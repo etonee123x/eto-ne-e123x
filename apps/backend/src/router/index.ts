@@ -7,6 +7,7 @@ import { router as routerUpload } from '@/endpoints/upload';
 
 const router = Router();
 
+router.use('/healthz', (...[, response]) => response.send('ok'));
 router.use('/auth', routerAuth);
 router.use('/folder-data', routerFolderData);
 router.use('/posts', routerPosts);
