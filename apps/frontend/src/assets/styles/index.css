@@ -1,0 +1,328 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-success: #00ff00;
+  --color-error: #ff0000;
+  --color-text: black;
+  --color-background: white;
+
+  --z-index-modal: 1000;
+  --z-index-explorer-navbar: 10;
+
+  --animate-runner: runner 1s linear infinite;
+
+  @keyframes runner {
+    0% {
+      left: calc(-1 * (1/6) * 100%);
+    }
+
+    100% {
+      left: 100%;
+    }
+  }
+}
+
+@theme inline {
+  --color-items: var(--color-details-1);
+  --color-items-hovered: var(--color-details-10);
+
+  --color-folders: var(--color-details-75);
+  --color-folders-hovered: var(--color-details-100);
+
+  --color-dark: var(--color-details-900);
+
+  --color-details-1: var(--color-details-1);
+  --color-details-10: var(--color-details-10);
+  --color-details-50: var(--color-details-50);
+  --color-details-75: var(--color-details-75);
+  --color-details-100: var(--color-details-100);
+  --color-details-200: var(--color-details-200);
+  --color-details-300: var(--color-details-300);
+  --color-details-400: var(--color-details-400);
+  --color-details-500: var(--color-details-500);
+  --color-details-600: var(--color-details-600);
+  --color-details-700: var(--color-details-700);
+  --color-details-800: var(--color-details-800);
+  --color-details-900: var(--color-details-900);
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+
+  * {
+    @apply focus:on-focus;
+  }
+
+  html,
+  body {
+    font-family:
+      -apple-system,
+      /* macOS и iOS */
+      BlinkMacSystemFont,
+      /* Chrome на macOS */
+      "Segoe UI",
+      /* Windows */
+      Roboto,
+      /* Android, Chrome OS */
+      "Helvetica Neue",
+      /* macOS */
+      Arial,
+      /* Фолбек */
+      sans-serif;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ul,
+  ol {
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    @apply list-none;
+  }
+
+
+  hr {
+    @apply m-0 border-none bg-dark min-h-px min-w-px;
+    margin: 0;
+  }
+
+  a {
+    @apply text-inherit;
+    @apply hover:text-details-500;
+  }
+
+  p {
+    all: unset;
+    display: block;
+  }
+
+  ._theme-color_red {
+    --color-details-1: #fff5f5;
+    --color-details-10: #ffebeb;
+    --color-details-50: #ffe5e5;
+    --color-details-75: #ffcccc;
+    --color-details-100: #ffb3b3;
+    --color-details-200: #ff8080;
+    --color-details-300: #ff4d4d;
+    --color-details-400: #ff1a1a;
+    --color-details-500: #ff0000;
+    --color-details-600: #e60000;
+    --color-details-700: #cc0000;
+    --color-details-800: #b30000;
+    --color-details-900: #800000;
+  }
+
+  ._theme-color_blue {
+    --color-details-1: #f5f5ff;
+    --color-details-10: #ebebff;
+    --color-details-50: #e5e5ff;
+    --color-details-75: #ccccff;
+    --color-details-100: #b3b3ff;
+    --color-details-200: #8080ff;
+    --color-details-300: #4d4dff;
+    --color-details-400: #1a1aff;
+    --color-details-500: #0000ff;
+    --color-details-600: #0000e6;
+    --color-details-700: #0000cc;
+    --color-details-800: #0000b3;
+    --color-details-900: #000080;
+  }
+
+  ._theme-color_green {
+    --color-details-1: #f5fff5;
+    --color-details-10: #ebffeb;
+    --color-details-50: #e5ffe5;
+    --color-details-75: #ccffcc;
+    --color-details-100: #b3ffb3;
+    --color-details-200: #80ff80;
+    --color-details-300: #4dff4d;
+    --color-details-400: #1aff1a;
+    --color-details-500: #00ff00;
+    --color-details-600: #00e600;
+    --color-details-700: #00cc00;
+    --color-details-800: #00b300;
+    --color-details-900: #008000;
+  }
+
+  ._theme-color_cyan {
+    --color-details-1: #f5ffff;
+    --color-details-10: #ebffff;
+    --color-details-50: #e5ffff;
+    --color-details-75: #ccffff;
+    --color-details-100: #b3ffff;
+    --color-details-200: #80ffff;
+    --color-details-300: #4dffff;
+    --color-details-400: #1affff;
+    --color-details-500: #00ffff;
+    --color-details-600: #00e6e6;
+    --color-details-700: #00cccc;
+    --color-details-800: #00b3b3;
+    --color-details-900: #008080;
+  }
+
+  ._theme-color_magenta {
+    --color-details-1: #fff5ff;
+    --color-details-10: #ffebff;
+    --color-details-50: #ffe5ff;
+    --color-details-75: #ffccff;
+    --color-details-100: #ffb3ff;
+    --color-details-200: #ff80ff;
+    --color-details-300: #ff4dff;
+    --color-details-400: #ff1aff;
+    --color-details-500: #ff00ff;
+    --color-details-600: #e600e6;
+    --color-details-700: #cc00cc;
+    --color-details-800: #b300b3;
+    --color-details-900: #800080;
+  }
+
+  ._theme-color_orange {
+    --color-details-1: #fff5f0;
+    --color-details-10: #ffebdf;
+    --color-details-50: #ffe5cc;
+    --color-details-75: #ffddb3;
+    --color-details-100: #ffcc80;
+    --color-details-200: #ffbf4d;
+    --color-details-300: #ffa61a;
+    --color-details-400: #ff9900;
+    --color-details-500: #ff8000;
+    --color-details-600: #e67300;
+    --color-details-700: #cc6600;
+    --color-details-800: #b35900;
+    --color-details-900: #804000;
+  }
+}
+
+@utility on-focus {
+  @apply outline-dark outline-2 outline-offset-1;
+}
+
+@utility container {
+  @apply max-w-7xl w-5/6;
+}
+
+@custom-variant hover-none (@media (hover: none));
+
+@layer components {
+  .layout-container {
+    @apply max-w-7xl w-5/6;
+  }
+
+  .icon {
+    @apply size-6;
+
+    &.icon_size_sm {
+      @apply size-4;
+    }
+
+    &.icon_size_lg {
+      @apply size-8;
+    }
+  }
+
+
+  .button {
+    all: unset;
+    @apply bg-items border border-dark border-solid rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-items-hovered;
+    @apply disabled:pointer-events-none disabled:bg-dark disabled:opacity-25 disabled:text-items;
+    @apply active:text-details-500 active:border-details-500;
+    @apply focus:on-focus;
+  }
+
+  .text-input-base {
+    @apply min-w-[272px] has-[input:read-only]:cursor-pointer has-[input:disabled]:pointer-events-none min-h-8 flex items-center gap-2 bg-background border border-current rounded-sm px-3 text-xs cursor-text justify-between box-border focus-within:on-focus;
+
+    input {
+      all: unset;
+      @apply text-black flex-1 min-w-0;
+    }
+  }
+
+  .checkbox {
+    @apply inline-flex items-center gap-2 cursor-pointer has-[input:disabled]:pointer-events-none text-dark has-[input:disabled]:text-dark has-[input:checked]:has-[input:disabled]:text-dark hover:text-details-200 has-[input:checked]:text-details-200;
+
+    &.checkbox_size_sm {
+      .icon {
+        @apply size-4;
+      }
+    }
+
+    &.checkbox_size_xs {
+      .icon {
+        @apply size-3;
+      }
+    }
+  }
+
+  .input {
+    @apply flex justify-center items-center p-4 border border-dark rounded-lg bg-items;
+    @apply focus:on-focus;
+    @apply hover:bg-items-hovered;
+
+    .icon {
+      @apply size-8;
+    }
+  }
+
+  .vr {
+    @apply self-stretch inline-block w-px bg-dark;
+  }
+
+  .element-title {
+    @apply text-xs text-dark;
+  }
+
+  .html {
+    a {
+      @apply underline;
+    }
+  }
+
+  .explorer-element {
+    @apply bg-items border-2 border-dark rounded-lg w-full cursor-pointer;
+    @apply hover:bg-items-hovered hover:border-details-500;
+    @apply focus-visible:on-focus focus-visible:no-underline;
+
+    .explorer-element__title {
+      @apply w-2/3 overflow-x-auto overflow-y-hidden m-2
+    }
+
+    &.explorer-element_folder {
+      @apply bg-folders;
+      @apply hover:bg-folders-hovered hover:text-[initial];
+    }
+  }
+
+  .dialog {
+    @apply fixed inset-0 m-auto p-0 z-modal rounded-lg border border-details-500 max-w-11/12 max-h-11/12 w-fit overflow-hidden;
+
+    .dialog__content {
+      scrollbar-gutter: stable_both-edges;
+      @apply p-4 flex flex-col w-full bg-background;
+    }
+
+    .dialog__backdrop {
+      @apply fixed inset-0 bg-dark/25 -z-[1];
+    }
+  }
+}
