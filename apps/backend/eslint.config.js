@@ -6,10 +6,6 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 
 export default [
   {
-    name: 'ignores',
-    ignores: ['submodules/'],
-  },
-  {
     name: 'js: recommended',
     ...pluginJs.configs.recommended,
   },

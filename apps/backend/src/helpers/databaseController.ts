@@ -30,10 +30,6 @@ import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import slugify from 'slugify';
 import busboy from 'busboy';
 import { formFullApiUrl } from '@/helpers/fullApiUrl';
-import { isNumber } from '@etonee123x/shared/utils/isNumber';
-import { objectGet } from '@etonee123x/shared/utils/objectGet';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import { omit } from '@etonee123x/shared/utils/omit';
 
 interface TableNameToType {
   posts: Post;
