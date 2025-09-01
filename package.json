@@ -1,0 +1,6 @@
+{
+  "name": "eto-ne-e123x",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev"
+  }
+}

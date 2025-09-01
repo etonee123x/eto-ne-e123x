@@ -1,0 +1,45 @@
+{
+  "name": "@apps/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "tsx src",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "script:clearUnusedUploads": "tsx src/scripts/clearUnusedUploads"
+  },
+  "dependencies": {
+    "@etonee123x/shared": "github:etonee123x/shared",
+    "busboy": "^1.6.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "filesize": "^11.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "music-metadata": "^11.8.3",
+    "slugify": "^1.6.6",
+    "tsx": "^4.20.5"
+  },
+  "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.2.3",
+    "@types/busboy": "^1.5.4",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/dotenv-flow": "^3.3.3",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.41.0",
+    "@typescript-eslint/parser": "^8.41.0",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.3.0",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.41.0"
+  }
+}
