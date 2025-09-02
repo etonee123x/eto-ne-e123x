@@ -193,7 +193,6 @@ export class TableRestController<
 }
 
 export class UploadController extends DatabaseController {
-  static PATH_UPLOADS = 'uploads';
   static IS_ADDING_DATE_TIME_ENABLED = false;
 
   static pathUploadsFull = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
@@ -236,7 +235,7 @@ export class UploadController extends DatabaseController {
 
     stream.pipe(createWriteStream(join(UploadController.pathUploadsFull, fileName)));
 
-    return [UploadController.PATH_UPLOADS, fileName].join('/');
+    return ['/uploads', fileName].join('/');
   }
 
   static clearUnusedUploads() {

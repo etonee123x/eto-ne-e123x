@@ -18,8 +18,8 @@ import type { ExpressContext } from '@/constants/injectionKeyExpressContext.js';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 
 // Constants
-const port = process.env.PORT ?? throwError('Порт не указан');
-const base = process.env.BASE ?? throwError('Базовый путь не указан');
+const port = process.env.PORT ?? throwError('PORT is not defined');
+const BASE = '/';
 
 // Cached production assets
 const templateHtml = isProduction ? await readFile('./dist/client/index.html', 'utf-8') : '';
@@ -62,7 +62,7 @@ if (isProduction) {
 } else {
   const { createServer } = await import('vite');
 
-  vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', base });
+  vite = await createServer({ server: { middlewareMode: true }, appType: 'custom', base: BASE });
   app.use(vite.middlewares);
 
   app.use((request, response, next) => {
@@ -135,7 +135,7 @@ const settings: RequestHandler = async (request: RequestWithLocals, response, ne
 };
 
 const main: RequestHandler = async (request: RequestWithLocals, response, next) => {
-  renderHTML(request.originalUrl.replace(base, ''), { request, response, next })
+  renderHTML(request.originalUrl.replace(BASE, ''), { request, response, next })
     .then((html) => {
       if (response.headersSent) {
         return;

@@ -1,27 +1,38 @@
 import { resolve } from 'path';
 
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig, type UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';
 import { ssrAutoKey } from './src/plugins/ssrAutoKey';
+import { isDevelopment } from './src/constants/mode';
 
-export default defineConfig((configEnv) => {
-  const env = loadEnv(configEnv.mode, process.cwd(), '');
-
-  const Authorization = `Basic ${Buffer.from([env.BASIC_USER, env.BASIC_PASSWORD].join(':')).toString('base64')}`;
-
-  return {
+export default defineConfig(() => {
+  const config: UserConfig = {
     resolve: {
       alias: {
         '@': resolve(__dirname, './src'),
       },
     },
-    server: {
+    plugins: [
+      //
+      VueDevTools(),
+      vue(),
+      ssrAutoKey(),
+      VueI18nPlugin(),
+      tailwindcss(),
+    ],
+    publicDir: 'public',
+  };
+
+  if (isDevelopment) {
+    const Authorization = `Basic ${Buffer.from([process.env.BASIC_USER, process.env.BASIC_PASSWORD].join(':')).toString('base64')}`;
+
+    config.server = {
       proxy: {
         '/api': {
-          target: env.SERVER_ORIGIN,
+          target: process.env.SERVER_ORIGIN,
           changeOrigin: true,
           secure: true,
           headers: {
@@ -29,7 +40,7 @@ export default defineConfig((configEnv) => {
           },
         },
         '/uploads': {
-          target: env.SERVER_ORIGIN,
+          target: process.env.SERVER_ORIGIN,
           changeOrigin: true,
           secure: true,
           headers: {
@@ -37,7 +48,7 @@ export default defineConfig((configEnv) => {
           },
         },
         '/content': {
-          target: env.SERVER_ORIGIN,
+          target: process.env.SERVER_ORIGIN,
           changeOrigin: true,
           secure: true,
           headers: {
@@ -45,8 +56,8 @@ export default defineConfig((configEnv) => {
           },
         },
       },
-    },
-    plugins: [VueDevTools(), vue(), ssrAutoKey(), VueI18nPlugin({}), tailwindcss()],
-    publicDir: 'public',
-  };
+    };
+  }
+
+  return config;
 });

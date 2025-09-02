@@ -1,4 +1,4 @@
-import { isServer } from '@/constants/target';
+import { isServer } from './target';
 
 const mode = isServer ? process.env.NODE_ENV : import.meta.env.MODE;
 

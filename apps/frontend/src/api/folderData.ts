@@ -10,4 +10,4 @@ export type FolderDataWithSinceTimestamps = Omit<FolderData, 'items' | 'linkedFi
   linkedFile: ItemWithSinceTimestamps<ItemFile>;
 };
 
-export const getFolderData = (url: string) => client<FolderDataWithSinceTimestamps>(`/get-folder-data${url}`);
+export const getFolderData = (url: string) => client<FolderDataWithSinceTimestamps>(`/folder-data${url}`);
