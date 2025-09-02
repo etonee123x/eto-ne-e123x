@@ -4,6 +4,11 @@ import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default [
   {
     name: 'js: recommended',
@@ -17,9 +22,10 @@ export default [
   {
     name: 'global languageOptions',
     languageOptions: {
-      globals: globals.browser,
+      globals: globals.node,
       parserOptions: {
         parser: '@typescript-eslint/parser',
+        tsconfigRootDir: __dirname,
       },
     },
   },

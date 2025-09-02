@@ -36,7 +36,9 @@ interface TableNameToType {
 }
 
 export class DatabaseController {
-  static readonly pathDataBase = join(process.cwd(), 'database');
+  static readonly pathDatabase = process.env.DATABASE_PATH
+    ? join(process.env.DATABASE_PATH)
+    : throwError('DATABASE_PATH is not set in environment variables');
 }
 
 class TableReaderWriter<
@@ -47,7 +49,7 @@ class TableReaderWriter<
 > {
   protected readonly absolutePath: string;
   constructor(tableTitle: TTableTiltle) {
-    this.absolutePath = join(DatabaseController.pathDataBase, `${tableTitle}.json`);
+    this.absolutePath = join(DatabaseController.pathDatabase, `${tableTitle}.json`);
 
     if (!existsSync(this.absolutePath)) {
       mkdirSync(dirname(this.absolutePath), { recursive: true });
@@ -197,7 +199,7 @@ export class UploadController extends DatabaseController {
   static PATH_UPLOADS = 'uploads';
   static IS_ADDING_DATE_TIME_ENABLED = false;
 
-  static pathUploadsFull = join(DatabaseController.pathDataBase, UploadController.PATH_UPLOADS);
+  static pathUploadsFull = join(DatabaseController.pathDatabase, UploadController.PATH_UPLOADS);
 
   static uploadFile(...[, stream, { filename }]: Parameters<busboy.BusboyEvents['file']>): string {
     if (!existsSync(UploadController.pathUploadsFull)) {
@@ -246,7 +248,7 @@ export class UploadController extends DatabaseController {
 
     const uploadsNames = readdirSync(UploadController.pathUploadsFull);
 
-    const tables = readdirSync(DatabaseController.pathDataBase, { withFileTypes: true })
+    const tables = readdirSync(DatabaseController.pathDatabase, { withFileTypes: true })
       .filter((databaseItem) => databaseItem.isFile())
       .map((table) => JSON.parse(String(readFileSync(join(table.path, table.name)))));
 

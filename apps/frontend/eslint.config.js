@@ -5,6 +5,11 @@ import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default [
   {
     name: 'ignores',
@@ -26,6 +31,7 @@ export default [
       globals: globals.browser,
       parserOptions: {
         parser: '@typescript-eslint/parser',
+        tsconfigRootDir: __dirname,
       },
     },
   },
