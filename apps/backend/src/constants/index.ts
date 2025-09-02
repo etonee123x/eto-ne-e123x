@@ -1,12 +1,3 @@
-import { HANDLER_NAME } from '@/types';
-
-export const HANDLER_NAME_TO_ROUTE = Object.freeze({
-  [HANDLER_NAME.GET_FOLDER_DATA]: '/get-folder-data',
-  [HANDLER_NAME.POSTS]: '/posts',
-  [HANDLER_NAME.UPLOAD]: '/upload',
-  [HANDLER_NAME.CHECK_AUTH]: '/auth',
-});
-
 export enum PROCESS_MODE {
   DEV = 'DEV',
   PROD = 'PROD',

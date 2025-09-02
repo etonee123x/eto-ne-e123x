@@ -3,8 +3,6 @@ import { readdirSync, statSync } from 'fs';
 import { parseFile } from 'music-metadata';
 import { join, dirname, parse as parsePath, sep } from 'path';
 
-import { formFullApiUrl } from '@/helpers/fullApiUrl';
-
 import {
   Item,
   NavigationItem,
@@ -15,13 +13,19 @@ import {
   ITEM_TYPES,
 } from '@etonee123x/shared/helpers/folderData';
 import { createError } from '@etonee123x/shared/helpers/error';
+import { throwError } from '@etonee123x/shared/utils/throwError';
 
-const STATIC_CONTENT_FOLDER = 'content';
 const PROHIBITED_ELEMENTS_NAMES = ['.git'];
 
 export const handler = async (urlPath: string): Promise<FolderData> => {
-  const makeInnerPath = (path: string) => join(STATIC_CONTENT_FOLDER, path);
+  const contentPath = process.env.CONTENT_PATH ?? throwError('CONTENT_PATH is not defined');
+
+  const pathToSystemPath = (path: string) => join(contentPath, path);
+
   const pathToFileURL = (path: string) => path.replace(new RegExp(`\\${sep}`, 'g'), '/');
+
+  const pathToSrc = (path: string) => ['/content', path].join('');
+
   const getMetaDataFields = async (path: string) =>
     parseFile(path) //
       .then(
@@ -52,8 +56,7 @@ export const handler = async (urlPath: string): Promise<FolderData> => {
   let linkedFile: ItemFile | null = null;
   let currentDirectory: string;
 
-  const outerPath = join(urlPath);
-  const innerPath = makeInnerPath(outerPath);
+  const innerPath = pathToSystemPath(urlPath);
 
   await access(innerPath).catch(() => {
     throw createError({ data: 'Not Found', statusCode: 404 });
@@ -62,17 +65,17 @@ export const handler = async (urlPath: string): Promise<FolderData> => {
   const stats = statSync(innerPath);
 
   if (stats.isFile()) {
-    currentDirectory = dirname(outerPath);
+    currentDirectory = dirname(urlPath);
     const { name, ext } = parsePath(urlPath);
     const fullName = [name, ext].join('');
     const outerFilePath = join(currentDirectory, fullName);
     const baseItem = {
       name: fullName,
       url: pathToFileURL(outerFilePath),
-      src: formFullApiUrl(join(STATIC_CONTENT_FOLDER, outerFilePath)),
+      src: pathToSrc(outerFilePath),
       itemType: ITEM_TYPES.FILE,
       _meta: {
-        createdAt: statSync(makeInnerPath(outerFilePath)).birthtimeMs,
+        createdAt: statSync(pathToSystemPath(outerFilePath)).birthtimeMs,
       },
     };
 
@@ -103,11 +106,11 @@ export const handler = async (urlPath: string): Promise<FolderData> => {
         break;
     }
   } else {
-    currentDirectory = outerPath;
+    currentDirectory = urlPath;
   }
   currentDirectory = currentDirectory || '/';
 
-  const items = await readdirSync(makeInnerPath(currentDirectory), { withFileTypes: true })
+  const items = await readdirSync(pathToSystemPath(currentDirectory), { withFileTypes: true })
     .reduce<Promise<Array<Item>>>(async (promiseAcc, element) => {
       if (PROHIBITED_ELEMENTS_NAMES.includes(element.name)) {
         return promiseAcc;
@@ -116,13 +119,13 @@ export const handler = async (urlPath: string): Promise<FolderData> => {
       const acc = await promiseAcc;
 
       const outerFilePath = join(currentDirectory, element.name);
-      const innerFilePath = makeInnerPath(outerFilePath);
+      const innerFilePath = pathToSystemPath(outerFilePath);
       const { ext } = parsePath(innerFilePath);
 
       const baseItem = {
         name: element.name,
-        url: pathToFileURL(join(currentDirectory, element.name)),
-        src: formFullApiUrl(join(STATIC_CONTENT_FOLDER, outerFilePath)),
+        url: pathToFileURL(outerFilePath),
+        src: pathToSrc(outerFilePath),
         _meta: {
           createdAt: statSync(innerFilePath).birthtimeMs,
         },
@@ -163,12 +166,22 @@ export const handler = async (urlPath: string): Promise<FolderData> => {
   currentDirectory = pathToFileURL(currentDirectory);
   const lvlUp = currentDirectory === '/' ? null : dirname(currentDirectory);
 
-  const navigationItems = currentDirectory
+  const navigationItems = currentDirectory //
     .split('/')
-    .filter(Boolean)
     .reduce<Array<NavigationItem>>(
-      (acc, text, index) => (acc.push({ text, link: acc[index]?.link + text + '/' }), acc),
-      [{ text: 'root', link: '/' }],
+      (navigationItems, text, index) => {
+        if (text) {
+          navigationItems.push({ text, link: navigationItems[index]?.link + text + '/' });
+        }
+
+        return navigationItems;
+      },
+      [
+        {
+          text: 'root',
+          link: '/',
+        },
+      ],
     );
 
   return {

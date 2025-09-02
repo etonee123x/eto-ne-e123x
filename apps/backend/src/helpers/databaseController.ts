@@ -29,16 +29,13 @@ import { createError } from '@etonee123x/shared/helpers/error';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import slugify from 'slugify';
 import busboy from 'busboy';
-import { formFullApiUrl } from '@/helpers/fullApiUrl';
 
 interface TableNameToType {
   posts: Post;
 }
 
 export class DatabaseController {
-  static readonly pathDatabase = process.env.DATABASE_PATH
-    ? join(process.env.DATABASE_PATH)
-    : throwError('DATABASE_PATH is not set in environment variables');
+  static readonly pathDatabase = process.env.DATABASE_PATH ?? throwError('DATABASE_PATH is not defined');
 }
 
 class TableReaderWriter<
@@ -199,7 +196,7 @@ export class UploadController extends DatabaseController {
   static PATH_UPLOADS = 'uploads';
   static IS_ADDING_DATE_TIME_ENABLED = false;
 
-  static pathUploadsFull = join(DatabaseController.pathDatabase, UploadController.PATH_UPLOADS);
+  static pathUploadsFull = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
 
   static uploadFile(...[, stream, { filename }]: Parameters<busboy.BusboyEvents['file']>): string {
     if (!existsSync(UploadController.pathUploadsFull)) {
@@ -239,7 +236,7 @@ export class UploadController extends DatabaseController {
 
     stream.pipe(createWriteStream(join(UploadController.pathUploadsFull, fileName)));
 
-    return formFullApiUrl([UploadController.PATH_UPLOADS, fileName].join('/'));
+    return [UploadController.PATH_UPLOADS, fileName].join('/');
   }
 
   static clearUnusedUploads() {

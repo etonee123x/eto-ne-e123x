@@ -10,6 +10,8 @@ import { ssrAutoKey } from './src/plugins/ssrAutoKey';
 export default defineConfig((configEnv) => {
   const env = loadEnv(configEnv.mode, process.cwd(), '');
 
+  const Authorization = `Basic ${Buffer.from([env.BASIC_USER, env.BASIC_PASSWORD].join(':')).toString('base64')}`;
+
   return {
     resolve: {
       alias: {
@@ -19,11 +21,27 @@ export default defineConfig((configEnv) => {
     server: {
       proxy: {
         '/api': {
-          target: env.API_ORIGIN,
+          target: env.SERVER_ORIGIN,
           changeOrigin: true,
           secure: true,
           headers: {
-            Authorization: `Basic ${Buffer.from([env.BASIC_USER, env.BASIC_PASSWORD].join(':')).toString('base64')}`,
+            Authorization,
+          },
+        },
+        '/uploads': {
+          target: env.SERVER_ORIGIN,
+          changeOrigin: true,
+          secure: true,
+          headers: {
+            Authorization,
+          },
+        },
+        '/content': {
+          target: env.SERVER_ORIGIN,
+          changeOrigin: true,
+          secure: true,
+          headers: {
+            Authorization,
           },
         },
       },

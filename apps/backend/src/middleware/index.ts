@@ -5,5 +5,3 @@ export { errorHandler } from '@/middleware/errorHandler';
 export { send404 } from '@/middleware/send404';
 
 export { checkAuth } from '@/middleware/checkAuth';
-
-export { ROUTE_TO_VALIDATORS } from '@/middleware/validators';

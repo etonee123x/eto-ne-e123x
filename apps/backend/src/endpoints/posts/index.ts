@@ -3,25 +3,41 @@ import { Router } from 'express';
 import { handlers } from './handlers';
 import { toId } from '@etonee123x/shared/helpers/id';
 
-import { ROUTE_TO_VALIDATORS, checkAuth } from '@/middleware';
-import { HANDLER_NAME_TO_ROUTE } from '@/constants';
-import { HANDLER_NAME } from '@/types';
+import { checkAuth } from '@/middleware';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { addSinceTimestamps } from '@/helpers/addSinceTimestamps';
+import { query } from 'express-validator';
+import { validationCheck } from '@/middleware/validationCheck';
 
 export const router = Router();
 
-router.get('/', ...ROUTE_TO_VALIDATORS[HANDLER_NAME_TO_ROUTE[HANDLER_NAME.POSTS]], (req, res) => {
-  const { rows, _meta } = handlers.get({ page: Number(req.query?.page), perPage: Number(req.query?.perPage) });
+router.get(
+  '/',
+  query('page')
+    .exists()
+    .withMessage('Parameter is required')
+    .isInt({ min: 0 })
+    .withMessage('Must be a non-negative integer')
+    .toInt(),
+  query('perPage')
+    .exists()
+    .withMessage('Parameter is required')
+    .isInt({ min: 1 })
+    .withMessage('Must be an integer greater than 0')
+    .toInt(),
+  validationCheck,
+  (req, res) => {
+    const { rows, _meta } = handlers.get({ page: Number(req.query?.page), perPage: Number(req.query?.perPage) });
 
-  res.send({
-    _meta,
-    rows: rows.map((row) => ({
-      ...row,
-      _meta: addSinceTimestamps(row._meta),
-    })),
-  });
-});
+    res.send({
+      _meta,
+      rows: rows.map((row) => ({
+        ...row,
+        _meta: addSinceTimestamps(row._meta),
+      })),
+    });
+  },
+);
 
 router.get('/:id', (req, res) => {
   const post = handlers.getById(toId(req.params.id));
