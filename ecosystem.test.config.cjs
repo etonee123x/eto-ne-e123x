@@ -9,9 +9,9 @@ module.exports = {
         PORT: 4001,
         NODE_ENV: "production",
         APP_ENV: "test",
-        DATABASE_PATH: '/var/lib/eto-ne-e123x/database',
-        CONTENT_PATH: '/var/lib/eto-ne-e123x/content',
-        UPLOADS_PATH: '/var/lib/eto-ne-e123x/uploads'
+        DATABASE_PATH: '/var/lib/test.eto-ne-e123x/database',
+        CONTENT_PATH: '/var/lib/test.eto-ne-e123x/content',
+        UPLOADS_PATH: '/var/lib/test.eto-ne-e123x/uploads'
       },
     },
     {
