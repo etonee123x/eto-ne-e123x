@@ -55,9 +55,9 @@ let vite: ViteDevServer;
 
 if (isProduction) {
   const compression = (await import('compression')).default;
-  const helmet = (await import('helmet')).default;
+  // const helmet = (await import('helmet')).default;
 
-  app.use(helmet());
+  // app.use(helmet());
   app.use(compression());
 } else {
   const { createServer } = await import('vite');
