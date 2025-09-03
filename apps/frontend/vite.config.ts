@@ -6,7 +6,8 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';
 import { ssrAutoKey } from './src/plugins/ssrAutoKey';
-import { isDevelopment } from './src/constants/mode';
+import { getAuthorization } from './src/helpers/getAuthorization';
+import { isAppModeDevelopment } from './src/constants/appMode';
 
 export default defineConfig(() => {
   const config: UserConfig = {
@@ -26,8 +27,8 @@ export default defineConfig(() => {
     publicDir: 'public',
   };
 
-  if (isDevelopment) {
-    const Authorization = `Basic ${Buffer.from([process.env.BASIC_USER, process.env.BASIC_PASSWORD].join(':')).toString('base64')}`;
+  if (isAppModeDevelopment) {
+    const Authorization = getAuthorization();
 
     config.server = {
       proxy: {
