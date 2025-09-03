@@ -21,7 +21,7 @@ export default defineConfig(() => {
       VueDevTools(),
       vue(),
       ssrAutoKey(),
-      VueI18nPlugin(),
+      VueI18nPlugin({}),
       tailwindcss(),
     ],
     publicDir: 'public',
