@@ -1,27 +1,30 @@
 module.exports = {
   apps: [
     {
-      name: "backend.test",
+      name: "backend",
       cwd: "./apps/backend",
       script: "npm",
       args: "run start",
       env: {
-        PORT: 4001,
+        PORT: 4000,
         NODE_ENV: "production",
-        APP_ENV: "test",
+        APP_ENV: "production",
+        DATABASE_PATH: '/var/lib/test.eto-ne-e123x/database',
+        CONTENT_PATH: '/var/lib/test.eto-ne-e123x/content',
+        UPLOADS_PATH: '/var/lib/test.eto-ne-e123x/uploads'
       },
     },
     {
-      name: "frontend.test",
+      name: "frontend",
       cwd: "./apps/frontend",
       script: "npm",
       args: "run start",
       env: {
-        PORT: 3001,
+        PORT: 3000,
         NODE_ENV: "production",
-        APP_ENV: "test",
-        INTERNAL_API_URL: "http://127.0.0.1:4001",
-        VITE_API_PREFIX: '/api'
+        APP_ENV: "production",
+        INTERNAL_API_URL: "http://127.0.0.1:4000",
+        VITE_API_PREFIX: "/api",
       },
     },
   ],
