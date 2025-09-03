@@ -168,14 +168,12 @@ export const handler = async (urlPath: string): Promise<FolderData> => {
 
   const navigationItems = currentDirectory //
     .split('/')
+    .filter(Boolean)
     .reduce<Array<NavigationItem>>(
-      (navigationItems, text, index) => {
-        if (text) {
-          navigationItems.push({ text, link: navigationItems[index]?.link + text + '/' });
-        }
-
-        return navigationItems;
-      },
+      (navigationItems, text, index) => (
+        navigationItems.push({ text, link: navigationItems[index]?.link + text + '/' }),
+        navigationItems
+      ),
       [
         {
           text: 'root',
