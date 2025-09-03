@@ -16,7 +16,7 @@ const baseURL = (() => {
     ].join('');
   }
 
-  return process.env.INNER_API_PREFIX ?? throwError('INNER_API_PREFIX is not defined');
+  return process.env.INTERNAL_API_URL ?? throwError('INTERNAL_API_URL is not defined');
 })();
 
 export const client = createFetch({
