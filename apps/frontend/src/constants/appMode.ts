@@ -1,6 +1,4 @@
-import { isServer } from './target';
-
-const appMode = isServer ? process.env.APP_MODE : undefined;
+const appMode = process.env.APP_MODE;
 
 export const isAppModeTest = appMode === 'test';
 
