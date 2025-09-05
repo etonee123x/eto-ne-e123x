@@ -32,15 +32,6 @@
   </dialog>
 </template>
 
-<i18n lang="yaml">
-En:
-  confirm: 'Confirm'
-  cancel: 'Cancel'
-Ru:
-  confirm: 'Подтвердить'
-  cancel: 'Отмена'
-</i18n>
-
 <script setup lang="ts">
 import { computed, onBeforeUnmount, useId, useTemplateRef, watchEffect } from 'vue';
 import { onKeyDown, useToggle } from '@vueuse/core';
@@ -85,7 +76,19 @@ const model = defineModel<boolean>();
 
 const toggleModel = useToggle(model);
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      confirm: 'Подтвердить',
+      cancel: 'Отмена',
+    },
+    En: {
+      confirm: 'Confirm',
+      cancel: 'Cancel',
+    },
+  },
+});
 
 const buttons = computed(
   () =>

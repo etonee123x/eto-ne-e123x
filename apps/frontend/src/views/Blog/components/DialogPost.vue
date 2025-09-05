@@ -28,19 +28,6 @@
   </BaseDialog>
 </template>
 
-<i18n lang="yaml">
-En:
-  created: 'Created { since }'
-  updated: 'Edited { since }'
-  createdAt: 'Created at { at }'
-  updatedAt: 'Edited at { at }'
-Ru:
-  created: 'Создано { since }'
-  updated: 'Изменено { since }'
-  createdAt: 'Создано в { at }'
-  updatedAt: 'Изменено в { at }'
-</i18n>
-
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -54,7 +41,23 @@ import PostData from './PostData.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      created: 'Создано { since }',
+      updated: 'Изменено { since }',
+      createdAt: 'Создано в { at }',
+      updatedAt: 'Изменено в { at }',
+    },
+    En: {
+      created: 'Created { since }',
+      updated: 'Edited { since }',
+      createdAt: 'Created at { at }',
+      updatedAt: 'Edited at { at }',
+    },
+  },
+});
 
 const router = useRouter();
 

@@ -27,15 +27,6 @@
   </div>
 </template>
 
-<i18n lang="yaml">
-Ru:
-  textareaPlaceholder: 'Сообщение'
-  files: 'Файлы'
-En:
-  textareaPlaceholder: 'Message'
-  files: 'Files'
-</i18n>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { type UnwrapRef, defineAsyncComponent, useTemplateRef } from 'vue';
@@ -54,7 +45,19 @@ const LazyBaseFilesList = defineAsyncComponent(() => import('@/components/ui/Bas
 
 defineProps<{ v$: UnwrapRef<ReturnType<typeof useVuelidatePostData>['v$']> }>();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      textareaPlaceholder: 'Сообщение',
+      files: 'Файлы',
+    },
+    En: {
+      textareaPlaceholder: 'Message',
+      files: 'Files',
+    },
+  },
+});
 
 const baseTextarea = useTemplateRef('baseTextarea');
 

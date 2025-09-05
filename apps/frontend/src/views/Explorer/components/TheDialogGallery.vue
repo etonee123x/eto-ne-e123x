@@ -2,7 +2,7 @@
   <BaseDialog isHiddenFooter isHiddenHeader v-model="isDialogOpen" @close="onClose">
     <article v-if="galleryStore.galleryItem" class="flex flex-col gap-2 items-center flex-1 w-full h-full">
       <header class="contents">
-        <BaseAlwaysScrollable class="w-full [--base-always-scrollable--content--margin:0_auto]" duration="12000">
+        <BaseAlwaysScrollable class="w-full [--base-always-scrollable--content--margin:0_auto]" duration="12000ms">
           {{ galleryStore.galleryItem.name }}
         </BaseAlwaysScrollable>
       </header>

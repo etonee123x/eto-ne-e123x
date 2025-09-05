@@ -2,7 +2,6 @@ import { resolve } from 'path';
 
 import { defineConfig, type UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';
 import { ssrAutoKey } from './src/plugins/ssrAutoKey';
@@ -21,12 +20,9 @@ export default defineConfig(() => {
       VueDevTools(),
       vue(),
       ssrAutoKey(),
-      VueI18nPlugin(),
       tailwindcss(),
     ],
     publicDir: 'public',
-    // Костыль, какие то глубокие импорты, ещё какая то хрень. TODO: заменить vue-i18n --> i18n-next
-    ssr: { noExternal: ['vue-i18n'] },
   };
 
   if (isAppModeDevelopment) {

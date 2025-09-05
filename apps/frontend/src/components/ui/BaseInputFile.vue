@@ -13,15 +13,6 @@
   </div>
 </template>
 
-<i18n lang="yaml">
-Ru:
-  title: 'Файлы'
-  add: 'Добавить'
-En:
-  title: 'Files'
-  add: 'Add'
-</i18n>
-
 <script setup lang="ts">
 import { ref, defineAsyncComponent, useTemplateRef } from 'vue';
 import { useFileDialog } from '@vueuse/core';
@@ -32,12 +23,23 @@ import BaseButton from './BaseButton';
 import BaseIcon from './BaseIcon';
 import BaseDialog from './BaseDialog.vue';
 
-import { useIsUniqueFileCheck } from '@/composables/useIsUniqueFileCheck';
 import { INPUT } from '@/helpers/ui';
 
 const LazyBaseFilesList = defineAsyncComponent(() => import('./BaseFilesList.vue'));
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      title: 'Файлы',
+      add: 'Добавить',
+    },
+    En: {
+      title: 'Files',
+      add: 'Add',
+    },
+  },
+});
 
 const baseDialog = useTemplateRef('baseDialog');
 
@@ -66,15 +68,21 @@ const onClick = () => openInitial();
 
 const onClickAdd = () => openInModal();
 
-const checkIsUnique = useIsUniqueFileCheck(model);
-
 onChangeInModal((files) => {
   if (!files) {
     return;
   }
 
   Array.from(files).forEach((file) => {
-    if (!checkIsUnique(file)) {
+    if (
+      model.value.some(
+        (_file) =>
+          _file.name === file.name &&
+          _file.size === file.size &&
+          _file.lastModified === file.lastModified &&
+          _file.type === file.type,
+      )
+    ) {
       return;
     }
 
