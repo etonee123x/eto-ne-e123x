@@ -1,73 +1,50 @@
 <template>
   <TextInputWrapper class="select" :label :labelFor="id" :errorMessage ref="textInputWrapper">
-    <Tippy
-      interactive
-      trigger="manual"
-      placement="bottom-start"
-      v-bind="propsTippy"
-      :duration="0"
-      :offset="[0, 2]"
-      :hideOnClick="false"
-      sticky
-      maxWidth="none"
-      tag="div"
-      ref="tippy"
-      @show="onShow"
-      @hidden="onHidden"
-      @clickOutside="onClickOutside"
-      @click.stop.prevent
+    <TextInputBase
+      :id
+      :disabled="isDisabled"
+      :readonly
+      :placeholder
+      :modelValue="isShown ? modelSearch : textSelected"
+      ref="textInputBase"
+      @update:modelValue="onUpdateTextInputValue"
+      @focus="onFocus"
+      @keydown.up.prevent="onKeydownUp"
+      @keydown.down.prevent="onKeydownDown"
+      @keydown.enter.prevent.stop="onKeydownEnter"
+      @keydown.tab="onKeydownTab"
     >
-      <TextInputBase
-        :id
-        :disabled="isDisabled"
-        :readonly
-        :placeholder
-        :modelValue="isShown ? modelSearch : textSelected"
-        ref="textInputBase"
-        @update:modelValue="onUpdateTextInputValue"
-        @focus="onFocus"
-        @keydown.up.prevent="onKeydownUp"
-        @keydown.down.prevent="onKeydownDown"
-        @keydown.enter.prevent.stop="onKeydownEnter"
-        @keydown.tab="onKeydownTab"
-      >
-        <button tabindex="-1">
-          <BaseIcon :path="isShown ? mdiChevronUp : mdiChevronDown" />
-        </button>
-      </TextInputBase>
+      <button tabindex="-1">
+        <BaseIcon :path="isShown ? mdiChevronUp : mdiChevronDown" />
+      </button>
+    </TextInputBase>
 
-      <template #content>
-        <div
-          :style="{ width: `${width}px` }"
-          class="max-h-[106px] text-black bg-background border border-details-300 rounded-sm p-1 text-xs overflow-hidden"
+    <div
+      popover="manual"
+      :style="{ width: `${width}px` }"
+      class="max-h-[106px] text-black bg-background border border-details-300 rounded-sm p-1 text-xs overflow-hidden"
+      ref="popover"
+      @toggle="onToggle"
+    >
+      <ul
+        v-if="optionsFiltered.length"
+        class="*:px-2 max-h-24 *:min-h-6 overflow-y-auto *:cursor-pointer *:rounded-xxs *:flex *:gap-2 *:items-center overflow-hidden"
+        ref="content"
+      >
+        <li
+          v-for="(option, index) in optionsFiltered"
+          :class="indexHighLighted === index && 'bg-details-10'"
+          ref="options"
+          :key="index"
+          @mouseenter="() => onMouseEnter(index)"
+          @click="() => onClickOption(option)"
         >
-          <ul
-            v-if="optionsFiltered.length"
-            class="*:px-2 max-h-24 *:min-h-6 overflow-y-auto *:cursor-pointer *:rounded-xxs *:flex *:gap-2 *:items-center overflow-hidden"
-            ref="content"
-          >
-            <li
-              v-for="(option, index) in optionsFiltered"
-              :class="indexHighLighted === index && 'bg-details-10'"
-              ref="options"
-              :key="index"
-              @mouseenter="() => onMouseEnter(index)"
-              @click="() => onClickOption(option)"
-            >
-              <BaseCheckbox
-                v-if="isOptionSelected(option)"
-                :class="CHECKBOX.SIZE.SM"
-                modelValue
-                readonly
-                tabindex="-1"
-              />
-              {{ optionToText(option) }}
-            </li>
-          </ul>
-          <div v-else>{{ i18n?.nothingFound ?? t('nothingFound') }}</div>
-        </div>
-      </template>
-    </Tippy>
+          <BaseCheckbox v-if="isOptionSelected(option)" :class="CHECKBOX.SIZE.SM" modelValue readonly tabindex="-1" />
+          {{ optionToText(option) }}
+        </li>
+      </ul>
+      <div v-else>{{ i18n?.nothingFound ?? t('nothingFound') }}</div>
+    </div>
 
     <template #bottom>
       <slot name="bottom" />
@@ -98,17 +75,16 @@ import TextInputBase from '@/components/ui/_TextInputsElements/_TextInputBase.vu
 import TextInputWrapper from '@/components/ui/_TextInputsElements/_TextInputWrapper.vue';
 import BaseIcon from '@/components/ui/BaseIcon';
 import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
-import { Tippy, type TippyComponent } from 'vue-tippy';
 import { computed, ref, watch, nextTick, watchEffect, useId, useTemplateRef } from 'vue';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
-import { useElementSize, type MaybeComputedElementRef } from '@vueuse/core';
+import { onClickOutside, useElementSize, useToggle, type MaybeComputedElementRef } from '@vueuse/core';
 import { isNil } from '@etonee123x/shared/utils/isNil';
-import { isEqual } from '@etonee123x/shared/utils/isEqual';
 import { useI18n } from 'vue-i18n';
 import BaseCheckbox from '@/components/ui/BaseCheckbox';
 import type { Nil } from '@etonee123x/shared/types';
 import { CHECKBOX } from '@/helpers/ui';
 import type { Props } from './types';
+import { computePosition, offset, autoUpdate } from '@floating-ui/dom';
 
 const _getOptionLikeText = (optionLike: Option | ModelValue | undefined) => {
   const isStringOrNumber = (argument: unknown): argument is string | number =>
@@ -139,10 +115,9 @@ const _getOptionLikeText = (optionLike: Option | ModelValue | undefined) => {
 
 const content = useTemplateRef('content');
 const htmloptions = useTemplateRef<Array<HTMLLIElement>>('options');
+const textInputWrapper = useTemplateRef('textInputWrapper');
 
 const props = defineProps<Props<Option, ModelValueSingle>>();
-
-const textInputWrapper = useTemplateRef<InstanceType<typeof TextInputWrapper>>('textInputWrapper');
 
 const emit = defineEmits<{
   'option:select': [Option];
@@ -200,8 +175,10 @@ const isOptionSelected = (option: Option) => {
   const optionValue = optionToModelValue(option);
 
   return props.multiple
-    ? (model.value as ModelValueArrayed).some((modelValueSingle) => isEqual(optionValue, modelValueSingle))
-    : isEqual(optionValue, model.value);
+    ? (model.value as ModelValueArrayed).some((modelValueSingle) =>
+        props.compareFunction(optionValue, modelValueSingle),
+      )
+    : props.compareFunction(optionValue, model.value as ModelValueSingle);
 };
 
 const model = defineModel<ModelValue>();
@@ -209,26 +186,56 @@ const modelSearch = defineModel<string>('search', { default: '' });
 
 const modelOptionSelected = ref<Option | Array<Option> | null>();
 
-const tippy = useTemplateRef<TippyComponent>('tippy');
+const popover = useTemplateRef('popover');
 
-const onShow = () => {
-  indexHighLighted.value = 0;
-};
+const [isShown, toggleIsShown] = useToggle();
 
-const onHidden = () => {
-  modelSearch.value = selectedToText(modelOptionSelected.value);
-};
+const syncShown = () => toggleIsShown(popover.value?.matches(':popover-open') ?? false);
 
-const isShown = computed(() => Boolean(tippy.value?.state.isShown));
+syncShown();
+const onToggle = syncShown;
+
+watchEffect(() => {
+  if (isShown.value) {
+    indexHighLighted.value = 0;
+  } else {
+    modelSearch.value = selectedToText(modelOptionSelected.value);
+  }
+});
 
 const onMouseEnter = (index: number) => {
   indexHighLighted.value = index;
 };
 
-const show = () => tippy.value?.show();
-const hide = () => tippy.value?.hide();
+let stop: (() => void) | null = null;
 
-const onClickOutside = hide;
+const show = () => {
+  const popoverElement = popover.value;
+  const referenceElement = textInputBase.value?.$el;
+
+  if (!(popoverElement && referenceElement)) {
+    return;
+  }
+
+  popoverElement.showPopover();
+
+  stop = autoUpdate(referenceElement, popoverElement, async () => {
+    const { x, y } = await computePosition(referenceElement, popoverElement, {
+      placement: 'bottom-start',
+      middleware: [offset(4)],
+    });
+
+    Object.assign(popoverElement.style, { position: 'fixed', left: `${x}px`, top: `${y}px` });
+  });
+};
+
+const hide = () => {
+  stop?.();
+  stop = null;
+  popover.value?.hidePopover();
+};
+
+onClickOutside(textInputWrapper, hide);
 
 const textInputBase = useTemplateRef('textInputBase');
 
@@ -258,7 +265,7 @@ const onClickOption = (option: Option) => {
   const optionValue = optionToModelValue(option);
 
   const maybeIndex = (model.value as ModelValueArrayed).findIndex((modelValueSingle) =>
-    isEqual(optionValue, modelValueSingle),
+    props.compareFunction(optionValue, modelValueSingle),
   );
 
   if (maybeIndex === -1) {

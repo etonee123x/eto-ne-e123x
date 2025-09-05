@@ -2,7 +2,7 @@
   <ol class="flex gap-4 flex-col" ref="ol">
     <li v-for="(file, index) in model" class="flex items-center gap-2" :key="getKeyByFile(file)">
       <FilesListFilePreview :file />
-      <BaseAlwaysScrollable duration="10000" class="flex-1">
+      <BaseAlwaysScrollable duration="10000ms" class="flex-1">
         {{ file.name }}
       </BaseAlwaysScrollable>
       <div class="text-2xl flex gap-2 ms-auto items-center">

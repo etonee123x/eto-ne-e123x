@@ -32,7 +32,6 @@ import BaseButton from './BaseButton';
 import BaseIcon from './BaseIcon';
 import BaseDialog from './BaseDialog.vue';
 
-import { useIsUniqueFileCheck } from '@/composables/useIsUniqueFileCheck';
 import { INPUT } from '@/helpers/ui';
 
 const LazyBaseFilesList = defineAsyncComponent(() => import('./BaseFilesList.vue'));
@@ -66,15 +65,39 @@ const onClick = () => openInitial();
 
 const onClickAdd = () => openInModal();
 
-const checkIsUnique = useIsUniqueFileCheck(model);
-
 onChangeInModal((files) => {
   if (!files) {
     return;
   }
 
   Array.from(files).forEach((file) => {
-    if (!checkIsUnique(file)) {
+    if (
+      model.value.some((_file) => {
+        const areNamesEqual = _file.name === file.name;
+
+        if (areNamesEqual) {
+          return true;
+        }
+
+        const areSizesEqual = _file.size === file.size;
+
+        if (areSizesEqual) {
+          return true;
+        }
+
+        const areLastModifiedEqual = _file.lastModified === file.lastModified;
+
+        if (areLastModifiedEqual) {
+          return true;
+        }
+
+        const areTypesEqual = _file.type === file.type;
+
+        if (areTypesEqual) {
+          return true;
+        }
+      })
+    ) {
       return;
     }
 

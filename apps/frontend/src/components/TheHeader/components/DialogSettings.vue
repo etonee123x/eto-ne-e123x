@@ -1,8 +1,18 @@
 <template>
   <BaseDialog :title="t('settings')" style="max-width: 25rem" ref="baseDialog" @confirm="onConfirm" @close="onClose">
     <BaseForm class="flex flex-col gap-4 mb-6">
-      <BaseSelect :options="Object.values(ThemeColor)" :label="t('color')" v-model="model.themeColor" />
-      <BaseSelect :options="Object.values(Language)" :label="t('language')" v-model="model.language" />
+      <BaseSelect
+        :compareFunction="commonCompareFunction"
+        :options="Object.values(ThemeColor)"
+        :label="t('color')"
+        v-model="model.themeColor"
+      />
+      <BaseSelect
+        :compareFunction="commonCompareFunction"
+        :options="Object.values(Language)"
+        :label="t('language')"
+        v-model="model.language"
+      />
       <BaseButton v-if="isDevelopment && !authStore.isAdmin" @click="onClickAuthorize">{{ t('authorize') }}</BaseButton>
     </BaseForm>
   </BaseDialog>
@@ -38,6 +48,7 @@ import { useAuthStore } from '@/stores/auth';
 import { isDevelopment } from '@/constants/mode';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import BaseForm from '@/components/ui/BaseForm.vue';
+import { commonCompareFunction } from '@/helpers/commonCompareFunction';
 
 const authStore = useAuthStore();
 

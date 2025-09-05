@@ -52,7 +52,6 @@ Ru:
 </i18n>
 
 <script setup lang="ts">
-import deepEqual from 'deep-equal';
 import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
 import { areIdsEqual } from '@etonee123x/shared/helpers/id';
 import { computed, ref, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
@@ -144,7 +143,15 @@ const isInEditMode = computed(() => areIdsEqual(blogStore.editModeFor, props.pos
 
 const onKeyDownEnter = onPostTextareaKeyDownEnter(onSubmit);
 
-const hasChanges = computed(() => !deepEqual(props.post, model.value));
+const hasChanges = computed(() => {
+  const areTextsDifferent = props.post.text !== model.value.text;
+
+  if (areTextsDifferent) {
+    return true;
+  }
+
+  return false;
+});
 
 const closeEditMode = () => {
   blogStore.editModeFor = null;

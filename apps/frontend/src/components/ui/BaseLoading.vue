@@ -21,21 +21,5 @@ defineProps<{ isFull?: boolean }>();
 
 const { t } = useI18n({ useScope: 'local' });
 
-const CLASSES = ['relative', 'after:absolute', "after:[--tw-content:'.']", 'after:[animation:loading_2s_infinite]'];
+const CLASSES = ['relative', 'after:absolute', "after:[--tw-content:'.']", 'after:animate-loading'];
 </script>
-
-<style>
-@keyframes loading {
-  0% {
-    content: '.';
-  }
-
-  33% {
-    content: '..';
-  }
-
-  67% {
-    content: '...';
-  }
-}
-</style>

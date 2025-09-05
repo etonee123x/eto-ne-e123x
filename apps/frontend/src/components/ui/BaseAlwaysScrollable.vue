@@ -1,8 +1,12 @@
 <template>
   <div class="overflow-hidden relative inline-flex" ref="container">
     <div
+      :style="{
+        '--scroll-x-diff': diffFormatted,
+        '--scroll-x-duration': duration,
+      }"
       class="whitespace-nowrap m-[var(--base-always-scrollable--content--margin)]"
-      :class="isAnimated && $s.animated"
+      :class="isAnimated && 'animate-scroll-x [animation-duration:var(--scroll-x-duration)]'"
       ref="content"
     >
       <slot />
@@ -14,14 +18,14 @@
 import { useElementSize } from '@vueuse/core';
 import { computed, useTemplateRef } from 'vue';
 
-const props = withDefaults(
+withDefaults(
   defineProps<
     Partial<{
-      duration: number | `${number}`;
+      duration: string;
     }>
   >(),
   {
-    duration: 5000,
+    duration: '5000ms',
   },
 );
 
@@ -36,26 +40,4 @@ const diff = computed(() => widthContent.value - widthContainer.value);
 const diffFormatted = computed(() => `-${diff.value}px`);
 
 const isAnimated = computed(() => diff.value > 0);
-
-const speedFormatted = computed(() => `${props.duration}ms`);
 </script>
-
-<style module="$s">
-.animated {
-  animation: scroll v-bind('speedFormatted') linear infinite;
-}
-
-@keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-
-  50% {
-    transform: translateX(v-bind('diffFormatted'));
-  }
-
-  0% {
-    transform: translateX(0);
-  }
-}
-</style>

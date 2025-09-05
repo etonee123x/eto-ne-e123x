@@ -1,10 +1,8 @@
 import type { Nil } from '@etonee123x/shared/types';
-import type { TippyComponent } from 'vue-tippy';
 
 export interface Props<Option, ModelValueSingle>
   extends Partial<{
     errorMessage: string;
-    propsTippy: Pick<TippyComponent['$props'], 'appendTo'>;
     multiple: boolean;
     disabled: boolean;
     isLoading: boolean;
@@ -18,4 +16,5 @@ export interface Props<Option, ModelValueSingle>
     i18n: Record<'nothingFound', string | undefined>;
   }> {
   options: Array<Option>;
+  compareFunction: (optionValue: ModelValueSingle, modelValueSingle: ModelValueSingle) => boolean;
 }
