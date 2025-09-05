@@ -22,19 +22,6 @@ const LANGUAGES = [
 
 export const useSettingsStore = defineStore('settings', () => {
   const cookies = useCookies();
-  const { t } = i18n.global;
-
-  const themeColorToThemeColorTranslation = computed(() =>
-    Object.freeze({
-      [ThemeColor.Blue]: t('themeColor.blue'),
-      [ThemeColor.Cyan]: t('themeColor.cyan'),
-      [ThemeColor.Green]: t('themeColor.green'),
-      [ThemeColor.Magenta]: t('themeColor.magenta'),
-      [ThemeColor.Orange]: t('themeColor.orange'),
-      [ThemeColor.Random]: t('themeColor.random'),
-      [ThemeColor.Red]: t('themeColor.red'),
-    }),
-  );
 
   const settings = ref<Settings>({
     themeColor: cookies.get('themeColor'),
@@ -100,8 +87,6 @@ export const useSettingsStore = defineStore('settings', () => {
     themeColor,
 
     languageInfo,
-
-    themeColorToThemeColorTranslation,
 
     initSettings,
     saveSettings,
