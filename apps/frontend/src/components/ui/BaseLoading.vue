@@ -7,19 +7,22 @@
   </span>
 </template>
 
-<i18n lang="yaml">
-En:
-  loading: 'Loading'
-Ru:
-  loading: 'Загрузка'
-</i18n>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
 defineProps<{ isFull?: boolean }>();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      loading: 'Загрузка',
+    },
+    En: {
+      loading: 'Loading',
+    },
+  },
+});
 
 const CLASSES = ['relative', 'after:absolute', "after:[--tw-content:'.']", 'after:animate-loading'];
 </script>

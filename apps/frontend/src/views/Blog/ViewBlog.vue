@@ -37,25 +37,6 @@
   </BasePage>
 </template>
 
-<i18n lang="yaml">
-En:
-  blog: 'Blog'
-  send: 'Send'
-  nothingWasFound: 'Nothing was found...'
-  confirmDelete: 'Delete Post'
-  deleteMessage: 'Are you sure you want to delete this post?'
-  microblogWithNoClearDirection: 'Microblog with no clear direction. Something from thoughts, something random. Everything is combined into one feed.'
-  myBlog: 'My blog. Post.'
-Ru:
-  blog: 'Блог'
-  send: 'Отправить'
-  nothingWasFound: 'Ничего не найдено...'
-  confirmDelete: 'Удалить пост'
-  deleteMessage: 'Вы уверены, что хотите удалить этот пост?'
-  microblogWithNoClearDirection: 'Микроблог без чёткой направленности. Что-то из мыслей, что-то случайное. Всё складывается в одну ленту'
-  myBlog: 'Мой блог. Пост.'
-</i18n>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
@@ -95,7 +76,31 @@ const lazyBlogEditPost = useTemplateRef('lazyBlogEditPost');
 
 const { reveal, confirm, cancel } = useConfirmDialog();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      blog: 'Блог',
+      send: 'Отправить',
+      nothingWasFound: 'Ничего не найдено...',
+      confirmDelete: 'Удалить пост',
+      deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
+      microblogWithNoClearDirection:
+        'Микроблог без чёткой направленности. Что-то из мыслей, что-то случайное. Всё складывается в одну ленту',
+      myBlog: 'Мой блог. Пост.',
+    },
+    En: {
+      blog: 'Blog',
+      send: 'Send',
+      nothingWasFound: 'Nothing was found...',
+      confirmDelete: 'Delete Post',
+      deleteMessage: 'Are you sure you want to delete this post?',
+      microblogWithNoClearDirection:
+        'Microblog with no clear direction. Something from thoughts, something random. Everything is combined into one feed.',
+      myBlog: 'My blog. Post.',
+    },
+  },
+});
 
 const route = useRoute();
 

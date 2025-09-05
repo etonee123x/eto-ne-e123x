@@ -18,23 +18,6 @@
   </BaseDialog>
 </template>
 
-<i18n lang="yaml">
-En:
-  settings: 'Settings'
-  color: 'Color:'
-  mode: 'Mode:'
-  language: 'Language:'
-  resetSettings: 'Reset settings'
-  authorize: 'Authorize'
-Ru:
-  settings: 'Настройки'
-  color: 'Цвет:'
-  mode: 'Режим:'
-  language: 'Язык:'
-  resetSettings: 'Сбросить настройки'
-  authorize: 'Авторизоваться'
-</i18n>
-
 <script setup lang="ts">
 import { useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -56,7 +39,27 @@ const baseDialog = useTemplateRef('baseDialog');
 
 const settingsStore = useSettingsStore();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      settings: 'Настройки',
+      color: 'Цвет:',
+      mode: 'Режим:',
+      language: 'Язык:',
+      resetSettings: 'Сбросить настройки',
+      authorize: 'Авторизоваться',
+    },
+    En: {
+      settings: 'Settings',
+      color: 'Color:',
+      mode: 'Mode:',
+      language: 'Language:',
+      resetSettings: 'Reset settings',
+      authorize: 'Authorize',
+    },
+  },
+});
 
 const [model, resetModel] = useSourcedRef(() => settingsStore.settings);
 

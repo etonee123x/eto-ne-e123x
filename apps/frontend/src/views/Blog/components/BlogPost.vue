@@ -38,19 +38,6 @@
   </article>
 </template>
 
-<i18n lang="yaml">
-En:
-  createdAt: 'Created at { at }'
-  updatedAt: 'Edited at { at }'
-  confirmDelete: 'Delete Post'
-  deleteMessage: 'Are you sure you want to delete this post?'
-Ru:
-  createdAt: 'Создано в { at }'
-  updatedAt: 'Изменено в { at }'
-  confirmDelete: 'Удалить пост'
-  deleteMessage: 'Вы уверены, что хотите удалить этот пост?'
-</i18n>
-
 <script setup lang="ts">
 import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
 import { areIdsEqual } from '@etonee123x/shared/helpers/id';
@@ -86,7 +73,23 @@ const blogStore = useBlogStore();
 
 const authStore = useAuthStore();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      createdAt: 'Создано в { at }',
+      updatedAt: 'Изменено в { at }',
+      confirmDelete: 'Удалить пост',
+      deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
+    },
+    En: {
+      createdAt: 'Created at { at }',
+      updatedAt: 'Edited at { at }',
+      confirmDelete: 'Delete Post',
+      deleteMessage: 'Are you sure you want to delete this post?',
+    },
+  },
+});
 
 const files = ref<Array<File>>([]);
 

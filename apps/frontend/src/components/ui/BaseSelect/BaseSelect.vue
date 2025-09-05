@@ -52,15 +52,6 @@
   </TextInputWrapper>
 </template>
 
-<i18n lang="yaml">
-Ru:
-  nothingFound: 'Ничего не найдено'
-  selectAnOption: 'Выберите вариант'
-En:
-  nothingFound: 'Nothing found'
-  selectAnOption: 'Select an option'
-</i18n>
-
 <script
   setup
   lang="ts"
@@ -131,7 +122,19 @@ const id = useId();
 
 const placeholder = computed(() => props.placeholder ?? t('selectAnOption'));
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      nothingFound: 'Ничего не найдено',
+      selectAnOption: 'Выберите вариант',
+    },
+    En: {
+      nothingFound: 'Nothing found',
+      selectAnOption: 'Select an option',
+    },
+  },
+});
 
 const indexHighLighted = ref(0);
 

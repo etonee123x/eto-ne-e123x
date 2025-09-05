@@ -13,15 +13,6 @@
   </div>
 </template>
 
-<i18n lang="yaml">
-Ru:
-  title: 'Файлы'
-  add: 'Добавить'
-En:
-  title: 'Files'
-  add: 'Add'
-</i18n>
-
 <script setup lang="ts">
 import { ref, defineAsyncComponent, useTemplateRef } from 'vue';
 import { useFileDialog } from '@vueuse/core';
@@ -36,7 +27,19 @@ import { INPUT } from '@/helpers/ui';
 
 const LazyBaseFilesList = defineAsyncComponent(() => import('./BaseFilesList.vue'));
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      title: 'Файлы',
+      add: 'Добавить',
+    },
+    En: {
+      title: 'Files',
+      add: 'Add',
+    },
+  },
+});
 
 const baseDialog = useTemplateRef('baseDialog');
 

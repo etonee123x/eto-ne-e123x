@@ -8,15 +8,18 @@
   </footer>
 </template>
 
-<i18n lang="yaml">
-Ru:
-  telegramLogo: Логотип телеграм
-En:
-  telegramLogo: Telegram logo
-</i18n>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    En: {
+      telegramLogo: 'Telegram logo',
+    },
+    Ru: {
+      telegramLogo: 'Логотип телеграм',
+    },
+  },
+});
 </script>

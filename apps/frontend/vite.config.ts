@@ -2,7 +2,6 @@ import { resolve } from 'path';
 
 import { defineConfig, type UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';
 import { ssrAutoKey } from './src/plugins/ssrAutoKey';
@@ -21,7 +20,6 @@ export default defineConfig(() => {
       VueDevTools(),
       vue(),
       ssrAutoKey(),
-      VueI18nPlugin(),
       tailwindcss(),
     ],
     publicDir: 'public',
