@@ -23,8 +23,6 @@ export default defineConfig(() => {
       tailwindcss(),
     ],
     publicDir: 'public',
-    // Костыль, какие то глубокие импорты, ещё какая то хрень. TODO: заменить vue-i18n --> i18n-next
-    ssr: { noExternal: ['vue-i18n'] },
   };
 
   if (isAppModeDevelopment) {
