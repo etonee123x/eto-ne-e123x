@@ -20,23 +20,6 @@
   </BasePage>
 </template>
 
-<i18n lang="yaml">
-En:
-  content: 'Content'
-  thatsWhatCloseToMe: 'Thats what close to me. Folder {folderName}, {description}'
-  foldersAndFiles: 'folders and files; with music, pictures, videos'
-  listenToAudio: 'listen to audio {fileName}, and other @:foldersAndFiles'
-  watchTheImage: 'watch the image {fileName}, and other @:foldersAndFiles'
-  watchTheVideo: 'watch the video {fileName}, and other @:foldersAndFiles'
-Ru:
-  content: 'Контент'
-  thatsWhatCloseToMe: 'То, что мне близко. Папка {folderName}, {description}'
-  foldersAndFiles: 'папки и файлы; с музыкой, картинками, видосиками'
-  listenToAudio: 'слушать аудио {fileName}, и другие @:foldersAndFiles'
-  watchTheImage: 'смотреть изображение {fileName}, и другие @:foldersAndFiles'
-  watchTheVideo: 'смотреть видео {fileName}, и другие @:foldersAndFiles'
-</i18n>
-
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue';
 import { onBeforeRouteUpdate, useRoute, type RouteLocationNormalizedLoaded } from 'vue-router';
@@ -64,7 +47,27 @@ const LazyExplorerElementFileVideo = defineAsyncComponent(() => import('./compon
 
 const goToPage404 = useGoToPage404();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      content: 'Контент',
+      thatsWhatCloseToMe: 'То, что мне близко. Папка {folderName}, {description}',
+      foldersAndFiles: 'папки и файлы; с музыкой, картинками, видосиками',
+      listenToAudio: 'слушать аудио {fileName}, и другие @:foldersAndFiles',
+      watchTheImage: 'смотреть изображение {fileName}, и другие @:foldersAndFiles',
+      watchTheVideo: 'смотреть видео {fileName}, и другие @:foldersAndFiles',
+    },
+    En: {
+      content: 'Content',
+      thatsWhatCloseToMe: 'Thats what close to me. Folder {folderName}, {description}',
+      foldersAndFiles: 'folders and files; with music, pictures, videos',
+      listenToAudio: 'listen to audio {fileName}, and other @:foldersAndFiles',
+      watchTheImage: 'watch the image {fileName}, and other @:foldersAndFiles',
+      watchTheVideo: 'watch the video {fileName}, and other @:foldersAndFiles',
+    },
+  },
+});
 
 const explorerStore = useExplorerStore();
 

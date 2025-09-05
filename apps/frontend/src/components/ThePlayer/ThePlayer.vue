@@ -68,29 +68,6 @@
   </section>
 </template>
 
-<i18n lang="yaml">
-En:
-  copied: 'Copied!'
-  copyLink: 'Copy link'
-  previousTrack: 'Previous track'
-  pauseTrack: 'Pause track'
-  playTrack: 'Play track'
-  nextTrack: 'Next track'
-  closePlayer: 'Close player'
-  enableShuffleTracks: 'Enable shuffle tracks'
-  disableShuffleTracks: 'Disable shuffle tracks'
-Ru:
-  copied: 'Скопировано!'
-  copyLink: 'Скопировать ссылку'
-  previousTrack: 'Предыдущий трек'
-  pauseTrack: 'Пауза трека'
-  playTrack: 'Воспроизвести трек'
-  nextTrack: 'Следующий трек'
-  closePlayer: 'Закрыть плеер'
-  enableShuffleTracks: 'Включить перемешивание треков'
-  disableShuffleTracks: 'Выключить перемешивание треков'
-</i18n>
-
 <script lang="ts" setup>
 import { useClipboard, useMediaControls, useToggle } from '@vueuse/core';
 import {
@@ -118,7 +95,33 @@ import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import { Temporal } from '@js-temporal/polyfill';
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      copied: 'Скопировано!',
+      copyLink: 'Скопировать ссылку',
+      previousTrack: 'Предыдущий трек',
+      pauseTrack: 'Пауза трека',
+      playTrack: 'Воспроизвести трек',
+      nextTrack: 'Следующий трек',
+      closePlayer: 'Закрыть плеер',
+      enableShuffleTracks: 'Включить перемешивание треков',
+      disableShuffleTracks: 'Выключить перемешивание треков',
+    },
+    En: {
+      copied: 'Copied!',
+      copyLink: 'Copy link',
+      previousTrack: 'Previous track',
+      pauseTrack: 'Pause track',
+      playTrack: 'Play track',
+      nextTrack: 'Next track',
+      closePlayer: 'Close player',
+      enableShuffleTracks: 'Enable shuffle tracks',
+      disableShuffleTracks: 'Disable shuffle tracks',
+    },
+  },
+});
 
 const playerStore = usePlayerStore();
 

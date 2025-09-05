@@ -30,19 +30,6 @@
   </header>
 </template>
 
-<i18n lang="yaml">
-Ru:
-  content: 'Контент'
-  blog: 'Блог'
-  openSettings: 'Открыть настройки'
-  logout: 'Логаут'
-En:
-  content: 'Content'
-  blog: 'Blog'
-  openSettings: 'Open Settings'
-  logout: 'Logout'
-</i18n>
-
 <script setup lang="ts">
 import { mdiLogout, mdiCog } from '@mdi/js';
 import { computed, useTemplateRef } from 'vue';
@@ -60,7 +47,23 @@ import { SITE_TITLE } from '@/constants/siteTitle';
 
 const dialogSettings = useTemplateRef('dialogSettings');
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      content: 'Контент',
+      blog: 'Блог',
+      openSettings: 'Открыть настройки',
+      logout: 'Логаут',
+    },
+    En: {
+      content: 'Content',
+      blog: 'Blog',
+      openSettings: 'Open Settings',
+      logout: 'Logout',
+    },
+  },
+});
 
 const loadingStore = useLoadingStore();
 

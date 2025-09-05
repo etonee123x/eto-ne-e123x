@@ -1,7 +1,7 @@
 <template>
   <a :href="fileUrl" target="_blank" class="inline-flex items-end gap-0.5" @click.stop>
     <BaseIcon :path="mdiFileOutline" class="text-2xl" />
-    <BaseAlwaysScrollable class="flex-1" duration="12000">
+    <BaseAlwaysScrollable class="flex-1" duration="12000ms">
       {{ fileText }}
     </BaseAlwaysScrollable>
   </a>

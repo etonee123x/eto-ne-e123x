@@ -2,13 +2,6 @@
   <component :is="component.is" class="max-w-full" v-bind="component.binds" @click.stop.prevent />
 </template>
 
-<i18n lang="yaml">
-Ru:
-  attachmentN: 'Вложение { N }'
-En:
-  attachmentN: 'Attachment { N }'
-</i18n>
-
 <script setup lang="ts">
 import { pick } from '@etonee123x/shared/utils/pick';
 import { computed, defineAsyncComponent } from 'vue';
@@ -28,7 +21,17 @@ const props = defineProps<{
   index: number;
 }>();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      attachmentN: 'Вложение { N }',
+    },
+    En: {
+      attachmentN: 'Attachment { N }',
+    },
+  },
+});
 
 const { loadGalleryItem } = useGalleryStore();
 

@@ -9,17 +9,6 @@
   </BasePage>
 </template>
 
-<i18n lang="yaml">
-En:
-  pageNotFound: 'Page not found. It may have been removed or the URL is incorrect.'
-  tryReturning: Try returning {0}.
-  toTheMainPage: 'to the main page'
-Ru:
-  pageNotFound: 'Страница не найдена. Возможно, она была удалена или вы ошиблись в адресе.'
-  tryReturning: Попробуйте вернуться {0}.
-  toTheMainPage: 'на главную страницу'
-</i18n>
-
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
@@ -29,7 +18,21 @@ import { useSeoMeta } from '@unhead/vue';
 import { useSSRContext } from '@/composables/useSSRContext';
 import { isServer } from '@/constants/target';
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    En: {
+      pageNotFound: 'Page not found. It may have been removed or the URL is incorrect.',
+      tryReturning: 'Try returning {0}.',
+      toTheMainPage: 'to the main page',
+    },
+    Ru: {
+      pageNotFound: 'Страница не найдена. Возможно, она была удалена или вы ошиблись в адресе.',
+      tryReturning: 'Попробуйте вернуться {0}.',
+      toTheMainPage: 'на главную страницу',
+    },
+  },
+});
 
 useSeoMeta({
   description: () => t('pageNotFound'),

@@ -20,6 +20,38 @@
       left: 100%;
     }
   }
+
+  --animate-loading: loading 2s linear infinite;
+
+  @keyframes loading {
+    0% {
+      content: '.';
+    }
+
+    33% {
+      content: '..';
+    }
+
+    67% {
+      content: '...';
+    }
+  }
+
+  --animate-scroll-x: scroll-x linear infinite;
+
+  @keyframes scroll-x {
+    0% {
+      transform: translateX(0);
+    }
+
+    50% {
+      transform: translateX(var(--scroll-x-diff));
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
 }
 
 @theme inline {

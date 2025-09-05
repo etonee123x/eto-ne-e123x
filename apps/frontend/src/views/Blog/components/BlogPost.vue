@@ -38,21 +38,7 @@
   </article>
 </template>
 
-<i18n lang="yaml">
-En:
-  createdAt: 'Created at { at }'
-  updatedAt: 'Edited at { at }'
-  confirmDelete: 'Delete Post'
-  deleteMessage: 'Are you sure you want to delete this post?'
-Ru:
-  createdAt: 'Создано в { at }'
-  updatedAt: 'Изменено в { at }'
-  confirmDelete: 'Удалить пост'
-  deleteMessage: 'Вы уверены, что хотите удалить этот пост?'
-</i18n>
-
 <script setup lang="ts">
-import deepEqual from 'deep-equal';
 import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
 import { areIdsEqual } from '@etonee123x/shared/helpers/id';
 import { computed, ref, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
@@ -87,7 +73,23 @@ const blogStore = useBlogStore();
 
 const authStore = useAuthStore();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      createdAt: 'Создано в { at }',
+      updatedAt: 'Изменено в { at }',
+      confirmDelete: 'Удалить пост',
+      deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
+    },
+    En: {
+      createdAt: 'Created at { at }',
+      updatedAt: 'Edited at { at }',
+      confirmDelete: 'Delete Post',
+      deleteMessage: 'Are you sure you want to delete this post?',
+    },
+  },
+});
 
 const files = ref<Array<File>>([]);
 
@@ -144,7 +146,15 @@ const isInEditMode = computed(() => areIdsEqual(blogStore.editModeFor, props.pos
 
 const onKeyDownEnter = onPostTextareaKeyDownEnter(onSubmit);
 
-const hasChanges = computed(() => !deepEqual(props.post, model.value));
+const hasChanges = computed(() => {
+  const areTextsDifferent = props.post.text !== model.value.text;
+
+  if (areTextsDifferent) {
+    return true;
+  }
+
+  return false;
+});
 
 const closeEditMode = () => {
   blogStore.editModeFor = null;

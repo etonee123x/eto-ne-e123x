@@ -17,13 +17,6 @@
   </RouterLink>
 </template>
 
-<i18n lang="yaml">
-En:
-  createdAt: 'Created at { at }'
-Ru:
-  createdAt: 'Создано в { at }'
-</i18n>
-
 <script setup lang="ts">
 import type { ItemFile } from '@etonee123x/shared/helpers/folderData';
 
@@ -36,7 +29,17 @@ const props = defineProps<{
   element: ItemFile & WithMeta<WithSinceTimestamps>;
 }>();
 
-const { t } = useI18n({ useScope: 'local' });
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    Ru: {
+      createdAt: 'Создано в { at }',
+    },
+    En: {
+      createdAt: 'Created at { at }',
+    },
+  },
+});
 
 const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => -props.element._meta.sinceCreated);
 

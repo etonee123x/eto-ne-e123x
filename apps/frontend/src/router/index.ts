@@ -1,13 +1,14 @@
 import { createMemoryHistory, createRouter as _createRouter, createWebHistory } from 'vue-router';
 
 import { isServer } from '@/constants/target';
+import { isDevelopment } from '@/constants/mode';
 
 export enum RouteName {
   Explorer = 'Explorer',
   Home = 'Home',
   Blog = 'Blog',
   BlogPost = 'BlogPost',
-  Auth = 'Auth',
+  Playground = 'Playground',
   Page404 = 'Page404',
 }
 
@@ -39,6 +40,15 @@ export const createRouter = () =>
           },
         ],
       },
+      ...(isDevelopment
+        ? [
+            {
+              name: RouteName.Playground,
+              path: '/__playground__',
+              component: () => import('@/views/Playground'),
+            },
+          ]
+        : []),
       {
         name: RouteName.Page404,
         path: '/:pathMatch(.*)*',
