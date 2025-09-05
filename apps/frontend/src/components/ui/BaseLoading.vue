@@ -24,5 +24,5 @@ const { t } = useI18n({
   },
 });
 
-const CLASSES = ['relative', 'after:absolute', "after:[--tw-content:'.']", 'after:animate-loading'];
+const CLASSES = ['relative', 'after:absolute', "after:content-['.']", 'after:animate-loading'];
 </script>

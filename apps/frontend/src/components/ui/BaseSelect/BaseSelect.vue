@@ -14,7 +14,7 @@
       @keydown.enter.prevent.stop="onKeydownEnter"
       @keydown.tab="onKeydownTab"
     >
-      <button tabindex="-1">
+      <button type="button" tabindex="-1">
         <BaseIcon :path="isShown ? mdiChevronUp : mdiChevronDown" />
       </button>
     </TextInputBase>
@@ -66,7 +66,7 @@ import TextInputBase from '@/components/ui/_TextInputsElements/_TextInputBase.vu
 import TextInputWrapper from '@/components/ui/_TextInputsElements/_TextInputWrapper.vue';
 import BaseIcon from '@/components/ui/BaseIcon';
 import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
-import { computed, ref, watch, nextTick, watchEffect, useId, useTemplateRef } from 'vue';
+import { computed, ref, watch, nextTick, watchEffect, useId, useTemplateRef, onUnmounted } from 'vue';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { onClickOutside, useElementSize, useToggle, type MaybeComputedElementRef } from '@vueuse/core';
 import { isNil } from '@etonee123x/shared/utils/isNil';
@@ -237,6 +237,11 @@ const hide = () => {
   stop = null;
   popover.value?.hidePopover();
 };
+
+onUnmounted(() => {
+  stop?.();
+  stop = null;
+});
 
 onClickOutside(textInputWrapper, hide);
 

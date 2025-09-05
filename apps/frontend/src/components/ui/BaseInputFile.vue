@@ -75,31 +75,13 @@ onChangeInModal((files) => {
 
   Array.from(files).forEach((file) => {
     if (
-      model.value.some((_file) => {
-        const areNamesEqual = _file.name === file.name;
-
-        if (areNamesEqual) {
-          return true;
-        }
-
-        const areSizesEqual = _file.size === file.size;
-
-        if (areSizesEqual) {
-          return true;
-        }
-
-        const areLastModifiedEqual = _file.lastModified === file.lastModified;
-
-        if (areLastModifiedEqual) {
-          return true;
-        }
-
-        const areTypesEqual = _file.type === file.type;
-
-        if (areTypesEqual) {
-          return true;
-        }
-      })
+      model.value.some(
+        (_file) =>
+          _file.name === file.name &&
+          _file.size === file.size &&
+          _file.lastModified === file.lastModified &&
+          _file.type === file.type,
+      )
     ) {
       return;
     }
