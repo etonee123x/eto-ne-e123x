@@ -6,7 +6,7 @@
     @pointerdown.stop
     @dragstart.stop
     @mousedown.stop
-    @touchstart.stop
+    @touchstart.stop.passive
   >
     <div
       :style

@@ -1,5 +1,13 @@
 <template>
-  <div :style ref="root" @touchstart="onTouchStart" @touchmove.prevent="onTouchMove" @touchend="onTouchEnd">
+  <div
+    :style
+    class="touch-pan-x"
+    ref="root"
+    @touchstart.passive="onTouchStart"
+    @touchmove.passive="onTouchMove"
+    @touchend="onTouchEnd"
+    @touchcancel="onTouchCancel"
+  >
     <slot />
   </div>
 </template>
@@ -78,5 +86,11 @@ const onTouchEnd = () => {
   style.transform = `translateX(${globalThis.innerWidth * (wasSwipedLeft ? -1 : 1)}px)`;
 
   setTimeout(() => emit('swiped'), Number(props.disapearDelay));
+};
+
+const onTouchCancel = () => {
+  wasStarted = false;
+  style.transition = 'all 500ms';
+  style.transform = `translateX(0px)`;
 };
 </script>
