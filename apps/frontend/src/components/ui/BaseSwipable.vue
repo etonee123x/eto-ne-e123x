@@ -6,6 +6,7 @@
     @touchstart.passive="onTouchStart"
     @touchmove.passive="onTouchMove"
     @touchend="onTouchEnd"
+    @touchcancel="onTouchCancel"
   >
     <slot />
   </div>
@@ -85,5 +86,11 @@ const onTouchEnd = () => {
   style.transform = `translateX(${globalThis.innerWidth * (wasSwipedLeft ? -1 : 1)}px)`;
 
   setTimeout(() => emit('swiped'), Number(props.disapearDelay));
+};
+
+const onTouchCancel = () => {
+  wasStarted = false;
+  style.transition = 'all 500ms';
+  style.transform = `translateX(0px)`;
 };
 </script>
