@@ -1,14 +1,5 @@
 <template>
-  <button
-    type="button"
-    :class="BUTTON.default"
-    :disabled="isDisabled"
-    @click="onCLick"
-    @mousedown="onMouseDown"
-    @mouseup="onMouseUp"
-    @touchstart="onTouchStart"
-    @touchEnd="onTouchEnd"
-  >
+  <button type="button" :class="BUTTON.default" :disabled="isDisabled">
     <span class="flex justify-between items-center gap-1" :class="isLoading && 'opacity-20'">
       <span v-if="$slots.prepend || propsIconPrepend" class="flex">
         <slot name="prepend">
@@ -43,26 +34,5 @@ const props = defineProps<
   }>
 >();
 
-const emit = defineEmits<{
-  click: [Event];
-  mouseDown: [Event];
-  mouseUp: [Event];
-  touchStart: [Event];
-  touchEnd: [Event];
-}>();
-
 const isDisabled = computed(() => props.isDisabled || props.isLoading);
-
-const onCLick = (e: Event) => {
-  if (isDisabled.value) {
-    return;
-  }
-
-  emit('click', e);
-};
-
-const onMouseDown: HTMLButtonElement['onmousedown'] = (e) => emit('mouseDown', e);
-const onMouseUp: HTMLButtonElement['onmouseup'] = (e) => emit('mouseUp', e);
-const onTouchStart: HTMLButtonElement['ontouchstart'] = (e) => emit('touchStart', e);
-const onTouchEnd: HTMLButtonElement['ontouchend'] = (e) => emit('touchEnd', e);
 </script>
