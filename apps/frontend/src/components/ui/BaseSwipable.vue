@@ -1,5 +1,12 @@
 <template>
-  <div :style ref="root" @touchstart="onTouchStart" @touchmove.prevent="onTouchMove" @touchend="onTouchEnd">
+  <div
+    :style
+    class="touch-pan-x"
+    ref="root"
+    @touchstart.passive="onTouchStart"
+    @touchmove.passive="onTouchMove"
+    @touchend="onTouchEnd"
+  >
     <slot />
   </div>
 </template>

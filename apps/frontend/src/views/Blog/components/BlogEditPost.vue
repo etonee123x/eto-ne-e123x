@@ -12,7 +12,6 @@
       />
       <div class="sticky top-2 flex flex-col gap-2 h-min">
         <BaseInputFile @update:modelValue="onUpdateModelValueInputFile" />
-        <!-- <BaseAudioRecorder @update:modelValue="onUpdateModelValueAudioRecorder" /> -->
       </div>
     </div>
     <div v-if="files.length">
@@ -88,10 +87,6 @@ const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (e) => {
 const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:model-value'] = (_files) => {
   files.value = files.value.concat(_files);
 };
-
-// const onUpdateModelValueAudioRecorder: InstanceType<typeof BaseAudioRecorder>['onUpdate:model-value'] = (blob) => {
-//   files.value.push(new File([blob], 'test.ogg', { type: blob.type }));
-// };
 
 defineExpose({
   focusTextarea: () => baseTextarea.value?.focus(),
