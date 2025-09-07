@@ -7,7 +7,7 @@ export type ItemWithSinceTimestamps<TItem extends Item> = TItem & WithMeta<WithS
 
 export type FolderDataWithSinceTimestamps = Omit<FolderData, 'items' | 'linkedFile'> & {
   items: Array<ItemWithSinceTimestamps<Item>>;
-  linkedFile: ItemWithSinceTimestamps<ItemFile>;
+  linkedFile: ItemWithSinceTimestamps<ItemFile> | null;
 };
 
 export const getFolderData = (url: string) => client<FolderDataWithSinceTimestamps>(`/folder-data${url}`);

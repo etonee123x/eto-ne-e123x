@@ -51,12 +51,10 @@ import { useBlogStore } from '@/stores/blog';
 import { useVuelidatePostData } from './composables/useVuelidatePostData';
 import { useAuthStore } from '@/stores/auth';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
-import { MAIN } from '@/constants/selectors';
-import { useElementFinder } from '@/composables/useElementFinder';
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
 import { onPostTextareaKeyDownEnter } from './helpers/onPostTextareaKeyDownEnter';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import { isServer } from '@/constants/target';
+import { isClient, isServer } from '@/constants/target';
 import { clientOnly } from '@/helpers/clientOnly';
 import BaseButton from '@/components/ui/BaseButton';
 import { useSourcedRef } from '@/composables/useSourcedRef';
@@ -110,11 +108,9 @@ const authStore = useAuthStore();
 
 const hasPosts = computed(() => Boolean(blogStore.all.length));
 
-const elementMain = useElementFinder(() => document.getElementById(MAIN));
-
 const goToPage404 = useGoToPage404();
 
-useInfiniteScroll(elementMain, () => blogStore.getAll().then(() => undefined), {
+useInfiniteScroll(isClient ? document.body : null, () => blogStore.getAll().then(() => undefined), {
   canLoadMore: () => !(blogStore.isLoadingGetAll || blogStore.isEnd),
   distance: 100,
 });
