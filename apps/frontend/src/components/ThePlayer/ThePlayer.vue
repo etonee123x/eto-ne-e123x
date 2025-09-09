@@ -95,7 +95,7 @@ import { useToastsStore } from '@/stores/toasts';
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
 import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
-import { Temporal } from '@js-temporal/polyfill';
+import { Temporal } from 'temporal-polyfill';
 import { useExplorerStore } from '@/stores/explorer';
 import { useRoute, RouterLink, useRouter } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
