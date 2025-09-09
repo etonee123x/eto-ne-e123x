@@ -60,16 +60,18 @@
             </BaseButton>
           </li>
         </ul>
-        <div v-if="!isMobile" class="flex h-full w-5/6 max-w-20 items-center">
-          <PlayerSlider v-model="volume" @keydown.right="onKeyDownRightVolume" @keydown.left="onKeyDownLeftVolume" />
-        </div>
+        <ClientOnly v-if="!isMobile">
+          <div class="flex h-full w-5/6 max-w-20 items-center">
+            <PlayerSlider v-model="volume" @keydown.right="onKeyDownRightVolume" @keydown.left="onKeyDownLeftVolume" />
+          </div>
+        </ClientOnly>
       </div>
     </div>
   </BaseSwipable>
 </template>
 
 <script lang="ts" setup>
-import { useClipboard, useMediaControls, useToggle } from '@vueuse/core';
+import { syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
 import {
   mdiClose,
   mdiShuffleVariant,
@@ -100,6 +102,7 @@ import { isNil } from '@etonee123x/shared/utils/isNil';
 import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
 import { useIsMobile } from '@/composables/useIsMobile';
+import ClientOnly from '../ClientOnly.vue';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -140,7 +143,14 @@ const toastsStore = useToastsStore();
 
 const audio = useTemplateRef('audio');
 
+const volumeLocalStorage = useLocalStorage('player-volume', 1);
 const { playing: isPlaying, waiting: isWaiting, currentTime: currentTimeSeconds, volume } = useMediaControls(audio);
+
+if (isMobile) {
+  volume.value = 1;
+} else {
+  syncRef(volumeLocalStorage, volume);
+}
 
 const duration = computed(() => playerStore.theTrack?.musicMetadata.duration ?? 0);
 
