@@ -99,7 +99,7 @@ import { useRoute, RouterLink, useRouter } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
-import { isMobile as _isMobile } from '@/helpers/isMobile';
+import { useIsMobile } from '@/composables/useIsMobile';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -129,7 +129,7 @@ const { t } = useI18n({
   },
 });
 
-const isMobile = _isMobile();
+const isMobile = useIsMobile();
 
 const route = useRoute();
 const router = useRouter();
