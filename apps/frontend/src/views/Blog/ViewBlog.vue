@@ -52,7 +52,6 @@ import { useVuelidatePostData } from './composables/useVuelidatePostData';
 import { useAuthStore } from '@/stores/auth';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
-import { onPostTextareaKeyDownEnter } from './helpers/onPostTextareaKeyDownEnter';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { isClient, isServer } from '@/constants/target';
 import { clientOnly } from '@/helpers/clientOnly';
@@ -62,6 +61,7 @@ import type { Post } from '@etonee123x/shared/types/blog';
 import type { ForPost } from '@etonee123x/shared/types/database';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
+import { useOnPostTextareaKeyDownEnter } from './composables/useOnPostTextareaKeyDownEnter';
 
 const LazyBaseForm = defineAsyncComponent(() => import('@/components/ui/BaseForm.vue'));
 const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
@@ -138,7 +138,7 @@ const onSubmit = async () => {
   lazyBlogEditPost.value?.focusTextarea();
 };
 
-const onKeyDownEnter = onPostTextareaKeyDownEnter(() => baseForm.value?.requestSubmit());
+const onKeyDownEnter = useOnPostTextareaKeyDownEnter(() => baseForm.value?.requestSubmit());
 
 const onBeforeDelete = async () => {
   dialogConfirmationDelete.value?.open();
