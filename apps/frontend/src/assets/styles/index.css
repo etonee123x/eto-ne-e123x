@@ -6,7 +6,8 @@
   --color-text: black;
   --color-background: white;
 
-  --z-index-modal: 1000;
+  --z-player: 1000;
+  --z-index-modal: 10000;
   --z-index-explorer-navbar: 10;
 
   --animate-runner: runner 1s linear infinite;
@@ -116,6 +117,12 @@
       Arial,
       /* Фолбек */
       sans-serif;
+
+    @apply overflow-y-auto h-[100dvh];
+  }
+
+  #app {
+    @apply flex flex-col bg-background min-h-full;
   }
 
   button {

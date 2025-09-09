@@ -26,6 +26,7 @@ import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { useGalleryStore } from '@/stores/gallery';
 import { useRoute, useRouter } from 'vue-router';
+import { FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
 
 const router = useRouter();
 const route = useRoute();
@@ -38,7 +39,7 @@ onKeyStroke('ArrowLeft', () => galleryStore.prev());
 const mediaContainer = useTemplateRef('mediaContainer');
 
 const component = computed(() =>
-  galleryStore.isCurrentGalleryItemVideo
+  galleryStore.galleryItem?.fileType === FILE_TYPES.VIDEO
     ? {
         is: 'video',
         binds: {

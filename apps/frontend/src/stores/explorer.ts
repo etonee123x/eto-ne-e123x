@@ -4,8 +4,7 @@ import { shallowReactive } from 'vue';
 import { usePlayerStore } from '@/stores/player';
 import { getFolderData as _getFolderData, type FolderDataWithSinceTimestamps } from '@/api/folderData';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
+import { type RouteLocationNormalizedLoaded } from 'vue-router';
 import { useGalleryStore } from '@/stores/gallery';
 import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
 
@@ -22,49 +21,53 @@ export const useExplorerStore = defineStore('explorer', () => {
     execute: getFolderData,
     isLoading: isLoadingGetFolderData,
   } = useAsyncStateApi(async (to: RouteLocationNormalizedLoaded) => {
-    const routePath = to.path.replace(/^\/explorer/, '');
+    const maybeFolderData = routePathToFolderData[to.path];
 
-    const maybeFolderData = routePathToFolderData[routePath];
+    const _folderData = maybeFolderData ?? (await _getFolderData(to.path.replace(/^\/explorer/, '')));
 
-    const __folderData = isNotNil(maybeFolderData) ? maybeFolderData : await _getFolderData(routePath);
-
-    const _folderData = {
-      ...__folderData,
-      items: __folderData.items.map((item) => ({
+    const folderData: FolderDataWithSinceTimestamps = {
+      items: _folderData.items.map((item) => ({
         ...item,
         url: moduleURLResolver(item.url),
       })),
-      lvlUp: __folderData.lvlUp && moduleURLResolver(__folderData.lvlUp),
-      navigationItems: __folderData.navigationItems.map((navigationItem) => ({
+      lvlUp: _folderData.lvlUp && moduleURLResolver(_folderData.lvlUp),
+      navigationItems: _folderData.navigationItems.map((navigationItem) => ({
         ...navigationItem,
         link: moduleURLResolver(navigationItem.link),
       })),
+      linkedFile: _folderData.linkedFile && {
+        ..._folderData.linkedFile,
+        url: moduleURLResolver(_folderData.linkedFile.url),
+      },
     };
 
-    routePathToFolderData[routePath] = _folderData;
+    routePathToFolderData[to.path] = folderData;
 
-    if (!_folderData.linkedFile) {
+    const folderDataLinkedFile = folderData.linkedFile;
+
+    if (!folderDataLinkedFile) {
       galleryStore.unloadGalleryItem();
 
-      return _folderData;
+      return folderData;
     }
 
-    const playlist = _folderData.items.filter(
-      (item) => item.itemType === ITEM_TYPES.FILE && item.fileType === FILE_TYPES.AUDIO,
-    );
+    if (folderDataLinkedFile.fileType === FILE_TYPES.AUDIO) {
+      playerStore.playlist = folderData.items.filter(
+        (item) => item.itemType === ITEM_TYPES.FILE && item.fileType === FILE_TYPES.AUDIO,
+      );
 
-    if (_folderData.linkedFile.fileType === FILE_TYPES.AUDIO) {
-      playerStore.loadRealPlaylist(playlist);
-      playerStore.loadTrack(_folderData.linkedFile);
-    } else {
-      playerStore.loadPotentialPlaylist(playlist);
+      playerStore.theTrack = folderDataLinkedFile;
+      playerStore.currentPlayingNumber = playerStore.playlist.findIndex(
+        (playlistItem) => playlistItem.src === folderDataLinkedFile.src,
+      );
+    } else if (
+      folderDataLinkedFile.fileType === FILE_TYPES.IMAGE ||
+      folderDataLinkedFile.fileType === FILE_TYPES.VIDEO
+    ) {
+      galleryStore.loadGalleryItemFromCurrentExplorerFolder(folderDataLinkedFile, folderData);
     }
 
-    if (_folderData.linkedFile.fileType === FILE_TYPES.IMAGE || _folderData.linkedFile.fileType === FILE_TYPES.VIDEO) {
-      galleryStore.loadGalleryItemFromCurrentExplorerFolder(_folderData.linkedFile, _folderData);
-    }
-
-    return _folderData;
+    return folderData;
   });
 
   return {
