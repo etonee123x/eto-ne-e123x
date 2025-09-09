@@ -1,5 +1,5 @@
 <template>
-  <BasePage :h1="t('blog')" class="mx-auto">
+  <BasePage :h1="t('blog')">
     <template v-if="authStore.isAdmin">
       <LazyBaseForm class="flex flex-col gap-4" ref="baseForm" @submit.prevent="onSubmit">
         <LazyBlogEditPost

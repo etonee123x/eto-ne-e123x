@@ -1,5 +1,5 @@
 <template>
-  <BasePage h1="404" class="mx-auto flex justify-center items-center flex-1 flex-col">
+  <BasePage h1="404" class="flex justify-center items-center flex-1 flex-col">
     <p>{{ t('pageNotFound') }}</p>
     <I18nT keypath="tryReturning" tag="p">
       <RouterLink :to="{ name: RouteName.Home }" class="underline">

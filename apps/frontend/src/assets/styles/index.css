@@ -97,6 +97,11 @@
     border-color: var(--color-gray-200, currentColor);
   }
 
+  :root {
+    --vw: 100dvw;
+    --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2)
+  }
+
   * {
     @apply focus:on-focus;
   }
@@ -118,7 +123,7 @@
       /* Фолбек */
       sans-serif;
 
-    @apply overflow-y-auto h-[100dvh];
+    @apply overflow-y-auto h-[100dvh] overflow-x-hidden;
   }
 
   #app {
@@ -256,15 +261,11 @@
   @apply outline-dark outline-2 outline-offset-1;
 }
 
-@utility container {
-  @apply max-w-7xl w-5/6;
-}
-
 @custom-variant hover-none (@media (hover: none));
 
 @layer components {
   .layout-container {
-    @apply max-w-7xl w-5/6;
+    @apply px-(--container-padding);
   }
 
   .icon {

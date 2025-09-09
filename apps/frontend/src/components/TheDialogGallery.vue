@@ -27,11 +27,14 @@ import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { useGalleryStore } from '@/stores/gallery';
 import { useRoute, useRouter } from 'vue-router';
 import { FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
+import { RouteName } from '@/router';
+import { useExplorerStore } from '@/stores/explorer';
 
 const router = useRouter();
 const route = useRoute();
 
 const galleryStore = useGalleryStore();
+const explorerStore = useExplorerStore();
 
 onKeyStroke('ArrowRight', () => galleryStore.next());
 onKeyStroke('ArrowLeft', () => galleryStore.prev());
@@ -64,12 +67,29 @@ useSwipe(mediaContainer, {
 });
 
 const onClose = () => {
-  galleryStore.unloadGalleryItem();
+  galleryStore.galleryItems = [];
 
-  router.push(route.fullPath.split('/').slice(0, -1).join('/'));
+  if (router.resolve(route.fullPath).name !== RouteName.Explorer) {
+    return;
+  }
+
+  const maybeFolderData = explorerStore.routePathToFolderData[route.fullPath];
+  const maybeFolderDataLinkedFile = maybeFolderData?.linkedFile;
+
+  if (!maybeFolderDataLinkedFile) {
+    return;
+  }
+
+  const lastNavigationItem = maybeFolderData.navigationItems.at(-1);
+
+  if (!lastNavigationItem) {
+    return;
+  }
+
+  router.push(lastNavigationItem.link);
 };
 
-const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(galleryStore.isGalleryItemLoaded));
+const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(galleryStore.galleryItem));
 
-watchEffect(() => toggleIsDialogOpen(Boolean(galleryStore.isGalleryItemLoaded)));
+watchEffect(() => toggleIsDialogOpen(Boolean(galleryStore.galleryItem)));
 </script>

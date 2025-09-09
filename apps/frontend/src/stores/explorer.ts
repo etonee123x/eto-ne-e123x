@@ -46,7 +46,7 @@ export const useExplorerStore = defineStore('explorer', () => {
     const folderDataLinkedFile = folderData.linkedFile;
 
     if (!folderDataLinkedFile) {
-      galleryStore.unloadGalleryItem();
+      galleryStore.galleryItems = [];
 
       return folderData;
     }
@@ -71,7 +71,6 @@ export const useExplorerStore = defineStore('explorer', () => {
   });
 
   return {
-    // SSR compatibility
     routePathToFolderData,
 
     getFolderData,

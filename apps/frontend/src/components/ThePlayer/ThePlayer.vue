@@ -4,7 +4,7 @@
     class="bg-background z-player shadow-[0_-2px_4px_0_rgba(34,60,80,0.2)] py-2 w-full"
     @swiped="onSwiped"
   >
-    <div class="layout-container mx-auto flex flex-col gap-1 justify-center">
+    <div class="layout-container flex flex-col gap-1 justify-center">
       <component
         :is="ComponentClose"
         v-if="shouldRenderButtonClose"
@@ -60,7 +60,7 @@
             </BaseButton>
           </li>
         </ul>
-        <div class="flex h-full w-5/6 max-w-20 items-center">
+        <div v-if="!isMobile" class="flex h-full w-5/6 max-w-20 items-center">
           <PlayerSlider v-model="volume" @keydown.right="onKeyDownRightVolume" @keydown.left="onKeyDownLeftVolume" />
         </div>
       </div>
@@ -95,10 +95,11 @@ import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import { Temporal } from '@js-temporal/polyfill';
 import { useExplorerStore } from '@/stores/explorer';
-import { useRoute, RouterLink } from 'vue-router';
+import { useRoute, RouterLink, useRouter } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
+import { isMobile as _isMobile } from '@/helpers/isMobile';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -128,7 +129,10 @@ const { t } = useI18n({
   },
 });
 
+const isMobile = _isMobile();
+
 const route = useRoute();
+const router = useRouter();
 
 const explorerStore = useExplorerStore();
 const playerStore = usePlayerStore();
@@ -137,6 +141,7 @@ const toastsStore = useToastsStore();
 const audio = useTemplateRef('audio');
 
 const { playing: isPlaying, waiting: isWaiting, currentTime: currentTimeSeconds, volume } = useMediaControls(audio);
+
 const duration = computed(() => playerStore.theTrack?.musicMetadata.duration ?? 0);
 
 const toggleIsPlaying = useToggle(isPlaying);
@@ -175,34 +180,55 @@ const controlButtons = computed(() => [
 const onEnded = playerStore.loadNext;
 
 const ComponentClose = computed(() => {
+  const to = toOnClose();
+
+  return to ? h(RouterLink, { to, class: BUTTON.default }) : BaseButton;
+});
+
+const toOnClose = () => {
   if (isNil(playerStore.theTrack?.url)) {
-    return BaseButton;
+    return;
   }
 
   const maybeFolderData = explorerStore.routePathToFolderData[route.fullPath];
   const maybeFolderDataLinkedFile = maybeFolderData?.linkedFile;
 
   if (!maybeFolderDataLinkedFile) {
-    return BaseButton;
+    return;
   }
 
   const lastNavigationItem = maybeFolderData.navigationItems.at(-1);
 
   if (!lastNavigationItem) {
-    return BaseButton;
+    return;
   }
 
-  return playerStore.playlist.some((track) => track.src === maybeFolderDataLinkedFile.src)
-    ? h(RouterLink, { to: lastNavigationItem.link, class: BUTTON.default })
-    : BaseButton;
-});
+  if (!playerStore.playlist.some((track) => track.src === maybeFolderDataLinkedFile.src)) {
+    return;
+  }
+
+  return lastNavigationItem.link;
+};
 
 const unloadTrack = () => {
   playerStore.theTrack = null;
+
+  // Такой вот костыль... Нужен чтобы выгрузить текущий трек из управления аудио.
+  // Без этого при закрытии плеера и нажатии на кнопку play/pause будет играть/останавливаться трек.
+  audio.value?.load();
 };
 
 const onClickClose = unloadTrack;
-const onSwiped = unloadTrack;
+
+const onSwiped = () => {
+  const to = toOnClose();
+
+  if (isNil(to)) {
+    return;
+  }
+
+  router.push(to).then(unloadTrack);
+};
 
 const { copy } = useClipboard({
   source: () => {
