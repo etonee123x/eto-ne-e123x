@@ -11,6 +11,7 @@
       </main>
       <LazyThePlayer v-if="playerStore.theTrack" class="sticky bottom-0" />
       <LazyTheFooter v-else />
+      <TheDialogGallery />
     </div>
   </Suspense>
 </template>
@@ -34,7 +35,8 @@ import { i18n } from '@/i18n';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { useSSRContext } from '@/composables/useSSRContext';
-import { SITE_TITLE } from './constants/siteTitle';
+import { SITE_TITLE } from '@/constants/siteTitle';
+import TheDialogGallery from '@/components/TheDialogGallery.vue';
 
 const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
 const LazyTheToasts = defineAsyncComponent(() => import('@/components/TheToasts.vue'));

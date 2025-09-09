@@ -1,6 +1,6 @@
 <template>
-  <BasePage :h1="t('content')" class="mx-auto">
-    <ExplorerNavbar class="-m-2 mb-2 sticky top-0" />
+  <BasePage :h1="t('content')">
+    <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
       <nav v-if="explorerStore.folderData?.lvlUp || elements.folders.length" class="contents">
         <LazyExplorerElementSystem
@@ -16,7 +16,6 @@
       </nav>
       <component :is="itemFileToComponent(file)" v-for="file in elements.files" :element="file" :key="file.src" />
     </div>
-    <TheDialogGallery />
   </BasePage>
 </template>
 
@@ -35,7 +34,6 @@ import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import TheDialogGallery from './components/TheDialogGallery.vue';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { usePlayerStore } from '@/stores/player';
 import { useGalleryStore } from '@/stores/gallery';

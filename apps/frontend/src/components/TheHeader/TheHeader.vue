@@ -5,7 +5,7 @@
         class="after:opacity-30 after:absolute after:bottom-0 after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-dark after:animate-runner"
       />
     </ClientOnly>
-    <div class="layout-container mx-auto flex items-center py-2 gap-4">
+    <div class="layout-container flex items-center py-2 gap-4">
       <nav class="flex items-end gap-4">
         <RouterLink :to="{ name: RouteName.Home }" class="text-xl">
           {{ SITE_TITLE }}

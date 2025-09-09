@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useCycleList } from '@vueuse/core';
 import { pick } from '@etonee123x/shared/utils/pick';
 
@@ -14,15 +14,9 @@ export const useGalleryStore = defineStore('gallery', () => {
 
   const galleryItems = ref<Array<GalleryItem>>([]);
 
-  const isGalleryItemLoaded = computed(() => Boolean(galleryItem.value));
-
   const loadGalleryItem = (_galleryItem: GalleryItem, _galleryItems: Array<GalleryItem> = []) => {
     galleryItem.value = _galleryItem;
     galleryItems.value = _galleryItems;
-  };
-
-  const unloadGalleryItem = () => {
-    galleryItems.value = [];
   };
 
   const {
@@ -53,10 +47,7 @@ export const useGalleryStore = defineStore('gallery', () => {
     galleryItem,
     galleryItems,
 
-    isGalleryItemLoaded,
-
     loadGalleryItem,
-    unloadGalleryItem,
     loadGalleryItemFromCurrentExplorerFolder,
 
     next,

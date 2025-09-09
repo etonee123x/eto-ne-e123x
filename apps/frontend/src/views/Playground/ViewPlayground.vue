@@ -1,5 +1,5 @@
 <template>
-  <BasePage h1="Playground" class="mx-auto flex justify-center items-center flex-1 flex-col"></BasePage>
+  <BasePage h1="Playground" class="flex justify-center items-center flex-1 flex-col"></BasePage>
 </template>
 
 <script setup lang="ts">
