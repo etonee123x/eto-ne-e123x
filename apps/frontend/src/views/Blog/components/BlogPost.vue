@@ -52,13 +52,13 @@ import { useVuelidatePostData } from '../composables/useVuelidatePostData';
 import { useAuthStore } from '@/stores/auth';
 import { RouteName } from '@/router';
 import { ICON } from '@/helpers/ui';
-import { onPostTextareaKeyDownEnter } from '../helpers/onPostTextareaKeyDownEnter';
 import { RouterLink } from 'vue-router';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import BaseButton from '@/components/ui/BaseButton';
 import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
+import { useOnPostTextareaKeyDownEnter } from '../composables/useOnPostTextareaKeyDownEnter';
 
 const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
 
@@ -144,7 +144,7 @@ const createdAtUpdatedAt = computed(() =>
 
 const isInEditMode = computed(() => areIdsEqual(blogStore.editModeFor, props.post._meta.id));
 
-const onKeyDownEnter = onPostTextareaKeyDownEnter(onSubmit);
+const onKeyDownEnter = useOnPostTextareaKeyDownEnter(onSubmit);
 
 const hasChanges = computed(() => {
   const areTextsDifferent = props.post.text !== model.value.text;

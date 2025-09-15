@@ -6,7 +6,6 @@
 import { pick } from '@etonee123x/shared/utils/pick';
 import { computed, defineAsyncComponent } from 'vue';
 
-import { getFileUrlExtension, getLastParameter } from '@/utils/url';
 import { useGalleryStore } from '@/stores/gallery';
 import { useBlogStore } from '@/stores/blog';
 import { useI18n } from 'vue-i18n';
@@ -33,23 +32,42 @@ const { t } = useI18n({
   },
 });
 
-const { loadGalleryItem } = useGalleryStore();
-
+const galleryStore = useGalleryStore();
 const blogStore = useBlogStore();
 
-const loadToGallery = () => {
-  const maybeLastParameter = getLastParameter(props.fileUrl);
+const getFileUrlExtension = (url: string) => url.match(/\.[^.]*$/gim)?.[0];
 
-  if (!maybeLastParameter) {
+const loadToGallery = () => {
+  const getLastParameter = (url: string) => url.match(/(?<=\/)[^/]*$/gim)?.[0];
+
+  const maybeExtension = getFileUrlExtension(props.fileUrl);
+
+  if (isNil(maybeExtension)) {
     return;
   }
 
-  loadGalleryItem(
-    { name: maybeLastParameter, src: props.fileUrl },
-    blogStore.all.reduce<NonNullable<Parameters<typeof loadGalleryItem>[1]>>(
+  const fileType = extensionToFileType(maybeExtension);
+
+  if (!(fileType === FILE_TYPES.IMAGE || fileType === FILE_TYPES.VIDEO)) {
+    return;
+  }
+
+  const maybeLastParameter = getLastParameter(props.fileUrl);
+
+  if (isNil(maybeLastParameter)) {
+    return;
+  }
+
+  galleryStore.loadGalleryItem(
+    {
+      name: maybeLastParameter,
+      src: props.fileUrl,
+      fileType,
+    },
+    blogStore.all.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>(
       (acc, post) => [
         ...acc,
-        ...post.filesUrls.reduce<NonNullable<Parameters<typeof loadGalleryItem>[1]>>((acc, fileUrl) => {
+        ...post.filesUrls.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>((acc, fileUrl) => {
           const maybeExtension = getFileUrlExtension(fileUrl);
 
           if (isNil(maybeExtension)) {
@@ -64,11 +82,11 @@ const loadToGallery = () => {
 
           const maybeLastParameter = getLastParameter(fileUrl);
 
-          if (!maybeLastParameter) {
+          if (isNil(maybeLastParameter)) {
             return acc;
           }
 
-          return [...acc, { name: maybeLastParameter, src: fileUrl }];
+          return [...acc, { name: maybeLastParameter, src: fileUrl, fileType }];
         }, []),
       ],
       [],

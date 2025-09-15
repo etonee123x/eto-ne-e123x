@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-container py-4">
+  <div class="layout-container">
     <header class="mb-4">
       <h1 class="text-3xl font-semibold">{{ h1 }}</h1>
     </header>

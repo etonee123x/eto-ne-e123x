@@ -1,6 +1,6 @@
 <template>
-  <BasePage :h1="t('content')" class="mx-auto">
-    <ExplorerNavbar class="-mt-4" />
+  <BasePage :h1="t('content')">
+    <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
       <nav v-if="explorerStore.folderData?.lvlUp || elements.folders.length" class="contents">
         <LazyExplorerElementSystem
@@ -16,12 +16,11 @@
       </nav>
       <component :is="itemFileToComponent(file)" v-for="file in elements.files" :element="file" :key="file.src" />
     </div>
-    <TheDialogGallery />
   </BasePage>
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent } from 'vue';
+import { computed, defineAsyncComponent, watchEffect } from 'vue';
 import { onBeforeRouteUpdate, useRoute, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { FILE_TYPES, ITEM_TYPES, type ItemFile, type ItemFolder } from '@etonee123x/shared/helpers/folderData';
 
@@ -35,8 +34,13 @@ import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import TheDialogGallery from './components/TheDialogGallery.vue';
 import { isNil } from '@etonee123x/shared/utils/isNil';
+import { usePlayerStore } from '@/stores/player';
+import { useGalleryStore } from '@/stores/gallery';
+import { useSourcedRef } from '@/composables/useSourcedRef';
+
+const playerStore = usePlayerStore();
+const galleryStore = useGalleryStore();
 
 const LazyExplorerElementSystem = defineAsyncComponent(() => import('./components/ExplorerElementSystem.vue'));
 const LazyExplorerElementFolder = defineAsyncComponent(() => import('./components/ExplorerElementFolder.vue'));
@@ -117,35 +121,73 @@ const fetchData = (to: RouteLocationNormalizedLoaded) => explorerStore.getFolder
 clientOnly(() => fetchData(route));
 
 const maybeLastNavigationItemText = computed(() => explorerStore.folderData?.navigationItems.at(-1)?.text);
-const maybeLinkedFile = computed(() => explorerStore.folderData?.linkedFile);
+
+const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<
+  typeof playerStore.theTrack | typeof galleryStore.galleryItem | null
+>(null);
+
+// Два watchEffect нужны, чтобы отображался крайний выбранный + актуальный файл (плеер или галерея)
+watchEffect(() => {
+  if (playerStore.theTrack) {
+    maybeSelectedFile.value = playerStore.theTrack;
+
+    return;
+  }
+
+  if (galleryStore.galleryItem) {
+    maybeSelectedFile.value = galleryStore.galleryItem;
+
+    return;
+  }
+
+  resetSelectedFile();
+});
+watchEffect(() => {
+  if (galleryStore.galleryItem) {
+    maybeSelectedFile.value = galleryStore.galleryItem;
+
+    return;
+  }
+
+  if (playerStore.theTrack) {
+    maybeSelectedFile.value = playerStore.theTrack;
+
+    return;
+  }
+
+  resetSelectedFile();
+});
 
 useSeoMeta({
   title: () =>
     [
       ...(isNotNil(maybeLastNavigationItemText.value) ? [maybeLastNavigationItemText.value] : []),
-      ...(isNotNil(maybeLinkedFile.value) ? [maybeLinkedFile.value.name] : []),
+      ...(isNotNil(maybeSelectedFile.value) ? [maybeSelectedFile.value.name] : []),
     ].join(' – ') || undefined,
   description: () => {
     if (isNil(maybeLastNavigationItemText.value)) {
       return undefined;
     }
 
-    if (!maybeLinkedFile.value) {
-      return t('thatsWhatCloseToMe', {
-        folderName: maybeLastNavigationItemText.value,
-        description: t('foldersAndFiles'),
-      });
+    let description: string;
+
+    if (maybeSelectedFile.value?.fileType === FILE_TYPES.AUDIO) {
+      description ??= t('listenToAudio', { fileName: maybeSelectedFile.value.name });
     }
 
-    const FILE_TYPE_TO_DESCRIPTION = {
-      [FILE_TYPES.AUDIO]: t('listenToAudio', { fileName: maybeLinkedFile.value.name }),
-      [FILE_TYPES.IMAGE]: t('watchTheImage', { fileName: maybeLinkedFile.value.name }),
-      [FILE_TYPES.VIDEO]: t('watchTheVideo', { fileName: maybeLinkedFile.value.name }),
-    };
+    if (maybeSelectedFile.value?.fileType === FILE_TYPES.VIDEO) {
+      description ??= t('watchTheVideo', { fileName: maybeSelectedFile.value.name });
+    }
+
+    if (maybeSelectedFile.value?.fileType === FILE_TYPES.IMAGE) {
+      description ??= t('watchTheImage', { fileName: maybeSelectedFile.value.name });
+    }
+
+    description ??= t('foldersAndFiles');
 
     return t('thatsWhatCloseToMe', {
       folderName: maybeLastNavigationItemText.value,
-      description: FILE_TYPE_TO_DESCRIPTION[maybeLinkedFile.value.fileType],
+      description,
     });
   },
 });
