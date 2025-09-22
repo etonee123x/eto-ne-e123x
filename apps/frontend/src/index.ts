@@ -5,17 +5,18 @@ import express, { type ErrorRequestHandler, type RequestHandler } from 'express'
 import type { ViteDevServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import { transformHtmlTemplate } from '@unhead/vue/server';
-import { resolve } from 'path';
-import { pick } from '@etonee123x/shared/utils/pick';
 import { postAuth } from '@/api/auth';
 import { isProduction } from '@/constants/mode';
 import { KEY_JWT } from '@/constants/keys';
 import http from 'http';
-import { type Locals, type RequestWithLocals } from '@/types';
 import { requestToOrigin } from '@/utils/requestToOrigin';
 import { isNil } from '@etonee123x/shared/utils/isNil';
-import type { ExpressContext } from '@/constants/injectionKeyExpressContext.js';
+import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
 import { throwError } from '@etonee123x/shared/utils/throwError';
+import { LOCALES_INFO } from '@/constants/localesInfo';
+import { isKnownLocale } from '@/helpers/isKnownLocale';
+import Negotiator from 'negotiator';
+import { propertyCurried } from '@etonee123x/shared/utils/property';
 
 // Constants
 const port = process.env.PORT ?? throwError('PORT is not defined');
@@ -55,9 +56,7 @@ let vite: ViteDevServer;
 
 if (isProduction) {
   const compression = (await import('compression')).default;
-  // const helmet = (await import('helmet')).default;
 
-  // app.use(helmet());
   app.use(compression());
 } else {
   const { createServer } = await import('vite');
@@ -78,6 +77,34 @@ if (isProduction) {
 
 app.get('/healthz', (...[, response]) => void response.send('ok'));
 
+app.get(`/`, (request, response) => {
+  if (!isKnownLocale(request.cookies.language)) {
+    const negotiatorLanguage = new Negotiator(request).language(LOCALES_INFO.map(propertyCurried('locale')));
+
+    request.cookies.language = isKnownLocale(negotiatorLanguage) ? negotiatorLanguage : 'en';
+
+    response.cookie('language', request.cookies.language, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+  }
+
+  response.redirect(`${request.cookies.language}/blog`);
+});
+
+app.get(
+  LOCALES_INFO.map((localeInfo) => `/${localeInfo.locale}`),
+  (request, response) => response.redirect(`${/\w+/.exec(request.originalUrl)?.[0]}/blog`),
+);
+
+const syncLocaleCookie: RequestHandler = (request, response, next) => {
+  const routeLanguage = /\w+/.exec(request.originalUrl)?.[0];
+
+  if (!isKnownLocale(request.cookies.language)) {
+    request.cookies.language = routeLanguage;
+    response.cookie('language', routeLanguage, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+  }
+
+  next();
+};
+
 const auth: RequestHandler = async (request, response, next) => {
   const maybeQueryJwt = request.query[KEY_JWT]?.toString();
 
@@ -91,7 +118,7 @@ const auth: RequestHandler = async (request, response, next) => {
 
       response.setHeader(
         'Set-Cookie',
-        cookies.map((c) => `${c}; ${isHttps ? 'Secure' : ''}; SameSite=Lax`),
+        cookies.map((cookie) => `${cookie}; ${isHttps ? 'Secure' : ''}; SameSite=Lax`),
       );
     })
     .catch(() => response.clearCookie(KEY_JWT));
@@ -103,38 +130,7 @@ const auth: RequestHandler = async (request, response, next) => {
   return response.redirect(requestUrl.toString());
 };
 
-const settings: RequestHandler = async (request: RequestWithLocals, response, next) => {
-  const initialSettings = JSON.parse(await readFile(resolve('./public/settings.json'), 'utf-8'));
-
-  const settings = {
-    ...initialSettings,
-    ...pick(request.cookies, ['themeColor', 'language']),
-  };
-
-  const locals: Locals = {
-    settings,
-  };
-
-  const isHttps = (request.headers['x-forwarded-proto'] ?? '').toString().startsWith('https');
-
-  response.cookie('language', settings.language, {
-    maxAge: 365 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
-    secure: isHttps,
-  });
-
-  response.cookie('themeColor', settings.themeColor, {
-    maxAge: 365 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
-    secure: isHttps,
-  });
-
-  request.locals = locals;
-
-  next();
-};
-
-const main: RequestHandler = async (request: RequestWithLocals, response, next) => {
+const main: RequestHandler = async (request, response, next) =>
   renderHTML(request.originalUrl.replace(BASE, ''), { request, response, next })
     .then((html) => {
       if (response.headersSent) {
@@ -147,7 +143,6 @@ const main: RequestHandler = async (request: RequestWithLocals, response, next) 
         .send(html);
     })
     .catch(next);
-};
 
 const error: ErrorRequestHandler = async (error, request, response, next) => {
   if (error instanceof Error) {
@@ -164,7 +159,7 @@ const error: ErrorRequestHandler = async (error, request, response, next) => {
   );
 };
 
-app.use('*all', auth, settings, main, error);
+app.use('*all', syncLocaleCookie, auth, main, error);
 
 http
   .createServer(app)

@@ -3,26 +3,22 @@ import { computed } from 'vue';
 
 import { postAuth as _postAuth, deleteAuth as _deleteAuth } from '@/api/auth';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
-import { useCookies } from '@vueuse/integrations/useCookies.mjs';
 import { isString } from '@etonee123x/shared/utils/isString';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import { isRealObject } from '@etonee123x/shared/utils/isRealObject';
 import { KEY_JWT } from '@/constants/keys';
 import { isDevelopment } from '@/constants/mode';
-import { isServer } from '@/constants/target';
 import { nonNullable } from '@/utils/nonNullable';
-import { useSSRContext } from '@/composables/useSSRContext';
+import { useGetCookie } from '@/composables/useGetCookie';
 
 export const useAuthStore = defineStore('auth', () => {
-  const cookies = useCookies([KEY_JWT]);
+  const getJwtCookie = useGetCookie(KEY_JWT);
 
   const { execute: postAuth, isLoading: isLoadingPostAuth } = useAsyncStateApi(_postAuth);
   const { execute: deleteAuth, isLoading: isLoadingDeleteAuth } = useAsyncStateApi(_deleteAuth);
 
   const isAdmin = computed(() => {
-    const cookieJwt = isServer //
-      ? nonNullable(useSSRContext()).express.request.cookies[KEY_JWT]
-      : cookies.get(KEY_JWT);
+    const cookieJwt = getJwtCookie();
 
     if (!isString(cookieJwt)) {
       return false;

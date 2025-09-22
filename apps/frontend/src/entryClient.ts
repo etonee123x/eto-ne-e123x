@@ -1,6 +1,7 @@
-import { useCookies } from '@vueuse/integrations/useCookies.mjs';
-import { createApp } from './main';
+import { useCookies } from '@vueuse/integrations/useCookies';
+import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/client';
+import { isKnownLocale } from '@/helpers/isKnownLocale';
 
 const { app, router, pinia, i18n } = createApp();
 
@@ -14,6 +15,10 @@ if (globalThis.__PINIA__) {
 
 const cookies = useCookies();
 
-i18n.global.locale.value = cookies.get('language');
+router.isReady().then(() => {
+  const routerLanguage = router.currentRoute.value.params.language?.toString();
 
-router.isReady().then(() => app.mount('#app', true));
+  i18n.global.locale.value = isKnownLocale(routerLanguage) ? routerLanguage : cookies.get('language');
+
+  app.mount('#app', true);
+});

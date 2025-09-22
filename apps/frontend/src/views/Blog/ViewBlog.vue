@@ -77,7 +77,7 @@ const { reveal, confirm, cancel } = useConfirmDialog();
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       blog: 'Блог',
       send: 'Отправить',
       nothingWasFound: 'Ничего не найдено...',
@@ -87,7 +87,7 @@ const { t } = useI18n({
         'Микроблог без чёткой направленности. Что-то из мыслей, что-то случайное. Всё складывается в одну ленту',
       myBlog: 'Мой блог. Пост.',
     },
-    En: {
+    en: {
       blog: 'Blog',
       send: 'Send',
       nothingWasFound: 'Nothing was found...',

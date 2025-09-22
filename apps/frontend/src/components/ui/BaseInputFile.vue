@@ -30,11 +30,11 @@ const LazyBaseFilesList = defineAsyncComponent(() => import('./BaseFilesList.vue
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       title: 'Файлы',
       add: 'Добавить',
     },
-    En: {
+    en: {
       title: 'Files',
       add: 'Add',
     },

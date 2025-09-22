@@ -107,7 +107,7 @@ import ClientOnly from '../ClientOnly.vue';
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       copied: 'Скопировано!',
       copyLink: 'Скопировать ссылку',
       previousTrack: 'Предыдущий трек',
@@ -118,7 +118,7 @@ const { t } = useI18n({
       enableShuffleTracks: 'Включить перемешивание треков',
       disableShuffleTracks: 'Выключить перемешивание треков',
     },
-    En: {
+    en: {
       copied: 'Copied!',
       copyLink: 'Copy link',
       previousTrack: 'Previous track',

@@ -1,13 +1,11 @@
-import { useSettingsStore } from '@/stores/settings';
 import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { useLocaleInfo } from './useLocaleInfo';
 
 export const useIntlRelativeTimeFormat = (
   _locales?: MaybeRefOrGetter<Intl.LocalesArgument>,
   options?: MaybeRefOrGetter<Intl.RelativeTimeFormatOptions>,
 ) => {
-  const settingsStore = useSettingsStore();
+  const localeInfo = useLocaleInfo();
 
-  return computed(
-    () => new Intl.RelativeTimeFormat(toValue(_locales) ?? settingsStore.languageInfo?.locale, toValue(options)),
-  );
+  return computed(() => new Intl.RelativeTimeFormat(toValue(_locales) ?? localeInfo.value.locale, toValue(options)));
 };

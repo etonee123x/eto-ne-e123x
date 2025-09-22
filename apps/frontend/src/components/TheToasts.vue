@@ -20,13 +20,13 @@
 <script setup lang="ts">
 import { mdiCheck, mdiClose } from '@mdi/js';
 
-import { ToastType, useToastsStore, type Toast } from '@/stores/toasts';
+import { TOAST_TYPES, useToastsStore, type Toast } from '@/stores/toasts';
 import BaseIcon from '@/components/ui/BaseIcon';
 import BaseButton from '@/components/ui/BaseButton';
 
 const toastsStore = useToastsStore();
 
-const isSuccess = (toast: Toast) => toast.type === ToastType.Success;
+const isSuccess = (toast: Toast) => toast.type === TOAST_TYPES.SUCCESS;
 
 const getIconPath = (toast: Toast) => (isSuccess(toast) ? mdiCheck : mdiClose);
 

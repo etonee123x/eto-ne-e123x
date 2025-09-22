@@ -2,7 +2,7 @@
   <footer class="border-t border-t-dark">
     <address class="layout-container py-2 flex gap-2 items-center">
       <a target="_blank" href="https://t.me/eto_ne_e123x">
-        <img class="size-6" src="./assets/icons/Logo.svg" :alt="t('telegramLogo')" />
+        <img class="size-6" src="@/assets/icons/telegram.svg" :alt="t('telegramLogo')" />
       </a>
     </address>
   </footer>
@@ -14,10 +14,10 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    En: {
+    en: {
       telegramLogo: 'Telegram logo',
     },
-    Ru: {
+    ru: {
       telegramLogo: 'Логотип телеграм',
     },
   },

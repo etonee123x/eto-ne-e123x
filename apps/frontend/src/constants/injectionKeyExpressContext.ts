@@ -1,9 +1,8 @@
-import type { RequestWithLocals } from '@/types';
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response, Request } from 'express';
 import type { InjectionKey } from 'vue';
 
 export interface ExpressContext {
-  request: RequestWithLocals;
+  request: Request;
   response: Response;
   next: NextFunction;
 }

@@ -1,5 +1,5 @@
 import { isServer } from '@/constants/target';
-import { RouteName } from '@/router';
+import { ROUTE_NAMES } from '@/router';
 import { useRouter } from 'vue-router';
 import { createError } from '@etonee123x/shared/helpers/error';
 
@@ -11,6 +11,6 @@ export const useGoToPage404 = () => {
       throw createError({ statusCode: 404 });
     }
 
-    return router.push({ name: RouteName.Page404 });
+    return router.push({ name: ROUTE_NAMES.PAGE_404 });
   };
 };

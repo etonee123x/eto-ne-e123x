@@ -4,16 +4,19 @@ import { createHead } from '@unhead/vue/server';
 import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
 import { isClient } from './constants/target';
 import { type SSRContext } from '@/composables/useSSRContext';
+import { isKnownLocale } from '@/helpers/isKnownLocale';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
-  const { app, router, pinia } = createApp({ url });
+  const { app, router, pinia, i18n } = createApp({ url });
 
-  app.config.errorHandler = () => {
+  app.config.errorHandler = (error) => {
+    console.error('Error in app', error);
+
     if (isClient || expressContext.response.headersSent) {
       return;
     }
 
-    expressContext.response.redirect('/404');
+    // expressContext.response.redirect('/404');
   };
 
   const head = createHead();
@@ -28,7 +31,15 @@ export const render = async (url: string, expressContext: ExpressContext) => {
 
   return router
     .isReady()
-    .then(() => renderToString(app, context))
+    .then(() => {
+      const routerLanguage = router.currentRoute.value.params.language?.toString();
+
+      i18n.global.locale.value = isKnownLocale(routerLanguage)
+        ? routerLanguage
+        : expressContext.request.cookies.language;
+
+      return renderToString(app, context);
+    })
     .then((html) => {
       head.push({
         script: [

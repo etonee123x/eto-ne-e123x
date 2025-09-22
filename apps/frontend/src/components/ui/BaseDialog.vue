@@ -23,7 +23,7 @@
 
       <slot v-if="!isHiddenFooter" name="footer" v-bind="{ close }">
         <footer v-if="buttons.length" class="flex justify-end gap-2 mt-auto">
-          <BaseButton v-for="button in buttons" :key="button.id" @click="button.onClick">
+          <BaseButton v-for="button in buttons" :key="button.key" @click="button.onClick">
             {{ button.text }}
           </BaseButton>
         </footer>
@@ -39,7 +39,7 @@ import { mdiClose } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import type { FunctionCallback } from '@etonee123x/shared/types';
-import { areIdsEqual, toId, type WithId } from '@etonee123x/shared/helpers/id';
+import { areIdsEqual, toId } from '@etonee123x/shared/helpers/id';
 import BaseButton from './BaseButton';
 import BaseIcon from './BaseIcon';
 import { useDialogStore } from '@/stores/dialog';
@@ -49,15 +49,14 @@ const dialog = useTemplateRef('dialog');
 
 const id = useId();
 
-interface Button extends WithId {
-  text: string;
-  onClick: FunctionCallback;
-}
-
 const props = defineProps<
   Partial<{
     title: string;
-    buttons: Array<Button>;
+    buttons: Array<{
+      key: PropertyKey;
+      text: string;
+      onClick: FunctionCallback;
+    }>;
     isHiddenHeader: boolean;
     isHiddenFooter: boolean;
   }>
@@ -79,11 +78,11 @@ const toggleModel = useToggle(model);
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       confirm: 'Подтвердить',
       cancel: 'Отмена',
     },
-    En: {
+    en: {
       confirm: 'Confirm',
       cancel: 'Cancel',
     },
@@ -94,7 +93,7 @@ const buttons = computed(
   () =>
     props.buttons ?? [
       {
-        id: 0,
+        key: 'cancel',
         text: t('cancel'),
         onClick: () => {
           emit('cancel');
@@ -102,7 +101,7 @@ const buttons = computed(
         },
       },
       {
-        id: 1,
+        key: 'confirm',
         text: t('confirm'),
         onClick: () => {
           emit('confirm');

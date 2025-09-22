@@ -18,7 +18,7 @@
             class="text-sm mt-4 text-dark flex justify-end items-center gap-0.5"
           >
             {{ sinceCreatedHumanReadable }}
-            <BaseIcon v-if="post._meta.updatedAt" :class="ICON.SIZE.SM" :path="mdiPencil" />
+            <BaseIcon v-if="post._meta.updatedAt" :class="ICON._SIZE._SM" :path="mdiPencil" />
           </time>
         </template>
       </div>
@@ -50,7 +50,7 @@ import BaseIcon from '@/components/ui/BaseIcon';
 import { useBlogStore } from '@/stores/blog';
 import { useVuelidatePostData } from '../composables/useVuelidatePostData';
 import { useAuthStore } from '@/stores/auth';
-import { RouteName } from '@/router';
+import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
 import { useSourcedRef } from '@/composables/useSourcedRef';
@@ -76,13 +76,13 @@ const authStore = useAuthStore();
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       createdAt: 'Создано в { at }',
       updatedAt: 'Изменено в { at }',
       confirmDelete: 'Удалить пост',
       deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
     },
-    En: {
+    en: {
       createdAt: 'Created at { at }',
       updatedAt: 'Edited at { at }',
       confirmDelete: 'Delete Post',
@@ -121,7 +121,7 @@ const component = computed(() =>
         Is: RouterLink,
         binds: {
           to: {
-            name: RouteName.BlogPost,
+            name: ROUTE_NAMES.BLOG_POST,
             params: {
               postId: props.post._meta.id,
             },

@@ -22,25 +22,22 @@ import { defineAsyncComponent, onServerPrefetch } from 'vue';
 
 import { usePlayerStore } from '@/stores/player';
 import { useToastsStore } from '@/stores/toasts';
-import TheHeader from '@/components/TheHeader';
-import { useSettingsStore } from '@/stores/settings';
-import { themeColorToThemeColorClass } from '@/helpers/themeColor';
+import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
-import { nonNullable } from '@/utils/nonNullable';
 import { useExplorerStore } from '@/stores/explorer';
 import { useRoute } from 'vue-router';
-import { RouteName } from '@/router';
+import { ROUTE_NAMES } from '@/router';
 import { clientOnly } from '@/helpers/clientOnly';
 import { i18n } from '@/i18n';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
-import { useSSRContext } from '@/composables/useSSRContext';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
+import { _THEME_COLOR } from '@/helpers/ui';
 
 const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
 const LazyTheToasts = defineAsyncComponent(() => import('@/components/TheToasts.vue'));
-const LazyTheFooter = defineAsyncComponent(() => import('@/components/TheFooter'));
+const LazyTheFooter = defineAsyncComponent(() => import('@/components/TheFooter.vue'));
 
 const route = useRoute();
 
@@ -49,25 +46,7 @@ const goToPage404 = useGoToPage404();
 const playerStore = usePlayerStore();
 const toastsStore = useToastsStore();
 
-if (isServer) {
-  const ssrContext = nonNullable(useSSRContext());
-
-  const maybeSettings = ssrContext.express.request.locals?.settings;
-
-  const settingsStore = useSettingsStore();
-
-  if (maybeSettings) {
-    settingsStore.initSettings(maybeSettings);
-  }
-
-  useHead({
-    bodyAttrs: {
-      class: themeColorToThemeColorClass(settingsStore.settings.themeColor),
-    },
-  });
-}
-
-if (route.name === RouteName.Explorer) {
+if (route.name === ROUTE_NAMES.EXPLORER) {
   const explorerStore = useExplorerStore();
 
   const getFolderData = () => explorerStore.getFolderData(route).catch(goToPage404);
@@ -91,4 +70,14 @@ useHead({
     lang: () => i18n.global.locale.value.toLocaleLowerCase(),
   },
 });
+
+if (isServer) {
+  const THEME_COLORS = Object.values(_THEME_COLOR);
+
+  useHead({
+    bodyAttrs: {
+      class: THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)],
+    },
+  });
+}
 </script>

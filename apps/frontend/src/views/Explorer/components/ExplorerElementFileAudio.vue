@@ -35,14 +35,14 @@ const props = defineProps<{
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       duration: 'Длительность',
       artists: 'Исполнитель(-и)',
       album: 'Альбом',
       year: 'Год выхода',
       bpm: 'Темп',
     },
-    En: {
+    en: {
       duration: 'Duration',
       artists: 'Artist(-s)',
       album: 'Album',

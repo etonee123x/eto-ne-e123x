@@ -7,12 +7,16 @@ import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
 import { type RouteLocationNormalizedLoaded } from 'vue-router';
 import { useGalleryStore } from '@/stores/gallery';
 import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
-
-const moduleURLResolver = (url: string) => `/explorer${url.replace(/^\/explorer/, '')}`;
+import { useL10n } from '@/composables/useL10n';
+import { throwError } from '@etonee123x/shared/utils/throwError';
 
 export const useExplorerStore = defineStore('explorer', () => {
   const playerStore = usePlayerStore();
   const galleryStore = useGalleryStore();
+
+  const { localizePath } = useL10n();
+
+  const moduleURLResolver = (url: string) => localizePath(`/explorer${url}`);
 
   const routePathToFolderData = shallowReactive<Record<string, FolderDataWithSinceTimestamps>>({});
 
@@ -21,27 +25,31 @@ export const useExplorerStore = defineStore('explorer', () => {
     execute: getFolderData,
     isLoading: isLoadingGetFolderData,
   } = useAsyncStateApi(async (to: RouteLocationNormalizedLoaded) => {
-    const maybeFolderData = routePathToFolderData[to.path];
+    const matterPath = '/' + Array.from(to.params.links ?? []).join('/');
 
-    const _folderData = maybeFolderData ?? (await _getFolderData(to.path.replace(/^\/explorer/, '')));
+    const maybeFolderData = routePathToFolderData[matterPath];
 
-    const folderData: FolderDataWithSinceTimestamps = {
-      items: _folderData.items.map((item) => ({
-        ...item,
-        url: moduleURLResolver(item.url),
-      })),
-      lvlUp: _folderData.lvlUp && moduleURLResolver(_folderData.lvlUp),
-      navigationItems: _folderData.navigationItems.map((navigationItem) => ({
-        ...navigationItem,
-        link: moduleURLResolver(navigationItem.link),
-      })),
-      linkedFile: _folderData.linkedFile && {
-        ..._folderData.linkedFile,
-        url: moduleURLResolver(_folderData.linkedFile.url),
-      },
-    };
+    const folderData =
+      maybeFolderData ??
+      (await _getFolderData(matterPath)
+        .then((_folderData) => ({
+          items: _folderData.items.map((item) => ({
+            ...item,
+            url: moduleURLResolver(item.url),
+          })),
+          lvlUp: _folderData.lvlUp && moduleURLResolver(_folderData.lvlUp),
+          navigationItems: _folderData.navigationItems.map((navigationItem) => ({
+            ...navigationItem,
+            link: moduleURLResolver(navigationItem.link),
+          })),
+          linkedFile: _folderData.linkedFile && {
+            ..._folderData.linkedFile,
+            url: moduleURLResolver(_folderData.linkedFile.url),
+          },
+        }))
+        .catch(throwError));
 
-    routePathToFolderData[to.path] = folderData;
+    routePathToFolderData[matterPath] = folderData;
 
     const folderDataLinkedFile = folderData.linkedFile;
 

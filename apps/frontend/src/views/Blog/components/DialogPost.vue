@@ -35,7 +35,7 @@ import { useRouter } from 'vue-router';
 
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { useBlogStore } from '@/stores/blog';
-import { RouteName } from '@/router';
+import { ROUTE_NAMES } from '@/router';
 import { useToggle } from '@vueuse/core';
 import PostData from './PostData.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
@@ -44,13 +44,13 @@ import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRel
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       created: 'Создано { since }',
       updated: 'Изменено { since }',
       createdAt: 'Создано в { at }',
       updatedAt: 'Изменено в { at }',
     },
-    En: {
+    en: {
       created: 'Created { since }',
       updated: 'Edited { since }',
       createdAt: 'Created at { at }',
@@ -80,7 +80,7 @@ const updatedAt = computed(() =>
 );
 
 const onDialogClose = () => {
-  router.push({ name: RouteName.Blog });
+  router.push({ name: ROUTE_NAMES.BLOG });
 };
 
 watchEffect(() => toggleIsDialogOpen(Boolean(blogStore.byId)));

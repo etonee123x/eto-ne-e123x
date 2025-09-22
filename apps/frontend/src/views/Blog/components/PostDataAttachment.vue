@@ -23,10 +23,10 @@ const props = defineProps<{
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       attachmentN: 'Вложение { N }',
     },
-    En: {
+    en: {
       attachmentN: 'Attachment { N }',
     },
   },

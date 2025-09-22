@@ -47,11 +47,11 @@ defineProps<{ v$: UnwrapRef<ReturnType<typeof useVuelidatePostData>['v$']> }>();
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       textareaPlaceholder: 'Сообщение',
       files: 'Файлы',
     },
-    En: {
+    en: {
       textareaPlaceholder: 'Message',
       files: 'Files',
     },

@@ -54,7 +54,7 @@ const goToPage404 = useGoToPage404();
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       content: 'Контент',
       thatsWhatCloseToMe: 'То, что мне близко. Папка {folderName}, {description}',
       foldersAndFiles: 'папки и файлы; с музыкой, картинками, видосиками',
@@ -62,7 +62,7 @@ const { t } = useI18n({
       watchTheImage: 'смотреть изображение {fileName}, и другие @:foldersAndFiles',
       watchTheVideo: 'смотреть видео {fileName}, и другие @:foldersAndFiles',
     },
-    En: {
+    en: {
       content: 'Content',
       thatsWhatCloseToMe: 'Thats what close to me. Folder {folderName}, {description}',
       foldersAndFiles: 'folders and files; with music, pictures, videos',

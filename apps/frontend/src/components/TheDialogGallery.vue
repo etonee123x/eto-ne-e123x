@@ -27,7 +27,7 @@ import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { useGalleryStore } from '@/stores/gallery';
 import { useRoute, useRouter } from 'vue-router';
 import { FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
-import { RouteName } from '@/router';
+import { ROUTE_NAMES } from '@/router';
 import { useExplorerStore } from '@/stores/explorer';
 
 const router = useRouter();
@@ -69,7 +69,7 @@ useSwipe(mediaContainer, {
 const onClose = () => {
   galleryStore.galleryItems = [];
 
-  if (router.resolve(route.fullPath).name !== RouteName.Explorer) {
+  if (router.resolve(route.fullPath).name !== ROUTE_NAMES.EXPLORER) {
     return;
   }
 

@@ -1,16 +1,15 @@
 import { computed, reactive } from 'vue';
 import { defineStore } from 'pinia';
-import { toId } from '@etonee123x/shared/helpers/id';
-import type { Id, WithId } from '@etonee123x/shared/helpers/id';
+import { areIdsEqual, toId, type Id, type WithId } from '@etonee123x/shared/helpers/id';
 
-export enum ToastType {
-  Error = 'Error',
-  Success = 'Success',
-}
+export const TOAST_TYPES = {
+  ERROR: 'ERROR',
+  SUCCESS: 'SUCCESS',
+} as const;
 
 export interface Toast extends WithId {
   text: string;
-  type: ToastType;
+  type: (typeof TOAST_TYPES)[keyof typeof TOAST_TYPES];
 }
 
 interface Options {
@@ -35,12 +34,12 @@ export const useToastsStore = defineStore('toasts', () => {
 
   const hasToasts = computed(() => Boolean(toasts.length));
 
-  const toastSuccess = (text: string, options?: Options) => toast(text, { type: ToastType.Success, ...options });
+  const toastSuccess = (text: string, options?: Options) => toast(text, { type: TOAST_TYPES.SUCCESS, ...options });
 
-  const toastError = (text: string, options?: Options) => toast(text, { type: ToastType.Error, ...options });
+  const toastError = (text: string, options?: Options) => toast(text, { type: TOAST_TYPES.ERROR, ...options });
 
   const closeToast = (id: Id) => {
-    const index = toasts.findIndex(({ id: _id }) => _id === id);
+    const index = toasts.findIndex(({ id: _id }) => areIdsEqual(_id, id));
 
     if (index === -1) {
       return;

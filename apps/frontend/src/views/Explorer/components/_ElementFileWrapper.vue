@@ -32,10 +32,10 @@ const props = defineProps<{
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       createdAt: 'Создано в { at }',
     },
-    En: {
+    en: {
       createdAt: 'Created at { at }',
     },
   },
