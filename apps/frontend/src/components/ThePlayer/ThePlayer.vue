@@ -97,7 +97,7 @@ import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import { Temporal } from 'temporal-polyfill';
 import { useExplorerStore } from '@/stores/explorer';
-import { useRoute, RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
@@ -134,7 +134,6 @@ const { t } = useI18n({
 
 const isMobile = useIsMobile();
 
-const route = useRoute();
 const router = useRouter();
 
 const explorerStore = useExplorerStore();
@@ -200,14 +199,13 @@ const toOnClose = () => {
     return;
   }
 
-  const maybeFolderData = explorerStore.routePathToFolderData[route.fullPath];
-  const maybeFolderDataLinkedFile = maybeFolderData?.linkedFile;
+  const maybeFolderDataLinkedFile = explorerStore.currentFolderData?.linkedFile;
 
   if (!maybeFolderDataLinkedFile) {
     return;
   }
 
-  const lastNavigationItem = maybeFolderData.navigationItems.at(-1);
+  const lastNavigationItem = explorerStore.currentFolderData.navigationItems.at(-1);
 
   if (!lastNavigationItem) {
     return;

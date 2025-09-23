@@ -5,13 +5,19 @@ import { isDevelopment } from '@/constants/mode';
 
 export const ROUTE_NAMES = {
   EXPLORER: 'EXPLORER',
-  HOME: 'HOME',
+  INDEX: 'INDEX',
   BLOG: 'BLOG',
   BLOG_POST: 'BLOG_POST',
   PLAYGROUND: 'PLAYGROUND',
   PAGE_404_GLOBAL: 'PAGE_404_GLOBAL',
   PAGE_404: 'PAGE_404',
-};
+} as const;
+
+export const ROUTE_NAME_TO_PATH = {
+  [ROUTE_NAMES.EXPLORER]: 'explorer',
+  [ROUTE_NAMES.INDEX]: '',
+  [ROUTE_NAMES.BLOG]: 'blog',
+} as const;
 
 export const createRouter = () =>
   _createRouter({
@@ -20,19 +26,17 @@ export const createRouter = () =>
         path: '/:language(ru|en)',
         children: [
           {
+            name: ROUTE_NAMES.INDEX,
+            path: ROUTE_NAME_TO_PATH.INDEX,
+            component: () => import('@/views/Index'),
+          },
+          {
+            path: `${ROUTE_NAME_TO_PATH.EXPLORER}/:links(.*)*`,
             name: ROUTE_NAMES.EXPLORER,
-            path: 'explorer/:links(.*)*',
             component: () => import('@/views/Explorer'),
           },
           {
-            name: ROUTE_NAMES.HOME,
-            path: '',
-            redirect: {
-              name: ROUTE_NAMES.BLOG,
-            },
-          },
-          {
-            path: 'blog',
+            path: ROUTE_NAME_TO_PATH.BLOG,
             children: [
               {
                 name: ROUTE_NAMES.BLOG,

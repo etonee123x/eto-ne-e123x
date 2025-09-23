@@ -17,12 +17,11 @@ import { LOCALES_INFO } from '@/constants/localesInfo';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 import Negotiator from 'negotiator';
 import { propertyCurried } from '@etonee123x/shared/utils/property';
+import { ROUTE_NAME_TO_PATH } from '@/router';
 
-// Constants
 const port = process.env.PORT ?? throwError('PORT is not defined');
 const BASE = '/';
 
-// Cached production assets
 const templateHtml = isProduction ? await readFile('./dist/client/index.html', 'utf-8') : '';
 
 const renderHTML = async (url: string, expressContext: ExpressContext) => {
@@ -44,7 +43,6 @@ const renderHTML = async (url: string, expressContext: ExpressContext) => {
   );
 };
 
-// Create http server
 const app = express();
 
 app.disable('x-powered-by');
@@ -77,7 +75,11 @@ if (isProduction) {
 
 app.get('/healthz', (...[, response]) => void response.send('ok'));
 
-app.get(`/`, (request, response) => {
+app.use((request, response, next) => {
+  if (!Object.values(ROUTE_NAME_TO_PATH).some((routePath) => new RegExp(`^/${routePath}(/|$)`).test(request.path))) {
+    return next();
+  }
+
   if (!isKnownLocale(request.cookies.language)) {
     const negotiatorLanguage = new Negotiator(request).language(LOCALES_INFO.map(propertyCurried('locale')));
 
@@ -86,13 +88,8 @@ app.get(`/`, (request, response) => {
     response.cookie('language', request.cookies.language, { maxAge: 365 * 24 * 60 * 60 * 1000 });
   }
 
-  response.redirect(`${request.cookies.language}/blog`);
+  response.redirect(301, `${request.cookies.language}${request.path}`);
 });
-
-app.get(
-  LOCALES_INFO.map((localeInfo) => `/${localeInfo.locale}`),
-  (request, response) => response.redirect(`${/\w+/.exec(request.originalUrl)?.[0]}/blog`),
-);
 
 const syncLocaleCookie: RequestHandler = (request, response, next) => {
   const routeLanguage = /\w+/.exec(request.originalUrl)?.[0];
@@ -127,7 +124,7 @@ const auth: RequestHandler = async (request, response, next) => {
 
   requestUrl.searchParams.delete(KEY_JWT);
 
-  return response.redirect(requestUrl.toString());
+  response.redirect(303, requestUrl.toString());
 };
 
 const main: RequestHandler = async (request, response, next) =>

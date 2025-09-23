@@ -7,7 +7,11 @@
     </ClientOnly>
     <div class="layout-container flex items-center py-2 gap-4">
       <nav class="flex items-end gap-4">
-        <RouterLink :to="localizeRoute({ name: ROUTE_NAMES.HOME })" class="text-xl">
+        <RouterLink
+          exactActiveClass="text-details-500"
+          :to="localizeRoute({ name: ROUTE_NAMES.INDEX })"
+          class="text-xl"
+        >
           {{ SITE_TITLE }}
         </RouterLink>
         <ul class="flex gap-2">

@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
-import { shallowReactive } from 'vue';
+import { computed, shallowReactive } from 'vue';
 
 import { usePlayerStore } from '@/stores/player';
 import { getFolderData as _getFolderData, type FolderDataWithSinceTimestamps } from '@/api/folderData';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
-import { type RouteLocationNormalizedLoaded } from 'vue-router';
+import { useRoute, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { useGalleryStore } from '@/stores/gallery';
 import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
 import { useL10n } from '@/composables/useL10n';
@@ -13,6 +13,7 @@ import { throwError } from '@etonee123x/shared/utils/throwError';
 export const useExplorerStore = defineStore('explorer', () => {
   const playerStore = usePlayerStore();
   const galleryStore = useGalleryStore();
+  const route = useRoute();
 
   const { localizePath } = useL10n();
 
@@ -78,8 +79,11 @@ export const useExplorerStore = defineStore('explorer', () => {
     return folderData;
   });
 
+  const currentFolderData = computed(() => routePathToFolderData['/' + Array.from(route.params.links ?? []).join('/')]);
+
   return {
     routePathToFolderData,
+    currentFolderData,
 
     getFolderData,
     isLoadingGetFolderData,

@@ -110,10 +110,19 @@ const hasPosts = computed(() => Boolean(blogStore.all.length));
 
 const goToPage404 = useGoToPage404();
 
-useInfiniteScroll(isClient ? document.body : null, () => blogStore.getAll().then(() => undefined), {
-  canLoadMore: () => !(blogStore.isLoadingGetAll || blogStore.isEnd),
-  distance: 100,
-});
+useInfiniteScroll(
+  isClient ? document.body : null,
+  () =>
+    blogStore
+      .getAll()
+      .then(() => undefined)
+      // чтобы не спамить запросами при ошибке (когда нет интернета)
+      .catch(() => new Promise((resolve) => setTimeout(resolve, 1000))),
+  {
+    canLoadMore: () => !(blogStore.isLoadingGetAll || blogStore.isEnd),
+    distance: 100,
+  },
+);
 
 const [files, resetFiles] = useSourcedRef<Array<File>>([]);
 

@@ -2,7 +2,7 @@
   <BasePage h1="404" class="flex justify-center items-center flex-1 flex-col">
     <p>{{ t('pageNotFound') }}</p>
     <I18nT keypath="tryReturning" tag="p">
-      <RouterLink :to="localizeRoute({ name: ROUTE_NAMES.HOME })" class="underline">
+      <RouterLink :to="localizeRoute({ name: ROUTE_NAMES.INDEX })" class="underline">
         {{ t('toTheMainPage') }}
       </RouterLink>
     </I18nT>

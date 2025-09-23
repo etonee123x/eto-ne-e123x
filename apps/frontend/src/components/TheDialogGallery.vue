@@ -73,14 +73,11 @@ const onClose = () => {
     return;
   }
 
-  const maybeFolderData = explorerStore.routePathToFolderData[route.fullPath];
-  const maybeFolderDataLinkedFile = maybeFolderData?.linkedFile;
-
-  if (!maybeFolderDataLinkedFile) {
+  if (!explorerStore.currentFolderData?.linkedFile) {
     return;
   }
 
-  const lastNavigationItem = maybeFolderData.navigationItems.at(-1);
+  const lastNavigationItem = explorerStore.currentFolderData.navigationItems.at(-1);
 
   if (!lastNavigationItem) {
     return;
