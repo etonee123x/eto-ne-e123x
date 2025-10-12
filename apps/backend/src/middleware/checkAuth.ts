@@ -1,4 +1,3 @@
-import { isModeDev } from '@/helpers/mode';
 import { isString } from '@etonee123x/shared/utils/isString';
 import { createError } from '@etonee123x/shared/helpers/error';
 import { isRealObject } from '@etonee123x/shared/utils/isRealObject';
@@ -6,9 +5,6 @@ import { RequestHandler } from 'express';
 import jsonWebToken from 'jsonwebtoken';
 
 const JWT_COOKIE_KEY = 'jwt';
-const DEV_JWT_VALUE = 'dev-jwt';
-
-const shouldBypassAsDev = (jwt: string) => isModeDev && jwt === DEV_JWT_VALUE;
 
 export const checkAuth: RequestHandler = (request, response, next) => {
   const jwt = request.cookies[JWT_COOKIE_KEY] || request.query.jwt;
@@ -16,14 +12,6 @@ export const checkAuth: RequestHandler = (request, response, next) => {
   if (!isString(jwt)) {
     response.clearCookie(JWT_COOKIE_KEY);
     throw createError({ statusCode: 401 });
-  }
-
-  if (shouldBypassAsDev(jwt)) {
-    response.cookie(JWT_COOKIE_KEY, jwt, {
-      maxAge: 1 * 60 * 60 * 1000,
-    });
-
-    return next();
   }
 
   try {

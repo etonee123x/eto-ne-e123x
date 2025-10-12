@@ -1,10 +1,10 @@
-import { useLoadingStore } from '@/stores/loading';
 import type { FetchError } from 'ofetch';
 import { computed, ref } from 'vue';
 import { isServer } from '@/constants/target';
 import { nonNullable } from '@/utils/nonNullable';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import { useSSRContext } from '@/composables/useSSRContext';
+import { useLoadingSources } from '@/plugins/loadingSources';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 type RequestFunction<Data, Params extends Array<any> = []> = (...params: Params) => Promise<Data>;
@@ -44,8 +44,12 @@ type UseAsyncStateApiParameters<Data, InitialState extends Data | undefined, Par
   | UseAsyncStateApiParametersWithKey<Data, InitialState, Params>
   | UseAsyncStateApiParametersWithoutKey<Data, InitialState, Params>;
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export const useAsyncStateApi = <Data, InitialState extends Data | undefined, Params extends Array<any> = []>(
+export const useAsyncStateApi = <
+  Data,
+  InitialState extends Data | undefined = undefined,
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  Params extends Array<any> = [],
+>(
   ...parameters: UseAsyncStateApiParameters<Data, InitialState, Params>
 ) => {
   const [
@@ -56,7 +60,7 @@ export const useAsyncStateApi = <Data, InitialState extends Data | undefined, Pa
     options = {},
   ] = parameters as UseAsyncStateApiParametersWithKey<Data, InitialState, Params>;
 
-  const loadingStore = useLoadingStore();
+  const loadingSources = useLoadingSources();
 
   const state = ref(initialState as InitialState extends undefined ? Data | undefined : Data);
 
@@ -115,9 +119,9 @@ export const useAsyncStateApi = <Data, InitialState extends Data | undefined, Pa
   const execute = async (...parameters: Params) => {
     const promise = _execute(...parameters)
       .catch(_onError)
-      .finally(() => loadingStore.sources.delete(promise));
+      .finally(() => loadingSources.delete(promise));
 
-    loadingStore.sources.add(promise);
+    loadingSources.add(promise);
 
     return promise;
   };

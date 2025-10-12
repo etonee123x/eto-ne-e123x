@@ -1,6 +1,6 @@
 <template>
   <BasePage :h1="t('blog')">
-    <template v-if="authStore.isAdmin">
+    <template v-if="auth.isAdmin.value">
       <LazyBaseForm class="flex flex-col gap-4" ref="baseForm" @submit.prevent="onSubmit">
         <LazyBlogEditPost
           :v$
@@ -9,7 +9,7 @@
           v-model:files="files"
           @keydown:enter="onKeyDownEnter"
         />
-        <BaseButton type="submit" :isLoading="blogStore.isLoadingPost">
+        <BaseButton type="submit" :isLoading="blogStore.postPost.isLoading">
           {{ t('send') }}
         </BaseButton>
       </LazyBaseForm>
@@ -17,12 +17,20 @@
     </template>
 
     <template v-if="hasPosts">
-      <BlogPost v-for="post in blogStore.all" class="not-last:mb-4" :post :onBeforeDelete :key="post._meta.id" />
+      <BlogPost
+        v-for="post in blogStore.getPosts.state"
+        class="not-last:mb-4"
+        :post
+        :onBeforeDelete
+        :isInEditMode="areIdsEqual(editModeFor, post._meta.id)"
+        :key="post._meta.id"
+        @changeEditModeFor="onChangeEditModeFor"
+      />
     </template>
-    <div v-else-if="!blogStore.isLoadingGetAll" class="text-lg flex justify-center items-center flex-1 h-full">
+    <div v-else-if="!blogStore.getPosts.isLoading" class="text-lg flex justify-center items-center flex-1 h-full">
       {{ t('nothingWasFound') }}
     </div>
-    <LazyBaseLoading v-if="blogStore.isLoadingGetAll" isFull class="flex justify-center" />
+    <LazyBaseLoading v-if="blogStore.getPosts.isLoading" isFull class="flex justify-center" />
 
     <DialogConfirmation
       :title="t('confirmDelete')"
@@ -40,16 +48,15 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
-import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch } from 'vue';
+import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { toId } from '@etonee123x/shared/helpers/id';
+import { areIdsEqual, toId, type Id } from '@etonee123x/shared/helpers/id';
 
 import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';
 
 import { useBlogStore } from '@/stores/blog';
 import { useVuelidatePostData } from './composables/useVuelidatePostData';
-import { useAuthStore } from '@/stores/auth';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
@@ -62,6 +69,7 @@ import type { ForPost } from '@etonee123x/shared/types/database';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
 import { useOnPostTextareaKeyDownEnter } from './composables/useOnPostTextareaKeyDownEnter';
+import { useAuth } from '@/plugins/auth';
 
 const LazyBaseForm = defineAsyncComponent(() => import('@/components/ui/BaseForm.vue'));
 const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
@@ -100,26 +108,28 @@ const { t } = useI18n({
   },
 });
 
+const editModeFor = ref<Id | null>(null);
+
 const route = useRoute();
 
 const blogStore = useBlogStore();
 
-const authStore = useAuthStore();
+const auth = useAuth();
 
-const hasPosts = computed(() => Boolean(blogStore.all.length));
+const hasPosts = computed(() => Boolean(blogStore.getPosts.state.length));
 
 const goToPage404 = useGoToPage404();
 
 useInfiniteScroll(
   isClient ? document.body : null,
   () =>
-    blogStore
-      .getAll()
+    blogStore.getPosts
+      .execute()
       .then(() => undefined)
       // чтобы не спамить запросами при ошибке (когда нет интернета)
       .catch(() => new Promise((resolve) => setTimeout(resolve, 1000))),
   {
-    canLoadMore: () => !(blogStore.isLoadingGetAll || blogStore.isEnd),
+    canLoadMore: () => !(blogStore.getPosts.isLoading || blogStore.isEnd),
     distance: 100,
   },
 );
@@ -138,7 +148,7 @@ const onSubmit = async () => {
     return;
   }
 
-  blogStore.post(postData.value, files.value).then(() => blogStore.getAll({ shouldReset: true }));
+  blogStore.postPost.execute(postData.value, files.value).then(() => blogStore.getPosts.execute({ shouldReset: true }));
 
   v$.value.$reset();
   resetFiles();
@@ -157,13 +167,17 @@ const onBeforeDelete = async () => {
   return !isCanceled;
 };
 
+const onChangeEditModeFor: NonNullable<InstanceType<typeof BlogPost>['onChangeEditModeFor']> = (id) => {
+  editModeFor.value = id;
+};
+
 const fetchData = () =>
   Promise.all([
-    blogStore.getAll(),
+    blogStore.getPosts.execute(),
     ...(isNotNil(route.params.postId)
       ? [
           //
-          blogStore.getById(toId(String(route.params.postId))).catch(goToPage404),
+          blogStore.getPostById.execute(toId(String(route.params.postId))).catch(goToPage404),
         ]
       : []),
   ]);
@@ -176,17 +190,17 @@ if (!isServer) {
     () => route.params.postId,
     async () => {
       if (isNotNil(route.params.postId)) {
-        await blogStore.getById(toId(String(route.params.postId)));
+        await blogStore.getPostById.execute(toId(String(route.params.postId)));
 
         return;
       }
 
-      blogStore.byId = undefined;
+      blogStore.getPostById.state = undefined;
     },
   );
 }
 
 useSeoMeta({
-  description: () => (blogStore.byId ? t('myBlog') : t('microblogWithNoClearDirection')),
+  description: () => (blogStore.getPostById.state ? t('myBlog') : t('microblogWithNoClearDirection')),
 });
 </script>

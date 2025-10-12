@@ -1,8 +1,7 @@
 import type { Id } from '@etonee123x/shared/helpers/id';
 import type { Post } from '@etonee123x/shared/types/blog';
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import { useToggle } from '@vueuse/core';
+import { useCounter, useToggle } from '@vueuse/core';
 
 import {
   getPosts as _getPosts,
@@ -18,78 +17,49 @@ import { useSourcedRef } from '@/composables/useSourcedRef';
 import type { ForPut, ForPost } from '@etonee123x/shared/types/database';
 
 export const useBlogStore = defineStore('blog', () => {
-  // TODO: сделать SSR-friendly композабл
-  // const { inc, reset: resetCounter, count: page } = useCounter();
-
-  const pageNumber = ref(0);
-  const [isEnd, toggleIsEnd] = useToggle();
-
   const [all, resetAll] = useSourcedRef<Array<PostWithMetaWithSinseTimestamps>>([]);
-  const { execute: getAll, isLoading: isLoadingGetAll } = useAsyncStateApi(
-    async (options: { shouldReset?: boolean } = {}) => {
-      if (options.shouldReset) {
-        resetAll();
-        toggleIsEnd(false);
-        pageNumber.value = 0;
-      }
+  const [page, resetPage] = useSourcedRef(0);
+  const [isEnd, resetIsEnd] = useSourcedRef(false);
 
-      return _getPosts(pageNumber.value).then(({ rows: _posts, _meta: { isEnd: _isEnd } }): Array<Post> => {
-        all.value = all.value.concat(_posts);
-        toggleIsEnd(_isEnd);
-        pageNumber.value++;
+  const getPosts = useAsyncStateApi(async (options: { shouldReset?: boolean } = {}) => {
+    if (options.shouldReset) {
+      resetAll();
+      resetIsEnd();
+      resetPage();
+    }
 
-        return all.value;
-      });
-    },
-    [],
-  );
+    return _getPosts(page.value).then((response) => {
+      all.value = all.value.concat(response.rows);
+      isEnd.value = response._meta.isEnd;
+      page.value = response._meta.page;
 
-  const { execute: post, isLoading: isLoadingPost } = useAsyncStateApi(
-    async (postData: ForPost<Post>, files: Array<File> = []) => {
-      const filesUrls = files.length ? await postUpload(files) : [];
+      return all.value;
+    });
+  }, []);
 
-      return _postPost({ ...postData, filesUrls });
-    },
-  );
+  const postPost = useAsyncStateApi(async (postData: ForPost<Post>, files: Array<File> = []) => {
+    const filesUrls = files.length ? await postUpload(files) : [];
 
-  const { execute: putById, isLoading: isLoadingPutById } = useAsyncStateApi(
-    async (id: Id, post: ForPut<Post>, files: Array<File> = []) => {
-      const filesUrls = files.length ? await postUpload(files) : [];
+    return _postPost({ ...postData, filesUrls });
+  });
 
-      return _putPost(id, { ...post, filesUrls });
-    },
-  );
+  const putPostById = useAsyncStateApi(async (id: Id, post: ForPut<Post>, files: Array<File> = []) => {
+    const filesUrls = files.length ? await postUpload(files) : [];
 
-  const { state: byId, execute: getById, isLoading: isLoadingGetById } = useAsyncStateApi(_getPostById);
+    return _putPost(id, { ...post, filesUrls });
+  });
 
-  const { execute: deleteById, isLoading: isLoadingDeleteById } = useAsyncStateApi(_deletePost);
+  const getPostById = useAsyncStateApi(_getPostById);
 
-  const hasPosts = computed(() => Boolean(all.value.length));
-
-  const editModeFor = ref<Id | null>(null);
+  const deletePostById = useAsyncStateApi(_deletePost);
 
   return {
-    all,
-    getAll,
-    isLoadingGetAll,
+    getPosts,
+    postPost,
+    putPostById,
+    getPostById,
+    deletePostById,
 
-    post,
-    isLoadingPost,
-
-    putById,
-    isLoadingPutById,
-
-    byId,
-    getById,
-    isLoadingGetById,
-
-    deleteById,
-    isLoadingDeleteById,
-
-    hasPosts,
     isEnd,
-    editModeFor,
-
-    pageNumber,
   };
 });

@@ -1,9 +1,9 @@
 <template>
   <BaseDialog isHiddenHeader v-model="isDialogOpen" @close="onDialogClose">
-    <article v-if="blogStore.byId">
+    <article v-if="blogStore.getPostById.state">
       <PostData
         class="max-w-full w-full h-full max-h-[calc(90dvh_-2*4*var(--spacing)_-6*var(--spacing)_-2*var(--spacing))] overflow-y-auto"
-        :post="blogStore.byId"
+        :post="blogStore.getPostById.state"
       />
     </article>
     <template #footer>
@@ -63,25 +63,29 @@ const router = useRouter();
 
 const blogStore = useBlogStore();
 
-const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(blogStore.byId));
+const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(blogStore.getPostById.state));
 
 const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() =>
-  blogStore.byId ? -blogStore.byId._meta.sinceCreated : null,
+  blogStore.getPostById.state ? -blogStore.getPostById.state._meta.sinceCreated : null,
 );
 
-const createdAt = computed(() => blogStore.byId && new Date(blogStore.byId._meta.createdAt).toISOString());
+const createdAt = computed(
+  () => blogStore.getPostById.state && new Date(blogStore.getPostById.state._meta.createdAt).toISOString(),
+);
 
 const sinceUpdatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() =>
-  isNotNil(blogStore.byId?._meta.sinceUpdated) ? -blogStore.byId._meta.sinceUpdated : null,
+  isNotNil(blogStore.getPostById.state?._meta.sinceUpdated) ? -blogStore.getPostById.state._meta.sinceUpdated : null,
 );
 
 const updatedAt = computed(() =>
-  isNotNil(blogStore.byId?._meta.updatedAt) ? new Date(blogStore.byId._meta.updatedAt).toISOString() : null,
+  isNotNil(blogStore.getPostById.state?._meta.updatedAt)
+    ? new Date(blogStore.getPostById.state._meta.updatedAt).toISOString()
+    : null,
 );
 
 const onDialogClose = () => {
   router.push({ name: ROUTE_NAMES.BLOG });
 };
 
-watchEffect(() => toggleIsDialogOpen(Boolean(blogStore.byId)));
+watchEffect(() => toggleIsDialogOpen(Boolean(blogStore.getPostById.state)));
 </script>

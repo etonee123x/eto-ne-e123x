@@ -21,11 +21,7 @@ export const useExplorerStore = defineStore('explorer', () => {
 
   const routePathToFolderData = shallowReactive<Record<string, FolderDataWithSinceTimestamps>>({});
 
-  const {
-    state: folderData,
-    execute: getFolderData,
-    isLoading: isLoadingGetFolderData,
-  } = useAsyncStateApi(async (to: RouteLocationNormalizedLoaded) => {
+  const getFolderData = useAsyncStateApi(async (to: RouteLocationNormalizedLoaded) => {
     const matterPath = '/' + Array.from(to.params.links ?? []).join('/');
 
     const maybeFolderData = routePathToFolderData[matterPath];
@@ -86,7 +82,5 @@ export const useExplorerStore = defineStore('explorer', () => {
     currentFolderData,
 
     getFolderData,
-    isLoadingGetFolderData,
-    folderData,
   };
 });

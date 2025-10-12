@@ -1,6 +1,6 @@
 <template>
   <header class="border-b border-b-details-500 relative">
-    <ClientOnly v-if="loadingStore.isLoading">
+    <ClientOnly v-if="loadingSources.size">
       <div
         class="after:opacity-30 after:absolute after:bottom-0 after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-dark after:animate-runner"
       />
@@ -38,9 +38,7 @@ import { useI18n } from 'vue-i18n';
 
 import BaseIcon from '@/components/ui/BaseIcon';
 import { ROUTE_NAMES } from '@/router';
-import { useAuthStore } from '@/stores/auth';
 import BaseButton from '@/components/ui/BaseButton';
-import { useLoadingStore } from '@/stores/loading';
 import ClientOnly from '@/components/ClientOnly.vue';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import { useLocaleInfo } from '@/composables/useLocaleInfo';
@@ -49,6 +47,8 @@ import { useL10n } from '@/composables/useL10n';
 import { useCookies } from '@vueuse/integrations/useCookies.mjs';
 import { useRouter } from 'vue-router';
 import { pick } from '@etonee123x/shared/utils/pick';
+import { useLoadingSources } from '@/plugins/loadingSources';
+import { useAuth } from '@/plugins/auth';
 
 const { localizeRoute } = useL10n();
 
@@ -80,9 +80,9 @@ const { t } = useI18n({
   },
 });
 
-const loadingStore = useLoadingStore();
+const loadingSources = useLoadingSources();
 
-const authStore = useAuthStore();
+const auth = useAuth();
 
 const links = computed(() => [
   {
@@ -106,13 +106,13 @@ const cookies = useCookies(['language']);
 const localeInfo = useLocaleInfo();
 
 const buttons = computed(() => [
-  ...(!authStore.isAdmin
+  ...(!auth.isAdmin.value
     ? [
         {
           key: 'logout',
           Component: IconLogout,
           ariaLabel: t('logout'),
-          onClick: authStore.deleteAuth,
+          onClick: auth.deleteAuth.execute,
         },
       ]
     : []),

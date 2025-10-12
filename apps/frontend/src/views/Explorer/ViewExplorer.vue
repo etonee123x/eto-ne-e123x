@@ -2,10 +2,10 @@
   <BasePage :h1="t('content')">
     <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
-      <nav v-if="explorerStore.folderData?.lvlUp || elements.folders.length" class="contents">
+      <nav v-if="explorerStore.getFolderData.state?.lvlUp || elements.folders.length" class="contents">
         <LazyExplorerElementSystem
-          v-if="explorerStore.folderData?.lvlUp"
-          :to="explorerStore.folderData.lvlUp"
+          v-if="explorerStore.getFolderData.state?.lvlUp"
+          :to="explorerStore.getFolderData.state.lvlUp"
           tag="RouterLink"
         >
           ...
@@ -92,7 +92,7 @@ const itemFileToComponent = (itemFile: ItemFile) => {
 
 const elements = computed(
   () =>
-    explorerStore.folderData?.items.reduce<{
+    explorerStore.getFolderData.state?.items.reduce<{
       folders: Array<ItemWithSinceTimestamps<ItemFolder>>;
       files: Array<ItemWithSinceTimestamps<ItemFile>>;
     }>(
@@ -116,11 +116,11 @@ const elements = computed(
     },
 );
 
-const fetchData = (to: RouteLocationNormalizedLoaded) => explorerStore.getFolderData(to).catch(goToPage404);
+const fetchData = (to: RouteLocationNormalizedLoaded) => explorerStore.getFolderData.execute(to).catch(goToPage404);
 
 clientOnly(() => fetchData(route));
 
-const maybeLastNavigationItemText = computed(() => explorerStore.folderData?.navigationItems.at(-1)?.text);
+const maybeLastNavigationItemText = computed(() => explorerStore.getFolderData.state?.navigationItems.at(-1)?.text);
 
 const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<
   typeof playerStore.theTrack | typeof galleryStore.galleryItem | null

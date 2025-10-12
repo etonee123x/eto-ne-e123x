@@ -7,6 +7,7 @@ import type {
   ForPut,
   ForPatch,
   WithSinceTimestamps,
+  WithPage,
 } from '@etonee123x/shared/types/database';
 
 import { client } from '@/api/_client';
@@ -16,7 +17,7 @@ const PER_PAGE = 10;
 export type PostWithMetaWithSinseTimestamps = Post & WithMeta<WithSinceTimestamps>;
 
 export const getPosts = (page: number) =>
-  client<WithMeta<WithIsEnd> & { rows: Array<PostWithMetaWithSinseTimestamps> }>(
+  client<WithMeta<WithIsEnd & WithPage> & { rows: Array<PostWithMetaWithSinseTimestamps> }>(
     `/posts?perPage=${PER_PAGE}&page=${page}`,
   );
 

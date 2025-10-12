@@ -24,6 +24,7 @@ import {
   type WithMeta,
   type WithIsEnd,
   type WithDatabaseMeta,
+  WithPage,
 } from '@etonee123x/shared/types/database';
 import { createError } from '@etonee123x/shared/helpers/error';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
@@ -76,7 +77,7 @@ export class TableRestController<
     this.tableReaderWriter = new TableReaderWriter<TTableTiltle, TEntity, TRow>(tableTitle);
   }
 
-  get(paginationMeta: Partial<PaginationMeta> = {}): WithMeta<WithIsEnd> & { rows: Array<TRow> } {
+  get(paginationMeta: Partial<PaginationMeta> = {}): WithMeta<WithIsEnd & WithPage> & { rows: Array<TRow> } {
     const { perPage = 10, page = 0 } = paginationMeta;
 
     const rows = this.tableReaderWriter.read();
@@ -91,6 +92,7 @@ export class TableRestController<
     return {
       _meta: {
         isEnd,
+        page,
       },
       rows: rows.slice(indexInitial, indexLast),
     };

@@ -4,8 +4,8 @@
       <TheHeader />
       <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
         <RouterView />
-        <LazyTheToasts
-          v-if="toastsStore.hasToasts"
+        <LazyTheNotifications
+          v-if="notifications.notifications.length"
           class="sticky bottom-4 group-has-[[data-player]]/app:bottom-30 mx-auto"
         />
       </main>
@@ -21,7 +21,6 @@ import { useHead } from '@unhead/vue';
 import { defineAsyncComponent, onServerPrefetch } from 'vue';
 
 import { usePlayerStore } from '@/stores/player';
-import { useToastsStore } from '@/stores/toasts';
 import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
 import { useExplorerStore } from '@/stores/explorer';
@@ -34,9 +33,10 @@ import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { _THEME_COLOR } from '@/helpers/ui';
+import { useNotifications } from '@/plugins/notifications';
 
 const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
-const LazyTheToasts = defineAsyncComponent(() => import('@/components/TheToasts.vue'));
+const LazyTheNotifications = defineAsyncComponent(() => import('@/components/TheNotifications.vue'));
 const LazyTheFooter = defineAsyncComponent(() => import('@/components/TheFooter.vue'));
 
 const route = useRoute();
@@ -44,12 +44,12 @@ const route = useRoute();
 const goToPage404 = useGoToPage404();
 
 const playerStore = usePlayerStore();
-const toastsStore = useToastsStore();
+const notifications = useNotifications();
 
 if (route.name === ROUTE_NAMES.EXPLORER) {
   const explorerStore = useExplorerStore();
 
-  const getFolderData = () => explorerStore.getFolderData(route).catch(goToPage404);
+  const getFolderData = () => explorerStore.getFolderData.execute(route).catch(goToPage404);
 
   onServerPrefetch(getFolderData);
   clientOnly(getFolderData);

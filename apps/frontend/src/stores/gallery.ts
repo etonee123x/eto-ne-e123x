@@ -29,7 +29,7 @@ export const useGalleryStore = defineStore('gallery', () => {
 
   const loadGalleryItemFromCurrentExplorerFolder = (
     explorerElement: ItemImage | ItemVideo,
-    folderData = explorerStore.folderData,
+    folderData = explorerStore.getFolderData.state,
   ) =>
     loadGalleryItem(
       pick(explorerElement, ['name', 'src', 'fileType']),

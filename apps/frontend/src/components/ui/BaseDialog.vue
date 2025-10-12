@@ -5,8 +5,8 @@
     class="dialog"
     :open="model"
     ref="dialog"
-    @close="onClose"
-    @cancel.prevent="onClose"
+    @close="onCloseDialog"
+    @cancel.prevent="onCloseDialog"
   >
     <div class="dialog__backdrop" @click="onClickBackdrop" />
     <div class="dialog__content">
@@ -39,11 +39,11 @@ import { mdiClose } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import type { FunctionCallback } from '@etonee123x/shared/types';
-import { areIdsEqual, toId } from '@etonee123x/shared/helpers/id';
+import { areIdsEqual, toId, type Id } from '@etonee123x/shared/helpers/id';
 import BaseButton from './BaseButton';
 import BaseIcon from './BaseIcon';
-import { useDialogStore } from '@/stores/dialog';
 import { isNil } from '@etonee123x/shared/utils/isNil';
+import { useDialogsIds } from '@/plugins/dialogsIds';
 
 const dialog = useTemplateRef('dialog');
 
@@ -69,7 +69,7 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const dialogStore = useDialogStore();
+const dialogIds = useDialogsIds();
 
 const model = defineModel<boolean>();
 
@@ -133,12 +133,30 @@ const close = () => {
   emit('close');
 };
 
-const onClose = close;
+const onCloseDialog = close;
 const onClickCloseIcon = close;
 const onClickBackdrop = close;
 
+const onOpen = (id: Id) => {
+  if (dialogIds.includes(id)) {
+    return;
+  }
+
+  dialogIds.push(id);
+};
+
+const onClose = (id: Id) => {
+  const index = dialogIds.indexOf(id);
+
+  if (index === -1) {
+    return;
+  }
+
+  dialogIds.splice(index, 1);
+};
+
 onKeyDown('Escape', () => {
-  const maybeLastDialogId = dialogStore.getLastId();
+  const maybeLastDialogId = dialogIds.at(-1);
 
   if (isNil(maybeLastDialogId) || !areIdsEqual(maybeLastDialogId, toId(id))) {
     return;
@@ -147,12 +165,12 @@ onKeyDown('Escape', () => {
   close();
 });
 
-onBeforeUnmount(() => dialogStore.onClose(toId(id)));
+onBeforeUnmount(() => onClose(toId(id)));
 
 watchEffect(() =>
   model.value //
-    ? dialogStore.onOpen(toId(id))
-    : dialogStore.onClose(toId(id)),
+    ? onOpen(toId(id))
+    : onClose(toId(id)),
 );
 
 defineExpose({

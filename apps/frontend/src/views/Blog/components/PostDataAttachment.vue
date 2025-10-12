@@ -64,7 +64,7 @@ const loadToGallery = () => {
       src: props.fileUrl,
       fileType,
     },
-    blogStore.all.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>(
+    blogStore.getPosts.state.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>(
       (acc, post) => [
         ...acc,
         ...post.filesUrls.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>((acc, fileUrl) => {

@@ -91,7 +91,6 @@ import BaseIcon from '@/components/ui/BaseIcon';
 import BaseSwipable from '@/components/ui/BaseSwipable.vue';
 import BaseToggler from '@/components/ui/BaseToggler.vue';
 import { usePlayerStore } from '@/stores/player';
-import { useToastsStore } from '@/stores/toasts';
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
 import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
@@ -103,6 +102,7 @@ import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
 import { useIsMobile } from '@/composables/useIsMobile';
 import ClientOnly from '../ClientOnly.vue';
+import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -138,7 +138,7 @@ const router = useRouter();
 
 const explorerStore = useExplorerStore();
 const playerStore = usePlayerStore();
-const toastsStore = useToastsStore();
+const notifications = useNotifications();
 
 const audio = useTemplateRef('audio');
 
@@ -253,7 +253,7 @@ const { copy } = useClipboard({
   legacy: true,
 });
 
-const onClickTitle = () => copy().then(() => toastsStore.toastSuccess(t('copied')));
+const onClickTitle = () => copy().then(() => notifications.notify(t('copied'), { type: NOTIFICATION_TYPES.SUCCESS }));
 
 const onKeyDownRightTime = () => {
   currentTimeSeconds.value += 5;

@@ -22,7 +22,7 @@
           </time>
         </template>
       </div>
-      <div v-if="authStore.isAdmin" class="flex justify-end border-t border-t-dark p-1 gap-2">
+      <div v-if="auth.isAdmin.value" class="flex justify-end border-t border-t-dark p-1 gap-2">
         <BaseButton
           v-for="control in controls"
           class="p-0.5"
@@ -40,7 +40,6 @@
 
 <script setup lang="ts">
 import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
-import { areIdsEqual } from '@etonee123x/shared/helpers/id';
 import { computed, ref, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -49,7 +48,6 @@ import PostData from './PostData.vue';
 import BaseIcon from '@/components/ui/BaseIcon';
 import { useBlogStore } from '@/stores/blog';
 import { useVuelidatePostData } from '../composables/useVuelidatePostData';
-import { useAuthStore } from '@/stores/auth';
 import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
@@ -59,19 +57,25 @@ import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { useOnPostTextareaKeyDownEnter } from '../composables/useOnPostTextareaKeyDownEnter';
+import { useAuth } from '@/plugins/auth';
 
 const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
 
 const props = defineProps<{
   post: PostWithMetaWithSinseTimestamps;
   onBeforeDelete: () => Promise<boolean>;
+  isInEditMode: boolean;
+}>();
+
+const emit = defineEmits<{
+  changeEditModeFor: [PostWithMetaWithSinseTimestamps['_meta']['id'] | null];
 }>();
 
 const blogEditPost = useTemplateRef('blogEditPost');
 
 const blogStore = useBlogStore();
 
-const authStore = useAuthStore();
+const auth = useAuth();
 
 const { t } = useI18n({
   useScope: 'local',
@@ -103,9 +107,9 @@ const onSubmit = async () => {
   }
 
   if (hasChanges.value) {
-    blogStore
-      .putById(props.post._meta.id, model.value, files.value)
-      .then(() => blogStore.getAll({ shouldReset: true }));
+    blogStore.putPostById
+      .execute(props.post._meta.id, model.value, files.value)
+      .then(() => blogStore.getPosts.execute({ shouldReset: true }));
   }
 
   closeEditMode();
@@ -113,7 +117,7 @@ const onSubmit = async () => {
 };
 
 const component = computed(() =>
-  isInEditMode.value
+  props.isInEditMode
     ? {
         Is: 'div',
       }
@@ -142,8 +146,6 @@ const createdAtUpdatedAt = computed(() =>
   ].join('\n'),
 );
 
-const isInEditMode = computed(() => areIdsEqual(blogStore.editModeFor, props.post._meta.id));
-
 const onKeyDownEnter = useOnPostTextareaKeyDownEnter(onSubmit);
 
 const hasChanges = computed(() => {
@@ -156,12 +158,10 @@ const hasChanges = computed(() => {
   return false;
 });
 
-const closeEditMode = () => {
-  blogStore.editModeFor = null;
-};
+const closeEditMode = () => emit('changeEditModeFor', null);
 
 const controls = computed(() => [
-  ...(isInEditMode.value
+  ...(props.isInEditMode
     ? [
         {
           key: 'cancel',
@@ -173,20 +173,20 @@ const controls = computed(() => [
           key: 'save',
           iconPath: mdiContentSave,
           isDisabled: !hasChanges.value,
-          isLoading: blogStore.isLoadingPutById,
+          isLoading: blogStore.putPostById.isLoading,
           onClick: onSubmit,
         },
       ]
     : []),
   // TODO: Надо придумать как редактировать посты с вложениями...
-  ...(!(isInEditMode.value || props.post.filesUrls.length)
+  ...(!(props.isInEditMode || props.post.filesUrls.length)
     ? [
         {
           key: 'edit',
           iconPath: mdiPencil,
-          isLoading: blogStore.isLoadingPutById,
+          isLoading: blogStore.putPostById.isLoading,
           onClick: () => {
-            blogStore.editModeFor = props.post._meta.id;
+            emit('changeEditModeFor', props.post._meta.id);
 
             nextTick(() => blogEditPost.value?.focusTextarea());
           },
@@ -196,13 +196,15 @@ const controls = computed(() => [
   {
     key: 'delete',
     iconPath: mdiDelete,
-    isLoading: blogStore.isLoadingDeleteById,
+    isLoading: blogStore.deletePostById.isLoading,
     onClick: async () => {
       if (!(await props.onBeforeDelete())) {
         return;
       }
 
-      return blogStore.deleteById(props.post._meta.id).then(() => blogStore.getAll({ shouldReset: true }));
+      return blogStore.deletePostById
+        .execute(props.post._meta.id)
+        .then(() => blogStore.getPosts.execute({ shouldReset: true }));
     },
   },
 ]);
