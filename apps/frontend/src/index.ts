@@ -76,7 +76,9 @@ if (isProduction) {
 app.get('/healthz', (...[, response]) => void response.send('ok'));
 
 app.use((request, response, next) => {
-  if (!Object.values(ROUTE_NAME_TO_PATH).some((routePath) => new RegExp(`^/${routePath}(/|$)`).test(request.path))) {
+  if (
+    !Object.values(ROUTE_NAME_TO_PATH).some((routePath) => new RegExp(`^/${routePath}(/|$|\\?)`).test(request.path))
+  ) {
     return next();
   }
 
@@ -88,7 +90,7 @@ app.use((request, response, next) => {
     response.cookie('language', request.cookies.language, { maxAge: 365 * 24 * 60 * 60 * 1000 });
   }
 
-  response.redirect(301, `${request.cookies.language}${request.path}`);
+  response.redirect(301, `${request.cookies.language}${request.originalUrl}`);
 });
 
 const syncLocaleCookie: RequestHandler = (request, response, next) => {

@@ -106,7 +106,7 @@ const cookies = useCookies(['language']);
 const localeInfo = useLocaleInfo();
 
 const buttons = computed(() => [
-  ...(!auth.isAdmin.value
+  ...(auth.isAdmin.value
     ? [
         {
           key: 'logout',

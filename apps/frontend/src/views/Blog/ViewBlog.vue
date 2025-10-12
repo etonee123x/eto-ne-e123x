@@ -1,18 +1,11 @@
 <template>
   <BasePage :h1="t('blog')">
     <template v-if="auth.isAdmin.value">
-      <LazyBaseForm class="flex flex-col gap-4" ref="baseForm" @submit.prevent="onSubmit">
-        <LazyBlogEditPost
-          :v$
-          ref="lazyBlogEditPost"
-          v-model="postData"
-          v-model:files="files"
-          @keydown:enter="onKeyDownEnter"
-        />
+      <LazyBlogEditPost ref="lazyBlogEditPost" @submit="onSubmit">
         <BaseButton type="submit" :isLoading="blogStore.postPost.isLoading">
           {{ t('send') }}
         </BaseButton>
-      </LazyBaseForm>
+      </LazyBlogEditPost>
       <hr v-if="hasPosts" class="my-4" />
     </template>
 
@@ -56,28 +49,21 @@ import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';
 
 import { useBlogStore } from '@/stores/blog';
-import { useVuelidatePostData } from './composables/useVuelidatePostData';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { isClient, isServer } from '@/constants/target';
 import { clientOnly } from '@/helpers/clientOnly';
 import BaseButton from '@/components/ui/BaseButton';
-import { useSourcedRef } from '@/composables/useSourcedRef';
-import type { Post } from '@etonee123x/shared/types/blog';
-import type { ForPost } from '@etonee123x/shared/types/database';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
-import { useOnPostTextareaKeyDownEnter } from './composables/useOnPostTextareaKeyDownEnter';
 import { useAuth } from '@/plugins/auth';
 
-const LazyBaseForm = defineAsyncComponent(() => import('@/components/ui/BaseForm.vue'));
 const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
 
 const LazyBlogEditPost = defineAsyncComponent(() => import('./components/BlogEditPost.vue'));
 
 const dialogConfirmationDelete = useTemplateRef('dialogConfirmationDelete');
-const baseForm = useTemplateRef('baseForm');
 const lazyBlogEditPost = useTemplateRef('lazyBlogEditPost');
 
 const { reveal, confirm, cancel } = useConfirmDialog();
@@ -134,30 +120,8 @@ useInfiniteScroll(
   },
 );
 
-const [files, resetFiles] = useSourcedRef<Array<File>>([]);
-
-const [postData, resetPostModel] = useSourcedRef<ForPost<Post>>(() => ({
-  text: '',
-  filesUrls: [],
-}));
-
-const { v$ } = useVuelidatePostData(postData, files);
-
-const onSubmit = async () => {
-  if (!(await v$.value.$validate())) {
-    return;
-  }
-
-  blogStore.postPost.execute(postData.value, files.value).then(() => blogStore.getPosts.execute({ shouldReset: true }));
-
-  v$.value.$reset();
-  resetFiles();
-  resetPostModel();
-
-  lazyBlogEditPost.value?.focusTextarea();
-};
-
-const onKeyDownEnter = useOnPostTextareaKeyDownEnter(() => baseForm.value?.requestSubmit());
+const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) =>
+  blogStore.postPost.execute(postData, files).then(() => blogStore.getPosts.execute({ shouldReset: true }));
 
 const onBeforeDelete = async () => {
   dialogConfirmationDelete.value?.open();

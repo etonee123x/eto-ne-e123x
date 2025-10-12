@@ -2,14 +2,7 @@
   <article class="w-full bg-background border border-dark rounded-sm cursor-pointer shadow-lg shadow-dark/15">
     <component :is="component.Is" v-bind="component.binds">
       <div class="p-4 flex flex-col">
-        <LazyBlogEditPost
-          v-if="isInEditMode"
-          :v$
-          ref="blogEditPost"
-          v-model="model"
-          v-model:files="files"
-          @keydown:enter="onKeyDownEnter"
-        />
+        <LazyBlogEditPost v-if="isInEditMode" :post ref="blogEditPost" @submit="onSubmit" />
         <template v-else>
           <PostData :post />
           <time
@@ -40,23 +33,20 @@
 
 <script setup lang="ts">
 import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
-import { computed, ref, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
+import { computed, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PostData from './PostData.vue';
 
 import BaseIcon from '@/components/ui/BaseIcon';
 import { useBlogStore } from '@/stores/blog';
-import { useVuelidatePostData } from '../composables/useVuelidatePostData';
 import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
-import { useSourcedRef } from '@/composables/useSourcedRef';
 import BaseButton from '@/components/ui/BaseButton';
 import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
-import { useOnPostTextareaKeyDownEnter } from '../composables/useOnPostTextareaKeyDownEnter';
 import { useAuth } from '@/plugins/auth';
 
 const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
@@ -71,7 +61,7 @@ const emit = defineEmits<{
   changeEditModeFor: [PostWithMetaWithSinseTimestamps['_meta']['id'] | null];
 }>();
 
-const blogEditPost = useTemplateRef('blogEditPost');
+const blogEditPost = useTemplateRef<InstanceType<typeof LazyBlogEditPost>>('blogEditPost');
 
 const blogStore = useBlogStore();
 
@@ -95,25 +85,19 @@ const { t } = useI18n({
   },
 });
 
-const files = ref<Array<File>>([]);
-
-const [model] = useSourcedRef(() => props.post, { isAutoSynced: true });
-
-const { v$ } = useVuelidatePostData(model, files);
-
-const onSubmit = async () => {
-  if (!(await v$.value.$validate())) {
-    return;
-  }
-
-  if (hasChanges.value) {
-    blogStore.putPostById
-      .execute(props.post._meta.id, model.value, files.value)
-      .then(() => blogStore.getPosts.execute({ shouldReset: true }));
-  }
+const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) => {
+  blogStore.putPostById
+    .execute(
+      props.post._meta.id,
+      {
+        ...postData,
+        _meta: props.post._meta,
+      },
+      files,
+    )
+    .then(() => blogStore.getPosts.execute({ shouldReset: true }));
 
   closeEditMode();
-  v$.value.$reset();
 };
 
 const component = computed(() =>
@@ -146,18 +130,6 @@ const createdAtUpdatedAt = computed(() =>
   ].join('\n'),
 );
 
-const onKeyDownEnter = useOnPostTextareaKeyDownEnter(onSubmit);
-
-const hasChanges = computed(() => {
-  const areTextsDifferent = props.post.text !== model.value.text;
-
-  if (areTextsDifferent) {
-    return true;
-  }
-
-  return false;
-});
-
 const closeEditMode = () => emit('changeEditModeFor', null);
 
 const controls = computed(() => [
@@ -172,9 +144,9 @@ const controls = computed(() => [
         {
           key: 'save',
           iconPath: mdiContentSave,
-          isDisabled: !hasChanges.value,
+          isDisabled: props.post.text === blogEditPost.value?.postData.text,
           isLoading: blogStore.putPostById.isLoading,
-          onClick: onSubmit,
+          onClick: () => blogEditPost.value?.requestSubmit(),
         },
       ]
     : []),
