@@ -19,8 +19,8 @@ export const createPlayer = () => {
   const playlist = shallowRef<Playlist>([]);
 
   const install: FunctionPlugin = (app, options: Options = {}) => {
-    theTrack.value = options.theTrack ?? null;
-    playlist.value = options.playlist ?? [];
+    theTrack.value = options.theTrack ?? theTrack.value;
+    playlist.value = options.playlist ?? playlist.value;
 
     app.provide(INJECTION_KEY_PLAYER, {
       theTrack,

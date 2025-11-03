@@ -1,5 +1,5 @@
 import type { FetchError } from 'ofetch';
-import { computed, ref } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
 import { isServer } from '@/constants/target';
 import { nonNullable } from '@/utils/nonNullable';
 import { useSourcedRef } from '@/composables/useSourcedRef';

@@ -7,7 +7,7 @@ import { type SSRContext } from '@/composables/useSSRContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
-  const { app, router, pinia, i18n, player } = createApp({ url });
+  const { app, router, i18n, player, gallery, explorer, blog } = createApp({ url });
 
   app.config.errorHandler = (error) => {
     console.error('Error in app', error);
@@ -44,13 +44,19 @@ export const render = async (url: string, expressContext: ExpressContext) => {
       head.push({
         script: [
           {
-            innerHTML: `window.__PINIA__ = ${JSON.stringify(pinia.state.value)}`,
-          },
-          {
             innerHTML: `window.__PAYLOAD__ = ${JSON.stringify(context.payload)}`,
           },
           {
             innerHTML: `window.__PLAYER__ = ${JSON.stringify(player.state.value)}`,
+          },
+          {
+            innerHTML: `window.__GALLERY__ = ${JSON.stringify(gallery.state.value)}`,
+          },
+          {
+            innerHTML: `window.__EXPLORER__ = ${JSON.stringify(explorer.state.value)}`,
+          },
+          {
+            innerHTML: `window.__BLOG__ = ${JSON.stringify(blog.state.value)}`,
           },
         ],
       });

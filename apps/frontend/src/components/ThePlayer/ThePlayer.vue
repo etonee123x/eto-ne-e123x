@@ -94,7 +94,6 @@ import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable
 import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import { Temporal } from 'temporal-polyfill';
-import { useExplorerStore } from '@/stores/explorer';
 import { RouterLink, useRouter } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { BUTTON } from '@/helpers/ui';
@@ -104,6 +103,7 @@ import ClientOnly from '../ClientOnly.vue';
 import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
 import { usePlayer } from '@/plugins/player';
+import { useExplorer } from '@/plugins/explorer';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -146,7 +146,7 @@ const isMobile = useIsMobile();
 
 const router = useRouter();
 
-const explorerStore = useExplorerStore();
+const explorer = useExplorer();
 const player = usePlayer();
 const notifications = useNotifications();
 
@@ -225,13 +225,15 @@ const toOnClose = () => {
     return;
   }
 
-  const maybeFolderDataLinkedFile = explorerStore.currentFolderData?.linkedFile;
+  const currentFolderData = explorer.currentFolderData();
+
+  const maybeFolderDataLinkedFile = currentFolderData?.linkedFile;
 
   if (!maybeFolderDataLinkedFile) {
     return;
   }
 
-  const lastNavigationItem = explorerStore.currentFolderData.navigationItems.at(-1);
+  const lastNavigationItem = currentFolderData?.navigationItems.at(-1);
 
   if (!lastNavigationItem) {
     return;

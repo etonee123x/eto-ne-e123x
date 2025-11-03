@@ -6,11 +6,11 @@
 import { pick } from '@etonee123x/shared/utils/pick';
 import { computed, defineAsyncComponent } from 'vue';
 
-import { useGalleryStore } from '@/stores/gallery';
-import { useBlogStore } from '@/stores/blog';
 import { useI18n } from 'vue-i18n';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { extensionToFileType, FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
+import { useGallery } from '@/plugins/gallery';
+import { useBlog } from '@/plugins/blog';
 
 const LazyAttachmentWithUnknownExtension = defineAsyncComponent(() => import('./AttachmentWithUnknownExtension.vue'));
 const LazyPreviewVideo = defineAsyncComponent(() => import('@/components/PreviewVideo.vue'));
@@ -32,8 +32,8 @@ const { t } = useI18n({
   },
 });
 
-const galleryStore = useGalleryStore();
-const blogStore = useBlogStore();
+const gallery = useGallery();
+const blog = useBlog();
 
 const getFileUrlExtension = (url: string) => url.match(/\.[^.]*$/gim)?.[0];
 
@@ -58,16 +58,16 @@ const loadToGallery = () => {
     return;
   }
 
-  galleryStore.loadGalleryItem(
+  gallery.loadGalleryItem(
     {
       name: maybeLastParameter,
       src: props.fileUrl,
       fileType,
     },
-    blogStore.getPosts.state.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>(
+    blog.getPosts.state.value.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
       (acc, post) => [
         ...acc,
-        ...post.filesUrls.reduce<NonNullable<Parameters<typeof galleryStore.loadGalleryItem>[1]>>((acc, fileUrl) => {
+        ...post.filesUrls.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((acc, fileUrl) => {
           const maybeExtension = getFileUrlExtension(fileUrl);
 
           if (isNil(maybeExtension)) {

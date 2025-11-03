@@ -39,7 +39,6 @@ import { useI18n } from 'vue-i18n';
 import PostData from './PostData.vue';
 
 import BaseIcon from '@/components/ui/BaseIcon';
-import { useBlogStore } from '@/stores/blog';
 import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
@@ -48,6 +47,7 @@ import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { useAuth } from '@/plugins/auth';
+import { useBlog } from '@/plugins/blog';
 
 const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
 
@@ -63,7 +63,7 @@ const emit = defineEmits<{
 
 const blogEditPost = useTemplateRef<InstanceType<typeof LazyBlogEditPost>>('blogEditPost');
 
-const blogStore = useBlogStore();
+const blog = useBlog();
 
 const auth = useAuth();
 
@@ -86,7 +86,7 @@ const { t } = useI18n({
 });
 
 const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) => {
-  blogStore.putPostById
+  blog.putPostById
     .execute(
       props.post._meta.id,
       {
@@ -95,7 +95,7 @@ const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postD
       },
       files,
     )
-    .then(() => blogStore.getPosts.execute({ shouldReset: true }));
+    .then(() => blog.getPosts.execute({ shouldReset: true }));
 
   closeEditMode();
 };
@@ -145,7 +145,7 @@ const controls = computed(() => [
           key: 'save',
           iconPath: mdiContentSave,
           isDisabled: props.post.text === blogEditPost.value?.postData.text,
-          isLoading: blogStore.putPostById.isLoading,
+          isLoading: blog.putPostById.isLoading.value,
           onClick: () => blogEditPost.value?.requestSubmit(),
         },
       ]
@@ -156,7 +156,7 @@ const controls = computed(() => [
         {
           key: 'edit',
           iconPath: mdiPencil,
-          isLoading: blogStore.putPostById.isLoading,
+          isLoading: blog.putPostById.isLoading.value,
           onClick: () => {
             emit('changeEditModeFor', props.post._meta.id);
 
@@ -168,15 +168,13 @@ const controls = computed(() => [
   {
     key: 'delete',
     iconPath: mdiDelete,
-    isLoading: blogStore.deletePostById.isLoading,
+    isLoading: blog.deletePostById.isLoading.value,
     onClick: async () => {
       if (!(await props.onBeforeDelete())) {
         return;
       }
 
-      return blogStore.deletePostById
-        .execute(props.post._meta.id)
-        .then(() => blogStore.getPosts.execute({ shouldReset: true }));
+      return blog.deletePostById.execute(props.post._meta.id).then(() => blog.getPosts.execute({ shouldReset: true }));
     },
   },
 ]);

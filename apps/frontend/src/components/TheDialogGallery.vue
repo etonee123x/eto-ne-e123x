@@ -1,17 +1,17 @@
 <template>
   <BaseDialog isHiddenFooter isHiddenHeader v-model="isDialogOpen" @close="onClose">
-    <article v-if="galleryStore.galleryItem" class="flex flex-col gap-2 items-center flex-1 w-full h-full">
+    <article v-if="gallery.item.value" class="flex flex-col gap-2 items-center flex-1 w-full h-full">
       <header class="contents">
         <BaseAlwaysScrollable class="w-full [--base-always-scrollable--content--margin:0_auto]" duration="12000ms">
-          {{ galleryStore.galleryItem.name }}
+          {{ gallery.item.value.name }}
         </BaseAlwaysScrollable>
       </header>
       <div class="flex-1 flex items-center justify-center overflow-hidden w-full h-full" ref="mediaContainer">
         <component
           :is="component.is"
           v-bind="component.binds"
-          class="object-contain border-none max-w-full max-h-[calc(90dvh_-2*4*var(--spacing)_-6*var(--spacing)_-2*var(--spacing))]"
-          :src="galleryStore.galleryItem.src"
+          class="object-contain border-none max-w-full max-h-[calc(90dvh-2*4*var(--spacing)-6*var(--spacing)-2*var(--spacing))]"
+          :src="gallery.item.value.src"
         />
       </div>
     </article>
@@ -24,25 +24,25 @@ import { computed, useTemplateRef, watchEffect } from 'vue';
 
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import BaseDialog from '@/components/ui/BaseDialog.vue';
-import { useGalleryStore } from '@/stores/gallery';
 import { useRoute, useRouter } from 'vue-router';
 import { FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
 import { ROUTE_NAMES } from '@/router';
-import { useExplorerStore } from '@/stores/explorer';
+import { useGallery } from '@/plugins/gallery';
+import { useExplorer } from '@/plugins/explorer';
 
 const router = useRouter();
 const route = useRoute();
 
-const galleryStore = useGalleryStore();
-const explorerStore = useExplorerStore();
+const gallery = useGallery();
+const explorer = useExplorer();
 
-onKeyStroke('ArrowRight', () => galleryStore.next());
-onKeyStroke('ArrowLeft', () => galleryStore.prev());
+onKeyStroke('ArrowRight', gallery.next);
+onKeyStroke('ArrowLeft', gallery.prev);
 
 const mediaContainer = useTemplateRef('mediaContainer');
 
 const component = computed(() =>
-  galleryStore.galleryItem?.fileType === FILE_TYPES.VIDEO
+  gallery.item.value?.fileType === FILE_TYPES.VIDEO
     ? {
         is: 'video',
         binds: {
@@ -57,27 +57,29 @@ const component = computed(() =>
 useSwipe(mediaContainer, {
   onSwipeEnd: (...[, direction]) => {
     if (direction === 'right') {
-      return galleryStore.prev();
+      return gallery.prev();
     }
 
     if (direction === 'left') {
-      return galleryStore.next();
+      return gallery.next();
     }
   },
 });
 
 const onClose = () => {
-  galleryStore.galleryItems = [];
+  gallery.items.value = [];
 
   if (router.resolve(route.fullPath).name !== ROUTE_NAMES.EXPLORER) {
     return;
   }
 
-  if (!explorerStore.currentFolderData?.linkedFile) {
+  const currentFolderData = explorer.currentFolderData();
+
+  if (!currentFolderData?.linkedFile) {
     return;
   }
 
-  const lastNavigationItem = explorerStore.currentFolderData.navigationItems.at(-1);
+  const lastNavigationItem = currentFolderData.navigationItems.at(-1);
 
   if (!lastNavigationItem) {
     return;
@@ -86,7 +88,7 @@ const onClose = () => {
   router.push(lastNavigationItem.link);
 };
 
-const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(galleryStore.galleryItem));
+const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(gallery.item.value));
 
-watchEffect(() => toggleIsDialogOpen(Boolean(galleryStore.galleryItem)));
+watchEffect(() => toggleIsDialogOpen(Boolean(gallery.item.value)));
 </script>

@@ -1,9 +1,9 @@
 <template>
   <BaseDialog isHiddenHeader v-model="isDialogOpen" @close="onDialogClose">
-    <article v-if="blogStore.getPostById.state">
+    <article v-if="blog.getPostById.state.value">
       <PostData
-        class="max-w-full w-full h-full max-h-[calc(90dvh_-2*4*var(--spacing)_-6*var(--spacing)_-2*var(--spacing))] overflow-y-auto"
-        :post="blogStore.getPostById.state"
+        class="max-w-full w-full h-full max-h-[calc(90dvh-2*4*var(--spacing)-6*var(--spacing)-2*var(--spacing))] overflow-y-auto"
+        :post="blog.getPostById.state.value"
       />
     </article>
     <template #footer>
@@ -34,12 +34,12 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import BaseDialog from '@/components/ui/BaseDialog.vue';
-import { useBlogStore } from '@/stores/blog';
 import { ROUTE_NAMES } from '@/router';
 import { useToggle } from '@vueuse/core';
 import PostData from './PostData.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
+import { useBlog } from '@/plugins/blog';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -61,25 +61,25 @@ const { t } = useI18n({
 
 const router = useRouter();
 
-const blogStore = useBlogStore();
+const blog = useBlog();
 
-const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(blogStore.getPostById.state));
+const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(blog.getPostById.state.value));
 
 const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() =>
-  blogStore.getPostById.state ? -blogStore.getPostById.state._meta.sinceCreated : null,
+  blog.getPostById.state.value ? -blog.getPostById.state.value._meta.sinceCreated : null,
 );
 
 const createdAt = computed(
-  () => blogStore.getPostById.state && new Date(blogStore.getPostById.state._meta.createdAt).toISOString(),
+  () => blog.getPostById.state.value && new Date(blog.getPostById.state.value._meta.createdAt).toISOString(),
 );
 
 const sinceUpdatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() =>
-  isNotNil(blogStore.getPostById.state?._meta.sinceUpdated) ? -blogStore.getPostById.state._meta.sinceUpdated : null,
+  isNotNil(blog.getPostById.state.value?._meta.sinceUpdated) ? -blog.getPostById.state.value._meta.sinceUpdated : null,
 );
 
 const updatedAt = computed(() =>
-  isNotNil(blogStore.getPostById.state?._meta.updatedAt)
-    ? new Date(blogStore.getPostById.state._meta.updatedAt).toISOString()
+  isNotNil(blog.getPostById.state.value?._meta.updatedAt)
+    ? new Date(blog.getPostById.state.value._meta.updatedAt).toISOString()
     : null,
 );
 
@@ -87,5 +87,5 @@ const onDialogClose = () => {
   router.push({ name: ROUTE_NAMES.BLOG });
 };
 
-watchEffect(() => toggleIsDialogOpen(Boolean(blogStore.getPostById.state)));
+watchEffect(() => toggleIsDialogOpen(Boolean(blog.getPostById.state.value)));
 </script>

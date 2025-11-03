@@ -28,7 +28,6 @@
     "is-mobile": "^5.0.0",
     "negotiator": "^1.0.0",
     "ofetch": "^1.5.1",
-    "pinia": "^3.0.3",
     "sortablejs": "^1.15.6",
     "temporal-polyfill": "^0.3.0",
     "universal-cookie": "^8.0.1",

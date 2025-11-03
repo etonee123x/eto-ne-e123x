@@ -3,15 +3,11 @@ import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/client';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 
-const { app, router, pinia, i18n } = createApp();
+const { app, router, i18n } = createApp();
 
 const head = createHead();
 
 app.use(head);
-
-if (globalThis.__PINIA__) {
-  pinia.state.value = globalThis.__PINIA__;
-}
 
 const cookies = useCookies();
 

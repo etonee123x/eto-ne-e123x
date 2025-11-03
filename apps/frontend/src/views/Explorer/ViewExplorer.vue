@@ -2,10 +2,10 @@
   <BasePage :h1="t('content')">
     <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
-      <nav v-if="explorerStore.getFolderData.state?.lvlUp || elements.folders.length" class="contents">
+      <nav v-if="explorer.getFolderData.state.value?.lvlUp || elements.folders.length" class="contents">
         <LazyExplorerElementSystem
-          v-if="explorerStore.getFolderData.state?.lvlUp"
-          :to="explorerStore.getFolderData.state.lvlUp"
+          v-if="explorer.getFolderData.state.value?.lvlUp"
+          :to="explorer.getFolderData.state.value.lvlUp"
           tag="RouterLink"
         >
           ...
@@ -26,7 +26,6 @@ import { FILE_TYPES, ITEM_TYPES, type ItemFile, type ItemFolder } from '@etonee1
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
-import { useExplorerStore } from '@/stores/explorer';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { clientOnly } from '@/helpers/clientOnly';
 import type { ItemWithSinceTimestamps } from '@/api/folderData';
@@ -35,12 +34,13 @@ import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { isNil } from '@etonee123x/shared/utils/isNil';
-import { useGalleryStore } from '@/stores/gallery';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import { usePlayer } from '@/plugins/player';
+import { useGallery } from '@/plugins/gallery';
+import { useExplorer } from '@/plugins/explorer';
 
 const player = usePlayer();
-const galleryStore = useGalleryStore();
+const gallery = useGallery();
 
 const LazyExplorerElementSystem = defineAsyncComponent(() => import('./components/ExplorerElementSystem.vue'));
 const LazyExplorerElementFolder = defineAsyncComponent(() => import('./components/ExplorerElementFolder.vue'));
@@ -73,7 +73,7 @@ const { t } = useI18n({
   },
 });
 
-const explorerStore = useExplorerStore();
+const explorer = useExplorer();
 
 const route = useRoute();
 
@@ -92,7 +92,7 @@ const itemFileToComponent = (itemFile: ItemFile) => {
 
 const elements = computed(
   () =>
-    explorerStore.getFolderData.state?.items.reduce<{
+    explorer.getFolderData.state.value?.items.reduce<{
       folders: Array<ItemWithSinceTimestamps<ItemFolder>>;
       files: Array<ItemWithSinceTimestamps<ItemFile>>;
     }>(
@@ -116,15 +116,15 @@ const elements = computed(
     },
 );
 
-const fetchData = (to: RouteLocationNormalizedLoaded) => explorerStore.getFolderData.execute(to).catch(goToPage404);
+const fetchData = (to: RouteLocationNormalizedLoaded) => explorer.getFolderData.execute(to).catch(goToPage404);
 
 clientOnly(() => fetchData(route));
 
-const maybeLastNavigationItemText = computed(() => explorerStore.getFolderData.state?.navigationItems.at(-1)?.text);
+const maybeLastNavigationItemText = computed(() => explorer.getFolderData.state.value?.navigationItems.at(-1)?.text);
 
-const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<
-  UnwrapRef<typeof player.theTrack> | typeof galleryStore.galleryItem | null
->(null);
+const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<UnwrapRef<
+  typeof player.theTrack | typeof gallery.item
+> | null>(null);
 
 // Два watchEffect нужны, чтобы отображался крайний выбранный + актуальный файл (плеер или галерея)
 watchEffect(() => {
@@ -134,8 +134,8 @@ watchEffect(() => {
     return;
   }
 
-  if (galleryStore.galleryItem) {
-    maybeSelectedFile.value = galleryStore.galleryItem;
+  if (gallery.item.value) {
+    maybeSelectedFile.value = gallery.item.value;
 
     return;
   }
@@ -143,8 +143,8 @@ watchEffect(() => {
   resetSelectedFile();
 });
 watchEffect(() => {
-  if (galleryStore.galleryItem) {
-    maybeSelectedFile.value = galleryStore.galleryItem;
+  if (gallery.item.value) {
+    maybeSelectedFile.value = gallery.item.value;
 
     return;
   }
