@@ -9,6 +9,7 @@ import { dialogsIds } from '@/plugins/dialogsIds';
 import { loadingSources } from '@/plugins/loadingSources';
 import { notifications } from '@/plugins/notifications';
 import { auth } from '@/plugins/auth';
+import { createPlayer } from '@/plugins/player';
 
 export const createApp = (context: Partial<{ url: string }> = {}) => {
   const app = createSSRApp(App);
@@ -18,6 +19,10 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
   app.use(auth);
   app.use(dialogsIds);
   app.use(i18n);
+
+  const player = createPlayer();
+
+  app.use(player, globalThis.__PLAYER__);
 
   const pinia = createPinia();
 
@@ -32,5 +37,5 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
     router.push(context.url);
   }
 
-  return { app, router, pinia, i18n };
+  return { app, router, pinia, i18n, player };
 };

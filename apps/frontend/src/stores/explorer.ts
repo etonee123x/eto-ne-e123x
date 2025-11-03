@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { computed, shallowReactive } from 'vue';
 
-import { usePlayerStore } from '@/stores/player';
 import { getFolderData as _getFolderData, type FolderDataWithSinceTimestamps } from '@/api/folderData';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
 import { useRoute, type RouteLocationNormalizedLoaded } from 'vue-router';
@@ -9,9 +8,10 @@ import { useGalleryStore } from '@/stores/gallery';
 import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
 import { useL10n } from '@/composables/useL10n';
 import { throwError } from '@etonee123x/shared/utils/throwError';
+import { usePlayer } from '@/plugins/player';
 
 export const useExplorerStore = defineStore('explorer', () => {
-  const playerStore = usePlayerStore();
+  const player = usePlayer();
   const galleryStore = useGalleryStore();
   const route = useRoute();
 
@@ -57,14 +57,11 @@ export const useExplorerStore = defineStore('explorer', () => {
     }
 
     if (folderDataLinkedFile.fileType === FILE_TYPES.AUDIO) {
-      playerStore.playlist = folderData.items.filter(
+      player.playlist.value = folderData.items.filter(
         (item) => item.itemType === ITEM_TYPES.FILE && item.fileType === FILE_TYPES.AUDIO,
       );
 
-      playerStore.theTrack = folderDataLinkedFile;
-      playerStore.currentPlayingNumber = playerStore.playlist.findIndex(
-        (playlistItem) => playlistItem.src === folderDataLinkedFile.src,
-      );
+      player.theTrack.value = folderDataLinkedFile;
     } else if (
       folderDataLinkedFile.fileType === FILE_TYPES.IMAGE ||
       folderDataLinkedFile.fileType === FILE_TYPES.VIDEO

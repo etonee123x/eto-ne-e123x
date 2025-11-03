@@ -20,11 +20,11 @@
           :title="t('copyLink')"
           @click="onClickTitle"
         >
-          <h2>{{ playerStore.theTrack?.name }}</h2>
+          <h2>{{ player.theTrack.value?.name }}</h2>
           <BaseIcon :path="mdiLinkVariant" />
         </header>
       </BaseAlwaysScrollable>
-      <audio :src="playerStore.theTrack?.src" autoplay ref="audio" @ended="onEnded" />
+      <audio :src="player.theTrack.value?.src" autoplay ref="audio" @ended="onEnded" />
       <div class="h-5 w-full mx-auto flex justify-between items-center gap-2">
         <time :datetime="currentTimeFormats.iso">
           {{ currentTimeFormats.humanReadable }}
@@ -43,8 +43,8 @@
       <div class="grid grid-cols-[1fr_min-content_1fr] grid-areas-['left_center_right'] gap-x-4 items-center">
         <BaseToggler
           class="whitespace-nowrap min-w-6 justify-self-end"
-          :aria-label="playerStore.isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')"
-          v-model="playerStore.isShuffleModeEnabled"
+          :aria-label="isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')"
+          v-model="isShuffleModeEnabled"
         >
           <BaseIcon class="text-2xl" :path="mdiShuffleVariant" />
         </BaseToggler>
@@ -81,7 +81,7 @@ import {
   mdiSkipBackward,
   mdiSkipForward,
 } from '@mdi/js';
-import { computed, useTemplateRef, h } from 'vue';
+import { computed, useTemplateRef, h, shallowReactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PlayerSlider from './components/PlayerSlider.vue';
@@ -90,7 +90,6 @@ import BaseButton from '@/components/ui/BaseButton';
 import BaseIcon from '@/components/ui/BaseIcon';
 import BaseSwipable from '@/components/ui/BaseSwipable.vue';
 import BaseToggler from '@/components/ui/BaseToggler.vue';
-import { usePlayerStore } from '@/stores/player';
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
 import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
@@ -103,6 +102,8 @@ import { nonNullable } from '@/utils/nonNullable';
 import { useIsMobile } from '@/composables/useIsMobile';
 import ClientOnly from '../ClientOnly.vue';
 import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
+import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
+import { usePlayer } from '@/plugins/player';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -132,12 +133,21 @@ const { t } = useI18n({
   },
 });
 
+const historyItems = shallowReactive<Array<number>>([]);
+const [isShuffleModeEnabled] = useToggle();
+const currentPlayingNumber = computed({
+  get: () => player.playlist.value.findIndex((playlistItem) => playlistItem.src === player.theTrack.value?.src),
+  set: (value) => {
+    player.theTrack.value = player.playlist.value[value] ?? null;
+  },
+});
+
 const isMobile = useIsMobile();
 
 const router = useRouter();
 
 const explorerStore = useExplorerStore();
-const playerStore = usePlayerStore();
+const player = usePlayer();
 const notifications = useNotifications();
 
 const audio = useTemplateRef('audio');
@@ -151,18 +161,34 @@ if (isMobile) {
   syncRef(volumeLocalStorage, volume);
 }
 
-const duration = computed(() => playerStore.theTrack?.musicMetadata.duration ?? 0);
+const duration = computed(() => player.theTrack.value?.musicMetadata.duration ?? 0);
 
 const toggleIsPlaying = useToggle(isPlaying);
 
 const shouldRenderButtonClose = computed(() => !(isPlaying.value || isWaiting.value));
 
+const load = {
+  next: () => {
+    historyItems.push(currentPlayingNumber.value);
+
+    currentPlayingNumber.value = isShuffleModeEnabled.value
+      ? getRandomExceptCurrentIndex(player.playlist.value.length, currentPlayingNumber.value)
+      : (currentPlayingNumber.value + 1) % player.playlist.value.length;
+  },
+  previous: () => {
+    currentPlayingNumber.value =
+      historyItems.length > 0
+        ? (historyItems.pop() ?? 0)
+        : (currentPlayingNumber.value - 1 + player.playlist.value.length) % player.playlist.value.length;
+  },
+};
+
 const controlButtons = computed(() => [
   {
     key: 'previous',
     icon: mdiSkipBackward,
-    onClick: playerStore.loadPrev,
-    isDisabled: playerStore.isShuffleModeEnabled && playerStore.historyItems.length === 0,
+    onClick: load.previous,
+    isDisabled: isShuffleModeEnabled.value && historyItems.length === 0,
     ariaLabel: t('previousTrack'),
   },
   isPlaying.value
@@ -181,12 +207,12 @@ const controlButtons = computed(() => [
   {
     key: 'next',
     icon: mdiSkipForward,
-    onClick: playerStore.loadNext,
+    onClick: load.next,
     ariaLabel: t('nextTrack'),
   },
 ]);
 
-const onEnded = playerStore.loadNext;
+const onEnded = load.next;
 
 const ComponentClose = computed(() => {
   const to = toOnClose();
@@ -195,7 +221,7 @@ const ComponentClose = computed(() => {
 });
 
 const toOnClose = () => {
-  if (isNil(playerStore.theTrack?.url)) {
+  if (isNil(player.theTrack.value?.url)) {
     return;
   }
 
@@ -211,7 +237,7 @@ const toOnClose = () => {
     return;
   }
 
-  if (!playerStore.playlist.some((track) => track.src === maybeFolderDataLinkedFile.src)) {
+  if (!player.playlist.value.some((track) => track.src === maybeFolderDataLinkedFile.src)) {
     return;
   }
 
@@ -219,7 +245,7 @@ const toOnClose = () => {
 };
 
 const unloadTrack = () => {
-  playerStore.theTrack = null;
+  player.theTrack.value = null;
 
   // Такой вот костыль... Нужен чтобы выгрузить текущий трек из управления аудио.
   // Без этого при закрытии плеера и нажатии на кнопку play/pause будет играть/останавливаться трек.
@@ -240,7 +266,7 @@ const onSwiped = () => {
 
 const { copy } = useClipboard({
   source: () => {
-    let _url = [globalThis.location.origin, nonNullable(playerStore.theTrack).url].join('');
+    let _url = [globalThis.location.origin, nonNullable(player.theTrack.value).url].join('');
 
     try {
       _url = encodeURI(_url);

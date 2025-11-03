@@ -9,7 +9,7 @@
           class="sticky bottom-4 group-has-data-player/app:bottom-30 mx-auto"
         />
       </main>
-      <LazyThePlayer v-if="playerStore.theTrack" class="sticky bottom-0" />
+      <LazyThePlayer v-if="player.theTrack.value" class="sticky bottom-0" />
       <LazyTheFooter v-else />
       <TheDialogGallery />
     </div>
@@ -20,7 +20,6 @@
 import { useHead } from '@unhead/vue';
 import { defineAsyncComponent, onServerPrefetch } from 'vue';
 
-import { usePlayerStore } from '@/stores/player';
 import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
 import { useExplorerStore } from '@/stores/explorer';
@@ -34,6 +33,7 @@ import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { _THEME_COLOR } from '@/helpers/ui';
 import { useNotifications } from '@/plugins/notifications';
+import { usePlayer } from '@/plugins/player';
 
 const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
 const LazyTheNotifications = defineAsyncComponent(() => import('@/components/TheNotifications.vue'));
@@ -43,7 +43,7 @@ const route = useRoute();
 
 const goToPage404 = useGoToPage404();
 
-const playerStore = usePlayerStore();
+const player = usePlayer();
 const notifications = useNotifications();
 
 if (route.name === ROUTE_NAMES.EXPLORER) {

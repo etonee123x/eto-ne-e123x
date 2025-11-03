@@ -7,7 +7,7 @@ import { type SSRContext } from '@/composables/useSSRContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
-  const { app, router, pinia, i18n } = createApp({ url });
+  const { app, router, pinia, i18n, player } = createApp({ url });
 
   app.config.errorHandler = (error) => {
     console.error('Error in app', error);
@@ -48,6 +48,9 @@ export const render = async (url: string, expressContext: ExpressContext) => {
           },
           {
             innerHTML: `window.__PAYLOAD__ = ${JSON.stringify(context.payload)}`,
+          },
+          {
+            innerHTML: `window.__PLAYER__ = ${JSON.stringify(player.state.value)}`,
           },
         ],
       });

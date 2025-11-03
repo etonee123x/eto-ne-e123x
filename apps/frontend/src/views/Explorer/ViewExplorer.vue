@@ -20,7 +20,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, watchEffect } from 'vue';
+import { computed, defineAsyncComponent, watchEffect, type UnwrapRef } from 'vue';
 import { onBeforeRouteUpdate, useRoute, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { FILE_TYPES, ITEM_TYPES, type ItemFile, type ItemFolder } from '@etonee123x/shared/helpers/folderData';
 
@@ -35,11 +35,11 @@ import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { isNil } from '@etonee123x/shared/utils/isNil';
-import { usePlayerStore } from '@/stores/player';
 import { useGalleryStore } from '@/stores/gallery';
 import { useSourcedRef } from '@/composables/useSourcedRef';
+import { usePlayer } from '@/plugins/player';
 
-const playerStore = usePlayerStore();
+const player = usePlayer();
 const galleryStore = useGalleryStore();
 
 const LazyExplorerElementSystem = defineAsyncComponent(() => import('./components/ExplorerElementSystem.vue'));
@@ -123,13 +123,13 @@ clientOnly(() => fetchData(route));
 const maybeLastNavigationItemText = computed(() => explorerStore.getFolderData.state?.navigationItems.at(-1)?.text);
 
 const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<
-  typeof playerStore.theTrack | typeof galleryStore.galleryItem | null
+  UnwrapRef<typeof player.theTrack> | typeof galleryStore.galleryItem | null
 >(null);
 
 // Два watchEffect нужны, чтобы отображался крайний выбранный + актуальный файл (плеер или галерея)
 watchEffect(() => {
-  if (playerStore.theTrack) {
-    maybeSelectedFile.value = playerStore.theTrack;
+  if (player.theTrack.value) {
+    maybeSelectedFile.value = player.theTrack.value;
 
     return;
   }
@@ -149,8 +149,8 @@ watchEffect(() => {
     return;
   }
 
-  if (playerStore.theTrack) {
-    maybeSelectedFile.value = playerStore.theTrack;
+  if (player.theTrack.value) {
+    maybeSelectedFile.value = player.theTrack.value;
 
     return;
   }
