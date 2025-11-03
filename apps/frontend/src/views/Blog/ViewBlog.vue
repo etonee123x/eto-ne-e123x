@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
-import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch, ref, getCurrentInstance } from 'vue';
+import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { areIdsEqual, toId, type Id } from '@etonee123x/shared/helpers/id';
 
