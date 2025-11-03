@@ -6,7 +6,7 @@
         <RouterView />
         <LazyTheNotifications
           v-if="notifications.notifications.length"
-          class="sticky bottom-4 group-has-[[data-player]]/app:bottom-30 mx-auto"
+          class="sticky bottom-4 group-has-data-player/app:bottom-30 mx-auto"
         />
       </main>
       <LazyThePlayer v-if="playerStore.theTrack" class="sticky bottom-0" />

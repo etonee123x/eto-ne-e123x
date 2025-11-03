@@ -60,8 +60,6 @@ export const useAsyncStateApi = <
     options = {},
   ] = parameters as UseAsyncStateApiParametersWithKey<Data, InitialState, Params>;
 
-  const loadingSources = useLoadingSources();
-
   const state = ref(initialState as InitialState extends undefined ? Data | undefined : Data);
 
   const [promise, resetPromise] = useSourcedRef<Promise<Data> | null>(null);
@@ -117,6 +115,8 @@ export const useAsyncStateApi = <
   };
 
   const execute = async (...parameters: Params) => {
+    const loadingSources = useLoadingSources();
+
     const promise = _execute(...parameters)
       .catch(_onError)
       .finally(() => loadingSources.delete(promise));

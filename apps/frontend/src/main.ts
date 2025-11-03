@@ -7,10 +7,17 @@ import App from '@/App.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { dialogsIds } from '@/plugins/dialogsIds';
 import { loadingSources } from '@/plugins/loadingSources';
+import { notifications } from '@/plugins/notifications';
 import { auth } from '@/plugins/auth';
 
 export const createApp = (context: Partial<{ url: string }> = {}) => {
   const app = createSSRApp(App);
+
+  app.use(notifications);
+  app.use(loadingSources);
+  app.use(auth);
+  app.use(dialogsIds);
+  app.use(i18n);
 
   const pinia = createPinia();
 
@@ -24,14 +31,6 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
   if (isNotNil(context.url)) {
     router.push(context.url);
   }
-
-  app.use(dialogsIds);
-
-  app.use(loadingSources);
-
-  app.use(auth);
-
-  app.use(i18n);
 
   return { app, router, pinia, i18n };
 };

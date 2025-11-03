@@ -12,7 +12,7 @@ export const useLoadingSources = () => {
   const loadingSources = inject(INJECTION_KEY_LOADING_SOURCES);
 
   if (!loadingSources) {
-    throw new Error('DialogsIds plugin is not installed');
+    throw new Error('LoadingSources plugin is not installed');
   }
 
   return loadingSources;
