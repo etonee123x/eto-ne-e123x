@@ -3,8 +3,6 @@
 @theme {
   --color-success: #00ff00;
   --color-error: #ff0000;
-  --color-text: black;
-  --color-background: white;
 
   --z-player: 1000;
   --z-index-modal: 10000;
@@ -56,13 +54,16 @@
 }
 
 @theme inline {
-  --color-items: var(--color-details-1);
-  --color-items-hovered: var(--color-details-10);
+  --color-text: var(--color-text);
+  --color-background: var(--color-background);
 
-  --color-folders: var(--color-details-75);
-  --color-folders-hovered: var(--color-details-100);
+  --color-items: var(--color-items);
+  --color-items-hovered: var(--color-items-hovered);
 
-  --color-dark: var(--color-details-900);
+  --color-folders: var(--color-folders);
+  --color-folders-hovered: var(--color-folders-hovered);
+
+  --color-dark: var(--color-dark);
 
   --color-details-1: var(--color-details-1);
   --color-details-10: var(--color-details-10);
@@ -77,16 +78,9 @@
   --color-details-700: var(--color-details-700);
   --color-details-800: var(--color-details-800);
   --color-details-900: var(--color-details-900);
+  --color-details-999: var(--color-details-999);
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
 
   *,
@@ -98,15 +92,30 @@
   }
 
   :root {
+    color-scheme: dark light;
+
     --vw: 100dvw;
-    --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2)
+    --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
+
+    --tone-1: 96%;
+    --tone-10: 92%;
+    --tone-50: 88%;
+    --tone-75: 80%;
+    --tone-100: 72%;
+    --tone-200: 56%;
+    --tone-300: 40%;
+    --tone-400: 24%;
+    --shade-600: 85%;
+    --shade-700: 70%;
+    --shade-800: 55%;
+    --shade-900: 35%;
+    --shade-999: 20%;
   }
 
   * {
     @apply focus:on-focus;
   }
 
-  html,
   body {
     font-family:
       -apple-system,
@@ -123,7 +132,31 @@
       /* Фолбек */
       sans-serif;
 
-    @apply overflow-y-auto h-[100dvh] overflow-x-hidden;
+    @apply overflow-y-auto h-dvh overflow-x-hidden text-text bg-background;
+
+    --color-text: var(--color-details-999);
+    --color-background: var(--color-details-1);
+
+    --color-items: var(--color-details-1);
+    --color-items-hovered: var(--color-details-10);
+
+    --color-folders: var(--color-details-75);
+    --color-folders-hovered: var(--color-details-100);
+
+    --color-dark: var(--color-details-700);
+
+    @media (prefers-color-scheme: dark) {
+      --color-text: var(--color-details-1);
+      --color-background: var(--color-details-999);
+
+      --color-items: var(--color-details-999);
+      --color-items-hovered: var(--color-details-900);
+
+      --color-folders: var(--color-details-900);
+      --color-folders-hovered: var(--color-details-800);
+
+      --color-dark: var(--color-details-700);
+    }
   }
 
   #app {
@@ -151,109 +184,49 @@
   }
 
   a {
-    @apply text-inherit;
+    /* @apply text-inherit; */
     @apply hover:text-details-500;
   }
 
   p {
-    all: unset;
     display: block;
   }
 
+  ._theme-color {
+    --color-details-1: color-mix(in oklch, white var(--tone-1), var(--accent));
+    --color-details-10: color-mix(in oklch, white var(--tone-10), var(--accent));
+    --color-details-50: color-mix(in oklch, white var(--tone-50), var(--accent));
+    --color-details-75: color-mix(in oklch, white var(--tone-75), var(--accent));
+    --color-details-100: color-mix(in oklch, white var(--tone-100), var(--accent));
+    --color-details-200: color-mix(in oklch, white var(--tone-200), var(--accent));
+    --color-details-300: color-mix(in oklch, white var(--tone-300), var(--accent));
+    --color-details-400: color-mix(in oklch, white var(--tone-400), var(--accent));
+    --color-details-500: var(--accent);
+    --color-details-600: color-mix(in oklch, var(--accent) var(--shade-600), black);
+    --color-details-700: color-mix(in oklch, var(--accent) var(--shade-700), black);
+    --color-details-800: color-mix(in oklch, var(--accent) var(--shade-800), black);
+    --color-details-900: color-mix(in oklch, var(--accent) var(--shade-900), black);
+    --color-details-999: color-mix(in oklch, var(--accent) var(--shade-999), black);
+  }
+
   ._theme-color_red {
-    --color-details-1: #fff5f5;
-    --color-details-10: #ffebeb;
-    --color-details-50: #ffe5e5;
-    --color-details-75: #ffcccc;
-    --color-details-100: #ffb3b3;
-    --color-details-200: #ff8080;
-    --color-details-300: #ff4d4d;
-    --color-details-400: #ff1a1a;
-    --color-details-500: #ff0000;
-    --color-details-600: #e60000;
-    --color-details-700: #cc0000;
-    --color-details-800: #b30000;
-    --color-details-900: #800000;
+    --accent: #ff2b2b;
   }
 
   ._theme-color_blue {
-    --color-details-1: #f5f5ff;
-    --color-details-10: #ebebff;
-    --color-details-50: #e5e5ff;
-    --color-details-75: #ccccff;
-    --color-details-100: #b3b3ff;
-    --color-details-200: #8080ff;
-    --color-details-300: #4d4dff;
-    --color-details-400: #1a1aff;
-    --color-details-500: #0000ff;
-    --color-details-600: #0000e6;
-    --color-details-700: #0000cc;
-    --color-details-800: #0000b3;
-    --color-details-900: #000080;
+    --accent: #2b6bff;
   }
 
   ._theme-color_green {
-    --color-details-1: #f5fff5;
-    --color-details-10: #ebffeb;
-    --color-details-50: #e5ffe5;
-    --color-details-75: #ccffcc;
-    --color-details-100: #b3ffb3;
-    --color-details-200: #80ff80;
-    --color-details-300: #4dff4d;
-    --color-details-400: #1aff1a;
-    --color-details-500: #00ff00;
-    --color-details-600: #00e600;
-    --color-details-700: #00cc00;
-    --color-details-800: #00b300;
-    --color-details-900: #008000;
+    --accent: #22c55e;
   }
 
   ._theme-color_cyan {
-    --color-details-1: #f5ffff;
-    --color-details-10: #ebffff;
-    --color-details-50: #e5ffff;
-    --color-details-75: #ccffff;
-    --color-details-100: #b3ffff;
-    --color-details-200: #80ffff;
-    --color-details-300: #4dffff;
-    --color-details-400: #1affff;
-    --color-details-500: #00ffff;
-    --color-details-600: #00e6e6;
-    --color-details-700: #00cccc;
-    --color-details-800: #00b3b3;
-    --color-details-900: #008080;
+    --accent: #06b6d4;
   }
 
   ._theme-color_magenta {
-    --color-details-1: #fff5ff;
-    --color-details-10: #ffebff;
-    --color-details-50: #ffe5ff;
-    --color-details-75: #ffccff;
-    --color-details-100: #ffb3ff;
-    --color-details-200: #ff80ff;
-    --color-details-300: #ff4dff;
-    --color-details-400: #ff1aff;
-    --color-details-500: #ff00ff;
-    --color-details-600: #e600e6;
-    --color-details-700: #cc00cc;
-    --color-details-800: #b300b3;
-    --color-details-900: #800080;
-  }
-
-  ._theme-color_orange {
-    --color-details-1: #fff5f0;
-    --color-details-10: #ffebdf;
-    --color-details-50: #ffe5cc;
-    --color-details-75: #ffddb3;
-    --color-details-100: #ffcc80;
-    --color-details-200: #ffbf4d;
-    --color-details-300: #ffa61a;
-    --color-details-400: #ff9900;
-    --color-details-500: #ff8000;
-    --color-details-600: #e67300;
-    --color-details-700: #cc6600;
-    --color-details-800: #b35900;
-    --color-details-900: #804000;
+    --accent: #e11dff;
   }
 }
 
@@ -349,7 +322,7 @@
 
     &.explorer-element_folder {
       @apply bg-folders;
-      @apply hover:bg-folders-hovered hover:text-[initial];
+      @apply hover:bg-folders-hovered;
     }
   }
 
@@ -362,7 +335,7 @@
     }
 
     .dialog__backdrop {
-      @apply fixed inset-0 bg-dark/25 -z-[1];
+      @apply fixed inset-0 bg-dark/25 -z-1;
     }
   }
 }

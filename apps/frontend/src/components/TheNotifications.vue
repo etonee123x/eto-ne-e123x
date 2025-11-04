@@ -8,9 +8,9 @@
     >
       <span class="relative flex items-center justify-between gap-2">
         <BaseIcon :path="getIconPath(notification)" />
-        <span class="text-[initial]">{{ notification.text }}</span>
+        <span class="text-text">{{ notification.text }}</span>
         <BaseButton @click="() => onClickClose(notification)">
-          <BaseIcon :path="mdiClose" class="text-[initial]" />
+          <BaseIcon :path="mdiClose" class="text-text" />
         </BaseButton>
       </span>
     </li>

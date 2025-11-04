@@ -80,7 +80,7 @@ if (isServer) {
     bodyAttrs: {
       // Всё ок
       // eslint-disable-next-line sonarjs/pseudo-random
-      class: THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)],
+      class: ['_theme-color', THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)]],
     },
   });
 }

@@ -114,7 +114,7 @@ const component = computed(() =>
               postId: props.post._meta.id,
             },
           },
-          class: 'hover:text-[initial]',
+          class: 'hover:text-text',
         },
       },
 );

@@ -34,5 +34,4 @@ export const _THEME_COLOR = {
   _BLUE: '_theme-color_blue',
   _CYAN: '_theme-color_cyan',
   _MAGENTA: '_theme-color_magenta',
-  _ORANGE: '_theme-color_orange',
 } as const;
