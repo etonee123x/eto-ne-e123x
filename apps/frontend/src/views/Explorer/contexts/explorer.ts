@@ -1,4 +1,5 @@
-import { type FolderDataWithSinceTimestamps, getFolderData as _getFolderData } from '@/api/folderData';
+import { getFolderData as _getFolderData } from '@/api/folderData';
+import type { FolderDataWithSinceTimestamps } from '@/api/folderData';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
 import { useL10n } from '@/composables/useL10n';
 import { useSSRContext } from '@/composables/useSsrContext';
@@ -9,8 +10,10 @@ import { nonNullable } from '@/utils/nonNullable';
 import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
 import { pick } from '@etonee123x/shared/utils/pick';
 import { throwError } from '@etonee123x/shared/utils/throwError';
-import { inject, provide, shallowRef, type InjectionKey } from 'vue';
-import { useRoute, type RouteLocationNormalizedLoaded, type RouteLocationNormalizedLoadedGeneric } from 'vue-router';
+import { inject, provide, shallowRef } from 'vue';
+import type { InjectionKey } from 'vue';
+import { useRoute } from 'vue-router';
+import type { RouteLocationNormalizedLoaded, RouteLocationNormalizedLoadedGeneric } from 'vue-router';
 
 interface ExplorerContext {
   getFolderData: ReturnType<

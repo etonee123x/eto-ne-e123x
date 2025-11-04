@@ -1,9 +1,9 @@
 import { renderToString } from 'vue/server-renderer';
 import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/server';
-import { type ExpressContext } from '@/constants/injectionKeyExpressContext';
+import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
 import { isClient } from './constants/target';
-import { type SSRContext } from '@/composables/useSsrContext';
+import type { SSRContext } from '@/composables/useSsrContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 
 export const render = async (url: string, expressContext: ExpressContext) => {

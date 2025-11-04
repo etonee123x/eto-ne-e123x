@@ -1,6 +1,7 @@
 import path from 'node:path';
 
-import { defineConfig, type UserConfig } from 'vite';
+import { defineConfig } from 'vite';
+import type { UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';

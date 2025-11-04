@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent } from 'vue';
-import { type Props as PropsIcon } from '@/components/ui/BaseIcon';
+import type { Props as PropsIcon } from '@/components/ui/BaseIcon';
 import { BUTTON } from '@/helpers/ui';
 import BaseIcon from '@/components/ui/BaseIcon';
 

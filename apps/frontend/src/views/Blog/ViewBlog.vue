@@ -46,7 +46,8 @@ import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
 import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import { areIdsEqual, toId, type Id } from '@etonee123x/shared/helpers/id';
+import { areIdsEqual, toId } from '@etonee123x/shared/helpers/id';
+import type { Id } from '@etonee123x/shared/helpers/id';
 
 import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';

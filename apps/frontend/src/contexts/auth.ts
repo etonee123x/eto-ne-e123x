@@ -7,7 +7,8 @@ import { nonNullable } from '@/utils/nonNullable';
 import { isRealObject } from '@etonee123x/shared/utils/isRealObject';
 import { isString } from '@etonee123x/shared/utils/isString';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
-import { computed, inject, provide, type ComputedRef, type InjectionKey } from 'vue';
+import { computed, inject, provide } from 'vue';
+import type { ComputedRef, InjectionKey } from 'vue';
 
 interface AuthContext {
   postAuth: ReturnType<typeof useAsyncStateApi<Awaited<ReturnType<typeof _postAuth>>>>;

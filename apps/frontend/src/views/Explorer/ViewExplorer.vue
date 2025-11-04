@@ -20,15 +20,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, watchEffect, type UnwrapRef } from 'vue';
-import { onBeforeRouteUpdate, useRoute, type RouteLocationNormalizedLoaded } from 'vue-router';
-import { FILE_TYPES, ITEM_TYPES, type ItemFile, type ItemFolder } from '@etonee123x/shared/helpers/folderData';
+import { computed, defineAsyncComponent, watchEffect } from 'vue';
+import type { UnwrapRef } from 'vue';
+import { onBeforeRouteUpdate, useRoute } from 'vue-router';
+import type { RouteLocationNormalizedLoaded } from 'vue-router';
+import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
+import type { ItemFile, ItemFolder } from '@etonee123x/shared/helpers/folderData';
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { clientOnly } from '@/helpers/clientOnly';
-import { type ItemWithSinceTimestamps } from '@/api/folderData';
+import type { ItemWithSinceTimestamps } from '@/api/folderData';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';

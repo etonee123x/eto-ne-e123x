@@ -31,14 +31,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { defineAsyncComponent, useTemplateRef } from 'vue';
-import { type Post } from '@etonee123x/shared/types/blog';
+import type { Post } from '@etonee123x/shared/types/blog';
 import { mdiDelete } from '@mdi/js';
 
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseInputFile from '@/components/ui/BaseInputFile.vue';
 import BaseButton from '@/components/ui/BaseButton/BaseButton.vue';
 import BaseIcon from '@/components/ui/BaseIcon';
-import { type ForPost } from '@etonee123x/shared/types/database';
+import type { ForPost } from '@etonee123x/shared/types/database';
 import BaseForm from '@/components/ui/BaseForm.vue';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import { useIsMobile } from '@/composables/useIsMobile';

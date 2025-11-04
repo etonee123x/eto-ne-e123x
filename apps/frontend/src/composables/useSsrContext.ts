@@ -1,6 +1,6 @@
 import { useSSRContext as _useSSRContext } from 'vue';
 
-import { type ExpressContext } from '@/constants/injectionKeyExpressContext';
+import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
 
 export interface SSRContext {
   express: ExpressContext;

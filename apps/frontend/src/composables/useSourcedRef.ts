@@ -1,5 +1,6 @@
 import { clone } from '@/utils/clone';
-import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue';
+import { computed, ref, toValue, watch } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 
 export const useSourcedRef = <Source>(
   source: MaybeRefOrGetter<Source>,

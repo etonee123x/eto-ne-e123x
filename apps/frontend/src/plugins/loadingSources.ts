@@ -1,5 +1,6 @@
 import { nonNullable } from '@/utils/nonNullable';
-import { inject, shallowReactive, type FunctionPlugin, type InjectionKey } from 'vue';
+import { inject, shallowReactive } from 'vue';
+import type { FunctionPlugin, InjectionKey } from 'vue';
 
 export const INJECTION_KEY_LOADING_SOURCES: InjectionKey<Set<Promise<unknown>>> = Symbol('loadingSources');
 

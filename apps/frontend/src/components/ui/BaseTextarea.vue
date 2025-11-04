@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { type ErrorObject } from '@vuelidate/core';
+import type { ErrorObject } from '@vuelidate/core';
 import { useTextareaAutosize } from '@vueuse/core';
 
 withDefaults(

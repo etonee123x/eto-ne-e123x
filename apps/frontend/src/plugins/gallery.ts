@@ -1,14 +1,7 @@
-import { type ItemImage, type ItemVideo } from '@etonee123x/shared/helpers/folderData';
+import type { ItemImage, ItemVideo } from '@etonee123x/shared/helpers/folderData';
 import { useCycleList } from '@vueuse/core';
-import {
-  computed,
-  inject,
-  shallowRef,
-  type FunctionPlugin,
-  type InjectionKey,
-  type ShallowRef,
-  type UnwrapRef,
-} from 'vue';
+import { computed, inject, shallowRef } from 'vue';
+import type { FunctionPlugin, InjectionKey, ShallowRef, UnwrapRef } from 'vue';
 
 type Item = Pick<ItemImage | ItemVideo, 'src' | 'name' | 'fileType'>;
 type Items = Array<Item>;

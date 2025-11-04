@@ -1,5 +1,6 @@
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
-import { inject, provide, type InjectionKey, type Ref } from 'vue';
+import { inject, provide } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
 
 import {
   getPosts as _getPosts,
@@ -7,13 +8,13 @@ import {
   deletePost as _deletePost,
   putPost as _putPost,
   getPostById as _getPostById,
-  type PostWithMetaWithSinseTimestamps,
 } from '@/api/posts';
+import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { postUpload } from '@/api/upload';
 import { useSourcedRef } from '@/composables/useSourcedRef';
-import { type ForPost, type ForPut } from '@etonee123x/shared/types/database';
-import { type Post } from '@etonee123x/shared/types/blog';
-import { type Id } from '@etonee123x/shared/helpers/id';
+import type { ForPost, ForPut } from '@etonee123x/shared/types/database';
+import type { Post } from '@etonee123x/shared/types/blog';
+import type { Id } from '@etonee123x/shared/helpers/id';
 import { nonNullable } from '@/utils/nonNullable';
 
 interface BlogContext {

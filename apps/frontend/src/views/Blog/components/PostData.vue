@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Post } from '@etonee123x/shared/types/blog';
+import type { Post } from '@etonee123x/shared/types/blog';
 import { computed } from 'vue';
 
 import PostDataAttachment from './PostDataAttachment.vue';

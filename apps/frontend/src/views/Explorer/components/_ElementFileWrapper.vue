@@ -18,8 +18,8 @@
 </template>
 
 <script setup lang="ts">
-import { type ItemFile } from '@etonee123x/shared/helpers/folderData';
-import { type WithMeta, type WithSinceTimestamps } from '@etonee123x/shared/types/database';
+import type { ItemFile } from '@etonee123x/shared/helpers/folderData';
+import type { WithMeta, WithSinceTimestamps } from '@etonee123x/shared/types/database';
 import { useI18n } from 'vue-i18n';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { computed } from 'vue';

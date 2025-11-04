@@ -1,5 +1,6 @@
-import { type Id } from '@etonee123x/shared/helpers/id';
-import { inject, shallowReactive, type InjectionKey, type Plugin } from 'vue';
+import type { Id } from '@etonee123x/shared/helpers/id';
+import { inject, shallowReactive } from 'vue';
+import type { InjectionKey, Plugin } from 'vue';
 
 interface DialogContext {
   onOpen: (id: Id) => void;

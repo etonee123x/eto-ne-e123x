@@ -1,4 +1,4 @@
-import { type RouteLocationAsRelativeGeneric } from 'vue-router';
+import type { RouteLocationAsRelativeGeneric } from 'vue-router';
 import { useLocaleInfo } from './useLocaleInfo';
 import { LOCALES_INFO } from '@/constants/localesInfo';
 import { propertyCurried } from '@etonee123x/shared/utils/property';

@@ -1,5 +1,6 @@
-import { type ItemAudio } from '@etonee123x/shared/helpers/folderData';
-import { computed, inject, shallowRef, type FunctionPlugin, type InjectionKey, type ShallowRef } from 'vue';
+import type { ItemAudio } from '@etonee123x/shared/helpers/folderData';
+import { computed, inject, shallowRef } from 'vue';
+import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
 
 type TheTrack = ItemAudio | null;
 type Playlist = Array<ItemAudio>;

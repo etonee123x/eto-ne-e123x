@@ -19,14 +19,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
-import { type ItemAudio } from '@etonee123x/shared/helpers/folderData';
+import type { ItemAudio } from '@etonee123x/shared/helpers/folderData';
 import { mdiClockOutline, mdiAccountOutline, mdiAlbum, mdiCalendarBlankOutline, mdiMetronome } from '@mdi/js';
 
 import ElementFileWrapper from './_ElementFileWrapper.vue';
 
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
 import BaseIcon from '@/components/ui/BaseIcon';
-import { type ItemWithSinceTimestamps } from '@/api/folderData';
+import type { ItemWithSinceTimestamps } from '@/api/folderData';
 
 const props = defineProps<{
   element: ItemWithSinceTimestamps<ItemAudio>;

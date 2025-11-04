@@ -13,7 +13,8 @@
 </template>
 
 <script setup lang="ts">
-import { type CSSProperties, reactive, computed, useTemplateRef } from 'vue';
+import { reactive, computed, useTemplateRef } from 'vue';
+import type { CSSProperties } from 'vue';
 import { useElementSize } from '@vueuse/core';
 
 const props = withDefaults(

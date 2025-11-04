@@ -1,4 +1,4 @@
-import { type FetchError } from 'ofetch';
+import type { FetchError } from 'ofetch';
 import { computed, ref } from 'vue';
 import { isServer } from '@/constants/target';
 import { nonNullable } from '@/utils/nonNullable';

@@ -22,7 +22,8 @@ import { mdiCheck, mdiClose } from '@mdi/js';
 
 import BaseIcon from '@/components/ui/BaseIcon';
 import BaseButton from '@/components/ui/BaseButton';
-import { NOTIFICATION_TYPES, useNotifications, type Notification } from '@/plugins/notifications';
+import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
+import type { Notification } from '@/plugins/notifications';
 
 const notifications = useNotifications();
 

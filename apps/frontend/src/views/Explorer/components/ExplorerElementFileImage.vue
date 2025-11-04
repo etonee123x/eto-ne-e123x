@@ -5,11 +5,11 @@
 </template>
 
 <script setup lang="ts">
-import { type ItemImage } from '@etonee123x/shared/helpers/folderData';
+import type { ItemImage } from '@etonee123x/shared/helpers/folderData';
 
 import ElementFileWrapper from './_ElementFileWrapper.vue';
 
-import { type ItemWithSinceTimestamps } from '@/api/folderData';
+import type { ItemWithSinceTimestamps } from '@/api/folderData';
 
 defineProps<{
   element: ItemWithSinceTimestamps<ItemImage>;

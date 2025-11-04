@@ -1,8 +1,9 @@
 import 'dotenv/config';
 
 import { readFile } from 'node:fs/promises';
-import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
-import { type ViteDevServer } from 'vite';
+import express from 'express';
+import type { ErrorRequestHandler, RequestHandler } from 'express';
+import type { ViteDevServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import { transformHtmlTemplate } from '@unhead/vue/server';
 import { postAuth } from '@/api/auth';
@@ -10,7 +11,7 @@ import { isProduction } from '@/constants/mode';
 import { KEY_JWT } from '@/constants/keys';
 import http from 'node:http';
 import { requestToOrigin } from '@/utils/requestToOrigin';
-import { type ExpressContext } from '@/constants/injectionKeyExpressContext';
+import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { LOCALES_INFO } from '@/constants/localesInfo';
 import { isKnownLocale } from '@/helpers/isKnownLocale';

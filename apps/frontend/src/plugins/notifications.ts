@@ -1,5 +1,7 @@
-import { inject, shallowReactive, type FunctionPlugin, type InjectionKey, type ShallowReactive } from 'vue';
-import { areIdsEqual, toId, type Id, type WithId } from '@etonee123x/shared/helpers/id';
+import { inject, shallowReactive } from 'vue';
+import type { FunctionPlugin, InjectionKey, ShallowReactive } from 'vue';
+import { areIdsEqual, toId } from '@etonee123x/shared/helpers/id';
+import type { Id, WithId } from '@etonee123x/shared/helpers/id';
 
 export const NOTIFICATION_TYPES = {
   ERROR: 'ERROR',

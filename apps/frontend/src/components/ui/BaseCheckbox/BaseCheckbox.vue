@@ -14,7 +14,7 @@ import BaseIcon from '@/components/ui/BaseIcon';
 import { computed, useId, useTemplateRef } from 'vue';
 import { mdiCheckboxBlank, mdiCheckboxMarked } from '@mdi/js';
 import { CHECKBOX } from '@/helpers/ui';
-import { type Props } from './types';
+import type { Props } from './types';
 
 const id = useId();
 

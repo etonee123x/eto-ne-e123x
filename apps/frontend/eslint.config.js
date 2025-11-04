@@ -64,7 +64,7 @@ export default defineConfig(
 
     rules: {
       'import/no-empty-named-blocks': 'error',
-      'import/consistent-type-specifier-style': ['error', 'prefer-inline'],
+      'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
       'import/no-duplicates': 'error',
 
       'no-console': ['error', { allow: ['warn', 'error', 'info'] }],

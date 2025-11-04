@@ -43,7 +43,7 @@ import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
 import BaseButton from '@/components/ui/BaseButton';
-import { type PostWithMetaWithSinseTimestamps } from '@/api/posts';
+import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { useAuthContext } from '@/contexts/auth';

@@ -1,6 +1,7 @@
-import { computed, toValue, type MaybeRefOrGetter } from 'vue';
+import { computed, toValue } from 'vue';
+import type { MaybeRefOrGetter } from 'vue';
 import { useIntlRelativeTimeFormat } from './useIntlRelativeTimeFormat';
-import { type Nil } from '@etonee123x/shared/types';
+import type { Nil } from '@etonee123x/shared/types';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 
 export const useIntlRelativeTimeFormatHumanReadable = <Since extends number | Nil>(_since: MaybeRefOrGetter<Since>) => {
