@@ -8,14 +8,14 @@
       @paste="onPaste"
       @keydown.enter="onKeyDownEnter"
     />
-    <ul v-if="errors.length" class="text-sm flex flex-col gap-1 text-error">
+    <ul v-if="errors.length > 0" class="text-sm flex flex-col gap-1 text-error">
       <li v-for="error in errors" :key="error.$uid">{{ error.$message }}</li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { ErrorObject } from '@vuelidate/core';
+import { type ErrorObject } from '@vuelidate/core';
 import { useTextareaAutosize } from '@vueuse/core';
 
 withDefaults(
@@ -24,6 +24,7 @@ withDefaults(
     errors?: Array<ErrorObject>;
   }>(),
   {
+    placeholder: undefined,
     errors: () => [],
   },
 );
@@ -34,9 +35,9 @@ const emit = defineEmits<{
   'keydown:enter': [KeyboardEvent];
 }>();
 
-const onPaste = (e: ClipboardEvent) => emit('paste', e);
+const onPaste = (event: ClipboardEvent) => emit('paste', event);
 
-const onKeyDownEnter = (e: KeyboardEvent) => emit('keydown:enter', e);
+const onKeyDownEnter = (event: KeyboardEvent) => emit('keydown:enter', event);
 
 const model = defineModel<string>({ required: true });
 

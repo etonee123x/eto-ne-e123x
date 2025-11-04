@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { ICON } from '@/helpers/ui';
-import type { Props } from './types';
+import { type Props } from './types';
 
 defineProps<Props>();
 </script>

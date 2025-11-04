@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-4">
     <BaseHtml v-if="html" :html />
-    <ul v-if="post.filesUrls.length">
+    <ul v-if="post.filesUrls.length > 0">
       <li v-for="(fileUrl, index) in post.filesUrls" :key="index">
         <PostDataAttachment :fileUrl :index />
       </li>
@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Post } from '@etonee123x/shared/types/blog';
+import { type Post } from '@etonee123x/shared/types/blog';
 import { computed } from 'vue';
 
 import PostDataAttachment from './PostDataAttachment.vue';

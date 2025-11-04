@@ -27,7 +27,7 @@ export const notifications: FunctionPlugin = (app) => {
 
     notifications.push({ text, id, ...options });
 
-    setTimeout(() => close(id), options?.ttl ?? 5 * 1000);
+    setTimeout(() => close(id), options.ttl ?? 5 * 1000);
   };
 
   const close: Notifications['close'] = (id) => {

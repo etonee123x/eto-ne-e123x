@@ -43,7 +43,7 @@ import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
 import BaseButton from '@/components/ui/BaseButton';
-import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
+import { type PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { useAuthContext } from '@/contexts/auth';
@@ -132,52 +132,57 @@ const createdAtUpdatedAt = computed(() =>
 
 const closeEditMode = () => emit('changeEditModeFor', null);
 
-const controls = computed(() => [
-  ...(props.isInEditMode
-    ? [
-        {
-          key: 'cancel',
-          iconPath: mdiCancel,
-          isLoading: false,
-          onClick: closeEditMode,
-        },
-        {
-          key: 'save',
-          iconPath: mdiContentSave,
-          isDisabled: props.post.text === blogEditPost.value?.postData.text,
-          isLoading: blogContext.putPostById.isLoading.value,
-          onClick: () => blogEditPost.value?.requestSubmit(),
-        },
-      ]
-    : []),
-  // TODO: Надо придумать как редактировать посты с вложениями...
-  ...(!(props.isInEditMode || props.post.filesUrls.length)
-    ? [
-        {
-          key: 'edit',
-          iconPath: mdiPencil,
-          isLoading: blogContext.putPostById.isLoading.value,
-          onClick: () => {
-            emit('changeEditModeFor', props.post._meta.id);
+const controls = computed(
+  () =>
+    [
+      ...(props.isInEditMode
+        ? [
+            {
+              key: 'cancel',
+              iconPath: mdiCancel,
+              isDisabled: false,
+              isLoading: false,
+              onClick: closeEditMode,
+            },
+            {
+              key: 'save',
+              iconPath: mdiContentSave,
+              isDisabled: props.post.text === blogEditPost.value?.postData.text,
+              isLoading: blogContext.putPostById.isLoading.value,
+              onClick: () => blogEditPost.value?.requestSubmit(),
+            },
+          ]
+        : []),
+      ...(props.isInEditMode || props.post.filesUrls.length > 0
+        ? []
+        : [
+            {
+              key: 'edit',
+              iconPath: mdiPencil,
+              isDisabled: false,
+              isLoading: blogContext.putPostById.isLoading.value,
+              onClick: () => {
+                emit('changeEditModeFor', props.post._meta.id);
 
-            nextTick(() => blogEditPost.value?.focusTextarea());
-          },
-        },
-      ]
-    : []),
-  {
-    key: 'delete',
-    iconPath: mdiDelete,
-    isLoading: blogContext.deletePostById.isLoading.value,
-    onClick: async () => {
-      if (!(await props.onBeforeDelete())) {
-        return;
-      }
+                nextTick(() => blogEditPost.value?.focusTextarea());
+              },
+            },
+          ]),
+      {
+        key: 'delete',
+        iconPath: mdiDelete,
+        isDisabled: false,
+        isLoading: blogContext.deletePostById.isLoading.value,
+        onClick: async () => {
+          if (!(await props.onBeforeDelete())) {
+            return;
+          }
 
-      return blogContext.deletePostById
-        .execute(props.post._meta.id)
-        .then(() => blogContext.getPosts.execute({ shouldReset: true }));
-    },
-  },
-]);
+          return blogContext.deletePostById
+            .execute(props.post._meta.id)
+            .then(() => blogContext.getPosts.execute({ shouldReset: true }));
+        },
+      },
+    ] as const,
+);
 </script>

@@ -18,7 +18,7 @@ const root = useTemplateRef('root');
 const router = useRouter();
 
 onMounted(() =>
-  Array.from(root.value?.getElementsByTagName('a') ?? []).forEach((a) =>
+  [...(root.value?.getElementsByTagName('a') ?? [])].forEach((a) =>
     a.addEventListener('click', (event) => {
       const hasHref = event.target && 'href' in event.target && isString(event.target.href);
       const hasTargetBlank = event.target && 'target' in event.target && event.target.target === '_blank';

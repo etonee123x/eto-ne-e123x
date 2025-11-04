@@ -1,6 +1,6 @@
 <template>
   <header class="border-b border-b-details-500 relative">
-    <ClientOnly v-if="loadingSources.size">
+    <ClientOnly v-if="loadingSources.size > 0">
       <div
         class="after:opacity-30 after:absolute after:bottom-0 after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-dark after:animate-runner"
       />
@@ -44,7 +44,7 @@ import { SITE_TITLE } from '@/constants/siteTitle';
 import { useLocaleInfo } from '@/composables/useLocaleInfo';
 import { i18n } from '@/i18n';
 import { useL10n } from '@/composables/useL10n';
-import { useCookies } from '@vueuse/integrations/useCookies.mjs';
+import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRouter } from 'vue-router';
 import { pick } from '@etonee123x/shared/utils/pick';
 import { useLoadingSources } from '@/plugins/loadingSources';
@@ -53,10 +53,14 @@ import { useAuthContext } from '@/contexts/auth';
 const { localizeRoute } = useL10n();
 
 const IconLogout = defineComponent({
+  // Не хочу, мне и так нравится
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   setup: () => () => h(BaseIcon, { path: mdiLogout }),
 });
 
 const Language = defineComponent({
+  // Не хочу, мне и так нравится
+  // eslint-disable-next-line unicorn/consistent-function-scoping
   setup: () => () => h('div', localeInfo.value.locale),
 });
 

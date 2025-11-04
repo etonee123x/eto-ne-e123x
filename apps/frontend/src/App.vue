@@ -5,7 +5,7 @@
       <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
         <RouterView />
         <LazyTheNotifications
-          v-if="notifications.notifications.length"
+          v-if="notifications.notifications.length > 0"
           class="sticky bottom-4 group-has-data-player/app:bottom-30 mx-auto"
         />
       </main>
@@ -78,6 +78,8 @@ if (isServer) {
 
   useHead({
     bodyAttrs: {
+      // Всё ок
+      // eslint-disable-next-line sonarjs/pseudo-random
       class: THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)],
     },
   });

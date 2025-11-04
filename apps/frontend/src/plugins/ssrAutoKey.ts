@@ -3,7 +3,7 @@ import { parse } from '@babel/parser';
 import traverse from '@babel/traverse';
 import generate from '@babel/generator';
 import * as t from '@babel/types';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { parse as parseSFC } from '@vue/compiler-sfc';
 
 export const ssrAutoKey = (): Plugin => ({
@@ -32,7 +32,7 @@ export const ssrAutoKey = (): Plugin => ({
       plugins: ['typescript', 'jsx', 'decorators-legacy'],
     });
 
-    let modified = false;
+    let modified = false as boolean;
 
     (traverse as unknown as { default: typeof traverse }).default(ast, {
       CallExpression(path) {
@@ -42,15 +42,17 @@ export const ssrAutoKey = (): Plugin => ({
           return;
         }
 
-        const firstArg = path.node.arguments[0];
+        const firstArgument = path.node.arguments[0];
 
         const isKeyProvided =
-          t.isStringLiteral(firstArg) || t.isTemplateLiteral(firstArg) || t.isCallExpression(firstArg);
+          t.isStringLiteral(firstArgument) || t.isTemplateLiteral(firstArgument) || t.isCallExpression(firstArgument);
 
         if (isKeyProvided) {
           return;
         }
 
+        // Всё ок
+        // eslint-disable-next-line sonarjs/hashing
         const hash = crypto
           .createHash('md5')
           .update(id + JSON.stringify(path.node.loc?.start))

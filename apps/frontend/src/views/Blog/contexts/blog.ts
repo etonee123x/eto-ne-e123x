@@ -11,9 +11,9 @@ import {
 } from '@/api/posts';
 import { postUpload } from '@/api/upload';
 import { useSourcedRef } from '@/composables/useSourcedRef';
-import type { ForPost, ForPut } from '@etonee123x/shared/types/database';
-import type { Post } from '@etonee123x/shared/types/blog';
-import type { Id } from '@etonee123x/shared/helpers/id';
+import { type ForPost, type ForPut } from '@etonee123x/shared/types/database';
+import { type Post } from '@etonee123x/shared/types/blog';
+import { type Id } from '@etonee123x/shared/helpers/id';
 import { nonNullable } from '@/utils/nonNullable';
 
 interface BlogContext {
@@ -56,7 +56,7 @@ export const provideBlogContext = () => {
     }
 
     return _getPosts(page.value).then((response) => {
-      all.value = all.value.concat(response.rows);
+      all.value = [...all.value, ...response.rows];
       isEnd.value = response._meta.isEnd;
       page.value = response._meta.page;
 
@@ -65,13 +65,13 @@ export const provideBlogContext = () => {
   }, []);
 
   const postPost = useAsyncStateApi(async (postData: ForPost<Post>, files: Array<File> = []) => {
-    const filesUrls = files.length ? await postUpload(files) : [];
+    const filesUrls = files.length > 0 ? await postUpload(files) : [];
 
     return _postPost({ ...postData, filesUrls });
   });
 
   const putPostById = useAsyncStateApi(async (id: Id, post: ForPut<Post>, files: Array<File> = []) => {
-    const filesUrls = files.length ? await postUpload(files) : [];
+    const filesUrls = files.length > 0 ? await postUpload(files) : [];
 
     return _putPost(id, { ...post, filesUrls });
   });

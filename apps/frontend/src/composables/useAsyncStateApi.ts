@@ -1,13 +1,13 @@
-import type { FetchError } from 'ofetch';
+import { type FetchError } from 'ofetch';
 import { computed, ref } from 'vue';
 import { isServer } from '@/constants/target';
 import { nonNullable } from '@/utils/nonNullable';
 import { useSourcedRef } from '@/composables/useSourcedRef';
-import { useSSRContext } from '@/composables/useSSRContext';
+import { useSSRContext } from '@/composables/useSsrContext';
 import { useLoadingSources } from '@/plugins/loadingSources';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-type RequestFunction<Data, Params extends Array<any> = []> = (...params: Params) => Promise<Data>;
+type RequestFunction<Data, Parameters_ extends Array<any> = []> = (...parameters: Parameters_) => Promise<Data>;
 
 type Options<Data> = Partial<{
   onSuccess: (data: Data) => void;
@@ -17,11 +17,11 @@ type UseAsyncStateApiParametersWithKey<
   Data,
   InitialState extends Data | undefined,
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  Params extends Array<any> = [],
+  Parameters_ extends Array<any> = [],
 > = [
   //
   key: string,
-  requestFunction: RequestFunction<Data, Params>,
+  requestFunction: RequestFunction<Data, Parameters_>,
   initialState?: InitialState,
   options?: Options<Data>,
 ];
@@ -30,26 +30,26 @@ type UseAsyncStateApiParametersWithoutKey<
   Data,
   InitialState extends Data | undefined,
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  Params extends Array<any> = [],
+  Parameters_ extends Array<any> = [],
 > = [
   //
-  requestFunction: RequestFunction<Data, Params>,
+  requestFunction: RequestFunction<Data, Parameters_>,
   initialState?: InitialState,
   options?: Options<Data>,
 ];
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-type UseAsyncStateApiParameters<Data, InitialState extends Data | undefined, Params extends Array<any> = []> =
-  | UseAsyncStateApiParametersWithKey<Data, InitialState, Params>
-  | UseAsyncStateApiParametersWithoutKey<Data, InitialState, Params>;
+type UseAsyncStateApiParameters<Data, InitialState extends Data | undefined, Parameters_ extends Array<any> = []> =
+  | UseAsyncStateApiParametersWithKey<Data, InitialState, Parameters_>
+  | UseAsyncStateApiParametersWithoutKey<Data, InitialState, Parameters_>;
 
 export const useAsyncStateApi = <
   Data,
   InitialState extends Data | undefined = undefined,
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  Params extends Array<any> = [],
+  Parameters_ extends Array<any> = [],
 >(
-  ...parameters: UseAsyncStateApiParameters<Data, InitialState, Params>
+  ...parameters: UseAsyncStateApiParameters<Data, InitialState, Parameters_>
 ) => {
   const [
     //
@@ -57,7 +57,7 @@ export const useAsyncStateApi = <
     requestFunction,
     initialState,
     options = {},
-  ] = parameters as UseAsyncStateApiParametersWithKey<Data, InitialState, Params>;
+  ] = parameters as UseAsyncStateApiParametersWithKey<Data, InitialState, Parameters_>;
 
   const state = ref(initialState as InitialState extends undefined ? Data | undefined : Data);
 
@@ -66,7 +66,7 @@ export const useAsyncStateApi = <
 
   const isLoading = computed(() => Boolean(promise.value));
 
-  const _execute = async (...parameters: Params): Promise<Data> => {
+  const _execute = async (...parameters: Parameters_): Promise<Data> => {
     if (isServer) {
       const ssrContext = nonNullable(useSSRContext());
 
@@ -94,6 +94,8 @@ export const useAsyncStateApi = <
 
     if (initial) {
       state.value = initial;
+      // Низкоуровневый API, ничего не поделаешь.
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete globalThis.__PAYLOAD__[key];
 
       return state.value;
@@ -114,7 +116,7 @@ export const useAsyncStateApi = <
     throw error;
   };
 
-  const execute = async (...parameters: Params) => {
+  const execute = async (...parameters: Parameters_) => {
     const promise = _execute(...parameters)
       .catch(_onError)
       .finally(() => loadingSources.delete(promise));
@@ -124,7 +126,7 @@ export const useAsyncStateApi = <
     return promise;
   };
 
-  const executeSilently = (...parameters: Params) => _execute(...parameters).catch(_onError);
+  const executeSilently = (...parameters: Parameters_) => _execute(...parameters).catch(_onError);
 
   return {
     state,

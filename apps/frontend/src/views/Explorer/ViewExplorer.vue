@@ -2,13 +2,13 @@
   <BasePage :h1="t('content')">
     <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
-      <nav v-if="explorerContext.getFolderData.state.value?.lvlUp || elements.folders.length" class="contents">
+      <nav v-if="explorerContext.getFolderData.state.value?.lvlUp || elements.folders.length > 0" class="contents">
         <LazyExplorerElementSystem
           v-if="explorerContext.getFolderData.state.value?.lvlUp"
           :to="explorerContext.getFolderData.state.value.lvlUp"
           tag="RouterLink"
         >
-          ...
+          {{ t('treeDots') }}
         </LazyExplorerElementSystem>
         <LazyExplorerElementFolder v-for="folder in elements.folders" :element="folder" :key="folder.src">
           {{ folder.name }}
@@ -28,7 +28,7 @@ import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { clientOnly } from '@/helpers/clientOnly';
-import type { ItemWithSinceTimestamps } from '@/api/folderData';
+import { type ItemWithSinceTimestamps } from '@/api/folderData';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
@@ -61,6 +61,7 @@ const { t } = useI18n({
       listenToAudio: 'слушать аудио {fileName}, и другие @:foldersAndFiles',
       watchTheImage: 'смотреть изображение {fileName}, и другие @:foldersAndFiles',
       watchTheVideo: 'смотреть видео {fileName}, и другие @:foldersAndFiles',
+      treeDots: '...',
     },
     en: {
       content: 'Content',
@@ -69,6 +70,7 @@ const { t } = useI18n({
       listenToAudio: 'listen to audio {fileName}, and other @:foldersAndFiles',
       watchTheImage: 'watch the image {fileName}, and other @:foldersAndFiles',
       watchTheVideo: 'watch the video {fileName}, and other @:foldersAndFiles',
+      treeDots: '...',
     },
   },
 });
@@ -79,14 +81,18 @@ const route = useRoute();
 
 const itemFileToComponent = (itemFile: ItemFile) => {
   switch (itemFile.fileType) {
-    case FILE_TYPES.AUDIO:
+    case FILE_TYPES.AUDIO: {
       return LazyExplorerElementFileAudio;
-    case FILE_TYPES.IMAGE:
+    }
+    case FILE_TYPES.IMAGE: {
       return LazyExplorerElementFileImage;
-    case FILE_TYPES.VIDEO:
+    }
+    case FILE_TYPES.VIDEO: {
       return LazyExplorerElementFileVideo;
-    default:
+    }
+    default: {
       return LazyExplorerElementSystem;
+    }
   }
 };
 
@@ -100,11 +106,11 @@ const elements = computed(
         folderElement.itemType === ITEM_TYPES.FOLDER
           ? {
               ...elements,
-              folders: elements.folders.concat(folderElement),
+              folders: [...elements.folders, folderElement],
             }
           : {
               ...elements,
-              files: elements.files.concat(folderElement),
+              files: [...elements.files, folderElement],
             },
       {
         folders: [],
@@ -171,7 +177,7 @@ useSeoMeta({
       return undefined;
     }
 
-    let description: string;
+    let description: string | null = null;
 
     if (maybeSelectedFile.value?.fileType === FILE_TYPES.AUDIO) {
       description ??= t('listenToAudio', { fileName: maybeSelectedFile.value.name });
@@ -194,5 +200,7 @@ useSeoMeta({
   },
 });
 
-onBeforeRouteUpdate((to) => void fetchData(to));
+onBeforeRouteUpdate((to) => {
+  fetchData(to);
+});
 </script>

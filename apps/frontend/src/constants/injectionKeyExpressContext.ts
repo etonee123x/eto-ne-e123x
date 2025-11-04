@@ -1,5 +1,5 @@
-import type { NextFunction, Response, Request } from 'express';
-import type { InjectionKey } from 'vue';
+import { type NextFunction, type Response, type Request } from 'express';
+import { type InjectionKey } from 'vue';
 
 export interface ExpressContext {
   request: Request;

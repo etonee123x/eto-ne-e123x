@@ -11,10 +11,10 @@ app.use(head);
 
 const cookies = useCookies();
 
-router.isReady().then(() => {
-  const routerLanguage = router.currentRoute.value.params.language?.toString();
+await router.isReady();
 
-  i18n.global.locale.value = isKnownLocale(routerLanguage) ? routerLanguage : cookies.get('language');
+const routerLanguage = router.currentRoute.value.params.language?.toString();
 
-  app.mount('#app', true);
-});
+i18n.global.locale.value = isKnownLocale(routerLanguage) ? routerLanguage : cookies.get('language');
+
+app.mount('#app', true);

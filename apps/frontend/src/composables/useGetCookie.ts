@@ -1,5 +1,5 @@
 import { nonNullable } from '@/utils/nonNullable';
-import { useSSRContext } from './useSSRContext';
+import { useSSRContext } from '@/composables/useSsrContext';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { isServer } from '@/constants/target';
 

@@ -57,11 +57,9 @@ const component = computed(() =>
 useSwipe(mediaContainer, {
   onSwipeEnd: (...[, direction]) => {
     if (direction === 'right') {
-      return gallery.prev();
-    }
-
-    if (direction === 'left') {
-      return gallery.next();
+      gallery.prev();
+    } else if (direction === 'left') {
+      gallery.next();
     }
   },
 });

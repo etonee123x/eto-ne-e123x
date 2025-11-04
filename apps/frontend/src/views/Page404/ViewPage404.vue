@@ -15,7 +15,7 @@ import { useI18n } from 'vue-i18n';
 import { ROUTE_NAMES } from '@/router';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
-import { useSSRContext } from '@/composables/useSSRContext';
+import { useSSRContext } from '@/composables/useSsrContext';
 import { isServer } from '@/constants/target';
 import { useL10n } from '@/composables/useL10n';
 

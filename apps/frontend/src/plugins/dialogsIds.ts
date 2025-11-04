@@ -1,4 +1,4 @@
-import type { Id } from '@etonee123x/shared/helpers/id';
+import { type Id } from '@etonee123x/shared/helpers/id';
 import { inject, type FunctionPlugin, type InjectionKey } from 'vue';
 
 export const INJECTION_KEY_DIALOGS_IDS: InjectionKey<Array<Id>> = Symbol('dialogIds');

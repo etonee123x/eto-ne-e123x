@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 declare module '*.vue' {
-  import type { ComponentPublicInstance } from 'vue';
+  import { type ComponentPublicInstance } from 'vue';
 
   const component: ComponentPublicInstance;
 
@@ -9,7 +9,7 @@ declare module '*.vue' {
 }
 
 declare module '*.yaml' {
-  type Value = string | number | boolean | null | undefined | Record<string, Value> | Value[];
+  type Value = string | number | boolean | null | undefined | Record<string, Value> | Array<Value>;
 
   type ObjectValue = Record<string, Value>;
 

@@ -35,7 +35,7 @@ export const provideAuthContext = () => {
     }
 
     const parseBase64Payload =
-      'atob' in globalThis ? globalThis.atob : (input: string) => Buffer.from(input, 'base64').toString('utf-8');
+      'atob' in globalThis ? globalThis.atob : (input: string) => Buffer.from(input, 'base64').toString('utf8');
 
     const jwtParsed = jsonParse(parseBase64Payload(nonNullable(cookieJwt.split('.')[1])));
 

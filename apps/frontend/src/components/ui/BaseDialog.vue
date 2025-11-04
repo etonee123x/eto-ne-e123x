@@ -22,7 +22,7 @@
       <slot v-bind="{ close }" />
 
       <slot v-if="!isHiddenFooter" name="footer" v-bind="{ close }">
-        <footer v-if="buttons.length" class="flex justify-end gap-2 mt-auto">
+        <footer v-if="buttons.length > 0" class="flex justify-end gap-2 mt-auto">
           <BaseButton v-for="button in buttons" :key="button.key" @click="button.onClick">
             {{ button.text }}
           </BaseButton>
@@ -38,7 +38,7 @@ import { onKeyDown, useToggle } from '@vueuse/core';
 import { mdiClose } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import type { FunctionCallback } from '@etonee123x/shared/types';
+import { type FunctionCallback } from '@etonee123x/shared/types';
 import { areIdsEqual, toId, type Id } from '@etonee123x/shared/helpers/id';
 import BaseButton from './BaseButton';
 import BaseIcon from './BaseIcon';

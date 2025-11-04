@@ -1,4 +1,4 @@
-import type { RouteLocationAsRelativeGeneric } from 'vue-router';
+import { type RouteLocationAsRelativeGeneric } from 'vue-router';
 import { useLocaleInfo } from './useLocaleInfo';
 import { LOCALES_INFO } from '@/constants/localesInfo';
 import { propertyCurried } from '@etonee123x/shared/utils/property';
@@ -14,10 +14,13 @@ export const useL10n = () => {
     },
   });
 
-  const localizePath = (path: string) =>
-    new RegExp(`^/(?:${LOCALES_INFO.map(propertyCurried('locale')).join('|')})/`).test(path)
-      ? path
-      : `/${localeInfo.value.locale.toLocaleLowerCase()}${path.startsWith('/') ? '' : '/'}${path}`;
+  const localizePath = (path: string) => {
+    if (new RegExp(`^/(?:${LOCALES_INFO.map(propertyCurried('locale')).join('|')})/`).test(path)) {
+      return path;
+    }
+
+    return `/${localeInfo.value.locale.toLocaleLowerCase()}${path.startsWith('/') ? '' : '/'}${path}`;
+  };
 
   return {
     localizeRoute,

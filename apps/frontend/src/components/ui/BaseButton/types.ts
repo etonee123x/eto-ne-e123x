@@ -1,4 +1,4 @@
-import type { Props as PropsIcon } from '@/components/ui/BaseIcon';
+import { type Props as PropsIcon } from '@/components/ui/BaseIcon';
 
 export interface Props
   extends Partial<{

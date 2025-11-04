@@ -1,4 +1,4 @@
-import type { ItemAudio } from '@etonee123x/shared/helpers/folderData';
+import { type ItemAudio } from '@etonee123x/shared/helpers/folderData';
 import { computed, inject, shallowRef, type FunctionPlugin, type InjectionKey, type ShallowRef } from 'vue';
 
 type TheTrack = ItemAudio | null;

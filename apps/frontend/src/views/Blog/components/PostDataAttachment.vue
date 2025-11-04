@@ -36,10 +36,9 @@ const gallery = useGallery();
 const blogContext = useBlogContext();
 
 const getFileUrlExtension = (url: string) => url.match(/\.[^.]*$/gim)?.[0];
+const getLastParameter = (url: string) => url.match(/(?<=\/)[^/]*$/gim)?.[0];
 
 const loadToGallery = () => {
-  const getLastParameter = (url: string) => url.match(/(?<=\/)[^/]*$/gim)?.[0];
-
   const maybeExtension = getFileUrlExtension(props.fileUrl);
 
   if (isNil(maybeExtension)) {
@@ -65,28 +64,28 @@ const loadToGallery = () => {
       fileType,
     },
     blogContext.getPosts.state.value.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
-      (acc, post) => [
-        ...acc,
-        ...post.filesUrls.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((acc, fileUrl) => {
+      (items, post) => [
+        ...items,
+        ...post.filesUrls.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((accumulator, fileUrl) => {
           const maybeExtension = getFileUrlExtension(fileUrl);
 
           if (isNil(maybeExtension)) {
-            return acc;
+            return accumulator;
           }
 
           const fileType = extensionToFileType(maybeExtension);
 
           if (!(fileType === FILE_TYPES.IMAGE || fileType === FILE_TYPES.VIDEO)) {
-            return acc;
+            return accumulator;
           }
 
           const maybeLastParameter = getLastParameter(fileUrl);
 
           if (isNil(maybeLastParameter)) {
-            return acc;
+            return accumulator;
           }
 
-          return [...acc, { name: maybeLastParameter, src: fileUrl, fileType }];
+          return [...accumulator, { name: maybeLastParameter, src: fileUrl, fileType }];
         }, []),
       ],
       [],
@@ -107,7 +106,7 @@ const component = computed(() => {
   const fileType = extensionToFileType(maybeExtension);
 
   switch (fileType) {
-    case FILE_TYPES.IMAGE:
+    case FILE_TYPES.IMAGE: {
       return {
         is: 'img',
         binds: {
@@ -116,7 +115,8 @@ const component = computed(() => {
           onClick: loadToGallery,
         },
       };
-    case FILE_TYPES.AUDIO:
+    }
+    case FILE_TYPES.AUDIO: {
       return {
         is: 'audio',
         binds: {
@@ -124,7 +124,8 @@ const component = computed(() => {
           controls: true,
         },
       };
-    case FILE_TYPES.VIDEO:
+    }
+    case FILE_TYPES.VIDEO: {
       return {
         is: LazyPreviewVideo,
         binds: {
@@ -132,11 +133,13 @@ const component = computed(() => {
           onClick: loadToGallery,
         },
       };
-    default:
+    }
+    default: {
       return {
         is: LazyAttachmentWithUnknownExtension,
         binds: pick(props, ['fileUrl']),
       };
+    }
   }
 });
 </script>

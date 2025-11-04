@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { extensionToFileType, FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 import { mdiFileOutline } from '@mdi/js';
 import { defineAsyncComponent, computed } from 'vue';
 
@@ -13,8 +14,22 @@ const LazyPreviewVideo = defineAsyncComponent(() => import('@/components/Preview
 const props = defineProps<{ file: File }>();
 
 const component = computed(() => {
-  switch (extensionToFileType(props.file.type.replace(/.*\//, '.'))) {
-    case FILE_TYPES.IMAGE:
+  const extension = /^[^/]+\/(?<extension>.*)$/.exec(props.file.type)?.groups?.extension;
+
+  const unknownComponent = {
+    is: LazyBaseIcon,
+    binds: {
+      path: mdiFileOutline,
+      size: '2rem',
+    },
+  };
+
+  if (isNil(extension)) {
+    return unknownComponent;
+  }
+
+  switch (extensionToFileType(extension)) {
+    case FILE_TYPES.IMAGE: {
       return {
         is: 'img',
         binds: {
@@ -26,7 +41,8 @@ const component = computed(() => {
           },
         },
       };
-    case FILE_TYPES.AUDIO:
+    }
+    case FILE_TYPES.AUDIO: {
       return {
         is: 'audio',
         binds: {
@@ -34,7 +50,8 @@ const component = computed(() => {
           controls: true,
         },
       };
-    case FILE_TYPES.VIDEO:
+    }
+    case FILE_TYPES.VIDEO: {
       return {
         is: LazyPreviewVideo,
         binds: {
@@ -46,14 +63,10 @@ const component = computed(() => {
           },
         },
       };
-    default:
-      return {
-        is: LazyBaseIcon,
-        binds: {
-          path: mdiFileOutline,
-          size: '2rem',
-        },
-      };
+    }
+    default: {
+      return unknownComponent;
+    }
   }
 });
 </script>

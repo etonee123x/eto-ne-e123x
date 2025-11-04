@@ -5,7 +5,7 @@
       <BaseIcon :path="mdiFilePlusOutline" />
     </button>
     <BaseDialog :title="t('title')" ref="baseDialog" @confirm="onConfirm" @close="onClose" @click.stop>
-      <LazyBaseFilesList v-if="model.length" v-model="model" />
+      <LazyBaseFilesList v-if="model.length > 0" v-model="model" />
       <BaseButton class="mx-auto my-4" :propsIconPrepend="{ path: mdiPlus }" @click="onClickAdd">
         {{ t('add') }}
       </BaseButton>
@@ -50,7 +50,7 @@ onChangeInitial((files) => {
     return;
   }
 
-  model.value = Array.from(files);
+  model.value = [...files];
 
   baseDialog.value?.open();
   resetInitial();
@@ -73,7 +73,7 @@ onChangeInModal((files) => {
     return;
   }
 
-  Array.from(files).forEach((file) => {
+  [...files].forEach((file) => {
     if (
       model.value.some(
         (_file) =>

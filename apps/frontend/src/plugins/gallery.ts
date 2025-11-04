@@ -1,4 +1,4 @@
-import type { ItemImage, ItemVideo } from '@etonee123x/shared/helpers/folderData';
+import { type ItemImage, type ItemVideo } from '@etonee123x/shared/helpers/folderData';
 import { useCycleList } from '@vueuse/core';
 import {
   computed,

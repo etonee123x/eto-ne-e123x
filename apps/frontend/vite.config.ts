@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import path from 'node:path';
 
 import { defineConfig, type UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -12,7 +12,7 @@ export default defineConfig(() => {
   const config: UserConfig = {
     resolve: {
       alias: {
-        '@': resolve(__dirname, './src'),
+        '@': path.resolve(__dirname, './src'),
       },
     },
     plugins: [

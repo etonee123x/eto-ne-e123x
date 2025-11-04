@@ -1,7 +1,7 @@
-import type { FolderData, Item, ItemFile } from '@etonee123x/shared/helpers/folderData';
+import { type FolderData, type Item, type ItemFile } from '@etonee123x/shared/helpers/folderData';
 
 import { client } from '@/api/_client';
-import type { WithMeta, WithSinceTimestamps } from '@etonee123x/shared/types/database';
+import { type WithMeta, type WithSinceTimestamps } from '@etonee123x/shared/types/database';
 
 export type ItemWithSinceTimestamps<TItem extends Item> = TItem & WithMeta<WithSinceTimestamps>;
 

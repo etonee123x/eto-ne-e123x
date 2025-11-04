@@ -105,7 +105,7 @@ const blogContext = provideBlogContext();
 
 const authContext = useAuthContext();
 
-const hasPosts = computed(() => Boolean(blogContext.getPosts.state.value.length));
+const hasPosts = computed(() => blogContext.getPosts.state.value.length > 0);
 
 const goToPage404 = useGoToPage404();
 

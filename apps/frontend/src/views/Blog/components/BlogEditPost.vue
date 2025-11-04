@@ -14,7 +14,7 @@
         <BaseInputFile @update:modelValue="onUpdateModelValueInputFile" />
       </div>
     </div>
-    <div v-if="files.length">
+    <div v-if="files.length > 0">
       <div class="mb-3 flex items-center gap-2">
         <div class="text-xl">{{ t('files') }}</div>
         <BaseButton @click="onClickDeleteFiles">
@@ -31,14 +31,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { defineAsyncComponent, useTemplateRef } from 'vue';
-import type { Post } from '@etonee123x/shared/types/blog';
+import { type Post } from '@etonee123x/shared/types/blog';
 import { mdiDelete } from '@mdi/js';
 
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseInputFile from '@/components/ui/BaseInputFile.vue';
 import BaseButton from '@/components/ui/BaseButton/BaseButton.vue';
 import BaseIcon from '@/components/ui/BaseIcon';
-import type { ForPost } from '@etonee123x/shared/types/database';
+import { type ForPost } from '@etonee123x/shared/types/database';
 import BaseForm from '@/components/ui/BaseForm.vue';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import { useIsMobile } from '@/composables/useIsMobile';
@@ -117,19 +117,19 @@ const onKeyDownEnter: InstanceType<typeof BaseTextarea>['onKeydown:enter'] = (ev
   baseForm.value?.requestSubmit();
 };
 
-const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (e) => {
-  const maybeFileList = e.clipboardData?.files;
+const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
+  const maybeFileList = event.clipboardData?.files;
 
   if (!maybeFileList?.length) {
     return;
   }
 
-  e.preventDefault();
-  files.value = files.value.concat([...maybeFileList]);
+  event.preventDefault();
+  files.value = [...files.value, ...maybeFileList];
 };
 
 const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:model-value'] = (_files) => {
-  files.value = files.value.concat(_files);
+  files.value = [...files.value, ..._files];
 };
 
 const focusTextarea = () => baseTextarea.value?.focus();

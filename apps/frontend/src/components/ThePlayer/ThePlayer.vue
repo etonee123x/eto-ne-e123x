@@ -233,7 +233,7 @@ const toOnClose = () => {
     return;
   }
 
-  const lastNavigationItem = currentFolderData?.navigationItems.at(-1);
+  const lastNavigationItem = currentFolderData.navigationItems.at(-1);
 
   if (!lastNavigationItem) {
     return;
@@ -272,8 +272,8 @@ const { copy } = useClipboard({
 
     try {
       _url = encodeURI(_url);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
 
     return _url;

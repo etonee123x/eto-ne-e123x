@@ -18,5 +18,5 @@ const props = defineProps<{
   fileUrl: string;
 }>();
 
-const fileText = computed(() => props.fileUrl.match(/[^/]+$/)?.[0] || props.fileUrl);
+const fileText = computed(() => props.fileUrl.split('/').at(-1) || props.fileUrl);
 </script>

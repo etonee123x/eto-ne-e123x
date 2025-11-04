@@ -1,4 +1,4 @@
-import type { Id } from '@etonee123x/shared/helpers/id';
+import { type Id } from '@etonee123x/shared/helpers/id';
 import { inject, shallowReactive, type InjectionKey, type Plugin } from 'vue';
 
 interface DialogContext {

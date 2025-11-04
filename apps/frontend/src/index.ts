@@ -2,36 +2,37 @@ import 'dotenv/config';
 
 import { readFile } from 'node:fs/promises';
 import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
-import type { ViteDevServer } from 'vite';
+import { type ViteDevServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import { transformHtmlTemplate } from '@unhead/vue/server';
 import { postAuth } from '@/api/auth';
 import { isProduction } from '@/constants/mode';
 import { KEY_JWT } from '@/constants/keys';
-import http from 'http';
+import http from 'node:http';
 import { requestToOrigin } from '@/utils/requestToOrigin';
-import { isNil } from '@etonee123x/shared/utils/isNil';
-import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
+import { type ExpressContext } from '@/constants/injectionKeyExpressContext';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { LOCALES_INFO } from '@/constants/localesInfo';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 import Negotiator from 'negotiator';
 import { propertyCurried } from '@etonee123x/shared/utils/property';
 import { ROUTE_NAME_TO_PATH } from '@/router';
+import { nonNullable } from '@/utils/nonNullable';
+import { isString } from '@etonee123x/shared/utils/isString';
 
 const port = process.env.PORT ?? throwError('PORT is not defined');
 const BASE = '/';
 
-const templateHtml = isProduction ? await readFile('./dist/client/index.html', 'utf-8') : '';
+const templateHtml = isProduction ? await readFile('./dist/client/index.html', 'utf8') : '';
 
 const renderHTML = async (url: string, expressContext: ExpressContext) => {
   const template = isProduction
     ? templateHtml
-    : await vite.transformIndexHtml(url, await readFile('index.html', 'utf-8'));
+    : await nonNullable(vite).transformIndexHtml(url, await readFile('index.html', 'utf8'));
 
   const { render } = isProduction
     ? await import('../dist/server/entryServer.js')
-    : await vite.ssrLoadModule('./src/entryServer.ts');
+    : await nonNullable(vite).ssrLoadModule('./src/entryServer.ts');
 
   const rendered = await render(url, expressContext);
 
@@ -50,10 +51,10 @@ app.set('trust proxy', true);
 
 app.use(cookieParser());
 
-let vite: ViteDevServer;
+let vite: ViteDevServer | null = null;
 
 if (isProduction) {
-  const compression = (await import('compression')).default;
+  const { default: compression } = await import('compression');
 
   app.use(compression());
 } else {
@@ -73,13 +74,16 @@ if (isProduction) {
   });
 }
 
-app.get('/healthz', (...[, response]) => void response.send('ok'));
+app.get('/healthz', (...[, response]) => response.send('ok'));
 
 app.use((request, response, next) => {
   if (
-    !Object.values(ROUTE_NAME_TO_PATH).some((routePath) => new RegExp(`^/${routePath}(/|$|\\?)`).test(request.path))
+    !Object.values(ROUTE_NAME_TO_PATH).some((routePath) =>
+      new RegExp(String.raw`^/${routePath}(/|$|\?)`).test(request.path),
+    )
   ) {
-    return next();
+    next();
+    return;
   }
 
   if (!isKnownLocale(request.cookies.language)) {
@@ -105,10 +109,11 @@ const syncLocaleCookie: RequestHandler = (request, response, next) => {
 };
 
 const auth: RequestHandler = async (request, response, next) => {
-  const maybeQueryJwt = request.query[KEY_JWT]?.toString();
+  const maybeQueryJwt = request.query[KEY_JWT];
 
-  if (isNil(maybeQueryJwt)) {
-    return next();
+  if (!isString(maybeQueryJwt)) {
+    next();
+    return;
   }
 
   await postAuth(maybeQueryJwt)

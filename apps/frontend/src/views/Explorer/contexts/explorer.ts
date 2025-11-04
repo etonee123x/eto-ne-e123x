@@ -1,7 +1,7 @@
 import { type FolderDataWithSinceTimestamps, getFolderData as _getFolderData } from '@/api/folderData';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
 import { useL10n } from '@/composables/useL10n';
-import { useSSRContext } from '@/composables/useSSRContext';
+import { useSSRContext } from '@/composables/useSsrContext';
 import { isServer } from '@/constants/target';
 import { useGallery } from '@/plugins/gallery';
 import { usePlayer } from '@/plugins/player';
@@ -19,6 +19,9 @@ interface ExplorerContext {
   currentFolderData: () => FolderDataWithSinceTimestamps | undefined;
 }
 
+const routeToMatterPath = (route: RouteLocationNormalizedLoaded) =>
+  Array.isArray(route.params.links) ? '/' + route.params.links.join('/') : '/';
+
 export const INJECTION_KEY_EXPLORER: InjectionKey<ExplorerContext> = Symbol('explorer');
 
 type RoutePathToFolderData = Record<string, FolderDataWithSinceTimestamps>;
@@ -33,12 +36,12 @@ export const provideExplorerContext = () => {
     isServer ? {} : (globalThis.__PAYLOAD__.routePathToFolderData ?? {}),
   );
 
+  const moduleURLResolver = (url: string) => localizePath(`/explorer${url}`);
+
   const maybeSsrContext = isServer ? useSSRContext() : undefined;
 
   const getFolderData = useAsyncStateApi(async (to: RouteLocationNormalizedLoaded) => {
-    const moduleURLResolver = (url: string) => localizePath(`/explorer${url}`);
-
-    const matterPath = '/' + Array.from(to.params.links ?? []).join('/');
+    const matterPath = routeToMatterPath(to);
 
     const maybeFolderData = routePathToFolderData.value[matterPath];
 
@@ -88,12 +91,12 @@ export const provideExplorerContext = () => {
     ) {
       gallery.loadGalleryItem(
         pick(folderDataLinkedFile, ['name', 'src', 'fileType']),
-        folderData?.items.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
-          (acc, folderElement) =>
+        folderData.items.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
+          (accumulator, folderElement) =>
             folderElement.itemType === ITEM_TYPES.FILE &&
             (folderElement.fileType === FILE_TYPES.IMAGE || folderElement.fileType === FILE_TYPES.VIDEO)
-              ? [...acc, pick(folderElement, ['name', 'src', 'fileType'])]
-              : acc,
+              ? [...accumulator, pick(folderElement, ['name', 'src', 'fileType'])]
+              : accumulator,
           [],
         ),
       );
@@ -102,7 +105,7 @@ export const provideExplorerContext = () => {
     return folderData;
   });
 
-  const currentFolderData = () => routePathToFolderData.value['/' + Array.from(route.params.links ?? []).join('/')];
+  const currentFolderData = () => routePathToFolderData.value[routeToMatterPath(route)];
 
   const explorerContext = {
     getFolderData,

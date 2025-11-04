@@ -13,7 +13,6 @@
 </template>
 
 <script setup lang="ts">
-// TODO: переписать на useSwipe?...
 import { type CSSProperties, reactive, computed, useTemplateRef } from 'vue';
 import { useElementSize } from '@vueuse/core';
 
@@ -46,8 +45,8 @@ let wasStarted = false;
 
 const style = reactive<CSSProperties>({});
 
-const onTouchStart = (e: TouchEvent) => {
-  const maybeChangedTouch = e.changedTouches[0];
+const onTouchStart = (event: TouchEvent) => {
+  const maybeChangedTouch = event.changedTouches[0];
 
   if (!maybeChangedTouch) {
     return;
@@ -58,8 +57,8 @@ const onTouchStart = (e: TouchEvent) => {
   style.transition = 'all 0ms';
 };
 
-const onTouchMove = (e: TouchEvent) => {
-  const maybeTouch = e.touches[0];
+const onTouchMove = (event: TouchEvent) => {
+  const maybeTouch = event.touches[0];
 
   if (!(wasStarted && maybeTouch)) {
     return;
