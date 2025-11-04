@@ -7,7 +7,7 @@ import { type SSRContext } from '@/composables/useSSRContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
-  const { app, router, i18n, player, gallery, explorer, blog } = createApp({ url });
+  const { app, router, i18n, player, gallery } = createApp({ url });
 
   app.config.errorHandler = (error) => {
     console.error('Error in app', error);
@@ -51,12 +51,6 @@ export const render = async (url: string, expressContext: ExpressContext) => {
           },
           {
             innerHTML: `window.__GALLERY__ = ${JSON.stringify(gallery.state.value)}`,
-          },
-          {
-            innerHTML: `window.__EXPLORER__ = ${JSON.stringify(explorer.state.value)}`,
-          },
-          {
-            innerHTML: `window.__BLOG__ = ${JSON.stringify(blog.state.value)}`,
           },
         ],
       });

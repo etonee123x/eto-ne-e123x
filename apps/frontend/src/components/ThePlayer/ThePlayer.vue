@@ -103,7 +103,7 @@ import ClientOnly from '../ClientOnly.vue';
 import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
 import { usePlayer } from '@/plugins/player';
-import { useExplorer } from '@/plugins/explorer';
+import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -146,7 +146,7 @@ const isMobile = useIsMobile();
 
 const router = useRouter();
 
-const explorer = useExplorer();
+const explorerContext = useExplorerContext();
 const player = usePlayer();
 const notifications = useNotifications();
 
@@ -225,7 +225,7 @@ const toOnClose = () => {
     return;
   }
 
-  const currentFolderData = explorer.currentFolderData();
+  const currentFolderData = explorerContext.currentFolderData();
 
   const maybeFolderDataLinkedFile = currentFolderData?.linkedFile;
 

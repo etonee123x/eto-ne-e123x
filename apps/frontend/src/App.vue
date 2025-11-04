@@ -33,11 +33,15 @@ import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { _THEME_COLOR } from '@/helpers/ui';
 import { useNotifications } from '@/plugins/notifications';
 import { usePlayer } from '@/plugins/player';
-import { useExplorer } from '@/plugins/explorer';
+import { provideAuthContext } from '@/contexts/auth';
+import { provideExplorerContext } from '@/views/Explorer/contexts/explorer';
 
 const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
 const LazyTheNotifications = defineAsyncComponent(() => import('@/components/TheNotifications.vue'));
 const LazyTheFooter = defineAsyncComponent(() => import('@/components/TheFooter.vue'));
+
+provideAuthContext();
+const explorerContext = provideExplorerContext();
 
 const route = useRoute();
 
@@ -47,9 +51,7 @@ const player = usePlayer();
 const notifications = useNotifications();
 
 if (route.name === ROUTE_NAMES.EXPLORER) {
-  const explorer = useExplorer();
-
-  const getFolderData = () => explorer.getFolderData.execute(route).catch(goToPage404);
+  const getFolderData = () => explorerContext.getFolderData.execute(route).catch(goToPage404);
 
   onServerPrefetch(getFolderData);
   clientOnly(getFolderData);

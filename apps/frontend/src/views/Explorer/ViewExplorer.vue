@@ -2,10 +2,10 @@
   <BasePage :h1="t('content')">
     <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
-      <nav v-if="explorer.getFolderData.state.value?.lvlUp || elements.folders.length" class="contents">
+      <nav v-if="explorerContext.getFolderData.state.value?.lvlUp || elements.folders.length" class="contents">
         <LazyExplorerElementSystem
-          v-if="explorer.getFolderData.state.value?.lvlUp"
-          :to="explorer.getFolderData.state.value.lvlUp"
+          v-if="explorerContext.getFolderData.state.value?.lvlUp"
+          :to="explorerContext.getFolderData.state.value.lvlUp"
           tag="RouterLink"
         >
           ...
@@ -37,7 +37,7 @@ import { isNil } from '@etonee123x/shared/utils/isNil';
 import { useSourcedRef } from '@/composables/useSourcedRef';
 import { usePlayer } from '@/plugins/player';
 import { useGallery } from '@/plugins/gallery';
-import { useExplorer } from '@/plugins/explorer';
+import { useExplorerContext } from './contexts/explorer';
 
 const player = usePlayer();
 const gallery = useGallery();
@@ -73,7 +73,7 @@ const { t } = useI18n({
   },
 });
 
-const explorer = useExplorer();
+const explorerContext = useExplorerContext();
 
 const route = useRoute();
 
@@ -92,7 +92,7 @@ const itemFileToComponent = (itemFile: ItemFile) => {
 
 const elements = computed(
   () =>
-    explorer.getFolderData.state.value?.items.reduce<{
+    explorerContext.getFolderData.state.value?.items.reduce<{
       folders: Array<ItemWithSinceTimestamps<ItemFolder>>;
       files: Array<ItemWithSinceTimestamps<ItemFile>>;
     }>(
@@ -116,11 +116,13 @@ const elements = computed(
     },
 );
 
-const fetchData = (to: RouteLocationNormalizedLoaded) => explorer.getFolderData.execute(to).catch(goToPage404);
+const fetchData = (to: RouteLocationNormalizedLoaded) => explorerContext.getFolderData.execute(to).catch(goToPage404);
 
 clientOnly(() => fetchData(route));
 
-const maybeLastNavigationItemText = computed(() => explorer.getFolderData.state.value?.navigationItems.at(-1)?.text);
+const maybeLastNavigationItemText = computed(
+  () => explorerContext.getFolderData.state.value?.navigationItems.at(-1)?.text,
+);
 
 const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<UnwrapRef<
   typeof player.theTrack | typeof gallery.item

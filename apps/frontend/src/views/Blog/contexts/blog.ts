@@ -1,5 +1,5 @@
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
-import { computed, inject, type FunctionPlugin, type InjectionKey, type Ref, type UnwrapRef } from 'vue';
+import { inject, provide, type InjectionKey, type Ref } from 'vue';
 
 import {
   getPosts as _getPosts,
@@ -14,8 +14,9 @@ import { useSourcedRef } from '@/composables/useSourcedRef';
 import type { ForPost, ForPut } from '@etonee123x/shared/types/database';
 import type { Post } from '@etonee123x/shared/types/blog';
 import type { Id } from '@etonee123x/shared/helpers/id';
+import { nonNullable } from '@/utils/nonNullable';
 
-interface Context {
+interface BlogContext {
   getPosts: ReturnType<
     typeof useAsyncStateApi<Array<PostWithMetaWithSinseTimestamps>, [], [Partial<{ shouldReset: boolean }>] | []>
   >;
@@ -40,9 +41,9 @@ interface Context {
   all: Ref<Array<PostWithMetaWithSinseTimestamps>>;
 }
 
-export const INJECTION_KEY_BLOG: InjectionKey<Context> = Symbol('blog');
+export const INJECTION_KEY_BLOG: InjectionKey<BlogContext> = Symbol('blog');
 
-export const createBlog = () => {
+export const provideBlogContext = () => {
   const [all, resetAll] = useSourcedRef<Array<PostWithMetaWithSinseTimestamps>>([]);
   const [page, resetPage] = useSourcedRef(0);
   const [isEnd, resetIsEnd] = useSourcedRef(false);
@@ -79,40 +80,20 @@ export const createBlog = () => {
 
   const deletePostById = useAsyncStateApi(_deletePost);
 
-  const install: FunctionPlugin = (app, options: Partial<UnwrapRef<Pick<Context, 'all' | 'isEnd' | 'page'>>> = {}) => {
-    isEnd.value = options.isEnd ?? isEnd.value;
-    page.value = options.page ?? page.value;
-    all.value = options.all ?? all.value;
-
-    app.provide(INJECTION_KEY_BLOG, {
-      getPosts,
-      postPost,
-      putPostById,
-      getPostById,
-      deletePostById,
-      isEnd,
-      page,
-      all,
-    });
+  const blogContext = {
+    getPosts,
+    postPost,
+    putPostById,
+    getPostById,
+    deletePostById,
+    isEnd,
+    page,
+    all,
   };
 
-  return {
-    install,
+  provide(INJECTION_KEY_BLOG, blogContext);
 
-    state: computed(() => ({
-      isEnd: isEnd.value,
-      page: page.value,
-      all: all.value,
-    })),
-  };
+  return blogContext;
 };
 
-export const useBlog = () => {
-  const blog = inject(INJECTION_KEY_BLOG);
-
-  if (!blog) {
-    throw new Error('Blog plugin is not installed');
-  }
-
-  return blog;
-};
+export const useBlogContext = () => nonNullable(inject(INJECTION_KEY_BLOG));

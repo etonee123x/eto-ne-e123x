@@ -1,5 +1,5 @@
 import type { FetchError } from 'ofetch';
-import { computed, getCurrentInstance, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { isServer } from '@/constants/target';
 import { nonNullable } from '@/utils/nonNullable';
 import { useSourcedRef } from '@/composables/useSourcedRef';
@@ -14,7 +14,6 @@ type Options<Data> = Partial<{
 }>;
 
 type UseAsyncStateApiParametersWithKey<
-  //
   Data,
   InitialState extends Data | undefined,
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -63,6 +62,7 @@ export const useAsyncStateApi = <
   const state = ref(initialState as InitialState extends undefined ? Data | undefined : Data);
 
   const [promise, resetPromise] = useSourcedRef<Promise<Data> | null>(null);
+  const loadingSources = useLoadingSources();
 
   const isLoading = computed(() => Boolean(promise.value));
 
@@ -115,8 +115,6 @@ export const useAsyncStateApi = <
   };
 
   const execute = async (...parameters: Params) => {
-    const loadingSources = useLoadingSources();
-
     const promise = _execute(...parameters)
       .catch(_onError)
       .finally(() => loadingSources.delete(promise));

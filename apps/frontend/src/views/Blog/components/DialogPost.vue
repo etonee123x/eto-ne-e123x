@@ -1,9 +1,9 @@
 <template>
   <BaseDialog isHiddenHeader v-model="isDialogOpen" @close="onDialogClose">
-    <article v-if="blog.getPostById.state.value">
+    <article v-if="blogContext.getPostById.state.value">
       <PostData
         class="max-w-full w-full h-full max-h-[calc(90dvh-2*4*var(--spacing)-6*var(--spacing)-2*var(--spacing))] overflow-y-auto"
-        :post="blog.getPostById.state.value"
+        :post="blogContext.getPostById.state.value"
       />
     </article>
     <template #footer>
@@ -39,7 +39,7 @@ import { useToggle } from '@vueuse/core';
 import PostData from './PostData.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
-import { useBlog } from '@/plugins/blog';
+import { useBlogContext } from '../contexts/blog';
 
 const { t } = useI18n({
   useScope: 'local',
@@ -61,25 +61,28 @@ const { t } = useI18n({
 
 const router = useRouter();
 
-const blog = useBlog();
+const blogContext = useBlogContext();
 
-const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(blog.getPostById.state.value));
+const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(blogContext.getPostById.state.value));
 
 const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() =>
-  blog.getPostById.state.value ? -blog.getPostById.state.value._meta.sinceCreated : null,
+  blogContext.getPostById.state.value ? -blogContext.getPostById.state.value._meta.sinceCreated : null,
 );
 
 const createdAt = computed(
-  () => blog.getPostById.state.value && new Date(blog.getPostById.state.value._meta.createdAt).toISOString(),
+  () =>
+    blogContext.getPostById.state.value && new Date(blogContext.getPostById.state.value._meta.createdAt).toISOString(),
 );
 
 const sinceUpdatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() =>
-  isNotNil(blog.getPostById.state.value?._meta.sinceUpdated) ? -blog.getPostById.state.value._meta.sinceUpdated : null,
+  isNotNil(blogContext.getPostById.state.value?._meta.sinceUpdated)
+    ? -blogContext.getPostById.state.value._meta.sinceUpdated
+    : null,
 );
 
 const updatedAt = computed(() =>
-  isNotNil(blog.getPostById.state.value?._meta.updatedAt)
-    ? new Date(blog.getPostById.state.value._meta.updatedAt).toISOString()
+  isNotNil(blogContext.getPostById.state.value?._meta.updatedAt)
+    ? new Date(blogContext.getPostById.state.value._meta.updatedAt).toISOString()
     : null,
 );
 
@@ -87,5 +90,5 @@ const onDialogClose = () => {
   router.push({ name: ROUTE_NAMES.BLOG });
 };
 
-watchEffect(() => toggleIsDialogOpen(Boolean(blog.getPostById.state.value)));
+watchEffect(() => toggleIsDialogOpen(Boolean(blogContext.getPostById.state.value)));
 </script>

@@ -15,7 +15,7 @@
           </time>
         </template>
       </div>
-      <div v-if="auth.isAdmin.value" class="flex justify-end border-t border-t-dark p-1 gap-2">
+      <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-dark p-1 gap-2">
         <BaseButton
           v-for="control in controls"
           class="p-0.5"
@@ -46,8 +46,8 @@ import BaseButton from '@/components/ui/BaseButton';
 import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
-import { useAuth } from '@/plugins/auth';
-import { useBlog } from '@/plugins/blog';
+import { useAuthContext } from '@/contexts/auth';
+import { useBlogContext } from '../contexts/blog';
 
 const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
 
@@ -63,9 +63,9 @@ const emit = defineEmits<{
 
 const blogEditPost = useTemplateRef<InstanceType<typeof LazyBlogEditPost>>('blogEditPost');
 
-const blog = useBlog();
+const blogContext = useBlogContext();
 
-const auth = useAuth();
+const authContext = useAuthContext();
 
 const { t } = useI18n({
   useScope: 'local',
@@ -86,7 +86,7 @@ const { t } = useI18n({
 });
 
 const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) => {
-  blog.putPostById
+  blogContext.putPostById
     .execute(
       props.post._meta.id,
       {
@@ -95,7 +95,7 @@ const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postD
       },
       files,
     )
-    .then(() => blog.getPosts.execute({ shouldReset: true }));
+    .then(() => blogContext.getPosts.execute({ shouldReset: true }));
 
   closeEditMode();
 };
@@ -145,7 +145,7 @@ const controls = computed(() => [
           key: 'save',
           iconPath: mdiContentSave,
           isDisabled: props.post.text === blogEditPost.value?.postData.text,
-          isLoading: blog.putPostById.isLoading.value,
+          isLoading: blogContext.putPostById.isLoading.value,
           onClick: () => blogEditPost.value?.requestSubmit(),
         },
       ]
@@ -156,7 +156,7 @@ const controls = computed(() => [
         {
           key: 'edit',
           iconPath: mdiPencil,
-          isLoading: blog.putPostById.isLoading.value,
+          isLoading: blogContext.putPostById.isLoading.value,
           onClick: () => {
             emit('changeEditModeFor', props.post._meta.id);
 
@@ -168,13 +168,15 @@ const controls = computed(() => [
   {
     key: 'delete',
     iconPath: mdiDelete,
-    isLoading: blog.deletePostById.isLoading.value,
+    isLoading: blogContext.deletePostById.isLoading.value,
     onClick: async () => {
       if (!(await props.onBeforeDelete())) {
         return;
       }
 
-      return blog.deletePostById.execute(props.post._meta.id).then(() => blog.getPosts.execute({ shouldReset: true }));
+      return blogContext.deletePostById
+        .execute(props.post._meta.id)
+        .then(() => blogContext.getPosts.execute({ shouldReset: true }));
     },
   },
 ]);

@@ -48,7 +48,7 @@ import { useCookies } from '@vueuse/integrations/useCookies.mjs';
 import { useRouter } from 'vue-router';
 import { pick } from '@etonee123x/shared/utils/pick';
 import { useLoadingSources } from '@/plugins/loadingSources';
-import { useAuth } from '@/plugins/auth';
+import { useAuthContext } from '@/contexts/auth';
 
 const { localizeRoute } = useL10n();
 
@@ -82,7 +82,7 @@ const { t } = useI18n({
 
 const loadingSources = useLoadingSources();
 
-const auth = useAuth();
+const authContext = useAuthContext();
 
 const links = computed(() => [
   {
@@ -106,13 +106,13 @@ const cookies = useCookies(['language']);
 const localeInfo = useLocaleInfo();
 
 const buttons = computed(() => [
-  ...(auth.isAdmin.value
+  ...(authContext.isAdmin.value
     ? [
         {
           key: 'logout',
           Component: IconLogout,
           ariaLabel: t('logout'),
-          onClick: auth.deleteAuth.execute,
+          onClick: authContext.deleteAuth.execute,
         },
       ]
     : []),

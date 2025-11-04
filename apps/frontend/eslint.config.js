@@ -1,5 +1,4 @@
 import globals from 'globals';
-import stylistic from '@stylistic/eslint-plugin';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
@@ -38,41 +37,6 @@ export default [
   {
     name: 'files pattern',
     files: ['**/*.{js,mjs,cjs,ts,vue}'],
-  },
-  {
-    name: 'stylistic',
-    plugins: {
-      '@stylistic/js': stylistic,
-      '@stylistic/ts': stylistic,
-    },
-    rules: {
-      '@stylistic/js/semi': ['error', 'always'],
-      '@stylistic/js/block-spacing': ['error', 'always'],
-      '@stylistic/js/comma-dangle': ['error', 'always-multiline'],
-      '@stylistic/js/lines-around-comment': [
-        'error',
-        {
-          beforeBlockComment: false,
-          allowBlockStart: true,
-          allowObjectStart: true,
-          allowArrayStart: true,
-        },
-      ],
-      '@stylistic/js/padding-line-between-statements': [
-        'error',
-        {
-          blankLine: 'always',
-          prev: '*',
-          next: ['return', 'export', 'function'],
-        },
-        { blankLine: 'always', prev: ['const', 'let', 'var'], next: '*' },
-        {
-          blankLine: 'any',
-          prev: ['const', 'let', 'var'],
-          next: ['const', 'let', 'var'],
-        },
-      ],
-    },
   },
   {
     name: 'typescript',

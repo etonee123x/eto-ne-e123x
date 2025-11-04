@@ -7,18 +7,17 @@ import { nonNullable } from '@/utils/nonNullable';
 import { isRealObject } from '@etonee123x/shared/utils/isRealObject';
 import { isString } from '@etonee123x/shared/utils/isString';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
-import { computed, inject, type FunctionPlugin } from 'vue';
-import type { ComputedRef, InjectionKey } from 'vue';
+import { computed, inject, provide, type ComputedRef, type InjectionKey } from 'vue';
 
-interface Auth {
+interface AuthContext {
   postAuth: ReturnType<typeof useAsyncStateApi<Awaited<ReturnType<typeof _postAuth>>>>;
   deleteAuth: ReturnType<typeof useAsyncStateApi<Awaited<ReturnType<typeof _deleteAuth>>>>;
   isAdmin: ComputedRef<boolean>;
 }
 
-export const INJECTION_KEY_AUTH: InjectionKey<Auth> = Symbol('auth');
+export const INJECTION_KEY_AUTH: InjectionKey<AuthContext> = Symbol('auth');
 
-export const auth: FunctionPlugin = (app) => {
+export const provideAuthContext = () => {
   const getJwtCookie = useGetCookie(KEY_JWT);
 
   const postAuth = useAsyncStateApi(_postAuth);
@@ -43,7 +42,7 @@ export const auth: FunctionPlugin = (app) => {
     return isRealObject(jwtParsed) && 'isAdmin' in jwtParsed && jwtParsed.isAdmin === true;
   });
 
-  app.provide(INJECTION_KEY_AUTH, {
+  provide(INJECTION_KEY_AUTH, {
     postAuth,
     deleteAuth,
 
@@ -51,12 +50,4 @@ export const auth: FunctionPlugin = (app) => {
   });
 };
 
-export const useAuth = () => {
-  const auth = inject(INJECTION_KEY_AUTH);
-
-  if (!auth) {
-    throw new Error('Auth plugin is not installed');
-  }
-
-  return auth;
-};
+export const useAuthContext = () => nonNullable(inject(INJECTION_KEY_AUTH));

@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { extensionToFileType, FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
 import { useGallery } from '@/plugins/gallery';
-import { useBlog } from '@/plugins/blog';
+import { useBlogContext } from '../contexts/blog';
 
 const LazyAttachmentWithUnknownExtension = defineAsyncComponent(() => import('./AttachmentWithUnknownExtension.vue'));
 const LazyPreviewVideo = defineAsyncComponent(() => import('@/components/PreviewVideo.vue'));
@@ -33,7 +33,7 @@ const { t } = useI18n({
 });
 
 const gallery = useGallery();
-const blog = useBlog();
+const blogContext = useBlogContext();
 
 const getFileUrlExtension = (url: string) => url.match(/\.[^.]*$/gim)?.[0];
 
@@ -64,7 +64,7 @@ const loadToGallery = () => {
       src: props.fileUrl,
       fileType,
     },
-    blog.getPosts.state.value.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
+    blogContext.getPosts.state.value.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
       (acc, post) => [
         ...acc,
         ...post.filesUrls.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((acc, fileUrl) => {

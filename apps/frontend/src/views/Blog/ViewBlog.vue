@@ -1,8 +1,8 @@
 <template>
   <BasePage :h1="t('blog')">
-    <template v-if="auth.isAdmin.value">
+    <template v-if="authContext.isAdmin.value">
       <LazyBlogEditPost ref="lazyBlogEditPost" @submit="onSubmit">
-        <BaseButton type="submit" :isLoading="blog.postPost.isLoading.value">
+        <BaseButton type="submit" :isLoading="blogContext.postPost.isLoading.value">
           {{ t('send') }}
         </BaseButton>
       </LazyBlogEditPost>
@@ -11,7 +11,7 @@
 
     <template v-if="hasPosts">
       <BlogPost
-        v-for="post in blog.getPosts.state.value"
+        v-for="post in blogContext.getPosts.state.value"
         class="not-last:mb-4"
         :post
         :onBeforeDelete
@@ -20,10 +20,13 @@
         @changeEditModeFor="onChangeEditModeFor"
       />
     </template>
-    <div v-else-if="!blog.getPosts.isLoading.value" class="text-lg flex justify-center items-center flex-1 h-full">
+    <div
+      v-else-if="!blogContext.getPosts.isLoading.value"
+      class="text-lg flex justify-center items-center flex-1 h-full"
+    >
       {{ t('nothingWasFound') }}
     </div>
-    <LazyBaseLoading v-if="blog.getPosts.isLoading.value" isFull class="flex justify-center" />
+    <LazyBaseLoading v-if="blogContext.getPosts.isLoading.value" isFull class="flex justify-center" />
 
     <DialogConfirmation
       :title="t('confirmDelete')"
@@ -56,8 +59,8 @@ import { clientOnly } from '@/helpers/clientOnly';
 import BaseButton from '@/components/ui/BaseButton';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
-import { useAuth } from '@/plugins/auth';
-import { useBlog } from '@/plugins/blog';
+import { useAuthContext } from '@/contexts/auth';
+import { provideBlogContext } from './contexts/blog';
 
 const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
 
@@ -98,30 +101,30 @@ const editModeFor = ref<Id | null>(null);
 
 const route = useRoute();
 
-const blog = useBlog();
+const blogContext = provideBlogContext();
 
-const auth = useAuth();
+const authContext = useAuthContext();
 
-const hasPosts = computed(() => Boolean(blog.getPosts.state.value.length));
+const hasPosts = computed(() => Boolean(blogContext.getPosts.state.value.length));
 
 const goToPage404 = useGoToPage404();
 
 useInfiniteScroll(
   isClient ? document.body : null,
   () =>
-    blog.getPosts
+    blogContext.getPosts
       .execute()
       .then(() => undefined)
       // чтобы не спамить запросами при ошибке (когда нет интернета)
       .catch(() => new Promise((resolve) => setTimeout(resolve, 1000))),
   {
-    canLoadMore: () => !(blog.getPosts.isLoading.value || blog.isEnd.value),
+    canLoadMore: () => !(blogContext.getPosts.isLoading.value || blogContext.isEnd.value),
     distance: 100,
   },
 );
 
 const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) =>
-  blog.postPost.execute(postData, files).then(() => blog.getPosts.execute({ shouldReset: true }));
+  blogContext.postPost.execute(postData, files).then(() => blogContext.getPosts.execute({ shouldReset: true }));
 
 const onBeforeDelete = async () => {
   dialogConfirmationDelete.value?.open();
@@ -137,11 +140,11 @@ const onChangeEditModeFor: NonNullable<InstanceType<typeof BlogPost>['onChangeEd
 
 const fetchData = () =>
   Promise.all([
-    blog.getPosts.execute(),
+    blogContext.getPosts.execute(),
     ...(isNotNil(route.params.postId)
       ? [
           //
-          blog.getPostById.execute(toId(String(route.params.postId))).catch(goToPage404),
+          blogContext.getPostById.execute(toId(String(route.params.postId))).catch(goToPage404),
         ]
       : []),
   ]);
@@ -151,12 +154,12 @@ if (!isServer) {
     () => route.params.postId,
     async () => {
       if (isNotNil(route.params.postId)) {
-        await blog.getPostById.execute(toId(String(route.params.postId)));
+        await blogContext.getPostById.execute(toId(String(route.params.postId)));
 
         return;
       }
 
-      blog.getPostById.state.value = undefined;
+      blogContext.getPostById.state.value = undefined;
     },
   );
 }
@@ -165,6 +168,6 @@ onServerPrefetch(fetchData);
 clientOnly(fetchData);
 
 useSeoMeta({
-  description: () => (blog.getPostById.state.value ? t('myBlog') : t('microblogWithNoClearDirection')),
+  description: () => (blogContext.getPostById.state.value ? t('myBlog') : t('microblogWithNoClearDirection')),
 });
 </script>

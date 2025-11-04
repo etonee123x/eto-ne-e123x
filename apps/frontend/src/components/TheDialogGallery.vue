@@ -28,13 +28,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
 import { ROUTE_NAMES } from '@/router';
 import { useGallery } from '@/plugins/gallery';
-import { useExplorer } from '@/plugins/explorer';
+import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
 
 const router = useRouter();
 const route = useRoute();
 
 const gallery = useGallery();
-const explorer = useExplorer();
+const explorerContext = useExplorerContext();
 
 onKeyStroke('ArrowRight', gallery.next);
 onKeyStroke('ArrowLeft', gallery.prev);
@@ -73,7 +73,7 @@ const onClose = () => {
     return;
   }
 
-  const currentFolderData = explorer.currentFolderData();
+  const currentFolderData = explorerContext.currentFolderData();
 
   if (!currentFolderData?.linkedFile) {
     return;
