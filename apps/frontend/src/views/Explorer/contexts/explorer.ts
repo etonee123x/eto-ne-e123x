@@ -1,6 +1,8 @@
 import { type FolderDataWithSinceTimestamps, getFolderData as _getFolderData } from '@/api/folderData';
 import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
 import { useL10n } from '@/composables/useL10n';
+import { useSSRContext } from '@/composables/useSSRContext';
+import { isServer } from '@/constants/target';
 import { useGallery } from '@/plugins/gallery';
 import { usePlayer } from '@/plugins/player';
 import { nonNullable } from '@/utils/nonNullable';
@@ -27,7 +29,11 @@ export const provideExplorerContext = () => {
   const player = usePlayer();
   const gallery = useGallery();
 
-  const routePathToFolderData = shallowRef<RoutePathToFolderData>({});
+  const routePathToFolderData = shallowRef<RoutePathToFolderData>(
+    isServer ? {} : (globalThis.__PAYLOAD__.routePathToFolderData ?? {}),
+  );
+
+  const maybeSsrContext = isServer ? useSSRContext() : undefined;
 
   const getFolderData = useAsyncStateApi(async (to: RouteLocationNormalizedLoaded) => {
     const moduleURLResolver = (url: string) => localizePath(`/explorer${url}`);
@@ -57,6 +63,10 @@ export const provideExplorerContext = () => {
         .catch(throwError));
 
     routePathToFolderData.value[matterPath] = folderData;
+
+    if (maybeSsrContext) {
+      maybeSsrContext.payload.routePathToFolderData = routePathToFolderData.value;
+    }
 
     const folderDataLinkedFile = folderData.linkedFile;
 
