@@ -109,7 +109,7 @@
     --shade-700: 70%;
     --shade-800: 55%;
     --shade-900: 35%;
-    --shade-999: 20%;
+    --shade-999: 18%;
   }
 
   * {
@@ -132,7 +132,7 @@
       /* Фолбек */
       sans-serif;
 
-    @apply overflow-y-auto h-dvh overflow-x-hidden text-text bg-background;
+    @apply overflow-y-auto has-[dialog[open]]:overflow-hidden h-dvh overflow-x-hidden text-text bg-background;
 
     --color-text: var(--color-details-999);
     --color-background: var(--color-details-1);
@@ -335,7 +335,7 @@
     }
 
     .dialog__backdrop {
-      @apply fixed inset-0 bg-dark/25 -z-1;
+      @apply fixed inset-0 bg-dark opacity-40 -z-1;
     }
   }
 }
