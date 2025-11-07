@@ -97,7 +97,7 @@
     --vw: 100dvw;
     --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
 
-    --tone-1: 96%;
+    --tone-1: 97%;
     --tone-10: 92%;
     --tone-50: 88%;
     --tone-75: 80%;
@@ -109,7 +109,7 @@
     --shade-700: 70%;
     --shade-800: 55%;
     --shade-900: 35%;
-    --shade-999: 18%;
+    --shade-999: 16%;
   }
 
   * {
@@ -227,6 +227,62 @@
 
   ._theme-color_magenta {
     --accent: #e11dff;
+  }
+
+  ._theme-color_mr-grey {
+    --accent: #6b7280;
+  }
+
+  ._theme-color_brown {
+    --accent: #a0522d;
+  }
+
+  ._theme-color_orange {
+    --accent: #ff7f2a;
+  }
+
+  ._theme-color_purple {
+    --accent: #a855f7;
+  }
+
+  ._theme-color_yellow {
+    --accent: #eab308;
+  }
+
+  ._theme-color_teal {
+    --accent: #14b8a6;
+  }
+
+  ._theme-color_pink {
+    --accent: #ec4899;
+  } 
+
+  ._theme-color_lime {
+    --accent: #84cc16;
+  }
+
+  ._theme-color_indigo {
+    --accent: #6366f1;
+  }
+
+  ._theme-color_sky {
+    --accent: #0ea5e9;
+  }
+
+  ._theme-color_violet {
+    --accent: #8b5cf6;
+  }
+
+  ._theme-color_emerald {
+    --accent: #10b981;
+  }
+
+  ._theme-color_rose {
+    --accent: #f43f5e;
+  }
+
+  ._theme-color_fuchsia {
+    --accent: #d946ef;
   }
 }
 
