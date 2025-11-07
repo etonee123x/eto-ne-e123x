@@ -3,6 +3,7 @@
 @theme {
   --color-success: #00ff00;
   --color-error: #ff0000;
+  --color-text-black: #111111;
 
   --z-player: 1000;
   --z-index-modal: 10000;
@@ -97,7 +98,6 @@
     --vw: 100dvw;
     --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
 
-    --tone-1: 97%;
     --tone-10: 92%;
     --tone-50: 88%;
     --tone-75: 80%;
@@ -109,7 +109,7 @@
     --shade-700: 70%;
     --shade-800: 55%;
     --shade-900: 35%;
-    --shade-999: 16%;
+    --shade-999: 20%;
   }
 
   * {
@@ -134,26 +134,30 @@
 
     @apply overflow-y-auto has-[dialog[open]]:overflow-hidden h-dvh overflow-x-hidden text-text bg-background;
 
-    --color-text: var(--color-details-999);
-    --color-background: var(--color-details-1);
+    --theme-base: white;
 
-    --color-items: var(--color-details-1);
-    --color-items-hovered: var(--color-details-10);
+    --color-text: var(--color-text-black);
+    --color-background: white;
 
-    --color-folders: var(--color-details-75);
-    --color-folders-hovered: var(--color-details-100);
+    --color-items: color-mix(in oklch, var(--theme-base) 90%, var(--color-details-500));
+    --color-items-hovered: color-mix(in oklch, var(--theme-base) 80%, var(--color-details-400));
+
+    --color-folders: color-mix(in oklch, var(--theme-base) 50%, var(--color-details-500));
+    --color-folders-hovered: color-mix(in oklch, var(--theme-base) 60%, var(--color-details-400));
 
     --color-dark: var(--color-details-700);
 
     @media (prefers-color-scheme: dark) {
-      --color-text: var(--color-details-1);
-      --color-background: var(--color-details-999);
+      --theme-base: #101010;
 
-      --color-items: var(--color-details-999);
-      --color-items-hovered: var(--color-details-900);
+      --color-text: white;
+      --color-background: color-mix(in oklch, var(--theme-base) 75%, var(--color-details-900));
 
-      --color-folders: var(--color-details-900);
-      --color-folders-hovered: var(--color-details-800);
+      --color-items: color-mix(in oklch, var(--theme-base) 85%, var(--color-details-500));
+      --color-items-hovered: color-mix(in oklch, var(--theme-base) 90%, var(--color-details-600));
+
+      --color-folders: color-mix(in oklch, var(--theme-base) 50%, var(--color-details-500));
+      --color-folders-hovered: color-mix(in oklch, var(--theme-base) 55%, var(--color-details-600));
 
       --color-dark: var(--color-details-700);
     }
@@ -193,7 +197,6 @@
   }
 
   ._theme-color {
-    --color-details-1: color-mix(in oklch, white var(--tone-1), var(--accent));
     --color-details-10: color-mix(in oklch, white var(--tone-10), var(--accent));
     --color-details-50: color-mix(in oklch, white var(--tone-50), var(--accent));
     --color-details-75: color-mix(in oklch, white var(--tone-75), var(--accent));
@@ -207,82 +210,6 @@
     --color-details-800: color-mix(in oklch, var(--accent) var(--shade-800), black);
     --color-details-900: color-mix(in oklch, var(--accent) var(--shade-900), black);
     --color-details-999: color-mix(in oklch, var(--accent) var(--shade-999), black);
-  }
-
-  ._theme-color_red {
-    --accent: #ff2b2b;
-  }
-
-  ._theme-color_blue {
-    --accent: #2b6bff;
-  }
-
-  ._theme-color_green {
-    --accent: #22c55e;
-  }
-
-  ._theme-color_cyan {
-    --accent: #06b6d4;
-  }
-
-  ._theme-color_magenta {
-    --accent: #e11dff;
-  }
-
-  ._theme-color_mr-grey {
-    --accent: #6b7280;
-  }
-
-  ._theme-color_brown {
-    --accent: #a0522d;
-  }
-
-  ._theme-color_orange {
-    --accent: #ff7f2a;
-  }
-
-  ._theme-color_purple {
-    --accent: #a855f7;
-  }
-
-  ._theme-color_yellow {
-    --accent: #eab308;
-  }
-
-  ._theme-color_teal {
-    --accent: #14b8a6;
-  }
-
-  ._theme-color_pink {
-    --accent: #ec4899;
-  } 
-
-  ._theme-color_lime {
-    --accent: #84cc16;
-  }
-
-  ._theme-color_indigo {
-    --accent: #6366f1;
-  }
-
-  ._theme-color_sky {
-    --accent: #0ea5e9;
-  }
-
-  ._theme-color_violet {
-    --accent: #8b5cf6;
-  }
-
-  ._theme-color_emerald {
-    --accent: #10b981;
-  }
-
-  ._theme-color_rose {
-    --accent: #f43f5e;
-  }
-
-  ._theme-color_fuchsia {
-    --accent: #d946ef;
   }
 }
 

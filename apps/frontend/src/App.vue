@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import { defineAsyncComponent, onServerPrefetch } from 'vue';
+import themes from '@/assets/styles/themes.json';
 
 import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
@@ -30,11 +31,11 @@ import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
-import { _THEME_COLOR } from '@/helpers/ui';
 import { useNotifications } from '@/plugins/notifications';
 import { usePlayer } from '@/plugins/player';
 import { provideAuthContext } from '@/contexts/auth';
 import { provideExplorerContext } from '@/views/Explorer/contexts/explorer';
+import { nonNullable } from '@/utils/nonNullable';
 
 const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
 const LazyTheNotifications = defineAsyncComponent(() => import('@/components/TheNotifications.vue'));
@@ -74,13 +75,19 @@ useHead({
 });
 
 if (isServer) {
-  const THEME_COLORS = Object.values(_THEME_COLOR);
-
   useHead({
+    style: [
+      {
+        textContent: themes.reduce(
+          (textContent, theme) => textContent + `._theme-color_${theme.title} { --accent: ${theme.accentValue}; }\n`,
+          '',
+        ),
+      },
+    ],
     bodyAttrs: {
       // Всё ок
       // eslint-disable-next-line sonarjs/pseudo-random
-      class: ['_theme-color', THEME_COLORS[Math.floor(Math.random() * THEME_COLORS.length)]],
+      class: ['_theme-color', `_theme-color_${nonNullable(themes[Math.floor(Math.random() * themes.length)]).title}`],
     },
   });
 }
