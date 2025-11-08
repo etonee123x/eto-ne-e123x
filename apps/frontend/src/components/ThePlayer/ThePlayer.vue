@@ -1,9 +1,5 @@
 <template>
-  <BaseSwipable
-    data-player
-    class="bg-background z-player shadow-[0_-2px_4px_0_rgba(34,60,80,0.2)] py-2 w-full"
-    @swiped="onSwiped"
-  >
+  <BaseSwipable data-player class="bg-background z-player shadow-primary-500 shadow-2xl py-2 w-full" @swiped="onSwiped">
     <div class="layout-container flex flex-col gap-1 justify-center">
       <component
         :is="ComponentClose"

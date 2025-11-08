@@ -10,7 +10,7 @@
   >
     <div
       :style
-      class="bg-details-100 h-1 relative after:absolute after:bg-details-500 after:h-full after:w-(--width)"
+      class="bg-primary-100 h-1 relative after:absolute after:bg-primary-500 after:h-full after:w-(--width)"
     />
   </div>
 </template>

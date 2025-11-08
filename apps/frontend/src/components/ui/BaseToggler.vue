@@ -1,5 +1,5 @@
 <template>
-  <BaseButton :class="model && 'text-details-500 border-details-500'" @click="onClick">
+  <BaseButton :class="model && 'text-primary-500 border-primary-500'" @click="onClick">
     <slot />
   </BaseButton>
 </template>

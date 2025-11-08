@@ -1,5 +1,5 @@
 <template>
-  <header class="border-b border-b-details-500 relative">
+  <header class="border-b border-b-primary-500 relative">
     <ClientOnly v-if="loadingSources.size > 0">
       <div
         class="after:opacity-30 after:absolute after:bottom-0 after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-dark after:animate-runner"
@@ -8,7 +8,7 @@
     <div class="layout-container flex items-center py-2 gap-4">
       <nav class="flex items-end gap-4">
         <RouterLink
-          exactActiveClass="text-details-500"
+          exactActiveClass="text-primary-500"
           :to="localizeRoute({ name: ROUTE_NAMES.INDEX })"
           class="text-xl"
         >
@@ -16,7 +16,7 @@
         </RouterLink>
         <ul class="flex gap-2">
           <li v-for="link in links" :key="link.key">
-            <RouterLink :to="link.to" activeClass="text-details-500">
+            <RouterLink :to="link.to" activeClass="text-primary-500">
               {{ link.text }}
             </RouterLink>
           </li>
