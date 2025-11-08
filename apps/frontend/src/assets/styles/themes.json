@@ -1,78 +1,78 @@
 [
   {
     "title": "red",
-    "accent": "#ff2b2b"
+    "accent": "oklch(0.600 0.200 27.5deg)"
   },
   {
     "title": "blue",
-    "accent": "#2b6bff"
+    "accent": "oklch(0.600 0.200 263.3deg)"
   },
   {
     "title": "green",
-    "accent": "#22c55e"
+    "accent": "oklch(0.600 0.200 149.6deg)"
   },
   {
     "title": "cyan",
-    "accent": "#06b6d4"
+    "accent": "oklch(0.600 0.200 215.2deg)"
   },
   {
     "title": "magenta",
-    "accent": "#e11dff"
+    "accent": "oklch(0.600 0.200 321.4deg)"
   },
   {
     "title": "mr-grey",
-    "accent": "#6b7280"
+    "accent": "oklch(0.600 0.200 264.4deg)"
   },
   {
     "title": "brown",
-    "accent": "#a0522d"
+    "accent": "oklch(0.600 0.200 44.6deg)"
   },
   {
     "title": "orange",
-    "accent": "#ff7f2a"
+    "accent": "oklch(0.600 0.200 49.0deg)"
   },
   {
     "title": "purple",
-    "accent": "#a855f7"
+    "accent": "oklch(0.600 0.200 303.9deg)"
   },
   {
     "title": "yellow",
-    "accent": "#eab308"
+    "accent": "oklch(0.600 0.200 86.0deg)"
   },
   {
     "title": "teal",
-    "accent": "#14b8a6"
+    "accent": "oklch(0.600 0.200 182.5deg)"
   },
   {
     "title": "pink",
-    "accent": "#ec4899"
+    "accent": "oklch(0.600 0.200 354.3deg)"
   },
   {
     "title": "lime",
-    "accent": "#84cc16"
+    "accent": "oklch(0.600 0.200 130.8deg)"
   },
   {
     "title": "indigo",
-    "accent": "#6366f1"
+    "accent": "oklch(0.600 0.200 277.1deg)"
   },
   {
     "title": "sky",
-    "accent": "#0ea5e9"
+    "accent": "oklch(0.600 0.200 237.3deg)"
   },
   {
     "title": "violet",
-    "accent": "#8b5cf6"
+    "accent": "oklch(0.600 0.200 292.7deg)"
   },
   {
     "title": "emerald",
-    "accent": "#10b981"
+    "accent": "oklch(0.600 0.200 162.5deg)"
   },
   {
     "title": "rose",
-    "accent": "#f43f5e"
+    "accent": "oklch(0.600 0.200 16.4deg)"
   },
   {
     "title": "fuchsia",
-    "accent": "#d946ef"
+    "accent": "oklch(0.600 0.200 322.1deg)"
   }
 ]
