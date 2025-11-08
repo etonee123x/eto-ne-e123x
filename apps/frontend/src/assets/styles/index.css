@@ -57,6 +57,7 @@
 @theme inline {
   --color-text: var(--color-text);
   --color-background: var(--color-background);
+  --color-background-secondary: var(--color-background-secondary);
 
   --color-items: var(--color-items);
   --color-items-hovered: var(--color-items-hovered);
@@ -139,6 +140,7 @@
 
     --color-text: var(--color-text-black);
     --color-background: white;
+    --color-background-secondary: var(--color-primary-200);
 
     --color-items: color-mix(in oklch, var(--theme-base) 90%, var(--color-primary-500));
     --color-items-hovered: color-mix(in oklch, var(--theme-base) 80%, var(--color-primary-400));
@@ -148,11 +150,13 @@
 
     --color-dark: var(--color-primary-700);
 
+
     @media (prefers-color-scheme: dark) {
       --theme-base: #101010;
 
       --color-text: white;
       --color-background: color-mix(in oklch, var(--theme-base) 75%, var(--color-primary-900));
+      --color-background-secondary: var(--color-primary-900);
 
       --color-items: color-mix(in oklch, var(--theme-base) 85%, var(--color-primary-500));
       --color-items-hovered: color-mix(in oklch, var(--theme-base) 90%, var(--color-primary-600));
@@ -224,10 +228,22 @@
 
   .button {
     all: unset;
-    @apply bg-items border border-dark border-solid rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-items-hovered;
+
+    --button-color: white;
+    --button-background-color: var(--color-primary-500);
+    --button-hover-background-color: var(--color-primary-600);
+    --button-border-color: var(--color-dark);
+
+    @apply text-(--button-color) bg-(--button-background-color) border border-(--button-border-color) border-solid rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-(--button-hover-background-color);
     @apply disabled:pointer-events-none disabled:bg-dark disabled:opacity-25 disabled:text-items;
-    @apply active:text-primary-500 active:border-primary-500;
+    @apply active:text-white active:border-primary-500;
     @apply focus:on-focus;
+
+    &.button_secondary {
+      --button-color: var(--color-text);
+      --button-background-color: var(--color-items);
+      --button-hover-background-color: var(--color-items-hovered);
+    }
   }
 
   .text-input-base {

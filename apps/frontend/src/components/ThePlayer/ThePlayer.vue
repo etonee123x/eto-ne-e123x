@@ -1,10 +1,15 @@
 <template>
-  <BaseSwipable data-player class="bg-background z-player shadow-primary-500 shadow-2xl py-2 w-full" @swiped="onSwiped">
+  <BaseSwipable
+    data-player
+    class="bg-background z-player border-t border-dark shadow-primary-500 shadow-2xl py-2 w-full"
+    @swiped="onSwiped"
+  >
     <div class="layout-container flex flex-col gap-1 justify-center">
       <component
         :is="ComponentClose"
         v-if="shouldRenderButtonClose"
         class="text-xl absolute end-2 top-2 hover-none:hidden"
+        :class="BUTTON._SECONDARY"
         :aria-label="t('closePlayer')"
         @click="onClickClose"
       >

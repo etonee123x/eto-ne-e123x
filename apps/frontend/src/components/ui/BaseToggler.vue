@@ -1,5 +1,15 @@
 <template>
-  <BaseButton :class="model && 'text-primary-500 border-primary-500'" @click="onClick">
+  <BaseButton
+    :style="
+      model && {
+        '--button-color': 'white',
+        '--button-border-color': 'currentColor',
+        '--button-background-color': 'var(--color-primary-800)',
+        '--button-hover-background-color': 'var(--color-primary-900)',
+      }
+    "
+    @click="onClick"
+  >
     <slot />
   </BaseButton>
 </template>

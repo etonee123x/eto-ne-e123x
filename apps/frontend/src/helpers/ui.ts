@@ -8,6 +8,7 @@ export const ICON = {
 
 export const BUTTON = {
   default: 'button',
+  _SECONDARY: 'button_secondary',
 } as const;
 
 export const INPUT = {
