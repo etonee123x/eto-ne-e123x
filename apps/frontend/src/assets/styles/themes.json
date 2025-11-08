@@ -1,78 +1,78 @@
 [
   {
     "title": "red",
-    "accentValue": "#ff2b2b"
+    "accent": "#ff2b2b"
   },
   {
     "title": "blue",
-    "accentValue": "#2b6bff"
+    "accent": "#2b6bff"
   },
   {
     "title": "green",
-    "accentValue": "#22c55e"
+    "accent": "#22c55e"
   },
   {
     "title": "cyan",
-    "accentValue": "#06b6d4"
+    "accent": "#06b6d4"
   },
   {
     "title": "magenta",
-    "accentValue": "#e11dff"
+    "accent": "#e11dff"
   },
   {
     "title": "mr-grey",
-    "accentValue": "#6b7280"
+    "accent": "#6b7280"
   },
   {
     "title": "brown",
-    "accentValue": "#a0522d"
+    "accent": "#a0522d"
   },
   {
     "title": "orange",
-    "accentValue": "#ff7f2a"
+    "accent": "#ff7f2a"
   },
   {
     "title": "purple",
-    "accentValue": "#a855f7"
+    "accent": "#a855f7"
   },
   {
     "title": "yellow",
-    "accentValue": "#eab308"
+    "accent": "#eab308"
   },
   {
     "title": "teal",
-    "accentValue": "#14b8a6"
+    "accent": "#14b8a6"
   },
   {
     "title": "pink",
-    "accentValue": "#ec4899"
+    "accent": "#ec4899"
   },
   {
     "title": "lime",
-    "accentValue": "#84cc16"
+    "accent": "#84cc16"
   },
   {
     "title": "indigo",
-    "accentValue": "#6366f1"
+    "accent": "#6366f1"
   },
   {
     "title": "sky",
-    "accentValue": "#0ea5e9"
+    "accent": "#0ea5e9"
   },
   {
     "title": "violet",
-    "accentValue": "#8b5cf6"
+    "accent": "#8b5cf6"
   },
   {
     "title": "emerald",
-    "accentValue": "#10b981"
+    "accent": "#10b981"
   },
   {
     "title": "rose",
-    "accentValue": "#f43f5e"
+    "accent": "#f43f5e"
   },
   {
     "title": "fuchsia",
-    "accentValue": "#d946ef"
+    "accent": "#d946ef"
   }
 ]

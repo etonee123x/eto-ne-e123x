@@ -8,7 +8,10 @@
     @mousedown.stop
     @touchstart.stop.passive
   >
-    <div :style class="bg-details-75 h-1 relative after:absolute after:bg-details-500 after:h-full after:w-(--width)" />
+    <div
+      :style
+      class="bg-details-100 h-1 relative after:absolute after:bg-details-500 after:h-full after:w-(--width)"
+    />
   </div>
 </template>
 

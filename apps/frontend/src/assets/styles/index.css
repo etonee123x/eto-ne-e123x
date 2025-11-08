@@ -66,10 +66,6 @@
 
   --color-dark: var(--color-dark);
 
-  --color-details-1: var(--color-details-1);
-  --color-details-10: var(--color-details-10);
-  --color-details-50: var(--color-details-50);
-  --color-details-75: var(--color-details-75);
   --color-details-100: var(--color-details-100);
   --color-details-200: var(--color-details-200);
   --color-details-300: var(--color-details-300);
@@ -79,7 +75,6 @@
   --color-details-700: var(--color-details-700);
   --color-details-800: var(--color-details-800);
   --color-details-900: var(--color-details-900);
-  --color-details-999: var(--color-details-999);
 }
 
 @layer base {
@@ -98,9 +93,6 @@
     --vw: 100dvw;
     --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
 
-    --tone-10: 92%;
-    --tone-50: 88%;
-    --tone-75: 80%;
     --tone-100: 72%;
     --tone-200: 56%;
     --tone-300: 40%;
@@ -109,7 +101,16 @@
     --shade-700: 70%;
     --shade-800: 55%;
     --shade-900: 35%;
-    --shade-999: 20%;
+
+    --color-details-100: color-mix(in oklch, white var(--tone-100), var(--accent));
+    --color-details-200: color-mix(in oklch, white var(--tone-200), var(--accent));
+    --color-details-300: color-mix(in oklch, white var(--tone-300), var(--accent));
+    --color-details-400: color-mix(in oklch, white var(--tone-400), var(--accent));
+    --color-details-500: var(--accent);
+    --color-details-600: color-mix(in oklch, var(--accent) var(--shade-600), black);
+    --color-details-700: color-mix(in oklch, var(--accent) var(--shade-700), black);
+    --color-details-800: color-mix(in oklch, var(--accent) var(--shade-800), black);
+    --color-details-900: color-mix(in oklch, var(--accent) var(--shade-900), black);
   }
 
   * {
@@ -194,22 +195,6 @@
 
   p {
     display: block;
-  }
-
-  ._theme-color {
-    --color-details-10: color-mix(in oklch, white var(--tone-10), var(--accent));
-    --color-details-50: color-mix(in oklch, white var(--tone-50), var(--accent));
-    --color-details-75: color-mix(in oklch, white var(--tone-75), var(--accent));
-    --color-details-100: color-mix(in oklch, white var(--tone-100), var(--accent));
-    --color-details-200: color-mix(in oklch, white var(--tone-200), var(--accent));
-    --color-details-300: color-mix(in oklch, white var(--tone-300), var(--accent));
-    --color-details-400: color-mix(in oklch, white var(--tone-400), var(--accent));
-    --color-details-500: var(--accent);
-    --color-details-600: color-mix(in oklch, var(--accent) var(--shade-600), black);
-    --color-details-700: color-mix(in oklch, var(--accent) var(--shade-700), black);
-    --color-details-800: color-mix(in oklch, var(--accent) var(--shade-800), black);
-    --color-details-900: color-mix(in oklch, var(--accent) var(--shade-900), black);
-    --color-details-999: color-mix(in oklch, var(--accent) var(--shade-999), black);
   }
 }
 

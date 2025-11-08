@@ -78,17 +78,11 @@ if (isServer) {
   useHead({
     style: [
       {
-        textContent: themes.reduce(
-          (textContent, theme) => textContent + `._theme-color_${theme.title} { --accent: ${theme.accentValue}; }\n`,
-          '',
-        ),
+        // Всё ок
+        // eslint-disable-next-line sonarjs/pseudo-random
+        textContent: `:root { --accent: ${nonNullable(themes[Math.floor(Math.random() * themes.length)]).accent}; }`,
       },
     ],
-    bodyAttrs: {
-      // Всё ок
-      // eslint-disable-next-line sonarjs/pseudo-random
-      class: ['_theme-color', `_theme-color_${nonNullable(themes[Math.floor(Math.random() * themes.length)]).title}`],
-    },
   });
 }
 </script>
