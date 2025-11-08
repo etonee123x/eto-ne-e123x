@@ -134,7 +134,7 @@
       /* Фолбек */
       sans-serif;
 
-    @apply overflow-y-auto has-[dialog[open]]:overflow-hidden h-dvh overflow-x-hidden text-text bg-background;
+    @apply has-[dialog[open]]:overflow-hidden text-text bg-background;
 
     --theme-base: white;
 
@@ -169,7 +169,8 @@
   }
 
   #app {
-    @apply flex flex-col bg-background min-h-full;
+    /* @apply flex flex-col bg-background min-h-full; */
+    @apply contents;
   }
 
   button {

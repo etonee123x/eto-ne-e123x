@@ -1,5 +1,5 @@
 <template>
-  <BasePage :h1="t('blog')">
+  <BasePage :h1="t('blog')" ref="basePage">
     <template v-if="authContext.isAdmin.value">
       <LazyBlogEditPost ref="lazyBlogEditPost" @submit="onSubmit">
         <BaseButton type="submit" :isLoading="blogContext.postPost.isLoading.value">
@@ -70,6 +70,8 @@ const LazyBlogEditPost = defineAsyncComponent(() => import('./components/BlogEdi
 const dialogConfirmationDelete = useTemplateRef('dialogConfirmationDelete');
 const lazyBlogEditPost = useTemplateRef('lazyBlogEditPost');
 
+const basePage = useTemplateRef('basePage');
+
 const { reveal, confirm, cancel } = useConfirmDialog();
 
 const { t } = useI18n({
@@ -111,7 +113,7 @@ const hasPosts = computed(() => blogContext.getPosts.state.value.length > 0);
 const goToPage404 = useGoToPage404();
 
 useInfiniteScroll(
-  isClient ? document.body : null,
+  () => (isClient ? (globalThis as unknown as Window) : null),
   () =>
     blogContext.getPosts
       .execute()

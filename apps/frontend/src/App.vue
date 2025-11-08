@@ -1,6 +1,6 @@
 <template>
   <Suspense>
-    <div class="contents group/app">
+    <div class="flex flex-col bg-background min-h-dvh group/app">
       <TheHeader />
       <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
         <RouterView />

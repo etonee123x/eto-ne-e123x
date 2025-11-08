@@ -1,8 +1,8 @@
 <template>
-  <header class="border-b border-b-primary-500 bg-background-secondary relative">
+  <header class="border-b border-b-dark bg-background-secondary relative">
     <ClientOnly v-if="loadingSources.size > 0">
       <div
-        class="after:opacity-30 after:absolute after:bottom-0 after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-dark after:animate-runner"
+        class="after:absolute after:bottom-0 rounded-full after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-primary-500 after:animate-runner"
       />
     </ClientOnly>
     <div class="layout-container flex items-center py-2 gap-4">

@@ -126,13 +126,10 @@ export const useAsyncStateApi = <
     return promise;
   };
 
-  const executeSilently = (...parameters: Parameters_) => _execute(...parameters).catch(_onError);
-
   return {
     state,
     isLoading,
     promise,
     execute,
-    executeSilently,
   };
 };
