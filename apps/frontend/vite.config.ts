@@ -5,7 +5,6 @@ import type { UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';
-import { ssrAutoKey } from './src/plugins/ssrAutoKey';
 import { getAuthorization } from './src/helpers/getAuthorization';
 import { isAppModeDevelopment } from './src/constants/appMode';
 
@@ -20,7 +19,6 @@ export default defineConfig(() => {
       //
       VueDevTools(),
       vue(),
-      ssrAutoKey(),
       tailwindcss(),
     ],
     publicDir: 'public',

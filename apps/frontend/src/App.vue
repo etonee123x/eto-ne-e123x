@@ -28,7 +28,6 @@ import { ROUTE_NAMES } from '@/router';
 import { clientOnly } from '@/helpers/clientOnly';
 import { i18n } from '@/i18n';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { useNotifications } from '@/plugins/notifications';
@@ -46,16 +45,12 @@ const explorerContext = provideExplorerContext();
 
 const route = useRoute();
 
-const goToPage404 = useGoToPage404();
-
 const player = usePlayer();
 const notifications = useNotifications();
 
 if (route.name === ROUTE_NAMES.EXPLORER) {
-  const getFolderData = () => explorerContext.getFolderData.execute(route).catch(goToPage404);
-
-  onServerPrefetch(getFolderData);
-  clientOnly(getFolderData);
+  onServerPrefetch(explorerContext.getFolderDataQuery.suspense);
+  clientOnly(explorerContext.getFolderDataQuery.suspense);
 }
 
 useHead({

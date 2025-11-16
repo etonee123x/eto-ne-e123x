@@ -1,5 +1,4 @@
 import { postAuth as _postAuth, deleteAuth as _deleteAuth } from '@/api/auth';
-import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
 import { useGetCookie } from '@/composables/useGetCookie';
 import { KEY_JWT } from '@/constants/keys';
 import { isDevelopment } from '@/constants/mode';
@@ -7,12 +6,19 @@ import { nonNullable } from '@/utils/nonNullable';
 import { isRealObject } from '@etonee123x/shared/utils/isRealObject';
 import { isString } from '@etonee123x/shared/utils/isString';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
+import { useMutation } from '@tanstack/vue-query';
+import type { UseMutationReturnType } from '@tanstack/vue-query';
 import { computed, inject, provide } from 'vue';
 import type { ComputedRef, InjectionKey } from 'vue';
 
 interface AuthContext {
-  postAuth: ReturnType<typeof useAsyncStateApi<Awaited<ReturnType<typeof _postAuth>>>>;
-  deleteAuth: ReturnType<typeof useAsyncStateApi<Awaited<ReturnType<typeof _deleteAuth>>>>;
+  postAuthMutation: UseMutationReturnType<
+    Awaited<ReturnType<typeof _postAuth>>,
+    Error,
+    Parameters<typeof _postAuth>[0],
+    unknown
+  >;
+  deleteAuthMutation: UseMutationReturnType<Awaited<ReturnType<typeof _deleteAuth>>, Error, void, unknown>;
   isAdmin: ComputedRef<boolean>;
 }
 
@@ -21,8 +27,15 @@ export const INJECTION_KEY_AUTH: InjectionKey<AuthContext> = Symbol('auth');
 export const provideAuthContext = () => {
   const getJwtCookie = useGetCookie(KEY_JWT);
 
-  const postAuth = useAsyncStateApi(_postAuth);
-  const deleteAuth = useAsyncStateApi(_deleteAuth);
+  const postAuthMutation = useMutation({
+    mutationKey: ['auth'],
+    mutationFn: _postAuth,
+  });
+
+  const deleteAuthMutation = useMutation({
+    mutationKey: ['auth'],
+    mutationFn: _deleteAuth,
+  });
 
   const isAdmin = computed(() => {
     const cookieJwt = getJwtCookie();
@@ -44,8 +57,8 @@ export const provideAuthContext = () => {
   });
 
   provide(INJECTION_KEY_AUTH, {
-    postAuth,
-    deleteAuth,
+    postAuthMutation,
+    deleteAuthMutation,
 
     isAdmin,
   });

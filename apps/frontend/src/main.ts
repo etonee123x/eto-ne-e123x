@@ -5,16 +5,15 @@ import { i18n } from '@/i18n';
 import App from '@/App.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { dialogsIds } from '@/plugins/dialogsIds';
-import { loadingSources } from '@/plugins/loadingSources';
 import { notifications } from '@/plugins/notifications';
 import { createPlayer } from '@/plugins/player';
 import { createGallery } from '@/plugins/gallery';
+import { VueQueryPlugin, QueryClient, keepPreviousData } from '@tanstack/vue-query';
 
 export const createApp = (context: Partial<{ url: string }> = {}) => {
   const app = createSSRApp(App);
 
   app.use(notifications);
-  app.use(loadingSources);
   app.use(dialogsIds);
   app.use(i18n);
 
@@ -30,5 +29,16 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
     router.push(context.url);
   }
 
-  return { app, router, i18n, player, gallery };
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: 1,
+        staleTime: Infinity,
+        placeholderData: keepPreviousData,
+      },
+    },
+  });
+  app.use(VueQueryPlugin, { queryClient });
+
+  return { app, router, i18n, player, gallery, queryClient };
 };

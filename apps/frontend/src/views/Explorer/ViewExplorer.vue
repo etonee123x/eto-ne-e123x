@@ -2,10 +2,10 @@
   <BasePage :h1="t('content')">
     <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
     <div class="flex flex-col gap-2">
-      <nav v-if="explorerContext.getFolderData.state.value?.lvlUp || elements.folders.length > 0" class="contents">
+      <nav v-if="explorerContext.getFolderDataQuery.data.value?.lvlUp || elements.folders.length > 0" class="contents">
         <LazyExplorerElementSystem
-          v-if="explorerContext.getFolderData.state.value?.lvlUp"
-          :to="explorerContext.getFolderData.state.value.lvlUp"
+          v-if="explorerContext.getFolderDataQuery.data.value?.lvlUp"
+          :to="explorerContext.getFolderDataQuery.data.value.lvlUp"
           tag="RouterLink"
         >
           {{ t('treeDots') }}
@@ -22,14 +22,11 @@
 <script setup lang="ts">
 import { computed, defineAsyncComponent, watchEffect } from 'vue';
 import type { UnwrapRef } from 'vue';
-import { onBeforeRouteUpdate, useRoute } from 'vue-router';
-import type { RouteLocationNormalizedLoaded } from 'vue-router';
 import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
 import type { ItemFile, ItemFolder } from '@etonee123x/shared/helpers/folderData';
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
-import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { clientOnly } from '@/helpers/clientOnly';
 import type { ItemWithSinceTimestamps } from '@/api/folderData';
 import BasePage from '@/components/ui/BasePage.vue';
@@ -51,8 +48,6 @@ const LazyExplorerElementFolder = defineAsyncComponent(() => import('./component
 const LazyExplorerElementFileAudio = defineAsyncComponent(() => import('./components/ExplorerElementFileAudio.vue'));
 const LazyExplorerElementFileImage = defineAsyncComponent(() => import('./components/ExplorerElementFileImage.vue'));
 const LazyExplorerElementFileVideo = defineAsyncComponent(() => import('./components/ExplorerElementFileVideo.vue'));
-
-const goToPage404 = useGoToPage404();
 
 const { t } = useI18n({
   useScope: 'local',
@@ -80,8 +75,6 @@ const { t } = useI18n({
 
 const explorerContext = useExplorerContext();
 
-const route = useRoute();
-
 const itemFileToComponent = (itemFile: ItemFile) => {
   switch (itemFile.fileType) {
     case FILE_TYPES.AUDIO: {
@@ -101,7 +94,7 @@ const itemFileToComponent = (itemFile: ItemFile) => {
 
 const elements = computed(
   () =>
-    explorerContext.getFolderData.state.value?.items.reduce<{
+    explorerContext.getFolderDataQuery.data.value?.items.reduce<{
       folders: Array<ItemWithSinceTimestamps<ItemFolder>>;
       files: Array<ItemWithSinceTimestamps<ItemFile>>;
     }>(
@@ -125,12 +118,10 @@ const elements = computed(
     },
 );
 
-const fetchData = (to: RouteLocationNormalizedLoaded) => explorerContext.getFolderData.execute(to).catch(goToPage404);
-
-clientOnly(() => fetchData(route));
+clientOnly(explorerContext.getFolderDataQuery.suspense);
 
 const maybeLastNavigationItemText = computed(
-  () => explorerContext.getFolderData.state.value?.navigationItems.at(-1)?.text,
+  () => explorerContext.getFolderDataQuery.data.value?.navigationItems.at(-1)?.text,
 );
 
 const [maybeSelectedFile, resetSelectedFile] = useSourcedRef<UnwrapRef<
@@ -201,9 +192,5 @@ useSeoMeta({
       description,
     });
   },
-});
-
-onBeforeRouteUpdate((to) => {
-  fetchData(to);
 });
 </script>

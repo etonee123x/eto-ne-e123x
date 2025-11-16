@@ -2,8 +2,13 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/client';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
+import { hydrate } from '@tanstack/vue-query';
 
-const { app, router, i18n } = createApp();
+const { app, router, i18n, queryClient } = createApp();
+
+if (globalThis.__QUERY__) {
+  hydrate(queryClient, globalThis.__QUERY__);
+}
 
 const head = createHead();
 

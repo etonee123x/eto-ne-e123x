@@ -71,7 +71,7 @@ const onClose = () => {
     return;
   }
 
-  const currentFolderData = explorerContext.currentFolderData();
+  const currentFolderData = explorerContext.getFolderDataQuery.data.value;
 
   if (!currentFolderData?.linkedFile) {
     return;

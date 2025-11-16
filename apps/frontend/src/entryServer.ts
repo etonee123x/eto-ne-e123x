@@ -5,9 +5,10 @@ import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
 import { isClient } from './constants/target';
 import type { SSRContext } from '@/composables/useSsrContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
+import { dehydrate } from '@tanstack/vue-query';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
-  const { app, router, i18n, player, gallery } = createApp({ url });
+  const { app, router, i18n, player, gallery, queryClient } = createApp({ url });
 
   app.config.errorHandler = (error) => {
     console.error('Error in app', error);
@@ -29,36 +30,36 @@ export const render = async (url: string, expressContext: ExpressContext) => {
     express: expressContext,
   };
 
-  return router
-    .isReady()
-    .then(() => {
-      const routerLanguage = router.currentRoute.value.params.language?.toString();
+  await router.isReady();
 
-      i18n.global.locale.value = isKnownLocale(routerLanguage)
-        ? routerLanguage
-        : expressContext.request.cookies.language;
+  const routerLanguage = router.currentRoute.value.params.language?.toString();
 
-      return renderToString(app, context);
-    })
-    .then((html) => {
-      head.push({
-        script: [
-          {
-            innerHTML: `window.__PAYLOAD__ = ${JSON.stringify(context.payload)}`,
-          },
-          {
-            innerHTML: `window.__PLAYER__ = ${JSON.stringify(player.state.value)}`,
-          },
-          {
-            innerHTML: `window.__GALLERY__ = ${JSON.stringify(gallery.state.value)}`,
-          },
-        ],
-      });
+  i18n.global.locale.value = isKnownLocale(routerLanguage) //
+    ? routerLanguage
+    : expressContext.request.cookies.language;
 
-      return {
-        html,
-        head,
-        teleports: context.teleports,
-      };
-    });
+  const html = await renderToString(app, context);
+
+  head.push({
+    script: [
+      {
+        innerHTML: `window.__QUERY__ = ${JSON.stringify(dehydrate(queryClient))}`,
+      },
+      {
+        innerHTML: `window.__PAYLOAD__ = ${JSON.stringify(context.payload)}`,
+      },
+      {
+        innerHTML: `window.__PLAYER__ = ${JSON.stringify(player.state.value)}`,
+      },
+      {
+        innerHTML: `window.__GALLERY__ = ${JSON.stringify(gallery.state.value)}`,
+      },
+    ],
+  });
+
+  return {
+    html,
+    head,
+    teleports: context.teleports,
+  };
 };

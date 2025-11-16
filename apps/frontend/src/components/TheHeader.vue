@@ -1,6 +1,6 @@
 <template>
   <header class="border-b border-b-dark bg-background-secondary relative">
-    <ClientOnly v-if="loadingSources.size > 0">
+    <ClientOnly v-if="fetchingNumber > 0">
       <div
         class="after:absolute after:bottom-0 rounded-full after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-primary-500 after:animate-runner"
       />
@@ -53,9 +53,9 @@ import { useL10n } from '@/composables/useL10n';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRouter } from 'vue-router';
 import { pick } from '@etonee123x/shared/utils/pick';
-import { useLoadingSources } from '@/plugins/loadingSources';
 import { useAuthContext } from '@/contexts/auth';
 import { BUTTON } from '@/helpers/ui';
+import { useIsFetching } from '@tanstack/vue-query';
 
 const { localizeRoute } = useL10n();
 
@@ -91,7 +91,7 @@ const { t } = useI18n({
   },
 });
 
-const loadingSources = useLoadingSources();
+const fetchingNumber = useIsFetching();
 
 const authContext = useAuthContext();
 
@@ -123,7 +123,7 @@ const buttons = computed(() => [
           key: 'logout',
           Component: IconLogout,
           ariaLabel: t('logout'),
-          onClick: authContext.deleteAuth.execute,
+          onClick: authContext.deleteAuthMutation.mutate,
         },
       ]
     : []),

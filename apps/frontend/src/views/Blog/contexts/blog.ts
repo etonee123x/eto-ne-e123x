@@ -1,6 +1,5 @@
-import { useAsyncStateApi } from '@/composables/useAsyncStateApi';
-import { inject, provide } from 'vue';
-import type { InjectionKey, Ref } from 'vue';
+import { computed, inject, provide } from 'vue';
+import type { InjectionKey } from 'vue';
 
 import {
   getPosts as _getPosts,
@@ -11,85 +10,99 @@ import {
 } from '@/api/posts';
 import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
 import { postUpload } from '@/api/upload';
-import { useSourcedRef } from '@/composables/useSourcedRef';
 import type { ForPost, ForPut } from '@etonee123x/shared/types/database';
 import type { Post } from '@etonee123x/shared/types/blog';
+import { toId } from '@etonee123x/shared/helpers/id';
 import type { Id } from '@etonee123x/shared/helpers/id';
 import { nonNullable } from '@/utils/nonNullable';
+import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/vue-query';
+import type {
+  InfiniteData,
+  UseInfiniteQueryReturnType,
+  UseMutationReturnType,
+  UseQueryReturnType,
+} from '@tanstack/vue-query';
+import { useRoute } from 'vue-router';
+import { isNil } from '@etonee123x/shared/utils/isNil';
+import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 
 interface BlogContext {
-  getPosts: ReturnType<
-    typeof useAsyncStateApi<Array<PostWithMetaWithSinseTimestamps>, [], [Partial<{ shouldReset: boolean }>] | []>
+  getPostsQuery: UseInfiniteQueryReturnType<InfiniteData<Awaited<ReturnType<typeof _getPosts>>>, Error>;
+  postPostMutation: UseMutationReturnType<
+    PostWithMetaWithSinseTimestamps,
+    Error,
+    {
+      postData: ForPost<Post>;
+      files?: Array<File>;
+    },
+    unknown
   >;
-  postPost: ReturnType<
-    typeof useAsyncStateApi<
-      PostWithMetaWithSinseTimestamps,
-      undefined,
-      [ForPost<PostWithMetaWithSinseTimestamps>, Array<File>]
-    >
+  putPostByIdMutation: UseMutationReturnType<
+    PostWithMetaWithSinseTimestamps,
+    Error,
+    {
+      id: Id;
+      postData: ForPut<Post>;
+      files?: Array<File>;
+    },
+    unknown
   >;
-  putPostById: ReturnType<
-    typeof useAsyncStateApi<
-      PostWithMetaWithSinseTimestamps,
-      undefined,
-      [Id, ForPut<PostWithMetaWithSinseTimestamps>, Array<File>]
-    >
-  >;
-  getPostById: ReturnType<typeof useAsyncStateApi<PostWithMetaWithSinseTimestamps, undefined, [Id]>>;
-  deletePostById: ReturnType<typeof useAsyncStateApi<PostWithMetaWithSinseTimestamps, undefined, [Id]>>;
-  isEnd: Ref<boolean>;
-  page: Ref<number>;
-  all: Ref<Array<PostWithMetaWithSinseTimestamps>>;
+  getPostByIdQuery: UseQueryReturnType<PostWithMetaWithSinseTimestamps, Error>;
+  deletePostByIdMutation: UseMutationReturnType<PostWithMetaWithSinseTimestamps, Error, Id, unknown>;
 }
 
 export const INJECTION_KEY_BLOG: InjectionKey<BlogContext> = Symbol('blog');
 
 export const provideBlogContext = () => {
-  const [all, resetAll] = useSourcedRef<Array<PostWithMetaWithSinseTimestamps>>([]);
-  const [page, resetPage] = useSourcedRef(0);
-  const [isEnd, resetIsEnd] = useSourcedRef(false);
+  const route = useRoute();
+  const postId = computed(() => (isNil(route.params.id) ? null : toId(String(route.params.id))));
 
-  const getPosts = useAsyncStateApi(async (options: { shouldReset?: boolean } = {}) => {
-    if (options.shouldReset) {
-      resetAll();
-      resetIsEnd();
-      resetPage();
-    }
-
-    return _getPosts(page.value).then((response) => {
-      all.value = [...all.value, ...response.rows];
-      isEnd.value = response._meta.isEnd;
-      page.value = response._meta.page;
-
-      return all.value;
-    });
-  }, []);
-
-  const postPost = useAsyncStateApi(async (postData: ForPost<Post>, files: Array<File> = []) => {
-    const filesUrls = files.length > 0 ? await postUpload(files) : [];
-
-    return _postPost({ ...postData, filesUrls });
+  const getPostsQuery: BlogContext['getPostsQuery'] = useInfiniteQuery({
+    queryKey: ['posts'],
+    queryFn: ({ pageParam: pageParameter = 0 }) => _getPosts(pageParameter),
+    getNextPageParam: (lastPage) => (lastPage._meta.isEnd ? undefined : lastPage._meta.page + 1),
+    initialPageParam: 0,
   });
 
-  const putPostById = useAsyncStateApi(async (id: Id, post: ForPut<Post>, files: Array<File> = []) => {
-    const filesUrls = files.length > 0 ? await postUpload(files) : [];
+  const postPostMutation: BlogContext['postPostMutation'] = useMutation({
+    mutationKey: ['post'],
+    mutationFn: async (payload) => {
+      const payloadFiles = payload.files ?? [];
 
-    return _putPost(id, { ...post, filesUrls });
+      const filesUrls = payloadFiles.length > 0 ? await postUpload(payloadFiles) : [];
+
+      return _postPost({ ...payload.postData, filesUrls });
+    },
   });
 
-  const getPostById = useAsyncStateApi(_getPostById);
+  const putPostByIdMutation: BlogContext['putPostByIdMutation'] = useMutation({
+    mutationKey: ['post'],
+    mutationFn: async (payload) => {
+      const payloadFiles = payload.files ?? [];
 
-  const deletePostById = useAsyncStateApi(_deletePost);
+      const filesUrls = payloadFiles.length > 0 ? await postUpload(payloadFiles) : [];
+
+      return _putPost(payload.id, { ...payload.postData, filesUrls });
+    },
+  });
+
+  const getPostByIdQuery: BlogContext['getPostByIdQuery'] = useQuery({
+    queryKey: ['post', postId],
+    queryFn: () => _getPostById(nonNullable(postId.value)),
+    enabled: () => isNotNil(postId.value),
+  });
+
+  const deletePostByIdMutation: BlogContext['deletePostByIdMutation'] = useMutation({
+    mutationKey: ['post'],
+    mutationFn: (...parameters: Parameters<typeof _deletePost>) => _deletePost(...parameters),
+  });
 
   const blogContext = {
-    getPosts,
-    postPost,
-    putPostById,
-    getPostById,
-    deletePostById,
-    isEnd,
-    page,
-    all,
+    getPostsQuery,
+    getPostByIdQuery,
+    postPostMutation,
+    putPostByIdMutation,
+    deletePostByIdMutation,
   };
 
   provide(INJECTION_KEY_BLOG, blogContext);

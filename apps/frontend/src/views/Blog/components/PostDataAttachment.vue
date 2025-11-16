@@ -63,33 +63,38 @@ const loadToGallery = () => {
       src: props.fileUrl,
       fileType,
     },
-    blogContext.getPosts.state.value.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
-      (items, post) => [
-        ...items,
-        ...post.filesUrls.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((accumulator, fileUrl) => {
-          const maybeExtension = getFileUrlExtension(fileUrl);
+    blogContext.getPostsQuery.data.value?.pages
+      .flatMap((page) => page.rows)
+      .reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
+        (items, post) => [
+          ...items,
+          ...post.filesUrls.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
+            (accumulator, fileUrl) => {
+              const maybeExtension = getFileUrlExtension(fileUrl);
 
-          if (isNil(maybeExtension)) {
-            return accumulator;
-          }
+              if (isNil(maybeExtension)) {
+                return accumulator;
+              }
 
-          const fileType = extensionToFileType(maybeExtension);
+              const fileType = extensionToFileType(maybeExtension);
 
-          if (!(fileType === FILE_TYPES.IMAGE || fileType === FILE_TYPES.VIDEO)) {
-            return accumulator;
-          }
+              if (!(fileType === FILE_TYPES.IMAGE || fileType === FILE_TYPES.VIDEO)) {
+                return accumulator;
+              }
 
-          const maybeLastParameter = getLastParameter(fileUrl);
+              const maybeLastParameter = getLastParameter(fileUrl);
 
-          if (isNil(maybeLastParameter)) {
-            return accumulator;
-          }
+              if (isNil(maybeLastParameter)) {
+                return accumulator;
+              }
 
-          return [...accumulator, { name: maybeLastParameter, src: fileUrl, fileType }];
-        }, []),
-      ],
-      [],
-    ),
+              return [...accumulator, { name: maybeLastParameter, src: fileUrl, fileType }];
+            },
+            [],
+          ),
+        ],
+        [],
+      ) ?? [],
   );
 };
 

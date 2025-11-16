@@ -86,16 +86,14 @@ const { t } = useI18n({
 });
 
 const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) => {
-  blogContext.putPostById
-    .execute(
-      props.post._meta.id,
-      {
-        ...postData,
-        _meta: props.post._meta,
-      },
-      files,
-    )
-    .then(() => blogContext.getPosts.execute({ shouldReset: true }));
+  blogContext.putPostByIdMutation.mutateAsync({
+    id: props.post._meta.id,
+    postData: {
+      ...postData,
+      _meta: props.post._meta,
+    },
+    files,
+  });
 
   closeEditMode();
 };
@@ -148,7 +146,7 @@ const controls = computed(
               key: 'save',
               iconPath: mdiContentSave,
               isDisabled: props.post.text === blogEditPost.value?.postData.text,
-              isLoading: blogContext.putPostById.isLoading.value,
+              isLoading: blogContext.putPostByIdMutation.isPending.value,
               onClick: () => blogEditPost.value?.requestSubmit(),
             },
           ]
@@ -160,7 +158,7 @@ const controls = computed(
               key: 'edit',
               iconPath: mdiPencil,
               isDisabled: false,
-              isLoading: blogContext.putPostById.isLoading.value,
+              isLoading: blogContext.putPostByIdMutation.isPending.value,
               onClick: () => {
                 emit('changeEditModeFor', props.post._meta.id);
 
@@ -172,15 +170,13 @@ const controls = computed(
         key: 'delete',
         iconPath: mdiDelete,
         isDisabled: false,
-        isLoading: blogContext.deletePostById.isLoading.value,
+        isLoading: blogContext.deletePostByIdMutation.isPending.value,
         onClick: async () => {
           if (!(await props.onBeforeDelete())) {
             return;
           }
 
-          return blogContext.deletePostById
-            .execute(props.post._meta.id)
-            .then(() => blogContext.getPosts.execute({ shouldReset: true }));
+          return blogContext.deletePostByIdMutation.mutateAsync(props.post._meta.id);
         },
       },
     ] as const,
