@@ -44,7 +44,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
-import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch, ref } from 'vue';
+import { defineAsyncComponent, computed, useTemplateRef, onServerPrefetch, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { areIdsEqual } from '@etonee123x/shared/helpers/id';
 import type { Id } from '@etonee123x/shared/helpers/id';
@@ -54,7 +54,7 @@ import BlogPost from './components/BlogPost.vue';
 
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
 import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import { isClient, isServer } from '@/constants/target';
+import { isClient } from '@/constants/target';
 import { clientOnly } from '@/helpers/clientOnly';
 import BaseButton from '@/components/ui/BaseButton';
 import BasePage from '@/components/ui/BasePage.vue';
@@ -150,21 +150,6 @@ const fetchData = () =>
         ]
       : []),
   ]);
-
-if (!isServer) {
-  watch(
-    () => route.params.postId,
-    async () => {
-      if (isNotNil(route.params.postId)) {
-        await blogContext.getPostByIdQuery.suspense();
-
-        return;
-      }
-
-      blogContext.getPostByIdQuery.data.value = undefined;
-    },
-  );
-}
 
 onServerPrefetch(fetchData);
 clientOnly(fetchData);

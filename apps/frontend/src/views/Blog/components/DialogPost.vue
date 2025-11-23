@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { computed, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { ROUTE_NAMES } from '@/router';
@@ -59,6 +59,7 @@ const { t } = useI18n({
   },
 });
 
+const route = useRoute();
 const router = useRouter();
 
 const blogContext = useBlogContext();
@@ -91,5 +92,5 @@ const onDialogClose = () => {
   router.push({ name: ROUTE_NAMES.BLOG });
 };
 
-watchEffect(() => toggleIsDialogOpen(Boolean(blogContext.getPostByIdQuery.data.value)));
+watchEffect(() => toggleIsDialogOpen(!blogContext.getPostByIdQuery.isLoading.value && isNotNil(route.params.postId)));
 </script>

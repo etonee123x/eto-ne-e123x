@@ -17,7 +17,7 @@ export const render = async (url: string, expressContext: ExpressContext) => {
       return;
     }
 
-    // expressContext.response.redirect('/404');
+    expressContext.response.redirect('/404');
   };
 
   const head = createHead();

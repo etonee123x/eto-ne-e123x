@@ -1,7 +1,7 @@
 <template>
   <BasePage h1="404" class="flex justify-center items-center flex-1 flex-col">
     <p>{{ t('pageNotFound') }}</p>
-    <I18nT keypath="tryReturning" tag="p">
+    <I18nT keypath="tryNavigate" tag="p">
       <RouterLink :to="localizeRoute({ name: ROUTE_NAMES.INDEX })" class="underline">
         {{ t('toTheMainPage') }}
       </RouterLink>
@@ -26,12 +26,12 @@ const { t } = useI18n({
   messages: {
     en: {
       pageNotFound: 'Page not found. It may have been removed or the URL is incorrect.',
-      tryReturning: 'Try returning {0}.',
+      tryNavigate: 'Try navigate {0}.',
       toTheMainPage: 'to the main page',
     },
     ru: {
       pageNotFound: 'Страница не найдена. Возможно, она была удалена или вы ошиблись в адресе.',
-      tryReturning: 'Попробуйте вернуться {0}.',
+      tryNavigate: 'Попробуйте перейти {0}.',
       toTheMainPage: 'на главную страницу',
     },
   },

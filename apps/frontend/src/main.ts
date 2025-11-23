@@ -32,8 +32,9 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
-        retry: 1,
+        retry: false,
         staleTime: Infinity,
+        throwOnError: true,
         placeholderData: keepPreviousData,
       },
     },
