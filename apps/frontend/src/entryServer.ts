@@ -25,7 +25,6 @@ export const render = async (url: string, expressContext: ExpressContext) => {
   app.use(head);
 
   const context: SSRContext = {
-    payload: {},
     teleports: {},
     express: expressContext,
   };
@@ -44,9 +43,6 @@ export const render = async (url: string, expressContext: ExpressContext) => {
     script: [
       {
         innerHTML: `window.__QUERY__ = ${JSON.stringify(dehydrate(queryClient))}`,
-      },
-      {
-        innerHTML: `window.__PAYLOAD__ = ${JSON.stringify(context.payload)}`,
       },
       {
         innerHTML: `window.__PLAYER__ = ${JSON.stringify(player.state.value)}`,
