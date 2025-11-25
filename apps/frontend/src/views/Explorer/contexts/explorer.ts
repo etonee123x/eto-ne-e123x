@@ -85,10 +85,11 @@ export const provideExplorerContext = async () => {
       );
 
       player.theTrack.value = folderDataLinkedFile;
-    } else if (
-      folderDataLinkedFile.fileType === FILE_TYPES.IMAGE ||
-      folderDataLinkedFile.fileType === FILE_TYPES.VIDEO
-    ) {
+
+      return;
+    }
+
+    if (folderDataLinkedFile.fileType === FILE_TYPES.IMAGE || folderDataLinkedFile.fileType === FILE_TYPES.VIDEO) {
       gallery.loadGalleryItem(
         folderDataLinkedFile,
         folderData.items.filter(
