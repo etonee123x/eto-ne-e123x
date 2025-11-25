@@ -24,8 +24,9 @@ import type {
 } from '@tanstack/vue-query';
 import { useRoute } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
+import { ROUTE_NAMES } from '@/router';
+import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
 
 interface BlogContext {
   getPostsQuery: UseInfiniteQueryReturnType<InfiniteData<Awaited<ReturnType<typeof _getPosts>>>, Error>;
@@ -54,7 +55,7 @@ interface BlogContext {
 
 export const INJECTION_KEY_BLOG: InjectionKey<BlogContext> = Symbol('blog');
 
-export const provideBlogContext = () => {
+export const provideBlogContext = async () => {
   const route = useRoute();
   const postId = computed(() => (isNil(route.params.postId) ? null : toId(String(route.params.postId))));
 
@@ -65,6 +66,14 @@ export const provideBlogContext = () => {
     queryFn: ({ pageParam: pageParameter = 0 }) => _getPosts(pageParameter),
     getNextPageParam: (lastPage) => (lastPage._meta.isEnd ? undefined : lastPage._meta.page + 1),
     initialPageParam: 0,
+    enabled: () => route.name === ROUTE_NAMES.BLOG,
+  });
+
+  const getPostByIdQuery: BlogContext['getPostByIdQuery'] = useQuery({
+    queryKey: ['post', postId],
+    queryFn: () => _getPostById(nonNullable(postId.value)).catch(() => goToPage404()),
+    enabled: () => route.name === ROUTE_NAMES.BLOG_POST,
+    placeholderData: undefined,
   });
 
   const postPostMutation: BlogContext['postPostMutation'] = useMutation({
@@ -89,13 +98,6 @@ export const provideBlogContext = () => {
     },
   });
 
-  const getPostByIdQuery: BlogContext['getPostByIdQuery'] = useQuery({
-    queryKey: ['post', postId],
-    queryFn: () => _getPostById(nonNullable(postId.value)).catch(() => goToPage404()),
-    enabled: () => isNotNil(postId.value),
-    placeholderData: undefined,
-  });
-
   const deletePostByIdMutation: BlogContext['deletePostByIdMutation'] = useMutation({
     mutationKey: ['post'],
     mutationFn: (...parameters: Parameters<typeof _deletePost>) => _deletePost(...parameters),
@@ -110,6 +112,11 @@ export const provideBlogContext = () => {
   };
 
   provide(INJECTION_KEY_BLOG, blogContext);
+
+  await awaitSuspensesIfNecessary([
+    [getPostsQuery.isEnabled.value, getPostsQuery.suspense],
+    [getPostByIdQuery.isEnabled.value, getPostByIdQuery.suspense],
+  ]);
 
   return blogContext;
 };

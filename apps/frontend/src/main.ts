@@ -1,4 +1,4 @@
-import { createSSRApp } from 'vue';
+import { createSSRApp, h, Suspense } from 'vue';
 
 import { createRouter } from '@/router';
 import { i18n } from '@/i18n';
@@ -11,7 +11,7 @@ import { createGallery } from '@/plugins/gallery';
 import { VueQueryPlugin, QueryClient, keepPreviousData } from '@tanstack/vue-query';
 
 export const createApp = (context: Partial<{ url: string }> = {}) => {
-  const app = createSSRApp(App);
+  const app = createSSRApp({ render: () => h(Suspense, null, { default: () => h(App) }) });
 
   app.use(notifications);
   app.use(dialogsIds);

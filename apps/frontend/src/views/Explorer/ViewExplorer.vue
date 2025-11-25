@@ -27,7 +27,6 @@ import type { ItemFile, ItemFolder } from '@etonee123x/shared/helpers/folderData
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
-import { clientOnly } from '@/helpers/clientOnly';
 import type { ItemWithSinceTimestamps } from '@/api/folderData';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
@@ -117,8 +116,6 @@ const elements = computed(
       files: [],
     },
 );
-
-clientOnly(explorerContext.getFolderDataQuery.suspense);
 
 const maybeLastNavigationItemText = computed(
   () => explorerContext.getFolderDataQuery.data.value?.navigationItems.at(-1)?.text,

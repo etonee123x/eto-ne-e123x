@@ -44,8 +44,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
-import { defineAsyncComponent, computed, useTemplateRef, onServerPrefetch, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { defineAsyncComponent, computed, useTemplateRef, ref } from 'vue';
 import { areIdsEqual } from '@etonee123x/shared/helpers/id';
 import type { Id } from '@etonee123x/shared/helpers/id';
 
@@ -53,14 +52,12 @@ import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';
 
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { isClient } from '@/constants/target';
-import { clientOnly } from '@/helpers/clientOnly';
 import BaseButton from '@/components/ui/BaseButton';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
 import { useAuthContext } from '@/contexts/auth';
-import { provideBlogContext } from './contexts/blog';
+import { useBlogContext } from './contexts/blog';
 
 const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
 
@@ -101,9 +98,7 @@ const { t } = useI18n({
 
 const editModeFor = ref<Id | null>(null);
 
-const route = useRoute();
-
-const blogContext = provideBlogContext();
+const blogContext = useBlogContext();
 
 const authContext = useAuthContext();
 
@@ -139,20 +134,6 @@ const onBeforeDelete = async () => {
 const onChangeEditModeFor: NonNullable<InstanceType<typeof BlogPost>['onChangeEditModeFor']> = (id) => {
   editModeFor.value = id;
 };
-
-const fetchData = () =>
-  Promise.all([
-    blogContext.getPostsQuery.suspense(),
-    ...(isNotNil(route.params.postId)
-      ? [
-          //
-          blogContext.getPostByIdQuery.suspense(),
-        ]
-      : []),
-  ]);
-
-onServerPrefetch(fetchData);
-clientOnly(fetchData);
 
 useSeoMeta({
   description: () => (blogContext.getPostByIdQuery.data.value ? t('myBlog') : t('microblogWithNoClearDirection')),
