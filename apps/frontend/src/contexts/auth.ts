@@ -1,24 +1,28 @@
-import { postAuth as _postAuth, deleteAuth as _deleteAuth } from '@/api/auth';
+import { client } from '@/api/client';
+import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
 import { useGetCookie } from '@/composables/useGetCookie';
 import { KEY_JWT } from '@/constants/keys';
 import { isDevelopment } from '@/constants/mode';
 import { nonNullable } from '@/utils/nonNullable';
-import { isRealObject } from '@etonee123x/shared/utils/isRealObject';
-import { isString } from '@etonee123x/shared/utils/isString';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import { useMutation } from '@tanstack/vue-query';
 import type { UseMutationReturnType } from '@tanstack/vue-query';
 import { computed, inject, provide } from 'vue';
-import type { ComputedRef, InjectionKey } from 'vue';
+import type { ComputedRef, InjectionKey, UnwrapRef } from 'vue';
 
 interface AuthContext {
   postAuthMutation: UseMutationReturnType<
-    Awaited<ReturnType<typeof _postAuth>>,
+    NonNullable<Awaited<ReturnType<(typeof client)['/auth']['POST']>>['data']>,
     Error,
-    Parameters<typeof _postAuth>[0],
+    Parameters<(typeof client)['/auth']['POST']>[0],
     unknown
   >;
-  deleteAuthMutation: UseMutationReturnType<Awaited<ReturnType<typeof _deleteAuth>>, Error, void, unknown>;
+  deleteAuthMutation: UseMutationReturnType<
+    NonNullable<Awaited<ReturnType<(typeof client)['/auth']['DELETE']>>['data']>,
+    Error,
+    Parameters<(typeof client)['/auth']['DELETE']>[0],
+    unknown
+  >;
   isAdmin: ComputedRef<boolean>;
 }
 
@@ -26,21 +30,26 @@ export const INJECTION_KEY_AUTH: InjectionKey<AuthContext> = Symbol('auth');
 
 export const provideAuthContext = () => {
   const getJwtCookie = useGetCookie(KEY_JWT);
+  const clientRequestPromiseWrapper = useClientRequestPromiseWrapper();
 
-  const postAuthMutation = useMutation({
+  const postAuthMutation: AuthContext['postAuthMutation'] = useMutation({
     mutationKey: ['auth'],
-    mutationFn: _postAuth,
+    mutationFn: (...parameters): Promise<NonNullable<UnwrapRef<AuthContext['postAuthMutation']['data']>>> => {
+      return clientRequestPromiseWrapper(client['/auth'].POST(parameters[0]));
+    },
   });
 
-  const deleteAuthMutation = useMutation({
+  const deleteAuthMutation: AuthContext['deleteAuthMutation'] = useMutation({
     mutationKey: ['auth'],
-    mutationFn: _deleteAuth,
+    mutationFn: (...parameters): Promise<NonNullable<UnwrapRef<AuthContext['deleteAuthMutation']['data']>>> => {
+      return clientRequestPromiseWrapper(client['/auth'].DELETE(parameters[0]));
+    },
   });
 
   const isAdmin = computed(() => {
     const cookieJwt = getJwtCookie();
 
-    if (!isString(cookieJwt)) {
+    if (typeof cookieJwt !== 'string') {
       return false;
     }
 
@@ -49,11 +58,15 @@ export const provideAuthContext = () => {
     }
 
     const parseBase64Payload =
-      'atob' in globalThis ? globalThis.atob : (input: string) => Buffer.from(input, 'base64').toString('utf8');
+      'atob' in globalThis
+        ? globalThis.atob
+        : (input: string) => {
+            return Buffer.from(input, 'base64').toString('utf8');
+          };
 
     const jwtParsed = jsonParse(parseBase64Payload(nonNullable(cookieJwt.split('.')[1])));
 
-    return isRealObject(jwtParsed) && 'isAdmin' in jwtParsed && jwtParsed.isAdmin === true;
+    return typeof jwtParsed === 'object' && jwtParsed !== null && 'isAdmin' in jwtParsed && jwtParsed.isAdmin === true;
   });
 
   provide(INJECTION_KEY_AUTH, {
@@ -64,4 +77,6 @@ export const provideAuthContext = () => {
   });
 };
 
-export const useAuthContext = () => nonNullable(inject(INJECTION_KEY_AUTH));
+export const useAuthContext = () => {
+  return nonNullable(inject(INJECTION_KEY_AUTH));
+};

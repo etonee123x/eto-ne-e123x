@@ -72,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
+import { identity, syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
 import {
   mdiClose,
   mdiShuffleVariant,
@@ -105,6 +105,9 @@ import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
 import { usePlayer } from '@/plugins/player';
 import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
+import { useL10n } from '@/composables/useL10n';
+
+const l10n = useL10n();
 
 const { t } = useI18n({
   useScope: 'local',
@@ -137,7 +140,11 @@ const { t } = useI18n({
 const historyItems = shallowReactive<Array<number>>([]);
 const [isShuffleModeEnabled] = useToggle();
 const currentPlayingNumber = computed({
-  get: () => player.playlist.value.findIndex((playlistItem) => playlistItem.src === player.theTrack.value?.src),
+  get: () => {
+    return player.playlist.value.findIndex((playlistItem) => {
+      return playlistItem.src === player.theTrack.value?.src;
+    });
+  },
   set: (value) => {
     player.theTrack.value = player.playlist.value[value] ?? null;
   },
@@ -159,14 +166,18 @@ const { playing: isPlaying, waiting: isWaiting, currentTime: currentTimeSeconds,
 if (isMobile) {
   volume.value = 1;
 } else {
-  syncRef(volumeLocalStorage, volume);
+  syncRef(volumeLocalStorage, volume, { transform: { ltr: identity, rtl: identity } });
 }
 
-const duration = computed(() => player.theTrack.value?.musicMetadata.duration ?? 0);
+const duration = computed(() => {
+  return player.theTrack.value?.metadata.duration ?? 0;
+});
 
 const toggleIsPlaying = useToggle(isPlaying);
 
-const shouldRenderButtonClose = computed(() => !(isPlaying.value || isWaiting.value));
+const shouldRenderButtonClose = computed(() => {
+  return !(isPlaying.value || isWaiting.value);
+});
 
 const load = {
   next: () => {
@@ -184,34 +195,40 @@ const load = {
   },
 };
 
-const controlButtons = computed(() => [
-  {
-    key: 'previous',
-    icon: mdiSkipBackward,
-    onClick: load.previous,
-    isDisabled: isShuffleModeEnabled.value && historyItems.length === 0,
-    ariaLabel: t('previousTrack'),
-  },
-  isPlaying.value
-    ? {
-        key: 'pause',
-        icon: mdiPause,
-        onClick: () => toggleIsPlaying(false),
-        ariaLabel: t('pauseTrack'),
-      }
-    : {
-        key: 'play',
-        icon: mdiPlay,
-        onClick: () => toggleIsPlaying(true),
-        ariaLabel: t('playTrack'),
-      },
-  {
-    key: 'next',
-    icon: mdiSkipForward,
-    onClick: load.next,
-    ariaLabel: t('nextTrack'),
-  },
-]);
+const controlButtons = computed(() => {
+  return [
+    {
+      key: 'previous',
+      icon: mdiSkipBackward,
+      onClick: load.previous,
+      isDisabled: isShuffleModeEnabled.value && historyItems.length === 0,
+      ariaLabel: t('previousTrack'),
+    },
+    isPlaying.value
+      ? {
+          key: 'pause',
+          icon: mdiPause,
+          onClick: () => {
+            return toggleIsPlaying(false);
+          },
+          ariaLabel: t('pauseTrack'),
+        }
+      : {
+          key: 'play',
+          icon: mdiPlay,
+          onClick: () => {
+            return toggleIsPlaying(true);
+          },
+          ariaLabel: t('playTrack'),
+        },
+    {
+      key: 'next',
+      icon: mdiSkipForward,
+      onClick: load.next,
+      ariaLabel: t('nextTrack'),
+    },
+  ];
+});
 
 const onEnded = load.next;
 
@@ -222,29 +239,33 @@ const ComponentClose = computed(() => {
 });
 
 const toOnClose = () => {
-  if (isNil(player.theTrack.value?.url)) {
+  if (!player.theTrack.value) {
     return;
   }
 
   const currentFolderData = explorerContext.getFolderDataQuery.data.value;
 
-  const maybeFolderDataLinkedFile = currentFolderData?.linkedFile;
+  const maybeFile = currentFolderData?.file;
 
-  if (!maybeFolderDataLinkedFile) {
+  if (!maybeFile) {
     return;
   }
 
-  const lastNavigationItem = currentFolderData.navigationItems.at(-1);
+  const lastNavigationItem = explorerContext.navigationLinks.value.at(-1);
 
   if (!lastNavigationItem) {
     return;
   }
 
-  if (!player.playlist.value.some((track) => track.src === maybeFolderDataLinkedFile.src)) {
+  if (
+    !player.playlist.value.some((track) => {
+      return track.src === maybeFile.src;
+    })
+  ) {
     return;
   }
 
-  return lastNavigationItem.link;
+  return lastNavigationItem.to;
 };
 
 const unloadTrack = () => {
@@ -267,22 +288,22 @@ const onSwiped = () => {
   router.push(to).then(unloadTrack);
 };
 
-const { copy } = useClipboard({
+const clipboard = useClipboard({
   source: () => {
-    let _url = [globalThis.location.origin, nonNullable(player.theTrack.value).url].join('');
-
-    try {
-      _url = encodeURI(_url);
-    } catch (error) {
-      console.error(error);
-    }
-
-    return _url;
+    return encodeURI(
+      new URL(
+        l10n.localizePath(['explorer', nonNullable(player.theTrack.value).path].join('/')),
+        globalThis.location.origin,
+      ).toString(),
+    );
   },
   legacy: true,
 });
 
-const onClickTitle = () => copy().then(() => notifications.notify(t('copied'), { type: NOTIFICATION_TYPES.SUCCESS }));
+const onClickTitle = async () => {
+  await clipboard.copy();
+  notifications.notify(t('copied'), { type: NOTIFICATION_TYPES.SUCCESS });
+};
 
 const onKeyDownRightTime = () => {
   currentTimeSeconds.value += 5;
@@ -300,11 +321,17 @@ const onKeyDownLeftVolume = () => {
   volume.value = to0To1Borders(volume.value - 0.05);
 };
 
-const millisecondsToTimeFormats = (milliseconds: number) => ({
-  humanReadable: millisecondsToHumanReadable(milliseconds),
-  iso: Temporal.Duration.from({ milliseconds: Math.ceil(milliseconds) }).toString(),
-});
+const millisecondsToTimeFormats = (milliseconds: number) => {
+  return {
+    humanReadable: millisecondsToHumanReadable(milliseconds),
+    iso: Temporal.Duration.from({ milliseconds: Math.ceil(milliseconds) }).toString(),
+  };
+};
 
-const currentTimeFormats = computed(() => millisecondsToTimeFormats(currentTimeSeconds.value * 1000));
-const durationFormats = computed(() => millisecondsToTimeFormats(duration.value));
+const currentTimeFormats = computed(() => {
+  return millisecondsToTimeFormats(currentTimeSeconds.value * 1000);
+});
+const durationFormats = computed(() => {
+  return millisecondsToTimeFormats(duration.value);
+});
 </script>

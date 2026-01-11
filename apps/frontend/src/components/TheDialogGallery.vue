@@ -25,7 +25,7 @@ import { computed, useTemplateRef, watchEffect } from 'vue';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
+import { FILE_TYPES } from '@/helpers/folderData';
 import { ROUTE_NAMES } from '@/router';
 import { useGallery } from '@/plugins/gallery';
 import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
@@ -41,8 +41,8 @@ onKeyStroke('ArrowLeft', gallery.prev);
 
 const mediaContainer = useTemplateRef('mediaContainer');
 
-const component = computed(() =>
-  gallery.item.value?.fileType === FILE_TYPES.VIDEO
+const component = computed(() => {
+  return gallery.item.value?.fileType === FILE_TYPES.VIDEO
     ? {
         is: 'video',
         binds: {
@@ -51,8 +51,8 @@ const component = computed(() =>
       }
     : {
         is: 'img',
-      },
-);
+      };
+});
 
 useSwipe(mediaContainer, {
   onSwipeEnd: (...[, direction]) => {
@@ -73,20 +73,22 @@ const onClose = () => {
 
   const currentFolderData = explorerContext.getFolderDataQuery.data.value;
 
-  if (!currentFolderData?.linkedFile) {
+  if (!currentFolderData?.file) {
     return;
   }
 
-  const lastNavigationItem = currentFolderData.navigationItems.at(-1);
+  const lastNavigationItem = explorerContext.navigationLinks.value.at(-1);
 
   if (!lastNavigationItem) {
     return;
   }
 
-  router.push(lastNavigationItem.link);
+  router.push(lastNavigationItem.to);
 };
 
 const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(gallery.item.value));
 
-watchEffect(() => toggleIsDialogOpen(Boolean(gallery.item.value)));
+watchEffect(() => {
+  return toggleIsDialogOpen(Boolean(gallery.item.value));
+});
 </script>

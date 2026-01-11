@@ -3,5 +3,12 @@ import { i18n } from '@/i18n';
 import { nonNullable } from '@/utils/nonNullable';
 import { computed } from 'vue';
 
-export const useLocaleInfo = () =>
-  computed(() => nonNullable(LOCALES_INFO.find((localeInfo) => localeInfo.locale === i18n.global.locale.value)));
+export const useLocaleInfo = () => {
+  return computed(() => {
+    return nonNullable(
+      LOCALES_INFO.find((localeInfo) => {
+        return localeInfo.locale === i18n.global.locale.value;
+      }),
+    );
+  });
+};

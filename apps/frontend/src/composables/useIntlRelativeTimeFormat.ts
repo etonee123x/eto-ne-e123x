@@ -8,5 +8,7 @@ export const useIntlRelativeTimeFormat = (
 ) => {
   const localeInfo = useLocaleInfo();
 
-  return computed(() => new Intl.RelativeTimeFormat(toValue(_locales) ?? localeInfo.value.locale, toValue(options)));
+  return computed(() => {
+    return new Intl.RelativeTimeFormat(toValue(_locales) ?? localeInfo.value.locale, toValue(options));
+  });
 };

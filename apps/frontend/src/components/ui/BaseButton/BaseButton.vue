@@ -23,7 +23,9 @@ import type { Props as PropsIcon } from '@/components/ui/BaseIcon';
 import { BUTTON } from '@/helpers/ui';
 import BaseIcon from '@/components/ui/BaseIcon';
 
-const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
+const LazyBaseLoading = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseLoading.vue');
+});
 
 const props = defineProps<
   Partial<{
@@ -34,5 +36,7 @@ const props = defineProps<
   }>
 >();
 
-const isDisabled = computed(() => props.isDisabled || props.isLoading);
+const isDisabled = computed(() => {
+  return props.isDisabled || props.isLoading;
+});
 </script>

@@ -60,15 +60,23 @@ import { useIsFetching } from '@tanstack/vue-query';
 const { localizeRoute } = useL10n();
 
 const IconLogout = defineComponent({
-  // Не хочу, мне и так нравится
-  // eslint-disable-next-line unicorn/consistent-function-scoping
-  setup: () => () => h(BaseIcon, { path: mdiLogout }),
+  setup: () => {
+    // Не хочу, мне и так нравится
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    return () => {
+      return h(BaseIcon, { path: mdiLogout });
+    };
+  },
 });
 
 const Language = defineComponent({
-  // Не хочу, мне и так нравится
-  // eslint-disable-next-line unicorn/consistent-function-scoping
-  setup: () => () => h('div', localeInfo.value.locale),
+  setup: () => {
+    // Не хочу, мне и так нравится
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    return () => {
+      return h('div', localeInfo.value.locale);
+    };
+  },
 });
 
 const router = useRouter();
@@ -95,58 +103,62 @@ const fetchingNumber = useIsFetching();
 
 const authContext = useAuthContext();
 
-const links = computed(() => [
-  {
-    text: t('content'),
-    to: localizeRoute({
-      name: ROUTE_NAMES.EXPLORER,
-    }),
-    key: 'content',
-  },
-  {
-    text: t('blog'),
-    to: localizeRoute({
-      name: ROUTE_NAMES.BLOG,
-    }),
-    key: 'blog',
-  },
-]);
+const links = computed(() => {
+  return [
+    {
+      text: t('content'),
+      to: localizeRoute({
+        name: ROUTE_NAMES.EXPLORER,
+      }),
+      key: 'content',
+    },
+    {
+      text: t('blog'),
+      to: localizeRoute({
+        name: ROUTE_NAMES.BLOG,
+      }),
+      key: 'blog',
+    },
+  ];
+});
 
 const cookies = useCookies(['language']);
 
 const localeInfo = useLocaleInfo();
 
-const buttons = computed(() => [
-  ...(authContext.isAdmin.value
-    ? [
-        {
-          key: 'logout',
-          Component: IconLogout,
-          ariaLabel: t('logout'),
-          onClick: authContext.deleteAuthMutation.mutate,
-        },
-      ]
-    : []),
-  {
-    key: 'changeLanguage',
-    Component: Language,
-    ariaLabel: t('changeLanguage'),
-    onClick: () => {
-      const newLanguage = localeInfo.value.locale === 'ru' ? 'en' : 'ru';
-
-      i18n.global.locale.value = newLanguage;
-      cookies.set('language', newLanguage, { path: '/', maxAge: 365 * 24 * 60 * 60 * 1000 });
-
-      router.replace(
-        localizeRoute({
-          ...pick(router.currentRoute.value, ['name', 'query', 'hash']),
-          params: {
-            ...router.currentRoute.value.params,
-            language: newLanguage,
+const buttons = computed(() => {
+  return [
+    ...(authContext.isAdmin.value
+      ? [
+          {
+            key: 'logout',
+            Component: IconLogout,
+            ariaLabel: t('logout'),
+            onClick: authContext.deleteAuthMutation.mutate,
           },
-        }),
-      );
+        ]
+      : []),
+    {
+      key: 'changeLanguage',
+      Component: Language,
+      ariaLabel: t('changeLanguage'),
+      onClick: () => {
+        const newLanguage = localeInfo.value.locale === 'ru' ? 'en' : 'ru';
+
+        i18n.global.locale.value = newLanguage;
+        cookies.set('language', newLanguage, { path: '/', maxAge: 365 * 24 * 60 * 60 * 1000 });
+
+        router.replace(
+          localizeRoute({
+            ...pick(router.currentRoute.value, ['name', 'query', 'hash']),
+            params: {
+              ...router.currentRoute.value.params,
+              language: newLanguage,
+            },
+          }),
+        );
+      },
     },
-  },
-]);
+  ];
+});
 </script>

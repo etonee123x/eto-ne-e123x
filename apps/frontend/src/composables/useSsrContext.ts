@@ -7,4 +7,6 @@ export interface SSRContext {
   teleports: Record<string, string>;
 }
 
-export const useSSRContext = () => _useSSRContext<SSRContext>();
+export const useSSRContext = () => {
+  return _useSSRContext<SSRContext>();
+};

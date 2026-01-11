@@ -6,7 +6,6 @@ import type { ErrorRequestHandler, RequestHandler } from 'express';
 import type { ViteDevServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import { transformHtmlTemplate } from '@unhead/vue/server';
-import { postAuth } from '@/api/auth';
 import { isProduction } from '@/constants/mode';
 import { KEY_JWT } from '@/constants/keys';
 import http from 'node:http';
@@ -19,7 +18,7 @@ import Negotiator from 'negotiator';
 import { propertyCurried } from '@etonee123x/shared/utils/property';
 import { ROUTE_NAME_TO_PATH } from '@/router';
 import { nonNullable } from '@/utils/nonNullable';
-import { isString } from '@etonee123x/shared/utils/isString';
+import { client } from '@/api/client';
 
 const port = process.env.PORT ?? throwError('PORT is not defined');
 const BASE = '/';
@@ -75,13 +74,15 @@ if (isProduction) {
   });
 }
 
-app.get('/healthz', (...[, response]) => response.send('ok'));
+app.get('/healthz', (...[, response]) => {
+  return response.send('ok');
+});
 
 app.use((request, response, next) => {
   if (
-    !Object.values(ROUTE_NAME_TO_PATH).some((routePath) =>
-      new RegExp(String.raw`^/${routePath}(/|$|\?)`).test(request.path),
-    )
+    !Object.values(ROUTE_NAME_TO_PATH).some((routePath) => {
+      return new RegExp(String.raw`^/${routePath}(/|$|\?)`).test(request.path);
+    })
   ) {
     next();
     return;
@@ -112,21 +113,26 @@ const syncLocaleCookie: RequestHandler = (request, response, next) => {
 const auth: RequestHandler = async (request, response, next) => {
   const maybeQueryJwt = request.query[KEY_JWT];
 
-  if (!isString(maybeQueryJwt)) {
+  if (typeof maybeQueryJwt !== 'string') {
     next();
     return;
   }
 
-  await postAuth(maybeQueryJwt)
-    .then((cookies) => {
+  await client['/auth']
+    .POST({ params: { query: { jwt: maybeQueryJwt } } })
+    .then((_response) => {
       const isHttps = (request.headers['x-forwarded-proto'] ?? '').toString().startsWith('https');
 
       response.setHeader(
         'Set-Cookie',
-        cookies.map((cookie) => `${cookie}; ${isHttps ? 'Secure' : ''}; SameSite=Lax`),
+        _response.response.headers.getSetCookie().map((cookie) => {
+          return `${cookie}; ${isHttps ? 'Secure' : ''}; SameSite=Lax`;
+        }),
       );
     })
-    .catch(() => response.clearCookie(KEY_JWT));
+    .catch(() => {
+      return response.clearCookie(KEY_JWT);
+    });
 
   const requestUrl = new URL(request.url, requestToOrigin(request));
 
@@ -135,8 +141,8 @@ const auth: RequestHandler = async (request, response, next) => {
   response.redirect(303, requestUrl.toString());
 };
 
-const main: RequestHandler = async (request, response, next) =>
-  renderHTML(request.originalUrl.replace(BASE, ''), { request, response, next })
+const main: RequestHandler = async (request, response, next) => {
+  return renderHTML(request.originalUrl.replace(BASE, ''), { request, response, next })
     .then((html) => {
       if (response.headersSent) {
         return;
@@ -148,6 +154,7 @@ const main: RequestHandler = async (request, response, next) =>
         .send(html);
     })
     .catch(next);
+};
 
 const error: ErrorRequestHandler = async (error, request, response, next) => {
   if (error instanceof Error) {
@@ -156,18 +163,22 @@ const error: ErrorRequestHandler = async (error, request, response, next) => {
     console.error('Unknown error', error);
   }
 
-  renderHTML('404', { request, response, next }).then((html) =>
-    response
+  renderHTML('404', { request, response, next }).then((html) => {
+    return response
       .status(response.statusCode || 500)
       .set({ 'Content-Type': 'text/html' })
-      .send(html),
-  );
+      .send(html);
+  });
 };
 
 app.use('*all', syncLocaleCookie, auth, main, error);
 
 http
   .createServer(app)
-  .once('listening', () => console.info(`HTTP server is listening on http://127.0.0.1:${port}`))
+  .once('listening', () => {
+    console.info(`HTTP server is listening on http://127.0.0.1:${port}`);
+  })
   .listen(port)
-  .on('error', (error) => console.error('Failed to start HTTP server due to:', error));
+  .on('error', (error) => {
+    console.error('Failed to start HTTP server due to:', error);
+  });

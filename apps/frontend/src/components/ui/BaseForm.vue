@@ -10,6 +10,8 @@ import { useTemplateRef } from 'vue';
 const form = useTemplateRef('form');
 
 defineExpose({
-  requestSubmit: () => form.value?.requestSubmit(),
+  requestSubmit: () => {
+    return form.value?.requestSubmit();
+  },
 });
 </script>

@@ -1,0 +1,9 @@
+type: object
+properties:
+  createdAt:
+    type: number
+  updatedAt:
+    type: number
+required:
+  - createdAt
+  - updatedAt

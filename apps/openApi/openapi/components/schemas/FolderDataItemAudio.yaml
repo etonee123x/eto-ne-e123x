@@ -1,0 +1,40 @@
+allOf:
+  - $ref: ./FolderDataItemFileBase.yaml
+  - type: object
+    properties:
+      fileType:
+        allOf:
+          - $ref: ./FileType.yaml
+          - enum: [AUDIO]
+      metadata:
+        type: object
+        properties:
+          album:
+            type: string
+            nullable: true
+          bpm:
+            type: number
+            nullable: true
+          year:
+            type: number
+            nullable: true
+          artists:
+            type: array
+            items:
+              type: string
+          bitrate:
+            type: number
+            nullable: true
+          duration:
+            type: number
+            nullable: true
+        required:
+          - bitrate
+          - duration
+          - album
+          - artists
+          - bpm
+          - year
+    required:
+      - metadata
+      - fileType

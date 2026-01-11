@@ -22,7 +22,6 @@ import themes from '@/assets/styles/themes.json';
 import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
 import { i18n } from '@/i18n';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { useNotifications } from '@/plugins/notifications';
@@ -31,10 +30,17 @@ import { provideAuthContext } from '@/contexts/auth';
 import { provideExplorerContext } from '@/views/Explorer/contexts/explorer';
 import { nonNullable } from '@/utils/nonNullable';
 import { provideBlogContext } from '@/views/Blog/contexts/blog';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 
-const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
-const LazyTheNotifications = defineAsyncComponent(() => import('@/components/TheNotifications.vue'));
-const LazyTheFooter = defineAsyncComponent(() => import('@/components/TheFooter.vue'));
+const LazyThePlayer = defineAsyncComponent(() => {
+  return import('@/components/ThePlayer/ThePlayer.vue');
+});
+const LazyTheNotifications = defineAsyncComponent(() => {
+  return import('@/components/TheNotifications.vue');
+});
+const LazyTheFooter = defineAsyncComponent(() => {
+  return import('@/components/TheFooter.vue');
+});
 
 provideAuthContext();
 
@@ -50,18 +56,21 @@ const player = usePlayer();
 const notifications = useNotifications();
 
 useHead({
-  titleTemplate: (title) =>
-    [
-      ...(isNotNil(title)
-        ? [
+  titleTemplate: (title) => {
+    return [
+      ...(isNil(title)
+        ? []
+        : [
             //
             title,
-          ]
-        : []),
+          ]),
       SITE_TITLE,
-    ].join(' | '),
+    ].join(' | ');
+  },
   htmlAttrs: {
-    lang: () => i18n.global.locale.value.toLocaleLowerCase(),
+    lang: () => {
+      return i18n.global.locale.value.toLocaleLowerCase();
+    },
   },
 });
 
@@ -69,9 +78,7 @@ if (isServer) {
   useHead({
     style: [
       {
-        // Всё ок
-        // eslint-disable-next-line sonarjs/pseudo-random
-        textContent: `:root { --accent: ${nonNullable(themes[Math.floor(Math.random() * themes.length)]).accent}; }`,
+        textContent: `:root { --accent: ${nonNullable(themes.at(Date.now() % themes.length)).accent}; }`,
       },
     ],
   });

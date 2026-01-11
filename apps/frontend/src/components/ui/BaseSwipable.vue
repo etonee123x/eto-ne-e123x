@@ -38,7 +38,9 @@ const root = useTemplateRef('root');
 
 const { width } = useElementSize(root, undefined, { box: 'border-box' });
 
-const threshold = computed(() => width.value * Number(props.threshold));
+const threshold = computed(() => {
+  return width.value * Number(props.threshold);
+});
 
 let touchStartX = 0;
 let diff = 0;
@@ -85,7 +87,9 @@ const onTouchEnd = () => {
   style.transition = `all ${props.disapearDelay}ms`;
   style.transform = `translateX(${globalThis.innerWidth * (wasSwipedLeft ? -1 : 1)}px)`;
 
-  setTimeout(() => emit('swiped'), Number(props.disapearDelay));
+  setTimeout(() => {
+    emit('swiped');
+  }, Number(props.disapearDelay));
 };
 
 const onTouchCancel = () => {

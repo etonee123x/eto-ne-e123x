@@ -27,9 +27,15 @@ import type { Notification } from '@/plugins/notifications';
 
 const notifications = useNotifications();
 
-const isSuccess = (notification: Notification) => notification.type === NOTIFICATION_TYPES.SUCCESS;
+const isSuccess = (notification: Notification) => {
+  return notification.type === NOTIFICATION_TYPES.SUCCESS;
+};
 
-const getIconPath = (notification: Notification) => (isSuccess(notification) ? mdiCheck : mdiClose);
+const getIconPath = (notification: Notification) => {
+  return isSuccess(notification) ? mdiCheck : mdiClose;
+};
 
-const onClickClose = (notification: Notification) => notifications.close(notification.id);
+const onClickClose = (notification: Notification) => {
+  notifications.close(notification.id);
+};
 </script>

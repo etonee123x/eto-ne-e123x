@@ -12,7 +12,7 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'node_modules/', 'src/api/swagger/'],
+    ignores: ['dist', 'node_modules', 'src/api/swagger/', 'src/types/openapi.ts'],
   },
   {
     ignores: ['scripts/**/*.js'],
@@ -72,7 +72,7 @@ export default defineConfig(
       'no-var': 'error',
       'no-unsafe-optional-chaining': 'error',
       curly: ['error', 'all'],
-      'arrow-body-style': ['error', 'as-needed'],
+      'arrow-body-style': ['error', 'always'],
       'no-sparse-arrays': ['off'],
       'prefer-const': ['error', { destructuring: 'all' }],
       'func-style': ['error', 'expression'],

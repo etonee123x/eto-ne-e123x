@@ -43,22 +43,24 @@ import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
 import BaseButton from '@/components/ui/BaseButton';
-import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { useAuthContext } from '@/contexts/auth';
 import { useBlogContext } from '../contexts/blog';
+import { isNil } from '@etonee123x/shared/utils/isNil';
+import type { components } from '@/types/openapi';
 
-const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
+const LazyBlogEditPost = defineAsyncComponent(() => {
+  return import('./BlogEditPost.vue');
+});
 
 const props = defineProps<{
-  post: PostWithMetaWithSinseTimestamps;
+  post: components['schemas']['PostResponse'];
   onBeforeDelete: () => Promise<boolean>;
   isInEditMode: boolean;
 }>();
 
 const emit = defineEmits<{
-  changeEditModeFor: [PostWithMetaWithSinseTimestamps['_meta']['id'] | null];
+  changeEditModeFor: [components['schemas']['PostResponse']['_meta']['id'] | null];
 }>();
 
 const blogEditPost = useTemplateRef<InstanceType<typeof LazyBlogEditPost>>('blogEditPost');
@@ -85,21 +87,36 @@ const { t } = useI18n({
   },
 });
 
-const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) => {
-  blogContext.putPostByIdMutation.mutateAsync({
-    id: props.post._meta.id,
-    postData: {
-      ...postData,
-      _meta: props.post._meta,
+const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postUpdateRequestData, files) => {
+  blogContext.patchPostByIdMutation.mutateAsync({
+    params: {
+      path: {
+        id: props.post._meta.id,
+      },
     },
-    files,
+    body: {
+      text: postUpdateRequestData.text,
+      attachments: [],
+      files: [],
+    },
+    bodySerializer: (body) => {
+      const formData = new FormData();
+
+      formData.append('text', body.text);
+
+      files.forEach((file) => {
+        formData.append('attachments', file);
+      });
+
+      return formData;
+    },
   });
 
   closeEditMode();
 };
 
-const component = computed(() =>
-  props.isInEditMode
+const component = computed(() => {
+  return props.isInEditMode
     ? {
         Is: 'div',
       }
@@ -114,71 +131,84 @@ const component = computed(() =>
           },
           class: 'hover:text-text',
         },
-      },
-);
+      };
+});
 
-const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => -props.post._meta.sinceCreated);
+const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => {
+  return props.post._meta.createdAt - Date.now();
+});
 
-const createdAtUpdatedAt = computed(() =>
-  [
+const createdAtUpdatedAt = computed(() => {
+  return [
     t('createdAt', { at: new Date(props.post._meta.createdAt).toISOString() }),
-    ...(isNotNil(props.post._meta.updatedAt)
-      ? [t('updatedAt', { at: new Date(props.post._meta.updatedAt).toISOString() })]
+    ...(isNil(props.post._meta.updatedAt)
+      ? []
+      : [t('updatedAt', { at: new Date(props.post._meta.updatedAt).toISOString() })]),
+  ].join('\n');
+});
+
+const closeEditMode = () => {
+  emit('changeEditModeFor', null);
+};
+
+const controls = computed(() => {
+  return [
+    ...(props.isInEditMode
+      ? [
+          {
+            key: 'cancel',
+            iconPath: mdiCancel,
+            isDisabled: false,
+            isLoading: false,
+            onClick: closeEditMode,
+          },
+          {
+            key: 'save',
+            iconPath: mdiContentSave,
+            isDisabled: props.post.text === blogEditPost.value?.resetableRefPostModel.value.value.text,
+            isLoading: blogContext.patchPostByIdMutation.isPending.value,
+            onClick: () => {
+              return blogEditPost.value?.requestSubmit();
+            },
+          },
+        ]
       : []),
-  ].join('\n'),
-);
+    ...(props.isInEditMode || props.post.attachments.length > 0
+      ? []
+      : [
+          {
+            key: 'edit',
+            iconPath: mdiPencil,
+            isDisabled: false,
+            isLoading: blogContext.patchPostByIdMutation.isPending.value,
+            onClick: () => {
+              emit('changeEditModeFor', props.post._meta.id);
 
-const closeEditMode = () => emit('changeEditModeFor', null);
-
-const controls = computed(
-  () =>
-    [
-      ...(props.isInEditMode
-        ? [
-            {
-              key: 'cancel',
-              iconPath: mdiCancel,
-              isDisabled: false,
-              isLoading: false,
-              onClick: closeEditMode,
+              nextTick(() => {
+                return blogEditPost.value?.focusTextarea();
+              });
             },
-            {
-              key: 'save',
-              iconPath: mdiContentSave,
-              isDisabled: props.post.text === blogEditPost.value?.postData.text,
-              isLoading: blogContext.putPostByIdMutation.isPending.value,
-              onClick: () => blogEditPost.value?.requestSubmit(),
-            },
-          ]
-        : []),
-      ...(props.isInEditMode || props.post.filesUrls.length > 0
-        ? []
-        : [
-            {
-              key: 'edit',
-              iconPath: mdiPencil,
-              isDisabled: false,
-              isLoading: blogContext.putPostByIdMutation.isPending.value,
-              onClick: () => {
-                emit('changeEditModeFor', props.post._meta.id);
+          },
+        ]),
+    {
+      key: 'delete',
+      iconPath: mdiDelete,
+      isDisabled: false,
+      isLoading: blogContext.deletePostByIdMutation.isPending.value,
+      onClick: async () => {
+        if (!(await props.onBeforeDelete())) {
+          return;
+        }
 
-                nextTick(() => blogEditPost.value?.focusTextarea());
-              },
+        return blogContext.deletePostByIdMutation.mutateAsync({
+          params: {
+            path: {
+              id: props.post._meta.id,
             },
-          ]),
-      {
-        key: 'delete',
-        iconPath: mdiDelete,
-        isDisabled: false,
-        isLoading: blogContext.deletePostByIdMutation.isPending.value,
-        onClick: async () => {
-          if (!(await props.onBeforeDelete())) {
-            return;
-          }
-
-          return blogContext.deletePostByIdMutation.mutateAsync(props.post._meta.id);
-        },
+          },
+        });
       },
-    ] as const,
-);
+    },
+  ] as const;
+});
 </script>

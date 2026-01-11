@@ -38,7 +38,9 @@ const { t } = useI18n({
 });
 
 useSeoMeta({
-  description: () => t('pageNotFound'),
+  description: () => {
+    return t('pageNotFound');
+  },
 });
 
 if (isServer) {

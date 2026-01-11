@@ -4,11 +4,14 @@ import { createHead } from '@unhead/vue/client';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 import { hydrate } from '@tanstack/vue-query';
 
-const { app, router, i18n, queryClient } = createApp();
+const { app, router, i18n, queryClient, gallery, player } = createApp();
 
 if (globalThis.__QUERY__) {
   hydrate(queryClient, globalThis.__QUERY__);
 }
+
+player.init();
+gallery.init();
 
 const head = createHead();
 

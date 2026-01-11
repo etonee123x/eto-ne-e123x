@@ -1,11 +1,16 @@
 <template>
-  <RouterLink :to="element.url" class="explorer-element">
+  <RouterLink :to class="explorer-element">
     <article>
       <header class="flex justify-between">
         <div class="explorer-element__title">
           {{ element.name }}
         </div>
-        <time :datetime="createdAt" :title="t('createdAt', { at: createdAt })" class="text-right m-2">
+        <time
+          :datetime="createdAt"
+          data-allow-mismatch="text"
+          :title="t('createdAt', { at: createdAt })"
+          class="text-right m-2"
+        >
           {{ sinceCreatedHumanReadable }}
         </time>
       </header>
@@ -18,15 +23,18 @@
 </template>
 
 <script setup lang="ts">
-import type { ItemFile } from '@etonee123x/shared/helpers/folderData';
-import type { WithMeta, WithSinceTimestamps } from '@etonee123x/shared/types/database';
 import { useI18n } from 'vue-i18n';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { computed } from 'vue';
+import type { components } from '@/types/openapi';
+import type { RouterLinkProps } from 'vue-router';
 
-const props = defineProps<{
-  element: ItemFile & WithMeta<WithSinceTimestamps>;
-}>();
+export interface Props {
+  element: components['schemas']['FolderDataItemFile'];
+  to: RouterLinkProps['to'];
+}
+
+const props = defineProps<Props>();
 
 const { t } = useI18n({
   useScope: 'local',
@@ -40,7 +48,11 @@ const { t } = useI18n({
   },
 });
 
-const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => -props.element._meta.sinceCreated);
+const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => {
+  return props.element._meta.createdAt - Date.now();
+});
 
-const createdAt = computed(() => new Date(props.element._meta.createdAt).toISOString());
+const createdAt = computed(() => {
+  return new Date(props.element._meta.createdAt).toISOString();
+});
 </script>

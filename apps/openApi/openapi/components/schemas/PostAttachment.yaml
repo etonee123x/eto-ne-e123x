@@ -1,0 +1,15 @@
+allOf:
+  - $ref: ./FolderDataItemFile.yaml
+  - type: object
+    properties:
+      _meta:
+        allOf:
+          - $ref: ./FolderDataItemMeta.yaml
+          - type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+    required:
+      - _meta

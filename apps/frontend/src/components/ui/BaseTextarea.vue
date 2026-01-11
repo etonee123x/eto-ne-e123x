@@ -25,7 +25,9 @@ withDefaults(
   }>(),
   {
     placeholder: undefined,
-    errors: () => [],
+    errors: () => {
+      return [];
+    },
   },
 );
 
@@ -35,15 +37,21 @@ const emit = defineEmits<{
   'keydown:enter': [KeyboardEvent];
 }>();
 
-const onPaste = (event: ClipboardEvent) => emit('paste', event);
+const onPaste = (event: ClipboardEvent) => {
+  emit('paste', event);
+};
 
-const onKeyDownEnter = (event: KeyboardEvent) => emit('keydown:enter', event);
+const onKeyDownEnter = (event: KeyboardEvent) => {
+  emit('keydown:enter', event);
+};
 
 const model = defineModel<string>({ required: true });
 
 const { textarea } = useTextareaAutosize({ input: model, styleProp: 'minHeight' });
 
 defineExpose({
-  focus: () => textarea.value?.focus(),
+  focus: () => {
+    return textarea.value?.focus();
+  },
 });
 </script>

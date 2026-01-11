@@ -1,41 +1,54 @@
-import type { ItemAudio } from '@etonee123x/shared/helpers/folderData';
+import { isFolderDataItemFileAudio } from '@/helpers/folderData';
+import type { components } from '@/types/openapi';
+import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { computed, inject, shallowRef } from 'vue';
 import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
 
-type TheTrack = ItemAudio | null;
-type Playlist = Array<ItemAudio>;
+type TheTrack = components['schemas']['FolderDataItemAudio'] | null;
+type Playlist = Array<components['schemas']['FolderDataItemAudio']>;
 
 export const INJECTION_KEY_PLAYER: InjectionKey<{
   theTrack: ShallowRef<TheTrack>;
   playlist: ShallowRef<Playlist>;
 }> = Symbol('player');
 
-interface Options {
-  theTrack?: TheTrack;
-  playlist?: Array<ItemAudio>;
-}
-
 export const createPlayer = () => {
   const theTrack = shallowRef<TheTrack>(null);
   const playlist = shallowRef<Playlist>([]);
 
-  const install: FunctionPlugin = (app, options: Options = {}) => {
-    theTrack.value = options.theTrack ?? theTrack.value;
-    playlist.value = options.playlist ?? playlist.value;
-
+  const install: FunctionPlugin = (app) => {
     app.provide(INJECTION_KEY_PLAYER, {
       theTrack,
       playlist,
     });
   };
 
+  const init = () => {
+    const _theTrack = objectGet(globalThis.__PLAYER__, 'theTrack');
+    const _playlist = objectGet(globalThis.__PLAYER__, 'playlist');
+
+    if (
+      (_theTrack === null || isFolderDataItemFileAudio(_theTrack)) &&
+      Array.isArray(_playlist) &&
+      _playlist.every((item) => {
+        return isFolderDataItemFileAudio(item);
+      })
+    ) {
+      theTrack.value = _theTrack;
+      playlist.value = _playlist;
+    }
+  };
+
   return {
     install,
+    init,
 
-    state: computed(() => ({
-      theTrack: theTrack.value,
-      playlist: playlist.value,
-    })),
+    state: computed(() => {
+      return {
+        theTrack: theTrack.value,
+        playlist: playlist.value,
+      };
+    }),
   };
 };
 

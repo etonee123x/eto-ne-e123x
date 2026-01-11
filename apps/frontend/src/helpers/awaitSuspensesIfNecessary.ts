@@ -1,7 +1,19 @@
 export const awaitSuspensesIfNecessary = async (
   suspenses: ReadonlyArray<readonly [boolean, () => Promise<unknown>]>,
 ) => {
-  if (suspenses.some(([isEnabled]) => isEnabled)) {
-    await Promise.all(suspenses.filter(([isEnabled]) => isEnabled).map(([, suspense]) => suspense()));
+  if (
+    suspenses.some(([isEnabled]) => {
+      return isEnabled;
+    })
+  ) {
+    await Promise.all(
+      suspenses
+        .filter(([isEnabled]) => {
+          return isEnabled;
+        })
+        .map(([, suspense]) => {
+          return suspense();
+        }),
+    );
   }
 };

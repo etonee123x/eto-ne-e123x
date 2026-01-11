@@ -12,8 +12,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
 import { ELEMENT_TITLE } from '@/helpers/ui';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 
 const props = defineProps<
   Partial<{
@@ -24,7 +24,11 @@ const props = defineProps<
   }>
 >();
 
-const hasError = computed(() => isNotNil(props.errorMessage));
+const hasError = computed(() => {
+  return !isNil(props.errorMessage);
+});
 
-const maybeMessage = computed(() => props.errorMessage ?? props.message);
+const maybeMessage = computed(() => {
+  return props.errorMessage ?? props.message;
+});
 </script>

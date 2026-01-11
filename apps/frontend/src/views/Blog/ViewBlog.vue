@@ -6,7 +6,7 @@
           {{ t('send') }}
         </BaseButton>
       </LazyBlogEditPost>
-      <hr v-if="hasPosts" class="my-4" />
+      <hr class="my-4" />
     </template>
 
     <template v-if="hasPosts">
@@ -15,7 +15,7 @@
         class="not-last:mb-4"
         :post
         :onBeforeDelete
-        :isInEditMode="areIdsEqual(editModeFor, post._meta.id)"
+        :isInEditMode="editModeFor === post._meta.id"
         :key="post._meta.id"
         @changeEditModeFor="onChangeEditModeFor"
       />
@@ -45,8 +45,6 @@
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
 import { defineAsyncComponent, computed, useTemplateRef, ref } from 'vue';
-import { areIdsEqual } from '@etonee123x/shared/helpers/id';
-import type { Id } from '@etonee123x/shared/helpers/id';
 
 import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';
@@ -59,9 +57,13 @@ import { useSeoMeta } from '@unhead/vue';
 import { useAuthContext } from '@/contexts/auth';
 import { useBlogContext } from './contexts/blog';
 
-const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
+const LazyBaseLoading = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseLoading.vue');
+});
 
-const LazyBlogEditPost = defineAsyncComponent(() => import('./components/BlogEditPost.vue'));
+const LazyBlogEditPost = defineAsyncComponent(() => {
+  return import('./components/BlogEditPost.vue');
+});
 
 const dialogConfirmationDelete = useTemplateRef('dialogConfirmationDelete');
 const lazyBlogEditPost = useTemplateRef('lazyBlogEditPost');
@@ -96,32 +98,70 @@ const { t } = useI18n({
   },
 });
 
-const editModeFor = ref<Id | null>(null);
+const editModeFor = ref<string | null>(null);
 
 const blogContext = useBlogContext();
 
 const authContext = useAuthContext();
 
-const posts = computed(() => blogContext.getPostsQuery.data.value?.pages.flatMap((page) => page.rows) ?? []);
+const posts = computed(() => {
+  return (
+    blogContext.getPostsQuery.data.value?.pages.flatMap((page) => {
+      return page.rows;
+    }) ?? []
+  );
+});
 
-const hasPosts = computed(() => posts.value.length > 0);
+const hasPosts = computed(() => {
+  return posts.value.length > 0;
+});
 
 useInfiniteScroll(
-  () => (isClient ? (globalThis as unknown as Window) : null),
-  () =>
-    blogContext.getPostsQuery
-      .fetchNextPage()
-      .then(() => undefined)
-      // чтобы не спамить запросами при ошибке (когда нет интернета)
-      .catch(() => new Promise((resolve) => setTimeout(resolve, 1000))),
+  () => {
+    return isClient ? (globalThis as unknown as Window) : null;
+  },
+  () => {
+    return (
+      blogContext.getPostsQuery
+        .fetchNextPage()
+        .then(() => {
+          return undefined;
+        })
+        // чтобы не спамить запросами при ошибке (когда нет интернета)
+        .catch(() => {
+          return new Promise((resolve) => {
+            return setTimeout(resolve, 1000);
+          });
+        })
+    );
+  },
   {
-    canLoadMore: () => !blogContext.getPostsQuery.isFetching.value && blogContext.getPostsQuery.hasNextPage.value,
+    canLoadMore: () => {
+      return !blogContext.getPostsQuery.isFetching.value && blogContext.getPostsQuery.hasNextPage.value;
+    },
     distance: 100,
   },
 );
 
-const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postData, files) =>
-  blogContext.postPostMutation.mutateAsync({ postData, files });
+const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postCreateRequestData, files) => {
+  return blogContext.postPostMutation.mutateAsync({
+    body: {
+      files: [],
+      text: postCreateRequestData.text,
+    },
+    bodySerializer: (body) => {
+      const formData = new FormData();
+
+      formData.append('text', body.text);
+
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
+
+      return formData;
+    },
+  });
+};
 
 const onBeforeDelete = async () => {
   dialogConfirmationDelete.value?.open();
@@ -136,6 +176,8 @@ const onChangeEditModeFor: NonNullable<InstanceType<typeof BlogPost>['onChangeEd
 };
 
 useSeoMeta({
-  description: () => (blogContext.getPostByIdQuery.data.value ? t('myBlog') : t('microblogWithNoClearDirection')),
+  description: () => {
+    return blogContext.getPostByIdQuery.data.value ? t('myBlog') : t('microblogWithNoClearDirection');
+  },
 });
 </script>

@@ -1,0 +1,69 @@
+get:
+  operationId: getPosts
+  summary: Get posts
+  tags: 
+    - Posts
+  parameters:
+    - in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+      description: Page number (0-based)
+    - in: query
+      name: pageSize
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+      description: Items per page
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PostsResponse.yaml
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Error400.yaml
+
+post:
+  operationId: createPost
+  summary: Create post
+  tags: 
+    - Posts
+  security:
+    - cookieAuth: []
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: ../components/schemas/PostCreateRequest.yaml
+  responses:
+    "200":
+      description: Created
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PostResponse.yaml
+    "400":
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Error400.yaml
+    "401":
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Error401.yaml

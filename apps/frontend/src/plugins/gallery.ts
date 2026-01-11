@@ -1,9 +1,14 @@
-import type { ItemImage, ItemVideo } from '@etonee123x/shared/helpers/folderData';
+import { isFolderDataItemImage, isFolderDataItemVideo } from '@/helpers/folderData';
+import type { components } from '@/types/openapi';
+import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { useCycleList } from '@vueuse/core';
 import { computed, inject, shallowRef } from 'vue';
-import type { FunctionPlugin, InjectionKey, ShallowRef, UnwrapRef } from 'vue';
+import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
 
-type Item = Pick<ItemImage | ItemVideo, 'src' | 'name' | 'fileType'>;
+type Item = Pick<
+  components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'],
+  'src' | 'name' | 'fileType'
+>;
 type Items = Array<Item>;
 
 interface Context {
@@ -29,13 +34,14 @@ export const createGallery = () => {
     prev,
     state: item,
   } = useCycleList<Item | undefined>(items, {
-    getIndexOf: (item, list) => list.findIndex((_item) => _item?.src === item?.src),
+    getIndexOf: (item, list) => {
+      return list.findIndex((_item) => {
+        return _item?.src === item?.src;
+      });
+    },
   });
 
-  const install: FunctionPlugin = (app, options: Partial<Pick<UnwrapRef<Context>, 'items' | 'item'>> = {}) => {
-    items.value = options.items ?? items.value;
-    item.value = options.item ?? item.value;
-
+  const install: FunctionPlugin = (app) => {
     app.provide(INJECTION_KEY_GALLERY, {
       item,
       items,
@@ -45,13 +51,32 @@ export const createGallery = () => {
     });
   };
 
+  const init = () => {
+    const _item = objectGet(globalThis.__GALLERY__, 'item');
+    const _items = objectGet(globalThis.__GALLERY__, 'items');
+
+    if (
+      (isFolderDataItemImage(_item) || isFolderDataItemVideo(_item)) &&
+      Array.isArray(_items) &&
+      _items.every((item) => {
+        return isFolderDataItemImage(item) || isFolderDataItemVideo(item);
+      })
+    ) {
+      item.value = _item;
+      items.value = _items;
+    }
+  };
+
   return {
     install,
+    init,
 
-    state: computed(() => ({
-      item: item.value,
-      items: items.value,
-    })),
+    state: computed(() => {
+      return {
+        item: item.value,
+        items: items.value,
+      };
+    }),
   };
 };
 

@@ -17,7 +17,11 @@ defineProps<{
 const baseDialog = useTemplateRef('baseDialog');
 
 defineExpose({
-  open: () => baseDialog.value?.open(),
-  close: () => baseDialog.value?.close(),
+  open: () => {
+    return baseDialog.value?.open();
+  },
+  close: () => {
+    return baseDialog.value?.close();
+  },
 });
 </script>

@@ -1,7 +1,7 @@
 import { Temporal } from 'temporal-polyfill';
 
 export const millisecondsToHumanReadable = (milliseconds: number): string => {
-  const { minutes = 0, seconds = 0 } = Temporal.Duration.from({
+  const { minutes, seconds } = Temporal.Duration.from({
     milliseconds: Math.ceil(milliseconds),
   }).round({
     largestUnit: 'minute',

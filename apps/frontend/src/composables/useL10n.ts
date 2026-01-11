@@ -6,13 +6,15 @@ import { propertyCurried } from '@etonee123x/shared/utils/property';
 export const useL10n = () => {
   const localeInfo = useLocaleInfo();
 
-  const localizeRoute = (route: RouteLocationAsRelativeGeneric) => ({
-    ...route,
-    params: {
-      language: localeInfo.value.locale.toLocaleLowerCase(),
-      ...route.params,
-    },
-  });
+  const localizeRoute = (route: RouteLocationAsRelativeGeneric) => {
+    return {
+      ...route,
+      params: {
+        language: localeInfo.value.locale.toLocaleLowerCase(),
+        ...route.params,
+      },
+    };
+  };
 
   const localizePath = (path: string) => {
     if (new RegExp(`^/(?:${LOCALES_INFO.map(propertyCurried('locale')).join('|')})/`).test(path)) {

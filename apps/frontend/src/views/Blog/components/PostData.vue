@@ -1,26 +1,28 @@
 <template>
   <div class="flex flex-col gap-4">
     <BaseHtml v-if="html" :html />
-    <ul v-if="post.filesUrls.length > 0">
-      <li v-for="(fileUrl, index) in post.filesUrls" :key="index">
-        <PostDataAttachment :fileUrl :index />
+    <ul v-if="post.attachments.length > 0">
+      <li v-for="(attachment, index) in post.attachments" :key="index">
+        <PostDataAttachment :attachment :index />
       </li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Post } from '@etonee123x/shared/types/blog';
 import { computed } from 'vue';
 
 import PostDataAttachment from './PostDataAttachment.vue';
 
 import BaseHtml from '@/components/ui/BaseHtml.vue';
 import { parseContent } from '@/utils/parseContent';
+import type { components } from '@/types/openapi';
 
 const props = defineProps<{
-  post: Post;
+  post: components['schemas']['PostResponse'];
 }>();
 
-const html = computed(() => parseContent(props.post.text));
+const html = computed(() => {
+  return parseContent(props.post.text);
+});
 </script>

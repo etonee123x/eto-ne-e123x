@@ -3,13 +3,17 @@
 </template>
 
 <script setup lang="ts">
-import { extensionToFileType, FILE_TYPES } from '@etonee123x/shared/helpers/folderData';
+import { extensionToFileType, FILE_TYPES } from '@/helpers/folderData';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { mdiFileOutline } from '@mdi/js';
 import { defineAsyncComponent, computed } from 'vue';
 
-const LazyBaseIcon = defineAsyncComponent(() => import('@/components/ui/BaseIcon'));
-const LazyPreviewVideo = defineAsyncComponent(() => import('@/components/PreviewVideo.vue'));
+const LazyBaseIcon = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseIcon');
+});
+const LazyPreviewVideo = defineAsyncComponent(() => {
+  return import('@/components/PreviewVideo.vue');
+});
 
 const props = defineProps<{ file: File }>();
 
@@ -28,7 +32,7 @@ const component = computed(() => {
     return unknownComponent;
   }
 
-  switch (extensionToFileType(extension)) {
+  switch (extensionToFileType(`.${extension}`)) {
     case FILE_TYPES.IMAGE: {
       return {
         is: 'img',

@@ -62,17 +62,27 @@ const onInput: NonNullable<HTMLInputElement['oninput']> = (event) => {
   model.value = event.target.value;
 };
 
-const onClickContainer = () => toggleIsFocused(true);
+const onClickContainer = () => {
+  return toggleIsFocused(true);
+};
 
 const onClickButtonClear = () => {
   model.value = '';
 };
 
-const onFocus = () => emit('focus');
-const onBlur = () => emit('blur');
+const onFocus = () => {
+  emit('focus');
+};
+const onBlur = () => {
+  emit('blur');
+};
 
 defineExpose({
-  blur: () => input.value?.blur(),
-  focus: () => input.value?.focus(),
+  blur: () => {
+    return input.value?.blur();
+  },
+  focus: () => {
+    return input.value?.focus();
+  },
 });
 </script>

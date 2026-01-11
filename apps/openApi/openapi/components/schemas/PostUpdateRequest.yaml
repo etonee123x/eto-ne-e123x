@@ -1,0 +1,18 @@
+type: object
+properties:
+  text:
+    type: string
+  attachments:
+    type: array
+    items:
+      oneOf:
+        - $ref: ./PostAttachment.yaml
+        - type: "null"
+  files:
+    type: array
+    items:
+      type: string
+required:
+  - text
+  - attachments
+  - files

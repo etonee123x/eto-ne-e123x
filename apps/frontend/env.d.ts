@@ -17,3 +17,13 @@ declare module '*.yaml' {
 
   export default content;
 }
+
+declare global {
+  var __GALLERY__: unknown;
+  var __PLAYER__: unknown;
+  var __QUERY__: unknown;
+}
+
+// Надо экспортировать что-то, чтобы работало
+// eslint-disable-next-line unicorn/require-module-specifiers
+export {};

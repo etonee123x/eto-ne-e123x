@@ -25,7 +25,9 @@ import BaseDialog from './BaseDialog.vue';
 
 import { INPUT } from '@/helpers/ui';
 
-const LazyBaseFilesList = defineAsyncComponent(() => import('./BaseFilesList.vue'));
+const LazyBaseFilesList = defineAsyncComponent(() => {
+  return import('./BaseFilesList.vue');
+});
 
 const { t } = useI18n({
   useScope: 'local',
@@ -61,12 +63,16 @@ const { open: openInModal, onChange: onChangeInModal, reset: resetInModal } = us
 const model = ref<Array<File>>([]);
 
 const emit = defineEmits<{
-  'update:model-value': [Array<File>];
+  'update:modelValue': [Array<File>];
 }>();
 
-const onClick = () => openInitial();
+const onClick = () => {
+  openInitial();
+};
 
-const onClickAdd = () => openInModal();
+const onClickAdd = () => {
+  openInModal();
+};
 
 onChangeInModal((files) => {
   if (!files) {
@@ -75,13 +81,14 @@ onChangeInModal((files) => {
 
   [...files].forEach((file) => {
     if (
-      model.value.some(
-        (_file) =>
+      model.value.some((_file) => {
+        return (
           _file.name === file.name &&
           _file.size === file.size &&
           _file.lastModified === file.lastModified &&
-          _file.type === file.type,
-      )
+          _file.type === file.type
+        );
+      })
     ) {
       return;
     }
@@ -92,7 +99,9 @@ onChangeInModal((files) => {
   resetInModal();
 });
 
-const onConfirm = () => emit('update:model-value', model.value);
+const onConfirm = () => {
+  emit('update:modelValue', model.value);
+};
 
 const onClose = () => {
   model.value = [];

@@ -1,18 +1,18 @@
 <template>
-  <ElementFileWrapper :element>
+  <ElementFileWrapper :to :element>
     <PreviewVideo :src="element.src" />
   </ElementFileWrapper>
 </template>
 
 <script setup lang="ts">
-import type { ItemVideo } from '@etonee123x/shared/helpers/folderData';
-
+import type { components } from '@/types/openapi';
 import ElementFileWrapper from './_ElementFileWrapper.vue';
+import type { Props as PropsElementFileWrapper } from './_ElementFileWrapper.vue';
 
 import PreviewVideo from '@/components/PreviewVideo.vue';
-import type { ItemWithSinceTimestamps } from '@/api/folderData';
 
 defineProps<{
-  element: ItemWithSinceTimestamps<ItemVideo>;
+  element: components['schemas']['FolderDataItemVideo'];
+  to: PropsElementFileWrapper['to'];
 }>();
 </script>

@@ -1,14 +1,13 @@
 import { inject, shallowReactive } from 'vue';
 import type { FunctionPlugin, InjectionKey, ShallowReactive } from 'vue';
-import { areIdsEqual, toId } from '@etonee123x/shared/helpers/id';
-import type { Id, WithId } from '@etonee123x/shared/helpers/id';
 
 export const NOTIFICATION_TYPES = {
   ERROR: 'ERROR',
   SUCCESS: 'SUCCESS',
 } as const;
 
-export interface Notification extends WithId {
+export interface Notification {
+  id: string;
   text: string;
   type: (typeof NOTIFICATION_TYPES)[keyof typeof NOTIFICATION_TYPES];
 }
@@ -16,7 +15,7 @@ export interface Notification extends WithId {
 interface Notifications {
   notifications: ShallowReactive<Array<Notification>>;
   notify: (text: string, options: { type: Notification['type']; ttl?: number }) => void;
-  close: (id: Id) => void;
+  close: (id: string) => void;
 }
 
 const INJECTION_KEY_NOTIFICATIONS: InjectionKey<Notifications> = Symbol('notifications');
@@ -25,15 +24,22 @@ export const notifications: FunctionPlugin = (app) => {
   const notifications = shallowReactive<Array<Notification>>([]);
 
   const notify: Notifications['notify'] = (text, options) => {
-    const id = toId(Date.now());
+    const id = String(Date.now());
 
     notifications.push({ text, id, ...options });
 
-    setTimeout(() => close(id), options.ttl ?? 5 * 1000);
+    setTimeout(
+      () => {
+        close(id);
+      },
+      options.ttl ?? 5 * 1000,
+    );
   };
 
   const close: Notifications['close'] = (id) => {
-    const index = notifications.findIndex(({ id: _id }) => areIdsEqual(_id, id));
+    const index = notifications.findIndex(({ id: _id }) => {
+      return _id === id;
+    });
 
     if (index === -1) {
       return;

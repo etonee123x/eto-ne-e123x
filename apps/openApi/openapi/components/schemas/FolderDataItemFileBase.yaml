@@ -1,0 +1,14 @@
+allOf:
+  - $ref: ./FolderDataItemBase.yaml
+  - type: object
+    properties:
+      itemType:
+        allOf:
+          - $ref: ./ItemType.yaml
+          - enum:
+            - FILE
+      src:
+        type: string
+    required:
+      - itemType
+      - src

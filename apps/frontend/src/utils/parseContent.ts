@@ -10,11 +10,13 @@ const replaceLinks: FunctionReplacer = (content) => {
 
   const origin = isServer ? requestToOrigin(nonNullable(useSSRContext()).express.request) : globalThis.location.origin;
 
-  return content.replace(
-    URL_REGEXP,
-    (url) => `<a href="${url}" ${url.startsWith(origin) ? '' : 'target="_blank"'}>${url}</a>`,
-  );
+  return content.replace(URL_REGEXP, (url) => {
+    return `<a href="${url}" ${url.startsWith(origin) ? '' : 'target="_blank"'}>${url}</a>`;
+  });
 };
 
-export const parseContent = (content: string | undefined): string =>
-  [replaceLinks].reduce((accumulator, _function) => _function(accumulator), content ?? '');
+export const parseContent = (content: string | undefined): string => {
+  return [replaceLinks].reduce((accumulator, _function) => {
+    return _function(accumulator);
+  }, content ?? '');
+};

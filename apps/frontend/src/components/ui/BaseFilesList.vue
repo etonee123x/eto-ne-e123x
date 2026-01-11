@@ -37,7 +37,9 @@ const onClickDeteleByIndex = (index: number) => {
   model.value.splice(index, 1);
 };
 
-const getKeyByFile = (file: File) => [file.name, file.type, file.lastModified, file.size].join('-');
+const getKeyByFile = (file: File) => {
+  return [file.name, file.type, file.lastModified, file.size].join('-');
+};
 
 watch(ol, (v) => {
   if (!v) {

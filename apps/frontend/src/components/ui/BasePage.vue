@@ -14,5 +14,12 @@ const props = defineProps<{
   h1: string;
 }>();
 
-useHead({ title: () => props.h1 }, { tagPriority: 'low' });
+useHead(
+  {
+    title: () => {
+      return props.h1;
+    },
+  },
+  { tagPriority: 'low' },
+);
 </script>

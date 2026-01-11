@@ -23,5 +23,7 @@ const model = defineModel<boolean>();
 
 const toggle = useToggle(model);
 
-const onClick = () => toggle();
+const onClick = () => {
+  return toggle();
+};
 </script>

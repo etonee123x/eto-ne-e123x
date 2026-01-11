@@ -1,67 +1,87 @@
-import { getFolderData as _getFolderData } from '@/api/folderData';
-import type { FolderDataWithSinceTimestamps } from '@/api/folderData';
 import { useGoToPage404 } from '@/composables/useGoToPage404';
-import { useL10n } from '@/composables/useL10n';
 import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
 import { useGallery } from '@/plugins/gallery';
 import { usePlayer } from '@/plugins/player';
 import { ROUTE_NAMES } from '@/router';
 import { nonNullable } from '@/utils/nonNullable';
-import { FILE_TYPES, ITEM_TYPES } from '@etonee123x/shared/helpers/folderData';
+import { FILE_TYPES } from '@/helpers/folderData';
 import { useQuery } from '@tanstack/vue-query';
 import type { UseQueryReturnType } from '@tanstack/vue-query';
 import { computed, inject, provide, watchEffect } from 'vue';
-import type { InjectionKey } from 'vue';
+import type { ComputedRef, InjectionKey, UnwrapRef } from 'vue';
 import { useRoute } from 'vue-router';
+import { client } from '@/api/client';
+import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
+import type { components } from '@/types/openapi';
+import { useL10n } from '@/composables/useL10n';
 
 interface ExplorerContext {
-  getFolderDataQuery: UseQueryReturnType<FolderDataWithSinceTimestamps, unknown>;
+  getFolderDataQuery: UseQueryReturnType<components['schemas']['FolderDataResponse'], unknown>;
+  navigationLinks: ComputedRef<Array<{ text: string; to: string }>>;
 }
 
 const INJECTION_KEY_EXPLORER: InjectionKey<ExplorerContext> = Symbol('explorer');
+const MODULE_NAME = 'explorer';
 
 export const provideExplorerContext = async () => {
-  const { localizePath } = useL10n();
+  const clientRequestPromiseWrapper = useClientRequestPromiseWrapper();
 
   const route = useRoute();
   const player = usePlayer();
   const gallery = useGallery();
-
-  const moduleURLResolver = (url: string) => localizePath(`/explorer${url}`);
-
-  const routeMatterPath = computed(() =>
-    Array.isArray(route.params.links) //
-      ? '/' + route.params.links.join('/')
-      : '/',
-  );
-
   const goToPage404 = useGoToPage404();
+  const l10n = useL10n();
+
+  const segments = computed(() => {
+    return typeof route.params.segments === 'string' && route.params.segments !== ''
+      ? [route.params.segments]
+      : route.params.segments || [];
+  });
+
+  const navigationLinks: ExplorerContext['navigationLinks'] = computed(() => {
+    const segments = getFolderDataQuery.data.value?.path.split('/').filter(Boolean) ?? [];
+
+    return (segments.at(-1) === getFolderDataQuery.data.value?.file?.name ? segments.slice(0, -1) : segments).reduce(
+      (segments, segment) => {
+        return [
+          ...segments,
+          {
+            text: segment,
+            to: [nonNullable(segments.at(-1)).to, segment].join('/'),
+          },
+        ];
+      },
+      [
+        {
+          text: 'root',
+          to: l10n.localizePath(MODULE_NAME),
+        },
+      ],
+    );
+  });
 
   const getFolderDataQuery: ExplorerContext['getFolderDataQuery'] = useQuery({
-    queryKey: ['folderData', routeMatterPath],
-    queryFn: () =>
-      _getFolderData(routeMatterPath.value)
-        .then((_folderData) => ({
-          items: _folderData.items.map((item) => ({
-            ...item,
-            url: moduleURLResolver(item.url),
-          })),
-          lvlUp: _folderData.lvlUp && moduleURLResolver(_folderData.lvlUp),
-          navigationItems: _folderData.navigationItems.map((navigationItem) => ({
-            ...navigationItem,
-            link: moduleURLResolver(navigationItem.link),
-          })),
-          linkedFile: _folderData.linkedFile && {
-            ..._folderData.linkedFile,
-            url: moduleURLResolver(_folderData.linkedFile.url),
-          },
-        }))
-        .catch(() => goToPage404()),
-    enabled: () => route.name === ROUTE_NAMES.EXPLORER,
+    queryKey: [
+      'folderData',
+      computed(() => {
+        return segments.value.join('/');
+      }),
+    ] as const,
+    queryFn: (...parameters): Promise<UnwrapRef<ExplorerContext['getFolderDataQuery']['data']>> => {
+      return clientRequestPromiseWrapper(
+        client['/folder-data'].GET({ params: { query: { path: parameters[0].queryKey[1] } } }),
+      ).catch(() => {
+        return goToPage404();
+      });
+    },
+    enabled: () => {
+      return route.name === ROUTE_NAMES.EXPLORER;
+    },
   });
 
   const explorerContext = {
     getFolderDataQuery,
+    navigationLinks,
   };
 
   provide(INJECTION_KEY_EXPLORER, explorerContext);
@@ -71,32 +91,29 @@ export const provideExplorerContext = async () => {
   watchEffect(() => {
     const folderData = getFolderDataQuery.data.value;
 
-    const folderDataLinkedFile = folderData?.linkedFile;
+    const maybeFile = folderData?.file;
 
-    if (!folderDataLinkedFile) {
+    if (!maybeFile) {
       gallery.items.value = [];
 
       return;
     }
 
-    if (folderDataLinkedFile.fileType === FILE_TYPES.AUDIO) {
-      player.playlist.value = folderData.items.filter(
-        (item) => item.itemType === ITEM_TYPES.FILE && item.fileType === FILE_TYPES.AUDIO,
-      );
-
-      player.theTrack.value = folderDataLinkedFile;
+    if (maybeFile.fileType === FILE_TYPES.AUDIO) {
+      player.playlist.value = folderData.files.filter((file) => {
+        return file.fileType === FILE_TYPES.AUDIO;
+      });
+      player.theTrack.value = maybeFile;
 
       return;
     }
 
-    if (folderDataLinkedFile.fileType === FILE_TYPES.IMAGE || folderDataLinkedFile.fileType === FILE_TYPES.VIDEO) {
+    if (maybeFile.fileType === FILE_TYPES.IMAGE || maybeFile.fileType === FILE_TYPES.VIDEO) {
       gallery.loadGalleryItem(
-        folderDataLinkedFile,
-        folderData.items.filter(
-          (item) =>
-            item.itemType === ITEM_TYPES.FILE &&
-            (item.fileType === FILE_TYPES.IMAGE || item.fileType === FILE_TYPES.VIDEO),
-        ),
+        maybeFile,
+        folderData.files.filter((file) => {
+          return file.fileType === FILE_TYPES.IMAGE || file.fileType === FILE_TYPES.VIDEO;
+        }),
       );
     }
   });
@@ -104,4 +121,6 @@ export const provideExplorerContext = async () => {
   return explorerContext;
 };
 
-export const useExplorerContext = () => nonNullable(inject(INJECTION_KEY_EXPLORER));
+export const useExplorerContext = () => {
+  return nonNullable(inject(INJECTION_KEY_EXPLORER));
+};

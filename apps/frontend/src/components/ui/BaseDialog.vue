@@ -12,7 +12,7 @@
     <div class="dialog__content">
       <slot v-if="!isHiddenHeader" name="header" v-bind="{ close }">
         <header class="flex justify-between items-center mb-6">
-          <span v-if="isNotNil(title)" class="text-lg">{{ title }}</span>
+          <span v-if="!isNil(title)" class="text-lg">{{ title }}</span>
           <BaseButton class="ms-auto" @click="onClickCloseIcon">
             <BaseIcon :path="mdiClose" />
           </BaseButton>
@@ -37,10 +37,6 @@ import { computed, onBeforeUnmount, useId, useTemplateRef, watchEffect } from 'v
 import { onKeyDown, useToggle } from '@vueuse/core';
 import { mdiClose } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import type { FunctionCallback } from '@etonee123x/shared/types';
-import { areIdsEqual, toId } from '@etonee123x/shared/helpers/id';
-import type { Id } from '@etonee123x/shared/helpers/id';
 import BaseButton from './BaseButton';
 import BaseIcon from './BaseIcon';
 import { isNil } from '@etonee123x/shared/utils/isNil';
@@ -56,7 +52,7 @@ const props = defineProps<
     buttons: Array<{
       key: PropertyKey;
       text: string;
-      onClick: FunctionCallback;
+      onClick: () => void | Promise<void>;
     }>;
     isHiddenHeader: boolean;
     isHiddenFooter: boolean;
@@ -90,8 +86,8 @@ const { t } = useI18n({
   },
 });
 
-const buttons = computed(
-  () =>
+const buttons = computed(() => {
+  return (
     props.buttons ?? [
       {
         key: 'cancel',
@@ -109,8 +105,9 @@ const buttons = computed(
           close();
         },
       },
-    ],
-);
+    ]
+  );
+});
 
 const open = () => {
   if (model.value) {
@@ -138,7 +135,7 @@ const onCloseDialog = close;
 const onClickCloseIcon = close;
 const onClickBackdrop = close;
 
-const onOpen = (id: Id) => {
+const onOpen = (id: string) => {
   if (dialogIds.includes(id)) {
     return;
   }
@@ -146,7 +143,7 @@ const onOpen = (id: Id) => {
   dialogIds.push(id);
 };
 
-const onClose = (id: Id) => {
+const onClose = (id: string) => {
   const index = dialogIds.indexOf(id);
 
   if (index === -1) {
@@ -159,20 +156,24 @@ const onClose = (id: Id) => {
 onKeyDown('Escape', () => {
   const maybeLastDialogId = dialogIds.at(-1);
 
-  if (isNil(maybeLastDialogId) || !areIdsEqual(maybeLastDialogId, toId(id))) {
+  if (isNil(maybeLastDialogId) || maybeLastDialogId !== id) {
     return;
   }
 
   close();
 });
 
-onBeforeUnmount(() => onClose(toId(id)));
+onBeforeUnmount(() => {
+  onClose(id);
+});
 
-watchEffect(() =>
-  model.value //
-    ? onOpen(toId(id))
-    : onClose(toId(id)),
-);
+watchEffect(() => {
+  if (model.value) {
+    onOpen(id);
+  } else {
+    onClose(id);
+  }
+});
 
 defineExpose({
   open,

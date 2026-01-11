@@ -36,6 +36,9 @@ export default defineConfig(() => {
           headers: {
             Authorization,
           },
+          rewrite: (path) => {
+            return path.replace(/^\/api/, '');
+          },
         },
         '/uploads': {
           target: process.env.SERVER_ORIGIN,

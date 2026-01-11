@@ -6,7 +6,7 @@
         :placeholder="t('textareaPlaceholder')"
         :errors="v$.text.$errors"
         ref="baseTextarea"
-        v-model="postData.text"
+        v-model="resetableRefPostModel.value.value.text"
         @keydown:enter="onKeyDownEnter"
         @paste="onPaste"
       />
@@ -14,14 +14,14 @@
         <BaseInputFile @update:modelValue="onUpdateModelValueInputFile" />
       </div>
     </div>
-    <div v-if="files.length > 0">
+    <div v-if="resetableRefFiles.value.value.length > 0">
       <div class="mb-3 flex items-center gap-2">
         <div class="text-xl">{{ t('files') }}</div>
         <BaseButton @click="onClickDeleteFiles">
           <BaseIcon :path="mdiDelete" />
         </BaseButton>
       </div>
-      <LazyBaseFilesList v-model="files" />
+      <LazyBaseFilesList v-model="resetableRefFiles.value.value" />
     </div>
 
     <slot />
@@ -31,32 +31,35 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { defineAsyncComponent, useTemplateRef } from 'vue';
-import type { Post } from '@etonee123x/shared/types/blog';
 import { mdiDelete } from '@mdi/js';
 
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseInputFile from '@/components/ui/BaseInputFile.vue';
 import BaseButton from '@/components/ui/BaseButton/BaseButton.vue';
 import BaseIcon from '@/components/ui/BaseIcon';
-import type { ForPost } from '@etonee123x/shared/types/database';
 import BaseForm from '@/components/ui/BaseForm.vue';
-import { useSourcedRef } from '@/composables/useSourcedRef';
+import { useResetableRef } from '@/composables/useResetableRef';
 import { useIsMobile } from '@/composables/useIsMobile';
 import { helpers, requiredIf } from '@vuelidate/validators';
 import { i18n } from '@/i18n';
 import useVuelidate from '@vuelidate/core';
+import type { components } from '@/types/openapi';
+
+type Post = Omit<components['schemas']['PostResponse'], '_meta'>;
 
 const props = defineProps<{
-  post?: ForPost<Post>;
+  post?: Post;
 }>();
 
 const emit = defineEmits<{
-  submit: [post: ForPost<Post>, files: Array<File>];
+  submit: [post: Post, files: Array<File>];
 }>();
 
 const baseForm = useTemplateRef('baseForm');
 
-const LazyBaseFilesList = defineAsyncComponent(() => import('@/components/ui/BaseFilesList.vue'));
+const LazyBaseFilesList = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseFilesList.vue');
+});
 
 const { t } = useI18n({
   useScope: 'local',
@@ -74,30 +77,33 @@ const { t } = useI18n({
 
 const baseTextarea = useTemplateRef('baseTextarea');
 
-const onClickDeleteFiles = () => {
-  files.value = [];
-};
+const resetableRefFiles = useResetableRef<Array<File>>([]);
+const onClickDeleteFiles = resetableRefFiles.reset;
 
-const [files, resetFiles] = useSourcedRef<Array<File>>([]);
-
-const [postData, resetPostModel] = useSourcedRef<ForPost<Post>>(
-  () =>
+const resetableRefPostModel = useResetableRef<Post>(() => {
+  return (
     props.post ?? {
       text: '',
-      filesUrls: [],
-    },
-);
+      attachments: [],
+      attachmentsOrder: [],
+    }
+  );
+});
 
 const v$ = useVuelidate(
   {
     text: {
       requiredIfNoFiles: helpers.withMessage(
-        () => i18n.global.t('validations.required'),
-        requiredIf(() => files.value.length === 0 && postData.value.filesUrls.length === 0),
+        () => {
+          return i18n.global.t('validations.required');
+        },
+        requiredIf(() => {
+          return resetableRefFiles.value.value.length === 0 && resetableRefPostModel.value.value.text.length === 0;
+        }),
       ),
     },
   },
-  postData,
+  resetableRefPostModel.value,
   { $lazy: true },
 );
 
@@ -125,24 +131,26 @@ const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
   }
 
   event.preventDefault();
-  files.value = [...files.value, ...maybeFileList];
+  resetableRefFiles.value.value = [...resetableRefFiles.value.value, ...maybeFileList];
 };
 
-const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:model-value'] = (_files) => {
-  files.value = [...files.value, ..._files];
+const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:modelValue'] = (_files) => {
+  resetableRefFiles.value.value = [...resetableRefFiles.value.value, ..._files];
 };
 
-const focusTextarea = () => baseTextarea.value?.focus();
+const focusTextarea = () => {
+  return baseTextarea.value?.focus();
+};
 
 const onSubmit = async () => {
   if (!(await v$.value.$validate())) {
     return;
   }
 
-  emit('submit', postData.value, files.value);
+  emit('submit', resetableRefPostModel.value.value, resetableRefFiles.value.value);
 
-  resetFiles();
-  resetPostModel();
+  resetableRefFiles.reset();
+  resetableRefPostModel.reset();
   v$.value.$reset();
 
   focusTextarea();
@@ -150,7 +158,9 @@ const onSubmit = async () => {
 
 defineExpose({
   focusTextarea,
-  postData,
-  requestSubmit: () => baseForm.value?.requestSubmit(),
+  resetableRefPostModel,
+  requestSubmit: () => {
+    return baseForm.value?.requestSubmit();
+  },
 });
 </script>

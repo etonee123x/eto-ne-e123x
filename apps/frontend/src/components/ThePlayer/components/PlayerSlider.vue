@@ -37,19 +37,26 @@ const [isUsingPosition, setIsUsingPosition] = useToggle();
 
 const model = defineModel<number>();
 
-const style = computed(() => ({
-  '--width': `${(((isUsingPosition.value ? position.value : props.modelValue) * 100) / props.multiplier).toFixed(2)}%`,
-}));
+const style = computed(() => {
+  return {
+    '--width': `${(((isUsingPosition.value ? position.value : props.modelValue) * 100) / props.multiplier).toFixed(2)}%`,
+  };
+});
 
 const slider = useTemplateRef('slider');
 
 const { pressed: isPressed } = useMousePressed({ target: slider });
 const { elementWidth, elementX } = useMouseInElement(slider);
 
-watch(isPressed, () => (props.isLazy ? onIsPressedChangeLazy() : onIsPressedChange()));
+watch(isPressed, () => {
+  return props.isLazy ? onIsPressedChangeLazy() : onIsPressedChange();
+});
 
-const getPosition = () =>
-  promiseTimeout(0).then(() => to0To1Borders(elementX.value, [, elementWidth.value]) * props.multiplier);
+const getPosition = () => {
+  return promiseTimeout(0).then(() => {
+    return to0To1Borders(elementX.value, [, elementWidth.value]) * props.multiplier;
+  });
+};
 
 const onIsPressedChange = async () => {
   if (!isPressed.value) {
