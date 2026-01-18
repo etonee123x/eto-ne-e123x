@@ -1,150 +1,178 @@
 import { TableController } from '@/helpers/TableController';
-import type { OperationHandler, OperationResponse, PostResponse } from '@/types/openapi';
-import { throwError } from '@etonee123x/shared';
+import { throwError } from '@etonee123x/shared/utils/throwError';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 import Express from 'express';
 import multer from 'multer';
+import slugify from 'slugify';
+import nodePath from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { parseFileByPath } from '@/helpers/parseFileByPath';
+import { nonNullable } from '@/utils/nonNullable';
+import { requestToUrl } from '@/utils/requestToUrl';
+import type { components } from '@/types/openapi';
+import type { RequestHandlerTyped } from '@/types/RequestHandlerTyped';
+import { cookieAuth } from '@/middlewares/cookieAuth';
 
-const uploadAsync = (request: Express.Request, response: Express.Response): Promise<Express.Request['files']> => {
-  return new Promise((resolve, reject) => {
-    multer({
-      // dest: process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined'),
-      limits: {
-        fileSize: 50 * 1024 * 1024,
-      },
-      storage: multer.diskStorage({
-        destination: () => {
-          return process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
-        },
-        filename: (...[, file, callback]) => {
-          console.log({ file });
-          // const fileName = (
-          //   [
-          //     [
-          //       //
-          //       true,
-          //       (fileName) => {
-          //         return slugify(fileName, { lower: true, strict: true, locale: 'ru' });
-          //       },
-          //     ],
-          //     [
-          //       true,
-          //       (fileName) => {
-          //         const date = new Date();
+const uploadsPath = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
 
-          //         return [
-          //           fileName,
-          //           [
-          //             [
-          //               //
-          //               date.getFullYear(),
-          //               withPadStart(date.getMonth() + 1),
-          //               withPadStart(date.getDate()),
-          //             ].join('-'),
-          //             [
-          //               //
-          //               withPadStart(date.getHours()),
-          //               withPadStart(date.getMinutes()),
-          //               withPadStart(date.getSeconds()),
-          //             ].join('-'),
-          //           ].join('_'),
-          //         ].join('_');
-          //       },
-          //     ],
-          //     [
-          //       //
-          //       true,
-          //       (fileName) => {
-          //         return [fileName, randomUUID().split('-', 1)[0]].join('_');
-          //       },
-          //     ],
-          //     [
-          //       //
-          //       true,
-          //       (fileName) => {
-          //         return [fileName, ext].join('');
-          //       },
-          //     ],
-          //   ] as Array<[boolean, (fileName: string) => string]>
-          // ).reduce((fileName, [condition, transformation]) => {
-          //   // лол
-          //   // eslint-disable-next-line sonarjs/no-selector-parameter
-          //   return condition ? transformation(fileName) : fileName;
-          // }, file.filename);
-        },
-      }),
-    }).array('files')(request, response, (error: unknown) => {
-      if (error) {
-        reject(new Error('File upload error'));
-      } else {
-        resolve(request.files);
-      }
-    });
-  });
+const withPadStart00 = (value: number) => {
+  return String(value).padStart(2, '0');
 };
 
-const tableControllerPosts = new TableController<Omit<PostResponse, '_meta'>>('posts');
+const uploadFiles = multer({
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+  },
+  storage: multer.diskStorage({
+    destination: (...[, , callback]) => {
+      callback(null, uploadsPath);
+    },
+    filename: (...[, file, callback]) => {
+      const { name, ext } = nodePath.parse(file.originalname);
 
-export const getPosts: OperationHandler<'getPosts', [Express.Request, Express.Response]> = async (
-  ...[context, , response]
-) => {
+      callback(
+        null,
+        (
+          [
+            (fileName) => {
+              return slugify(fileName, { lower: true, strict: true, locale: 'ru' });
+            },
+            (fileName) => {
+              const date = new Date();
+
+              return [
+                fileName,
+                [
+                  [
+                    //
+                    date.getFullYear(),
+                    withPadStart00(date.getMonth() + 1),
+                    withPadStart00(date.getDate()),
+                  ].join('-'),
+                  [
+                    //
+                    withPadStart00(date.getHours()),
+                    withPadStart00(date.getMinutes()),
+                    withPadStart00(date.getSeconds()),
+                  ].join('-'),
+                ].join('_'),
+              ].join('_');
+            },
+            (fileName) => {
+              return [fileName, randomUUID().split('-', 1)[0]].join('_');
+            },
+            (fileName) => {
+              return [fileName, ext].join('');
+            },
+          ] satisfies Array<(fileName: string) => string>
+        ).reduce((fileName, transformation) => {
+          return transformation(fileName);
+        }, name),
+      );
+    },
+  }),
+}).array('files');
+
+const tableControllerPosts = new TableController<Omit<components['schemas']['PostResponse'], '_meta'>>('posts');
+
+export const getPosts: RequestHandlerTyped<'/posts', 'get'> = async (request, response) => {
+  const url = requestToUrl(request);
+  const pageSize = Number(nonNullable(url.searchParams.get('pageSize')));
+  const page = Number(nonNullable(url.searchParams.get('page')));
+
+  const indexInitial = page * pageSize;
+  const indexLast = indexInitial + pageSize;
   const posts = tableControllerPosts.read();
 
-  const perPage = context.request.query.pageSize ?? 10;
-  const page = context.request.query.page ?? 0;
-
-  const indexInitial = page * perPage;
-  const indexLast = indexInitial + perPage;
-
-  const data: OperationResponse<'getPosts'> = {
+  return response.send({
     _meta: {
       isEnd: indexLast >= posts.length - 1,
       page,
     },
     rows: posts.slice(indexInitial, indexLast),
+  });
+};
+
+export const getPostById: RequestHandlerTyped<'/posts/{id}', 'get'> = async (request, response) => {
+  const id = request.params.id;
+
+  const post = tableControllerPosts.readRowById(id);
+
+  return response.send(post);
+};
+
+const parseMulterFile = async (file: globalThis.Express.Multer.File) => {
+  // новояз
+  // eslint-disable-next-line unicorn/prevent-abbreviations
+  const src = `/uploads/${file.filename}`;
+
+  return {
+    ...(await parseFileByPath(file.path)),
+    src,
+    path: src,
   };
-  return response.send(data);
 };
 
-export const getPostById: OperationHandler<'getPostById', [Express.Request, Express.Response]> = async (
-  ...[context, , response]
-) => {
-  const post = tableControllerPosts.readRowById(context.request.params.id);
-
-  const data: OperationResponse<'getPostById'> = post;
-  return response.send(data);
-};
-
-export const createPost: OperationHandler<'createPost', [Express.Request, Express.Response]> = async (
-  context,
-  request,
-  response,
-) => {
-  const files = await uploadAsync(request, response);
-  console.log({ files });
+export const createPost: RequestHandlerTyped<
+  '/posts',
+  'post',
+  Omit<components['schemas']['PostCreateRequest'], 'files'>
+> = async (request, response) => {
+  const files = request.files as Array<globalThis.Express.Multer.File>;
 
   const post = tableControllerPosts.writeEntityOrRow(undefined, {
-    attachments: [],
-    text: String(request.body.text),
+    attachments: await Promise.all(
+      files.map((file) => {
+        return parseMulterFile(file);
+      }),
+    ),
+    text: request.body.text,
   });
 
-  const data: OperationResponse<'createPost'> = post;
-  return response.send(data);
+  return response.send(post);
 };
 
-export const updatePostById: OperationHandler<'updatePostById', [Express.Request, Express.Response]> = async (
-  ...[context, , response]
-) => {
-  const post = tableControllerPosts.writeEntityOrRow(context.request.params.id, context.request.body);
+export const updatePostById: RequestHandlerTyped<
+  '/posts/{id}',
+  'patch',
+  Omit<components['schemas']['PostUpdateRequest'], 'files'>
+> = async (request, response) => {
+  const id = request.params.id;
+  const files = request.files as Array<globalThis.Express.Multer.File>;
 
-  const data: OperationResponse<'updatePostById'> = post;
-  return response.send(data);
+  let index = 0;
+
+  const post = tableControllerPosts.writeEntityOrRow(id, {
+    text: request.body.text,
+    attachments: await Promise.all([
+      ...request.body.attachments.map(async (attachment) => {
+        return isNil(attachment) && index < files.length ? parseMulterFile(nonNullable(files[index++])) : attachment;
+      }),
+      ...files.slice(index).map((file) => {
+        return parseMulterFile(file);
+      }),
+    ]).then((attachments) => {
+      return attachments.filter((attachment) => {
+        return !isNil(attachment);
+      });
+    }),
+  });
+
+  return response.send(post);
 };
 
-export const deletePostById: OperationHandler<'deletePostById', [Express.Request, Express.Response]> = async (
-  ...[context, , response]
-) => {
-  const post = tableControllerPosts.deleteRowById(context.request.params.id);
+export const deletePostById: RequestHandlerTyped<'/posts/{id}', 'delete'> = async (request, response) => {
+  const id = request.params.id;
 
-  const data: OperationResponse<'deletePostById'> = post;
-  return response.send(data);
+  const post = tableControllerPosts.deleteRowById(id);
+
+  return response.send(post);
 };
+
+export const router = Express.Router();
+
+router.post('/posts', cookieAuth, uploadFiles, createPost);
+router.get('/posts', getPosts);
+router.get('/posts/:id', getPostById);
+router.patch('/posts/:id', cookieAuth, uploadFiles, updatePostById);
+router.delete('/posts/:id', cookieAuth, deletePostById);

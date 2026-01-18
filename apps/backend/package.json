@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "script:clearUnusedUploads": "tsx src/scripts/clearUnusedUploads",
-    "openapi:typegen": "openapi typegen --backend ../openApi/dist/openapi.yaml > src/types/openapi.d.ts"
+    "generate:openapi": "openapi-typescript ../openApi/openapi/openapi.yaml --output ./src/types/openapi.ts --enum-values"
   },
   "dependencies": {
     "@etonee123x/shared": "github:etonee123x/shared",
@@ -24,7 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
     "music-metadata": "^11.10.5",
-    "openapi-backend": "^5.15.0",
+    "openapi-typescript": "^7.10.1",
     "sharp": "^0.34.5",
     "slugify": "^1.6.6"
   },

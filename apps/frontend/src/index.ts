@@ -10,7 +10,7 @@ import { isProduction } from '@/constants/mode';
 import { KEY_JWT } from '@/constants/keys';
 import http from 'node:http';
 import { requestToOrigin } from '@/utils/requestToOrigin';
-import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
+import type { ExpressContext } from '@/types/ExpressContext';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { LOCALES_INFO } from '@/constants/localesInfo';
 import { isKnownLocale } from '@/helpers/isKnownLocale';

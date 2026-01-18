@@ -2,7 +2,7 @@ import { computed, inject, provide } from 'vue';
 import type { InjectionKey, UnwrapRef } from 'vue';
 
 import { nonNullable } from '@/utils/nonNullable';
-import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/vue-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import type {
   InfiniteData,
   UseInfiniteQueryReturnType,
@@ -17,6 +17,8 @@ import { client } from '@/api/client';
 import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
 
 const PAGE_SIZE = 10;
+
+const MODULE_NAME = 'posts';
 
 interface BlogContext {
   getPostsQuery: UseInfiniteQueryReturnType<
@@ -57,8 +59,10 @@ export const provideBlogContext = async () => {
     return isNil(route.params.postId) ? null : String(route.params.postId);
   });
 
+  const queryClient = useQueryClient();
+
   const getPostsQuery: BlogContext['getPostsQuery'] = useInfiniteQuery({
-    queryKey: ['posts'],
+    queryKey: [MODULE_NAME],
     queryFn: (
       ...parameters
     ): Promise<NonNullable<UnwrapRef<BlogContext['getPostsQuery']['data']>>['pages'][number]> => {
@@ -83,7 +87,7 @@ export const provideBlogContext = async () => {
   });
 
   const getPostByIdQuery: BlogContext['getPostByIdQuery'] = useQuery({
-    queryKey: ['post', postId],
+    queryKey: [MODULE_NAME, postId],
     queryFn: (): Promise<NonNullable<UnwrapRef<BlogContext['getPostByIdQuery']['data']>>> => {
       return clientRequestPromiseWrapper(
         client['/posts/{id}'].GET({
@@ -102,23 +106,32 @@ export const provideBlogContext = async () => {
   });
 
   const postPostMutation: BlogContext['postPostMutation'] = useMutation({
-    mutationKey: ['post'],
+    mutationKey: [MODULE_NAME],
     mutationFn: (...parameters): Promise<NonNullable<UnwrapRef<BlogContext['postPostMutation']['data']>>> => {
       return clientRequestPromiseWrapper(client['/posts'].POST(parameters[0]));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MODULE_NAME] });
     },
   });
 
   const patchPostByIdMutation: BlogContext['patchPostByIdMutation'] = useMutation({
-    mutationKey: ['post'],
+    mutationKey: [MODULE_NAME],
     mutationFn: (...parameters): Promise<NonNullable<UnwrapRef<BlogContext['patchPostByIdMutation']['data']>>> => {
       return clientRequestPromiseWrapper(client['/posts/{id}'].PATCH(parameters[0]));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MODULE_NAME] });
     },
   });
 
   const deletePostByIdMutation: BlogContext['deletePostByIdMutation'] = useMutation({
-    mutationKey: ['post'],
+    mutationKey: [MODULE_NAME],
     mutationFn: (...parameters): Promise<NonNullable<UnwrapRef<BlogContext['deletePostByIdMutation']['data']>>> => {
       return clientRequestPromiseWrapper(client['/posts/{id}'].DELETE(parameters[0]));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MODULE_NAME] });
     },
   });
 

@@ -52,7 +52,7 @@
         <ul class="flex justify-center gap-2">
           <li v-for="controlButton in controlButtons" :key="controlButton.key">
             <BaseButton
-              :isDisabled="controlButton.isDisabled"
+              :disabled="controlButton.disabled"
               class="whitespace-nowrap min-w-6 h-6 w-8"
               :aria-label="controlButton.ariaLabel"
               @click="controlButton.onClick"
@@ -87,8 +87,8 @@ import { useI18n } from 'vue-i18n';
 
 import PlayerSlider from './components/PlayerSlider.vue';
 
-import BaseButton from '@/components/ui/BaseButton';
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseSwipable from '@/components/ui/BaseSwipable.vue';
 import BaseToggler from '@/components/ui/BaseToggler.vue';
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
@@ -201,7 +201,7 @@ const controlButtons = computed(() => {
       key: 'previous',
       icon: mdiSkipBackward,
       onClick: load.previous,
-      isDisabled: isShuffleModeEnabled.value && historyItems.length === 0,
+      disabled: isShuffleModeEnabled.value && historyItems.length === 0,
       ariaLabel: t('previousTrack'),
     },
     isPlaying.value

@@ -20,8 +20,8 @@
 <script setup lang="ts">
 import { mdiCheck, mdiClose } from '@mdi/js';
 
-import BaseIcon from '@/components/ui/BaseIcon';
-import BaseButton from '@/components/ui/BaseButton';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
+import BaseButton from '@/components/ui/BaseButton.vue';
 import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 import type { Notification } from '@/plugins/notifications';
 

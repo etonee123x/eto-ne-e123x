@@ -42,9 +42,9 @@ import { mdiLogout } from '@mdi/js';
 import { computed, defineComponent, h } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { ROUTE_NAMES } from '@/router';
-import BaseButton from '@/components/ui/BaseButton';
+import BaseButton from '@/components/ui/BaseButton.vue';
 import ClientOnly from '@/components/ClientOnly.vue';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import { useLocaleInfo } from '@/composables/useLocaleInfo';

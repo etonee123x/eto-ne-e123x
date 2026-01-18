@@ -2,7 +2,7 @@
   <article class="w-full bg-background border border-dark rounded-sm cursor-pointer shadow-lg shadow-dark/15">
     <component :is="component.Is" v-bind="component.binds">
       <div class="p-4 flex flex-col">
-        <LazyBlogEditPost v-if="isInEditMode" :post ref="blogEditPost" @submit="onSubmit" />
+        <LazyFormPost v-if="isInEditMode" :post ref="formPost" @submit="onSubmit" />
         <template v-else>
           <PostData :post />
           <time
@@ -38,19 +38,19 @@ import { useI18n } from 'vue-i18n';
 
 import PostData from './PostData.vue';
 
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { ROUTE_NAMES } from '@/router';
 import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
-import BaseButton from '@/components/ui/BaseButton';
+import BaseButton from '@/components/ui/BaseButton.vue';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { useAuthContext } from '@/contexts/auth';
 import { useBlogContext } from '../contexts/blog';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import type { components } from '@/types/openapi';
 
-const LazyBlogEditPost = defineAsyncComponent(() => {
-  return import('./BlogEditPost.vue');
+const LazyFormPost = defineAsyncComponent(() => {
+  return import('./FormPost.vue');
 });
 
 const props = defineProps<{
@@ -63,7 +63,7 @@ const emit = defineEmits<{
   changeEditModeFor: [components['schemas']['PostResponse']['_meta']['id'] | null];
 }>();
 
-const blogEditPost = useTemplateRef<InstanceType<typeof LazyBlogEditPost>>('blogEditPost');
+const formPost = useTemplateRef<InstanceType<typeof LazyFormPost>>('formPost');
 
 const blogContext = useBlogContext();
 
@@ -87,7 +87,7 @@ const { t } = useI18n({
   },
 });
 
-const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postUpdateRequestData, files) => {
+const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (postUpdateRequestData, files) => {
   blogContext.patchPostByIdMutation.mutateAsync({
     params: {
       path: {
@@ -165,10 +165,9 @@ const controls = computed(() => {
           {
             key: 'save',
             iconPath: mdiContentSave,
-            isDisabled: props.post.text === blogEditPost.value?.resetableRefPostModel.value.value.text,
             isLoading: blogContext.patchPostByIdMutation.isPending.value,
             onClick: () => {
-              return blogEditPost.value?.requestSubmit();
+              return formPost.value?.form?.requestSubmit();
             },
           },
         ]
@@ -185,7 +184,7 @@ const controls = computed(() => {
               emit('changeEditModeFor', props.post._meta.id);
 
               nextTick(() => {
-                return blogEditPost.value?.focusTextarea();
+                return formPost.value?.focusTextarea();
               });
             },
           },

@@ -1,10 +1,10 @@
 <template>
-  <BaseForm class="flex gap-4 flex-col" ref="baseForm" @submit.prevent="onSubmit">
+  <form class="flex gap-4 flex-col" ref="form" @submit.prevent="onSubmit">
     <div class="flex gap-4">
       <BaseTextarea
         class="flex-1"
         :placeholder="t('textareaPlaceholder')"
-        :errors="v$.text.$errors"
+        name="text"
         ref="baseTextarea"
         v-model="resetableRefPostModel.value.value.text"
         @keydown:enter="onKeyDownEnter"
@@ -25,24 +25,20 @@
     </div>
 
     <slot />
-  </BaseForm>
+  </form>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { defineAsyncComponent, useTemplateRef } from 'vue';
+import { computed, defineAsyncComponent, useTemplateRef } from 'vue';
 import { mdiDelete } from '@mdi/js';
 
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseInputFile from '@/components/ui/BaseInputFile.vue';
-import BaseButton from '@/components/ui/BaseButton/BaseButton.vue';
-import BaseIcon from '@/components/ui/BaseIcon';
-import BaseForm from '@/components/ui/BaseForm.vue';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { useResetableRef } from '@/composables/useResetableRef';
 import { useIsMobile } from '@/composables/useIsMobile';
-import { helpers, requiredIf } from '@vuelidate/validators';
-import { i18n } from '@/i18n';
-import useVuelidate from '@vuelidate/core';
 import type { components } from '@/types/openapi';
 
 type Post = Omit<components['schemas']['PostResponse'], '_meta'>;
@@ -55,7 +51,7 @@ const emit = defineEmits<{
   submit: [post: Post, files: Array<File>];
 }>();
 
-const baseForm = useTemplateRef('baseForm');
+const form = useTemplateRef('form');
 
 const LazyBaseFilesList = defineAsyncComponent(() => {
   return import('@/components/ui/BaseFilesList.vue');
@@ -67,10 +63,12 @@ const { t } = useI18n({
     ru: {
       textareaPlaceholder: 'Сообщение',
       files: 'Файлы',
+      required: 'Обязательное',
     },
     en: {
       textareaPlaceholder: 'Message',
       files: 'Files',
+      required: 'Required',
     },
   },
 });
@@ -85,27 +83,9 @@ const resetableRefPostModel = useResetableRef<Post>(() => {
     props.post ?? {
       text: '',
       attachments: [],
-      attachmentsOrder: [],
     }
   );
 });
-
-const v$ = useVuelidate(
-  {
-    text: {
-      requiredIfNoFiles: helpers.withMessage(
-        () => {
-          return i18n.global.t('validations.required');
-        },
-        requiredIf(() => {
-          return resetableRefFiles.value.value.length === 0 && resetableRefPostModel.value.value.text.length === 0;
-        }),
-      ),
-    },
-  },
-  resetableRefPostModel.value,
-  { $lazy: true },
-);
 
 const isMobile = useIsMobile();
 
@@ -120,7 +100,7 @@ const onKeyDownEnter: InstanceType<typeof BaseTextarea>['onKeydown:enter'] = (ev
 
   event.preventDefault();
 
-  baseForm.value?.requestSubmit();
+  form.value?.requestSubmit();
 };
 
 const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
@@ -139,28 +119,27 @@ const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:
 };
 
 const focusTextarea = () => {
-  return baseTextarea.value?.focus();
+  baseTextarea.value?.focus();
 };
 
 const onSubmit = async () => {
-  if (!(await v$.value.$validate())) {
-    return;
-  }
-
   emit('submit', resetableRefPostModel.value.value, resetableRefFiles.value.value);
 
   resetableRefFiles.reset();
   resetableRefPostModel.reset();
-  v$.value.$reset();
 
   focusTextarea();
 };
 
 defineExpose({
   focusTextarea,
-  resetableRefPostModel,
-  requestSubmit: () => {
-    return baseForm.value?.requestSubmit();
-  },
+  form,
+  isValid: computed(() => {
+    return (
+      resetableRefPostModel.value.value.text.trim().length > 0 ||
+      resetableRefFiles.value.value.length > 0 ||
+      resetableRefPostModel.value.value.attachments.length > 0
+    );
+  }),
 });
 </script>

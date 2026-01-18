@@ -1,11 +1,11 @@
 <template>
   <BasePage :h1="t('blog')" ref="basePage">
     <template v-if="authContext.isAdmin.value">
-      <LazyBlogEditPost ref="lazyBlogEditPost" @submit="onSubmit">
+      <LazyFormPost ref="formPost" @submit="onSubmit">
         <BaseButton type="submit" :isLoading="blogContext.postPostMutation.isPending.value">
           {{ t('send') }}
         </BaseButton>
-      </LazyBlogEditPost>
+      </LazyFormPost>
       <hr class="my-4" />
     </template>
 
@@ -51,7 +51,7 @@ import BlogPost from './components/BlogPost.vue';
 
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
 import { isClient } from '@/constants/target';
-import BaseButton from '@/components/ui/BaseButton';
+import BaseButton from '@/components/ui/BaseButton.vue';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
 import { useAuthContext } from '@/contexts/auth';
@@ -61,12 +61,12 @@ const LazyBaseLoading = defineAsyncComponent(() => {
   return import('@/components/ui/BaseLoading.vue');
 });
 
-const LazyBlogEditPost = defineAsyncComponent(() => {
-  return import('./components/BlogEditPost.vue');
+const LazyFormPost = defineAsyncComponent(() => {
+  return import('./components/FormPost.vue');
 });
 
 const dialogConfirmationDelete = useTemplateRef('dialogConfirmationDelete');
-const lazyBlogEditPost = useTemplateRef('lazyBlogEditPost');
+const formPost = useTemplateRef('formPost');
 
 const basePage = useTemplateRef('basePage');
 
@@ -143,7 +143,7 @@ useInfiniteScroll(
   },
 );
 
-const onSubmit: InstanceType<typeof LazyBlogEditPost>['onSubmit'] = async (postCreateRequestData, files) => {
+const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (postCreateRequestData, files) => {
   return blogContext.postPostMutation.mutateAsync({
     body: {
       files: [],

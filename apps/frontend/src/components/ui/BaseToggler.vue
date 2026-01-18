@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { useToggle } from '@vueuse/core';
 
-import BaseButton from './BaseButton';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 const model = defineModel<boolean>();
 

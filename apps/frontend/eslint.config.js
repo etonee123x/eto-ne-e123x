@@ -141,6 +141,7 @@ export default defineConfig(
       'unicorn/no-unreadable-array-destructuring': 'off',
       'unicorn/no-useless-undefined': 'off',
       'unicorn/no-array-reduce': 'off',
+      'unicorn/filename-case': 'off',
 
       'vue/prefer-separate-static-class': 'error',
       'vue/no-ref-as-operand': 'error',
@@ -223,18 +224,6 @@ export default defineConfig(
           endOfLine: 'auto',
         },
       ],
-    },
-  },
-  {
-    files: ['**/*.vue'],
-    rules: {
-      'unicorn/filename-case': ['error', { case: 'pascalCase' }],
-    },
-  },
-  {
-    files: ['**/*.ts'],
-    rules: {
-      'unicorn/filename-case': ['error', { case: 'camelCase' }],
     },
   },
 );

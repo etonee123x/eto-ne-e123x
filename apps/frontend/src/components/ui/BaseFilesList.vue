@@ -21,10 +21,10 @@ import { isNil } from '@etonee123x/shared/utils/isNil';
 import Sortable from 'sortablejs';
 import { useTemplateRef, watch } from 'vue';
 
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import FilesListFilePreview from '@/components/ui/FilesListFilePreview.vue';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
-import BaseButton from '@/components/ui/BaseButton';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 const CLASS_HANDLE = '_handle';
 

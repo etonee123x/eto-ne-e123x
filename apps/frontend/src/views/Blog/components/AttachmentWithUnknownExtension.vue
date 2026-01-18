@@ -10,11 +10,11 @@
 <script setup lang="ts">
 import { mdiFileOutline } from '@mdi/js';
 
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import type { components } from '@/types/openapi';
 
 defineProps<{
-  attachment: components['schemas']['PostAttachment'] & components['schemas']['FolderDataItemUnknown'];
+  attachment: components['schemas']['FolderDataItemFile'] & components['schemas']['FolderDataItemUnknown'];
 }>();
 </script>

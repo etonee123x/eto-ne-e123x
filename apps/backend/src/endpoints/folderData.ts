@@ -4,7 +4,9 @@ import { throwError } from '@etonee123x/shared/utils/throwError';
 import { ITEM_TYPES } from '@/helpers/folderData';
 import { parseFileByPath } from '@/helpers/parseFileByPath';
 import createHttpError from 'http-errors';
-import type { Components, OperationHandler, OperationResponse } from '@/types/openapi';
+import { requestToUrl } from '@/utils/requestToUrl';
+import type { RequestHandlerTyped } from '@/types/RequestHandlerTyped';
+import type { components } from '@/types/openapi';
 import Express from 'express';
 
 const PROHIBITED_ELEMENTS_NAMES = new Set(['.git']);
@@ -15,10 +17,9 @@ const pathToSystemPath = (path: string) => {
   return nodePath.join(contentPath, path);
 };
 
-export const getFolderData: OperationHandler<'getFolderData', [Express.Request, Express.Response]> = async (
-  ...[context, , response]
-) => {
-  const { path } = context.request.query;
+const getFolderData: RequestHandlerTyped<'/folder-data', 'get'> = async (request, response) => {
+  const url = requestToUrl(request);
+  const path = url.searchParams.get('path') ?? '/';
 
   const systemPath = pathToSystemPath(path);
 
@@ -42,7 +43,9 @@ export const getFolderData: OperationHandler<'getFolderData', [Express.Request, 
 
   const readdirAwaited = await readdir(pathToSystemPath(currentDirectory), { withFileTypes: true });
 
-  const items = await readdirAwaited.reduce<Promise<Pick<Components.Schemas.FolderDataResponse, 'files' | 'folders'>>>(
+  const items = await readdirAwaited.reduce<
+    Promise<Pick<components['schemas']['FolderDataResponse'], 'files' | 'folders'>>
+  >(
     async (promiseItems, item) => {
       if (PROHIBITED_ELEMENTS_NAMES.has(item.name)) {
         return promiseItems;
@@ -91,11 +94,13 @@ export const getFolderData: OperationHandler<'getFolderData', [Express.Request, 
     Promise.resolve({ files: [], folders: [] }),
   );
 
-  const data: OperationResponse<'getFolderData'> = {
+  return response.send({
     ...items,
     file,
     path,
-  };
-
-  return response.send(data);
+  });
 };
+
+export const router = Express.Router();
+
+router.get('/folder-data', getFolderData);

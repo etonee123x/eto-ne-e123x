@@ -37,8 +37,8 @@ import { computed, onBeforeUnmount, useId, useTemplateRef, watchEffect } from 'v
 import { onKeyDown, useToggle } from '@vueuse/core';
 import { mdiClose } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
-import BaseButton from './BaseButton';
-import BaseIcon from './BaseIcon';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { useDialogsIds } from '@/plugins/dialogsIds';
 

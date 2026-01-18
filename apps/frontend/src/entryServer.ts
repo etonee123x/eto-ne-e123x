@@ -1,7 +1,7 @@
 import { renderToString } from 'vue/server-renderer';
 import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/server';
-import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
+import type { ExpressContext } from '@/types/ExpressContext';
 import { isClient } from './constants/target';
 import type { SSRContext } from '@/composables/useSsrContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';

@@ -437,22 +437,6 @@ components:
         - $ref: '#/components/schemas/FolderDataItemImage'
         - $ref: '#/components/schemas/FolderDataItemVideo'
         - $ref: '#/components/schemas/FolderDataItemUnknown'
-    PostAttachment:
-      allOf:
-        - $ref: '#/components/schemas/FolderDataItemFile'
-        - type: object
-          properties:
-            _meta:
-              allOf:
-                - $ref: '#/components/schemas/FolderDataItemMeta'
-                - type: object
-                  properties:
-                    id:
-                      type: string
-                  required:
-                    - id
-          required:
-            - _meta
     PostResponse:
       type: object
       properties:
@@ -474,7 +458,7 @@ components:
         attachments:
           type: array
           items:
-            $ref: '#/components/schemas/PostAttachment'
+            $ref: '#/components/schemas/FolderDataItemFile'
       required:
         - _meta
         - text
@@ -535,7 +519,7 @@ components:
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/PostAttachment'
+              - $ref: '#/components/schemas/FolderDataItemFile'
               - type: 'null'
         files:
           type: array

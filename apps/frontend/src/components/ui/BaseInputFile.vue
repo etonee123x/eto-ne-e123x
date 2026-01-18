@@ -19,9 +19,9 @@ import { useFileDialog } from '@vueuse/core';
 import { mdiFilePlusOutline, mdiPlus } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
 
-import BaseButton from './BaseButton';
-import BaseIcon from './BaseIcon';
-import BaseDialog from './BaseDialog.vue';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
+import BaseDialog from '@/components/ui/BaseDialog.vue';
 
 import { INPUT } from '@/helpers/ui';
 

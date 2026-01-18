@@ -9,7 +9,7 @@ import { mdiFileOutline } from '@mdi/js';
 import { defineAsyncComponent, computed } from 'vue';
 
 const LazyBaseIcon = defineAsyncComponent(() => {
-  return import('@/components/ui/BaseIcon');
+  return import('@/components/ui/BaseIcon.vue');
 });
 const LazyPreviewVideo = defineAsyncComponent(() => {
   return import('@/components/PreviewVideo.vue');

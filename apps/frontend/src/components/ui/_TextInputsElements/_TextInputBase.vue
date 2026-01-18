@@ -27,7 +27,7 @@
 
 <script setup lang="ts">
 import { mdiCross } from '@mdi/js';
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { useFocus, useToggle } from '@vueuse/core';
 import { useTemplateRef } from 'vue';
 

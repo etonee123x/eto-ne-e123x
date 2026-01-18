@@ -12,6 +12,7 @@ properties:
     type: array
     items:
       type: string
+      format: binary
 required:
   - text
   - attachments

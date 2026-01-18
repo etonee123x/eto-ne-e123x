@@ -25,7 +25,7 @@ import ElementFileWrapper from './_ElementFileWrapper.vue';
 import type { Props as PropsElementFileWrapper } from './_ElementFileWrapper.vue';
 
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import type { components } from '@/types/openapi';
 
 const props = defineProps<{

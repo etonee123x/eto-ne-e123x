@@ -10,7 +10,7 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 
 export default defineConfig(
   {
-    ignores: ['dist/', 'node_modules/', 'src/types/openapi.d.ts'],
+    ignores: ['dist/', 'node_modules/', 'src/types/openapi.ts'],
   },
   {
     files: ['**/*.ts'],
@@ -117,7 +117,7 @@ export default defineConfig(
       'unicorn/no-unreadable-array-destructuring': 'off',
       'unicorn/no-useless-undefined': 'off',
       'unicorn/no-array-reduce': 'off',
-      'unicorn/filename-case': ['error', { case: 'camelCase', ignore: ['TableController.ts'] }],
+      'unicorn/filename-case': ['error', { case: 'camelCase', ignore: ['TableController.ts', 'RequestHandlerTyped.ts'] }],
 
       'prettier/prettier': [
         'error',
