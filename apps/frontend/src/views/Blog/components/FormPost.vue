@@ -14,14 +14,14 @@
         <BaseInputFile @update:modelValue="onUpdateModelValueInputFile" />
       </div>
     </div>
-    <div v-if="resetableRefFiles.value.value.length > 0">
+    <div v-if="resetableRefFilesAndAttachments.value.value.length > 0">
       <div class="mb-3 flex items-center gap-2">
         <div class="text-xl">{{ t('files') }}</div>
         <BaseButton @click="onClickDeleteFiles">
-          <BaseIcon :path="mdiDelete" />
+          <BaseIcon :path="mdiClose" />
         </BaseButton>
       </div>
-      <LazyBaseFilesList v-model="resetableRefFiles.value.value" />
+      <LazyBaseFilesList v-model="resetableRefFilesAndAttachments.value.value" />
     </div>
 
     <slot />
@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { computed, defineAsyncComponent, useTemplateRef } from 'vue';
-import { mdiDelete } from '@mdi/js';
+import { mdiClose } from '@mdi/js';
 
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseInputFile from '@/components/ui/BaseInputFile.vue';
@@ -40,11 +40,13 @@ import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { useResetableRef } from '@/composables/useResetableRef';
 import { useIsMobile } from '@/composables/useIsMobile';
 import type { components } from '@/types/openapi';
+import { isFile } from '@/utils/isFile';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 
-type Post = Omit<components['schemas']['PostResponse'], '_meta'>;
+type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 
 const props = defineProps<{
-  post?: Post;
+  post: Post;
 }>();
 
 const emit = defineEmits<{
@@ -75,16 +77,15 @@ const { t } = useI18n({
 
 const baseTextarea = useTemplateRef('baseTextarea');
 
-const resetableRefFiles = useResetableRef<Array<File>>([]);
-const onClickDeleteFiles = resetableRefFiles.reset;
+const resetableRefFilesAndAttachments = useResetableRef<Array<NonNullable<Post['attachments'][number]> | File>>(() => {
+  return props.post.attachments.filter((attachment) => {
+    return !isNil(attachment);
+  });
+});
+const onClickDeleteFiles = resetableRefFilesAndAttachments.reset;
 
 const resetableRefPostModel = useResetableRef<Post>(() => {
-  return (
-    props.post ?? {
-      text: '',
-      attachments: [],
-    }
-  );
+  return props.post;
 });
 
 const isMobile = useIsMobile();
@@ -111,11 +112,11 @@ const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
   }
 
   event.preventDefault();
-  resetableRefFiles.value.value = [...resetableRefFiles.value.value, ...maybeFileList];
+  resetableRefFilesAndAttachments.value.value = [...resetableRefFilesAndAttachments.value.value, ...maybeFileList];
 };
 
 const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:modelValue'] = (_files) => {
-  resetableRefFiles.value.value = [...resetableRefFiles.value.value, ..._files];
+  resetableRefFilesAndAttachments.value.value = [...resetableRefFilesAndAttachments.value.value, ..._files];
 };
 
 const focusTextarea = () => {
@@ -123,9 +124,20 @@ const focusTextarea = () => {
 };
 
 const onSubmit = async () => {
-  emit('submit', resetableRefPostModel.value.value, resetableRefFiles.value.value);
+  emit(
+    'submit',
+    {
+      text: resetableRefPostModel.value.value.text,
+      attachments: resetableRefFilesAndAttachments.value.value.map((fileOrAttachment) => {
+        return isFile(fileOrAttachment) ? null : fileOrAttachment;
+      }),
+    },
+    resetableRefFilesAndAttachments.value.value.filter((fileOrAttachment) => {
+      return isFile(fileOrAttachment);
+    }),
+  );
 
-  resetableRefFiles.reset();
+  resetableRefFilesAndAttachments.reset();
   resetableRefPostModel.reset();
 
   focusTextarea();
@@ -137,7 +149,7 @@ defineExpose({
   isValid: computed(() => {
     return (
       resetableRefPostModel.value.value.text.trim().length > 0 ||
-      resetableRefFiles.value.value.length > 0 ||
+      resetableRefFilesAndAttachments.value.value.length > 0 ||
       resetableRefPostModel.value.value.attachments.length > 0
     );
   }),

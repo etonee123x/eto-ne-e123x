@@ -16,8 +16,8 @@ import type { components } from '@/types/openapi';
 const LazyAttachmentWithUnknownExtension = defineAsyncComponent(() => {
   return import('./AttachmentWithUnknownExtension.vue');
 });
-const LazyPreviewVideo = defineAsyncComponent(() => {
-  return import('@/components/PreviewVideo.vue');
+const LazyBaseVideo = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseVideo.vue');
 });
 
 const props = defineProps<{
@@ -88,7 +88,7 @@ const component = computed(() => {
     }
     case FILE_TYPES.VIDEO: {
       return {
-        is: LazyPreviewVideo,
+        is: LazyBaseVideo,
         binds: {
           src: props.attachment.src,
           onClick: loadToGallery,

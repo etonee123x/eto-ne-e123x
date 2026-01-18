@@ -1,8 +1,12 @@
 <template>
   <BasePage :h1="t('blog')" ref="basePage">
     <template v-if="authContext.isAdmin.value">
-      <LazyFormPost ref="formPost" @submit="onSubmit">
-        <BaseButton type="submit" :isLoading="blogContext.postPostMutation.isPending.value">
+      <LazyFormPost :post="{ text: '', attachments: [] }" ref="formPost" @submit="onSubmit">
+        <BaseButton
+          type="submit"
+          :disabled="!formPost?.isValid"
+          :isLoading="blogContext.postPostMutation.isPending.value"
+        >
           {{ t('send') }}
         </BaseButton>
       </LazyFormPost>
@@ -143,11 +147,11 @@ useInfiniteScroll(
   },
 );
 
-const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (postCreateRequestData, files) => {
+const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (post, files) => {
   return blogContext.postPostMutation.mutateAsync({
     body: {
       files: [],
-      text: postCreateRequestData.text,
+      text: post.text,
     },
     bodySerializer: (body) => {
       const formData = new FormData();

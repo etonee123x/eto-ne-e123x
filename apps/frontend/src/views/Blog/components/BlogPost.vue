@@ -48,6 +48,7 @@ import { useAuthContext } from '@/contexts/auth';
 import { useBlogContext } from '../contexts/blog';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import type { components } from '@/types/openapi';
+import { pick } from '@etonee123x/shared/utils/pick';
 
 const LazyFormPost = defineAsyncComponent(() => {
   return import('./FormPost.vue');
@@ -87,7 +88,7 @@ const { t } = useI18n({
   },
 });
 
-const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (postUpdateRequestData, files) => {
+const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (post, files) => {
   blogContext.patchPostByIdMutation.mutateAsync({
     params: {
       path: {
@@ -95,17 +96,17 @@ const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (postUpdat
       },
     },
     body: {
-      text: postUpdateRequestData.text,
-      attachments: [],
+      ...pick(post, ['attachments', 'text']),
       files: [],
     },
     bodySerializer: (body) => {
       const formData = new FormData();
 
       formData.append('text', body.text);
+      formData.append(`attachments`, JSON.stringify(body.attachments));
 
       files.forEach((file) => {
-        formData.append('attachments', file);
+        formData.append('files', file);
       });
 
       return formData;
@@ -171,9 +172,6 @@ const controls = computed(() => {
             },
           },
         ]
-      : []),
-    ...(props.isInEditMode || props.post.attachments.length > 0
-      ? []
       : [
           {
             key: 'edit',

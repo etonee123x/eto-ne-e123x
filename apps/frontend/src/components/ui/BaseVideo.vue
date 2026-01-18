@@ -7,8 +7,8 @@
 
 <script setup lang="ts">
 import { mdiPlayCircleOutline } from '@mdi/js';
-
 import BaseIcon from '@/components/ui/BaseIcon.vue';
+
 defineProps<{
   src: string;
 }>();

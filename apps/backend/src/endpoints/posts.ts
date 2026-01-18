@@ -145,7 +145,9 @@ export const updatePostById: RequestHandlerTyped<
   const post = tableControllerPosts.writeEntityOrRow(id, {
     text: request.body.text,
     attachments: await Promise.all([
-      ...request.body.attachments.map(async (attachment) => {
+      // :((
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...(JSON.parse(request.body.attachments as any) as typeof request.body.attachments).map(async (attachment) => {
         return isNil(attachment) && index < files.length ? parseMulterFile(nonNullable(files[index++])) : attachment;
       }),
       ...files.slice(index).map((file) => {
