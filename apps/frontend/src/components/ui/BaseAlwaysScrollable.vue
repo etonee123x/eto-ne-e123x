@@ -5,7 +5,7 @@
         '--scroll-x-diff': diffFormatted,
         '--scroll-x-duration': duration,
       }"
-      class="whitespace-nowrap m-[var(--base-always-scrollable--content--margin)]"
+      class="whitespace-nowrap m-(--base-always-scrollable--content--margin)"
       :class="isAnimated && 'animate-scroll-x [animation-duration:var(--scroll-x-duration)]'"
       ref="content"
     >
