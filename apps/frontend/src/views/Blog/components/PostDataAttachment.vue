@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { pick } from '@etonee123x/shared/utils/pick';
 import { computed, defineAsyncComponent } from 'vue';
 
 import { useI18n } from 'vue-i18n';
@@ -16,8 +15,8 @@ import type { components } from '@/types/openapi';
 const LazyAttachmentWithUnknownExtension = defineAsyncComponent(() => {
   return import('./AttachmentWithUnknownExtension.vue');
 });
-const LazyBaseVideo = defineAsyncComponent(() => {
-  return import('@/components/ui/BaseVideo.vue');
+const LazyBaseVideoPreview = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseVideoPreview.vue');
 });
 
 const props = defineProps<{
@@ -46,7 +45,7 @@ const loadToGallery = () => {
   }
 
   gallery.loadGalleryItem(
-    pick(props.attachment, ['name', 'src', 'fileType']),
+    props.attachment,
     blogContext.getPostsQuery.data.value?.pages
       .flatMap(propertyCurried('rows'))
       .reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((items, post) => {
@@ -55,7 +54,7 @@ const loadToGallery = () => {
           ...post.attachments.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
             (accumulator, attachment) => {
               return attachment.fileType === FILE_TYPES.IMAGE || attachment.fileType === FILE_TYPES.VIDEO
-                ? [...accumulator, pick(attachment, ['name', 'src', 'fileType'])]
+                ? [...accumulator, attachment]
                 : accumulator;
             },
             [],
@@ -72,6 +71,8 @@ const component = computed(() => {
         is: 'img',
         binds: {
           src: props.attachment.src,
+          width: props.attachment.metadata.width,
+          height: props.attachment.metadata.height,
           alt: t('attachmentN', { N: props.index + 1 }),
           onClick: loadToGallery,
         },
@@ -88,9 +89,11 @@ const component = computed(() => {
     }
     case FILE_TYPES.VIDEO: {
       return {
-        is: LazyBaseVideo,
+        is: LazyBaseVideoPreview,
         binds: {
           src: props.attachment.src,
+          width: props.attachment.metadata.width,
+          height: props.attachment.metadata.height,
           onClick: loadToGallery,
         },
       };

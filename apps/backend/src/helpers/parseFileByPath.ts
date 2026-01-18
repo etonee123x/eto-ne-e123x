@@ -7,12 +7,7 @@ import nodePath from 'node:path';
 import sharp from 'sharp';
 import { execFile } from 'node:child_process';
 import ffprobe from 'ffprobe-static';
-import type {
-  FolderDataItemAudio,
-  FolderDataItemImage,
-  FolderDataItemUnknown,
-  FolderDataItemVideo,
-} from '@/types/openapi';
+import type { components } from '@/types/openapi';
 
 const getVideoMetadata = (path: string) => {
   return new Promise<{
@@ -97,7 +92,7 @@ export const parseFileByPath = async (path: string) => {
       ...base,
       fileType: FILE_TYPES.AUDIO,
       metadata,
-    } satisfies Omit<FolderDataItemAudio, 'path' | 'src'>;
+    } satisfies Omit<components['schemas']['FolderDataItemAudio'], 'path' | 'src'>;
   }
 
   if (fileType === FILE_TYPES.IMAGE) {
@@ -107,7 +102,7 @@ export const parseFileByPath = async (path: string) => {
       ...base,
       fileType: FILE_TYPES.IMAGE,
       metadata: pick(metadata, ['width', 'height']),
-    } satisfies Omit<FolderDataItemImage, 'path' | 'src'>;
+    } satisfies Omit<components['schemas']['FolderDataItemImage'], 'path' | 'src'>;
   }
 
   if (fileType === FILE_TYPES.VIDEO) {
@@ -117,11 +112,11 @@ export const parseFileByPath = async (path: string) => {
       ...base,
       fileType: FILE_TYPES.VIDEO,
       metadata,
-    } satisfies Omit<FolderDataItemVideo, 'path' | 'src'>;
+    } satisfies Omit<components['schemas']['FolderDataItemVideo'], 'path' | 'src'>;
   }
 
   return {
     ...base,
     fileType: FILE_TYPES.UNKNOWN,
-  } satisfies Omit<FolderDataItemUnknown, 'path' | 'src'>;
+  } satisfies Omit<components['schemas']['FolderDataItemUnknown'], 'path' | 'src'>;
 };

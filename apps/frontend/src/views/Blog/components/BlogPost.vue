@@ -1,33 +1,39 @@
 <template>
-  <article class="w-full bg-background border border-dark rounded-sm cursor-pointer shadow-lg shadow-dark/15">
-    <component :is="component.Is" v-bind="component.binds">
-      <div class="p-4 flex flex-col">
-        <LazyFormPost v-if="isInEditMode" :post ref="formPost" @submit="onSubmit" />
-        <template v-else>
-          <PostData :post />
-          <time
-            :datetime="new Date(props.post._meta.createdAt).toISOString()"
-            :title="createdAtUpdatedAt"
-            class="text-sm mt-4 text-dark flex justify-end items-center gap-0.5"
-          >
-            {{ sinceCreatedHumanReadable }}
-            <BaseIcon v-if="post._meta.updatedAt" :class="ICON._SIZE._SM" :path="mdiPencil" />
-          </time>
-        </template>
-      </div>
-      <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-dark p-1 gap-2">
-        <BaseButton
-          v-for="control in controls"
-          class="p-0.5"
-          :isLoading="control.isLoading"
-          :isDisabled="control.isDisabled"
-          :key="control.key"
-          @click.stop.prevent="control.onClick"
+  <article class="w-full bg-background border border-dark rounded-sm shadow-lg shadow-dark/15">
+    <RouterLink
+      :to="{
+        name: ROUTE_NAMES.BLOG_POST,
+        params: {
+          postId: props.post._meta.id,
+        },
+      }"
+      class="p-4 flex flex-col"
+    >
+      <LazyFormPost v-if="isInEditMode" :post ref="formPost" @submit="onSubmit" />
+      <template v-else>
+        <PostData :post />
+        <time
+          :datetime="new Date(props.post._meta.createdAt).toISOString()"
+          :title="createdAtUpdatedAt"
+          class="text-sm mt-4 text-dark flex justify-end items-center gap-0.5"
         >
-          <BaseIcon class="text-2xl" :path="control.iconPath" />
-        </BaseButton>
-      </div>
-    </component>
+          {{ sinceCreatedHumanReadable }}
+          <BaseIcon v-if="post._meta.updatedAt" :class="ICON._SIZE._SM" :path="mdiPencil" />
+        </time>
+      </template>
+    </RouterLink>
+    <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-dark p-1 gap-2">
+      <BaseButton
+        v-for="control in controls"
+        class="p-0.5"
+        :isLoading="control.isLoading"
+        :isDisabled="control.isDisabled"
+        :key="control.key"
+        @click.stop.prevent="control.onClick"
+      >
+        <BaseIcon class="text-2xl" :path="control.iconPath" />
+      </BaseButton>
+    </div>
   </article>
 </template>
 
@@ -116,25 +122,6 @@ const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (post, fil
   closeEditMode();
 };
 
-const component = computed(() => {
-  return props.isInEditMode
-    ? {
-        Is: 'div',
-      }
-    : {
-        Is: RouterLink,
-        binds: {
-          to: {
-            name: ROUTE_NAMES.BLOG_POST,
-            params: {
-              postId: props.post._meta.id,
-            },
-          },
-          class: 'hover:text-text',
-        },
-      };
-});
-
 const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => {
   return props.post._meta.createdAt - Date.now();
 });
@@ -157,19 +144,19 @@ const controls = computed(() => {
     ...(props.isInEditMode
       ? [
           {
-            key: 'cancel',
-            iconPath: mdiCancel,
-            isDisabled: false,
-            isLoading: false,
-            onClick: closeEditMode,
-          },
-          {
             key: 'save',
             iconPath: mdiContentSave,
             isLoading: blogContext.patchPostByIdMutation.isPending.value,
             onClick: () => {
               return formPost.value?.form?.requestSubmit();
             },
+          },
+          {
+            key: 'cancel',
+            iconPath: mdiCancel,
+            isDisabled: false,
+            isLoading: false,
+            onClick: closeEditMode,
           },
         ]
       : [

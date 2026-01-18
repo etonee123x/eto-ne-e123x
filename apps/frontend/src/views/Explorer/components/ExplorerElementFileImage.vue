@@ -1,6 +1,12 @@
 <template>
   <ElementFileWrapper :to :element>
-    <img class="max-w-full mx-auto" :src="element.src" :alt="element.name" />
+    <img
+      class="max-w-full mx-auto"
+      :width="element.metadata.width"
+      :height="element.metadata.height"
+      :src="element.src"
+      :alt="element.name"
+    />
   </ElementFileWrapper>
 </template>
 

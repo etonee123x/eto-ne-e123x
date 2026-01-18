@@ -34,10 +34,6 @@ const LazyBaseIcon = defineAsyncComponent(() => {
   return import('@/components/ui/BaseIcon.vue');
 });
 
-const LazyBaseVideo = defineAsyncComponent(() => {
-  return import('@/components/ui/BaseVideo.vue');
-});
-
 const PreviewUnknown = () => {
   return h(LazyBaseIcon, { path: mdiFileOutline, size: '2rem' });
 };
@@ -61,7 +57,7 @@ const PreviewAudio = (file: FileOrFolderDataItemFile) => {
 };
 
 const PreviewVideo = (file: FileOrFolderDataItemFile) => {
-  return h(LazyBaseVideo, {
+  return h('video', {
     src: fileToSrc(file),
     controls: true,
     style: {

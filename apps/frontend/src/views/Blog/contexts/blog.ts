@@ -82,7 +82,7 @@ export const provideBlogContext = async () => {
     },
     initialPageParam: 0,
     enabled: () => {
-      return route.name === ROUTE_NAMES.BLOG;
+      return route.name === ROUTE_NAMES.BLOG || route.name === ROUTE_NAMES.BLOG_POST;
     },
   });
 

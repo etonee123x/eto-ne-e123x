@@ -5,10 +5,7 @@ import { useCycleList } from '@vueuse/core';
 import { computed, inject, shallowRef } from 'vue';
 import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
 
-type Item = Pick<
-  components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'],
-  'src' | 'name' | 'fileType'
->;
+type Item = components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'];
 type Items = Array<Item>;
 
 interface Context {

@@ -1,6 +1,11 @@
 <template>
   <ElementFileWrapper :to :element>
-    <BaseVideo :src="element.src" />
+    <BaseVideoPreview
+      class="mx-auto"
+      :src="element.src"
+      :width="element.metadata.width"
+      :height="element.metadata.height"
+    />
   </ElementFileWrapper>
 </template>
 
@@ -9,7 +14,7 @@ import type { components } from '@/types/openapi';
 import ElementFileWrapper from './_ElementFileWrapper.vue';
 import type { Props as PropsElementFileWrapper } from './_ElementFileWrapper.vue';
 
-import BaseVideo from '@/components/ui/BaseVideo.vue';
+import BaseVideoPreview from '@/components/ui/BaseVideoPreview.vue';
 
 defineProps<{
   element: components['schemas']['FolderDataItemVideo'];

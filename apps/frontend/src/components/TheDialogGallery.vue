@@ -12,6 +12,8 @@
           v-bind="component.binds"
           class="object-contain border-none max-w-full max-h-[calc(90dvh-2*4*var(--spacing)-6*var(--spacing)-2*var(--spacing))]"
           :src="gallery.item.value.src"
+          :height="gallery.item.value.metadata.height"
+          :width="gallery.item.value.metadata.width"
         />
       </div>
     </article>
