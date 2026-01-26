@@ -12,8 +12,29 @@ import { requestToUrl } from '@/utils/requestToUrl';
 import type { components } from '@/types/openapi';
 import type { RequestHandlerTyped } from '@/types/RequestHandlerTyped';
 import { cookieAuth } from '@/middlewares/cookieAuth';
+import { rm } from 'node:fs/promises';
 
 const uploadsPath = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
+
+const idioticFieldMultipartFormDataToJSONParser = (fields: Array<string>): Express.RequestHandler => {
+  return (...[request, , next]) => {
+    for (const field of fields) {
+      if (typeof request.body[field] === 'string') {
+        try {
+          request.body[field] = JSON.parse(request.body[field]);
+        } catch {
+          request.body[field] = undefined;
+        }
+      }
+    }
+    next();
+  };
+};
+
+const deleteAttachment = (attachment: components['schemas']['FolderDataItemFile']) => {
+  tableControllerPosts.deleteRowById(attachment.path);
+  return rm(nodePath.join(uploadsPath, attachment.name));
+};
 
 const withPadStart00 = (value: number) => {
   return String(value).padStart(2, '0');
@@ -142,12 +163,10 @@ export const updatePostById: RequestHandlerTyped<
 
   let index = 0;
 
-  const post = tableControllerPosts.writeEntityOrRow(id, {
+  const postNew = {
     text: request.body.text,
     attachments: await Promise.all([
-      // :((
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ...(JSON.parse(request.body.attachments as any) as typeof request.body.attachments).map(async (attachment) => {
+      ...request.body.attachments.map(async (attachment) => {
         return isNil(attachment) && index < files.length ? parseMulterFile(nonNullable(files[index++])) : attachment;
       }),
       ...files.slice(index).map((file) => {
@@ -158,7 +177,23 @@ export const updatePostById: RequestHandlerTyped<
         return !isNil(attachment);
       });
     }),
+  };
+
+  const postOld = tableControllerPosts.readRowById(id);
+
+  postOld.attachments.forEach((attachmentInOldPost) => {
+    if (
+      postNew.attachments.some((attachmentInNewPost) => {
+        return attachmentInNewPost.src === attachmentInOldPost.src;
+      })
+    ) {
+      return;
+    }
+
+    deleteAttachment(attachmentInOldPost);
   });
+
+  const post = tableControllerPosts.writeEntityOrRow(id, postNew);
 
   return response.send(post);
 };
@@ -168,6 +203,10 @@ export const deletePostById: RequestHandlerTyped<'/posts/{id}', 'delete'> = asyn
 
   const post = tableControllerPosts.deleteRowById(id);
 
+  post.attachments.forEach((attachment) => {
+    deleteAttachment(attachment);
+  });
+
   return response.send(post);
 };
 
@@ -176,5 +215,11 @@ export const router = Express.Router();
 router.post('/posts', cookieAuth, uploadFiles, createPost);
 router.get('/posts', getPosts);
 router.get('/posts/:id', getPostById);
-router.patch('/posts/:id', cookieAuth, uploadFiles, updatePostById);
+router.patch(
+  '/posts/:id',
+  cookieAuth,
+  uploadFiles,
+  idioticFieldMultipartFormDataToJSONParser(['attachments']),
+  updatePostById,
+);
 router.delete('/posts/:id', cookieAuth, deletePostById);

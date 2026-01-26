@@ -37,7 +37,9 @@ export class TableController<
     return jsonParse.unsafe<Array<Row>>(readFileSync(this.absolutePath, { encoding: 'utf8' }));
   }
 
-  readRowById(id: string, rows: Array<Row> = this.read()): Row {
+  readRowById(id: string): Row {
+    const rows = this.read();
+
     return (
       rows.find((row) => {
         return row._meta.id === id;
