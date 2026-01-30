@@ -23,7 +23,8 @@ export class TableController<
     _meta: Meta;
   },
 > {
-  protected readonly absolutePath: string;
+  private readonly absolutePath: string;
+
   constructor(tableTitle: string) {
     this.absolutePath = path.join(tableDatabasePath, `${tableTitle}.json`);
 
@@ -80,7 +81,7 @@ export class TableController<
 
   deleteRowById(id: string): Row {
     const rows = this.read();
-    const row = this.readRowById(id, rows);
+    const row = this.readRowById(id);
 
     const updatedRows = rows.filter((row) => {
       return row._meta.id !== id;
