@@ -3,16 +3,17 @@ import { throwError } from '@etonee123x/shared/utils/throwError';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import Express from 'express';
 import multer from 'multer';
-import slugify from 'slugify';
 import nodePath from 'node:path';
-import { randomUUID } from 'node:crypto';
 import { parseFileByPath } from '@/helpers/parseFileByPath';
 import { nonNullable } from '@/utils/nonNullable';
 import { requestToUrl } from '@/utils/requestToUrl';
 import type { components } from '@/types/openapi';
 import type { RequestHandlerTyped } from '@/types/RequestHandlerTyped';
 import { cookieAuth } from '@/middlewares/cookieAuth';
-import { rm } from 'node:fs/promises';
+import { readdir, rm, writeFile } from 'node:fs/promises';
+import { fileTypeFromBuffer } from 'file-type';
+import createHttpError from 'http-errors';
+import { _throw } from '@etonee123x/shared';
 
 const uploadsPath = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
 
@@ -32,66 +33,14 @@ const idioticFieldMultipartFormDataToJSONParser = (fields: Array<string>): Expre
 };
 
 const deleteAttachment = (attachment: components['schemas']['FolderDataItemFile']) => {
-  tableControllerPosts.deleteRowById(attachment.path);
   return rm(nodePath.join(uploadsPath, attachment.name));
 };
 
-const withPadStart00 = (value: number) => {
-  return String(value).padStart(2, '0');
-};
-
-const uploadFiles = multer({
+const parseFiles = multer({
   limits: {
     fileSize: 50 * 1024 * 1024,
   },
-  storage: multer.diskStorage({
-    destination: (...[, , callback]) => {
-      callback(null, uploadsPath);
-    },
-    filename: (...[, file, callback]) => {
-      const { name, ext } = nodePath.parse(file.originalname);
-
-      callback(
-        null,
-        (
-          [
-            (fileName) => {
-              return slugify(fileName, { lower: true, strict: true, locale: 'ru' });
-            },
-            (fileName) => {
-              const date = new Date();
-
-              return [
-                fileName,
-                [
-                  [
-                    //
-                    date.getFullYear(),
-                    withPadStart00(date.getMonth() + 1),
-                    withPadStart00(date.getDate()),
-                  ].join('-'),
-                  [
-                    //
-                    withPadStart00(date.getHours()),
-                    withPadStart00(date.getMinutes()),
-                    withPadStart00(date.getSeconds()),
-                  ].join('-'),
-                ].join('_'),
-              ].join('_');
-            },
-            (fileName) => {
-              return [fileName, randomUUID().split('-', 1)[0]].join('_');
-            },
-            (fileName) => {
-              return [fileName, ext].join('');
-            },
-          ] satisfies Array<(fileName: string) => string>
-        ).reduce((fileName, transformation) => {
-          return transformation(fileName);
-        }, name),
-      );
-    },
-  }),
+  storage: multer.memoryStorage(),
 }).array('files');
 
 const tableControllerPosts = new TableController<Omit<components['schemas']['PostResponse'], '_meta'>>('posts');
@@ -122,13 +71,20 @@ export const getPostById: RequestHandlerTyped<'/posts/{id}', 'get'> = async (req
   return response.send(post);
 };
 
-const parseMulterFile = async (file: globalThis.Express.Multer.File) => {
+const saveMulterFile = async (file: globalThis.Express.Multer.File) => {
+  const fileType = (await fileTypeFromBuffer(file.buffer)) ?? _throw(createHttpError(400, 'Unsupported file type'));
+
+  const fileName = `upload-${crypto.randomUUID()}.${fileType.ext}`;
+  const filePath = nodePath.join(uploadsPath, fileName);
+
+  await writeFile(filePath, file.buffer);
+
   // новояз
   // eslint-disable-next-line unicorn/prevent-abbreviations
-  const src = `/uploads/${file.filename}`;
+  const src = `/uploads/${fileName}`;
 
   return {
-    ...(await parseFileByPath(file.path)),
+    ...(await parseFileByPath(filePath)),
     src,
     path: src,
   };
@@ -144,7 +100,7 @@ export const createPost: RequestHandlerTyped<
   const post = tableControllerPosts.writeEntityOrRow(undefined, {
     attachments: await Promise.all(
       files.map((file) => {
-        return parseMulterFile(file);
+        return saveMulterFile(file);
       }),
     ),
     text: request.body.text,
@@ -167,10 +123,10 @@ export const updatePostById: RequestHandlerTyped<
     text: request.body.text,
     attachments: await Promise.all([
       ...request.body.attachments.map(async (attachment) => {
-        return isNil(attachment) && index < files.length ? parseMulterFile(nonNullable(files[index++])) : attachment;
+        return isNil(attachment) && index < files.length ? saveMulterFile(nonNullable(files[index++])) : attachment;
       }),
       ...files.slice(index).map((file) => {
-        return parseMulterFile(file);
+        return saveMulterFile(file);
       }),
     ]).then((attachments) => {
       return attachments.filter((attachment) => {
@@ -212,13 +168,13 @@ export const deletePostById: RequestHandlerTyped<'/posts/{id}', 'delete'> = asyn
 
 export const router = Express.Router();
 
-router.post('/posts', cookieAuth, uploadFiles, createPost);
+router.post('/posts', cookieAuth, parseFiles, createPost);
 router.get('/posts', getPosts);
 router.get('/posts/:id', getPostById);
 router.patch(
   '/posts/:id',
   cookieAuth,
-  uploadFiles,
+  parseFiles,
   idioticFieldMultipartFormDataToJSONParser(['attachments']),
   updatePostById,
 );

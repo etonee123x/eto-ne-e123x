@@ -42,6 +42,7 @@ import { useIsMobile } from '@/composables/useIsMobile';
 import type { components } from '@/types/openapi';
 import { isFile } from '@/utils/isFile';
 import { isNil } from '@etonee123x/shared/utils/isNil';
+import { fileToFileWithHashName } from '@/helpers/fileToFileWithHashName';
 
 type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 
@@ -112,7 +113,12 @@ const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
   }
 
   event.preventDefault();
-  resetableRefFilesAndAttachments.value.value = [...resetableRefFilesAndAttachments.value.value, ...maybeFileList];
+  resetableRefFilesAndAttachments.value.value = [
+    ...resetableRefFilesAndAttachments.value.value,
+    ...[...maybeFileList].map((file) => {
+      return fileToFileWithHashName(file);
+    }),
+  ];
 };
 
 const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:modelValue'] = (_files) => {

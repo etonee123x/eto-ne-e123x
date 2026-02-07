@@ -24,6 +24,7 @@ import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 
 import { INPUT } from '@/helpers/ui';
+import { fileToFileWithHashName } from '@/helpers/fileToFileWithHashName';
 
 const LazyBaseFilesList = defineAsyncComponent(() => {
   return import('./BaseFilesList.vue');
@@ -45,20 +46,22 @@ const { t } = useI18n({
 
 const baseDialog = useTemplateRef('baseDialog');
 
-const { open: openInitial, onChange: onChangeInitial, reset: resetInitial } = useFileDialog();
+const fileDialogInitial = useFileDialog();
 
-onChangeInitial((files) => {
+fileDialogInitial.onChange((files) => {
   if (!files) {
     return;
   }
 
-  model.value = [...files];
+  model.value = [...files].map((file) => {
+    return fileToFileWithHashName(file);
+  });
 
   baseDialog.value?.open();
-  resetInitial();
+  fileDialogInitial.reset();
 });
 
-const { open: openInModal, onChange: onChangeInModal, reset: resetInModal } = useFileDialog();
+const fileDialogInModal = useFileDialog();
 
 const model = ref<Array<File>>([]);
 
@@ -67,36 +70,27 @@ const emit = defineEmits<{
 }>();
 
 const onClick = () => {
-  openInitial();
+  fileDialogInitial.open();
 };
 
 const onClickAdd = () => {
-  openInModal();
+  fileDialogInModal.open();
 };
 
-onChangeInModal((files) => {
+fileDialogInModal.onChange((files) => {
   if (!files) {
     return;
   }
 
-  [...files].forEach((file) => {
-    if (
-      model.value.some((_file) => {
-        return (
-          _file.name === file.name &&
-          _file.size === file.size &&
-          _file.lastModified === file.lastModified &&
-          _file.type === file.type
-        );
-      })
-    ) {
-      return;
-    }
+  [...files]
+    .map((file) => {
+      return fileToFileWithHashName(file);
+    })
+    .forEach((file) => {
+      model.value.push(file);
+    });
 
-    model.value.push(file);
-  });
-
-  resetInModal();
+  fileDialogInModal.reset();
 });
 
 const onConfirm = () => {
