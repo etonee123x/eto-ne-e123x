@@ -1,5 +1,5 @@
 <template>
-  <footer class="border-t border-t-dark">
+  <footer class="border-t border-t-primary-500">
     <address class="layout-container py-2 flex gap-2 items-center">
       <a target="_blank" href="https://t.me/eto_ne_e123x">
         <img class="size-6" src="@/assets/icons/telegram.svg" :alt="t('telegramLogo')" />

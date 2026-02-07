@@ -10,7 +10,7 @@ import { requestToUrl } from '@/utils/requestToUrl';
 import type { components } from '@/types/openapi';
 import type { RequestHandlerTyped } from '@/types/RequestHandlerTyped';
 import { cookieAuth } from '@/middlewares/cookieAuth';
-import { readdir, rm, writeFile } from 'node:fs/promises';
+import { rm, writeFile } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 import createHttpError from 'http-errors';
 import { _throw } from '@etonee123x/shared';

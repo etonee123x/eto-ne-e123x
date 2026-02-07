@@ -36,7 +36,6 @@ export const render = async (url: string, expressContext: ExpressContext) => {
   i18n.global.locale.value = isKnownLocale(routerLanguage) //
     ? routerLanguage
     : expressContext.request.cookies.language;
-  console.log('expressContext.request.cookies.language:', expressContext.request.cookies.language);
 
   const html = await renderToString(app, context);
 

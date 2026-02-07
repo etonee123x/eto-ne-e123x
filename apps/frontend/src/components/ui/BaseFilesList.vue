@@ -6,7 +6,8 @@
         {{ file.name }}
       </BaseAlwaysScrollable>
       <div class="text-2xl flex gap-2 ms-auto items-center">
-        <BaseIcon class="cursor-grab text-dark" :class="CLASS_HANDLE" :path="mdiSwapVertical" />
+        <!-- TODO: переместить -->
+        <BaseIcon class="cursor-grab" :class="CLASS_HANDLE" :path="mdiSwapVertical" />
         <BaseButton @click="() => onClickDeteleByIndex(index)">
           <BaseIcon :path="mdiClose" />
         </BaseButton>

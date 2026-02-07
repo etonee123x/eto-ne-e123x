@@ -1,5 +1,5 @@
 <template>
-  <article class="w-full bg-background border border-dark rounded-sm shadow-lg shadow-dark/15">
+  <article class="border rounded-lg bg-neutral-200 dark:bg-neutral-800 border-primary-500 hover:scale-[1.015]">
     <RouterLink
       :to="{
         name: ROUTE_NAMES.BLOG_POST,
@@ -15,14 +15,14 @@
         <time
           :datetime="new Date(props.post._meta.createdAt).toISOString()"
           :title="createdAtUpdatedAt"
-          class="text-sm mt-4 text-dark flex justify-end items-center gap-0.5"
+          class="text-sm mt-4 flex justify-end items-center gap-0.5"
         >
           {{ sinceCreatedHumanReadable }}
-          <BaseIcon v-if="post._meta.updatedAt" :class="ICON._SIZE._SM" :path="mdiPencil" />
+          <BaseIcon v-if="post._meta.updatedAt" :path="mdiPencil" />
         </time>
       </template>
     </RouterLink>
-    <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-dark p-1 gap-2">
+    <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-primary-500 p-1 gap-2">
       <BaseButton
         v-for="control in controls"
         class="p-0.5"
@@ -46,7 +46,6 @@ import PostData from './PostData.vue';
 
 import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { ROUTE_NAMES } from '@/router';
-import { ICON } from '@/helpers/ui';
 import { RouterLink } from 'vue-router';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';

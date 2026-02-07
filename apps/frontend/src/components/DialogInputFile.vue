@@ -1,33 +1,25 @@
 <template>
-  <div>
-    <button type="button" :class="INPUT.default" @click="onClick">
-      <input tabindex="-1" class="fixed start-0 translate-x-[-200%] pointer-events-none" type="file" />
-      <BaseIcon :path="mdiFilePlusOutline" />
-    </button>
-    <BaseDialog :title="t('title')" ref="baseDialog" @confirm="onConfirm" @close="onClose" @click.stop>
-      <LazyBaseFilesList v-if="model.length > 0" v-model="model" />
-      <BaseButton class="mx-auto my-4" :propsIconPrepend="{ path: mdiPlus }" @click="onClickAdd">
-        {{ t('add') }}
-      </BaseButton>
-    </BaseDialog>
-  </div>
+  <BaseDialog :title="t('title')" ref="baseDialog" @confirm="onConfirm" @close="onClose">
+    <LazyBaseFilesList v-if="model.length > 0" v-model="model" />
+    <BaseButton class="mx-auto my-4" :propsIconPrepend="{ path: mdiPlus }" @click="onClickAdd">
+      {{ t('add') }}
+    </BaseButton>
+  </BaseDialog>
 </template>
 
 <script setup lang="ts">
 import { ref, defineAsyncComponent, useTemplateRef } from 'vue';
 import { useFileDialog } from '@vueuse/core';
-import { mdiFilePlusOutline, mdiPlus } from '@mdi/js';
+import { mdiPlus } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
-import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 
-import { INPUT } from '@/helpers/ui';
 import { fileToFileWithHashName } from '@/helpers/fileToFileWithHashName';
 
 const LazyBaseFilesList = defineAsyncComponent(() => {
-  return import('./BaseFilesList.vue');
+  return import('@/components/ui/BaseFilesList.vue');
 });
 
 const { t } = useI18n({
@@ -69,10 +61,6 @@ const emit = defineEmits<{
   'update:modelValue': [Array<File>];
 }>();
 
-const onClick = () => {
-  fileDialogInitial.open();
-};
-
 const onClickAdd = () => {
   fileDialogInModal.open();
 };
@@ -100,4 +88,12 @@ const onConfirm = () => {
 const onClose = () => {
   model.value = [];
 };
+
+const open = () => {
+  fileDialogInitial.open();
+};
+
+defineExpose({
+  open,
+});
 </script>

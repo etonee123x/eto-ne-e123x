@@ -1,5 +1,5 @@
 <template>
-  <button type="button" :class="BUTTON.default" :disabled>
+  <button :class="BUTTON.default" :disabled>
     <span class="flex justify-between items-center gap-1" :class="isLoading && 'opacity-20'">
       <span v-if="$slots.prepend || propsIconPrepend" class="flex">
         <slot name="prepend">

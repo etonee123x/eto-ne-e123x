@@ -1,78 +1,78 @@
 [
   {
     "title": "red",
-    "accent": "oklch(0.600 0.200 27.5deg)"
+    "hue": "27.5deg"
   },
   {
     "title": "blue",
-    "accent": "oklch(0.600 0.200 263.3deg)"
+    "hue": "263.3deg"
   },
   {
     "title": "green",
-    "accent": "oklch(0.600 0.200 149.6deg)"
+    "hue": "149.6deg"
   },
   {
     "title": "cyan",
-    "accent": "oklch(0.600 0.200 215.2deg)"
+    "hue": "215.2deg"
   },
   {
     "title": "magenta",
-    "accent": "oklch(0.600 0.200 321.4deg)"
+    "hue": "321.4deg"
   },
   {
     "title": "mr-grey",
-    "accent": "oklch(0.600 0.200 264.4deg)"
+    "hue": "264.4deg"
   },
   {
     "title": "brown",
-    "accent": "oklch(0.600 0.200 44.6deg)"
+    "hue": "44.6deg"
   },
   {
     "title": "orange",
-    "accent": "oklch(0.600 0.200 49.0deg)"
+    "hue": "49.0deg"
   },
   {
     "title": "purple",
-    "accent": "oklch(0.600 0.200 303.9deg)"
+    "hue": "303.9deg"
   },
   {
     "title": "yellow",
-    "accent": "oklch(0.600 0.200 86.0deg)"
+    "hue": "86.0deg"
   },
   {
     "title": "teal",
-    "accent": "oklch(0.600 0.200 182.5deg)"
+    "hue": "182.5deg"
   },
   {
     "title": "pink",
-    "accent": "oklch(0.600 0.200 354.3deg)"
+    "hue": "354.3deg"
   },
   {
     "title": "lime",
-    "accent": "oklch(0.600 0.200 130.8deg)"
+    "hue": "130.7deg"
   },
   {
     "title": "indigo",
-    "accent": "oklch(0.600 0.200 277.1deg)"
+    "hue": "277.1deg"
   },
   {
     "title": "sky",
-    "accent": "oklch(0.600 0.200 237.3deg)"
+    "hue": "237.3deg"
   },
   {
     "title": "violet",
-    "accent": "oklch(0.600 0.200 292.7deg)"
+    "hue": "292.7deg"
   },
   {
     "title": "emerald",
-    "accent": "oklch(0.600 0.200 162.5deg)"
+    "hue": "162.5deg"
   },
   {
     "title": "rose",
-    "accent": "oklch(0.600 0.200 16.4deg)"
+    "hue": "16.4deg"
   },
   {
     "title": "fuchsia",
-    "accent": "oklch(0.600 0.200 322.1deg)"
+    "hue": "322.1deg"
   }
 ]

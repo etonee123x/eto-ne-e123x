@@ -1,6 +1,34 @@
 <template>
-  <div class="flex flex-col bg-background min-h-dvh group/app">
+  <div class="flex flex-col min-h-dvh group/app">
     <TheHeader />
+    <div>
+      <div class="flex *:size-8">
+        <div class="bg-primary-50" />
+        <div class="bg-primary-100" />
+        <div class="bg-primary-200" />
+        <div class="bg-primary-300" />
+        <div class="bg-primary-400" />
+        <div class="bg-primary-500" />
+        <div class="bg-primary-600" />
+        <div class="bg-primary-700" />
+        <div class="bg-primary-800" />
+        <div class="bg-primary-900" />
+        <div class="bg-primary-950" />
+      </div>
+      <div class="flex *:size-8">
+        <div class="bg-neutral-50" />
+        <div class="bg-neutral-100" />
+        <div class="bg-neutral-200" />
+        <div class="bg-neutral-300" />
+        <div class="bg-neutral-400" />
+        <div class="bg-neutral-500" />
+        <div class="bg-neutral-600" />
+        <div class="bg-neutral-700" />
+        <div class="bg-neutral-800" />
+        <div class="bg-neutral-900" />
+        <div class="bg-neutral-950" />
+      </div>
+    </div>
     <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
       <RouterView />
       <LazyTheNotifications
@@ -78,7 +106,7 @@ if (isServer) {
   useHead({
     style: [
       {
-        textContent: `:root { --accent: ${nonNullable(themes.at(Date.now() % themes.length)).accent}; }`,
+        textContent: `:root { --theme-hue: ${nonNullable(themes.at(Date.now() % themes.length)).hue}; }`,
       },
     ],
   });

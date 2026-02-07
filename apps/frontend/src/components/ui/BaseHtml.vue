@@ -1,11 +1,10 @@
 <template>
   <!-- eslint-disable-next-line vue/no-v-html -->
-  <div :class="HTML" class="whitespace-break-spaces wrap-break-word" ref="root" v-html="html" />
+  <div class="custom-html" ref="root" v-html="html" />
 </template>
 
 <script setup lang="ts">
 // TODO: add sanitization
-import { HTML } from '@/helpers/ui';
 import { onMounted, useTemplateRef } from 'vue';
 import { useRouter } from 'vue-router';
 

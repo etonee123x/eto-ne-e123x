@@ -1,7 +1,7 @@
 <template>
   <div class="flex justify-center items-center max-w-full relative">
     <video class="max-w-full" :src :width :height :onClick />
-    <BaseIcon class="absolute text-items size-1/3 pointer-events-none" :path="mdiPlayCircleOutline" />
+    <BaseIcon class="absolute text-primary-500 size-1/3 pointer-events-none" :path="mdiPlayCircleOutline" />
   </div>
 </template>
 

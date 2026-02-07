@@ -1,9 +1,5 @@
 <template>
-  <BaseSwipable
-    data-player
-    class="bg-background z-player border-t border-dark shadow-primary-500 shadow-2xl py-2 w-full"
-    @swiped="onSwiped"
-  >
+  <BaseSwipable data-player class="bg-background z-player border-t border-primary-500 py-2 w-full" @swiped="onSwiped">
     <div class="layout-container flex flex-col gap-1 justify-center">
       <component
         :is="ComponentClose"
@@ -16,11 +12,7 @@
         <BaseIcon :path="mdiClose" />
       </component>
       <BaseAlwaysScrollable class="[--base-always-scrollable--content--margin:0_auto]">
-        <header
-          class="cursor-pointer flex items-start gap-0.5 border-b border-b-dark border-dashed"
-          :title="t('copyLink')"
-          @click="onClickTitle"
-        >
+        <header class="cursor-pointer flex items-center gap-0.5" :title="t('copyLink')" @click="onClickTitle">
           <h2>{{ player.theTrack.value?.name }}</h2>
           <BaseIcon :path="mdiLinkVariant" />
         </header>

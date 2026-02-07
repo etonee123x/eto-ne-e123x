@@ -7,6 +7,7 @@
     ref="dialog"
     @close="onCloseDialog"
     @cancel.prevent="onCloseDialog"
+    @click.stop
   >
     <div class="dialog__backdrop" @click="onClickBackdrop" />
     <div class="dialog__content">

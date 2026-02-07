@@ -2,15 +2,15 @@
   <ul class="flex flex-col gap-2">
     <li
       v-for="notification in notifications.notifications.slice(0, 5)"
-      class="select-none p-2 mx-auto w-fit min-w-[min(20rem,80vw)] bg-background border border-dark rounded-sm hover:scale-[1.02]"
+      class="select-none p-2 mx-auto w-fit min-w-[min(20rem,80vw)] bg-background border border-primary-600 rounded-sm hover:scale-[1.02]"
       :class="isSuccess(notification) ? 'text-success' : 'text-error'"
       :key="notification.id"
     >
       <span class="relative flex items-center justify-between gap-2">
         <BaseIcon :path="getIconPath(notification)" />
-        <span class="text-text">{{ notification.text }}</span>
+        <span>{{ notification.text }}</span>
         <BaseButton @click="() => onClickClose(notification)">
-          <BaseIcon :path="mdiClose" class="text-text" />
+          <BaseIcon :path="mdiClose" />
         </BaseButton>
       </span>
     </li>

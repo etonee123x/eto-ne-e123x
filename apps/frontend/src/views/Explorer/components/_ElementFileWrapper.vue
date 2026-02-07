@@ -14,8 +14,7 @@
           {{ sinceCreatedHumanReadable }}
         </time>
       </header>
-      <hr />
-      <div class="p-2">
+      <div class="p-2 border-t border-t-primary-500">
         <slot />
       </div>
     </article>

@@ -1,5 +1,5 @@
 <template>
-  <header class="border-b border-b-dark bg-background-secondary relative">
+  <header class="bg-primary-500 text-neutral-50 dark:text-neutral-950 relative">
     <ClientOnly v-if="fetchingNumber > 0">
       <div
         class="after:absolute after:bottom-0 rounded-full after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-primary-500 after:animate-runner"
@@ -8,28 +8,22 @@
     <div class="layout-container flex items-center py-2 gap-4">
       <nav class="flex items-end gap-4">
         <RouterLink
-          exactActiveClass="text-primary-500"
           :to="localizeRoute({ name: ROUTE_NAMES.INDEX })"
-          class="text-xl"
+          exactActiveClass="font-bold underline"
+          class="text-xl hover:underline underline-offset-2"
         >
           {{ SITE_TITLE }}
         </RouterLink>
         <ul class="flex gap-2">
           <li v-for="link in links" :key="link.key">
-            <RouterLink :to="link.to" activeClass="text-primary-500">
+            <RouterLink :to="link.to" activeClass="font-bold underline" class="hover:underline underline-offset-2">
               {{ link.text }}
             </RouterLink>
           </li>
         </ul>
       </nav>
       <div class="ms-auto flex gap-2">
-        <BaseButton
-          v-for="button in buttons"
-          :aria-label="button.ariaLabel"
-          :class="BUTTON._SECONDARY"
-          :key="button.key"
-          @click="button.onClick"
-        >
+        <BaseButton v-for="button in buttons" :aria-label="button.ariaLabel" :key="button.key" @click="button.onClick">
           <component :is="button.Component" />
         </BaseButton>
       </div>
@@ -54,7 +48,6 @@ import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRouter } from 'vue-router';
 import { pick } from '@etonee123x/shared/utils/pick';
 import { useAuthContext } from '@/contexts/auth';
-import { BUTTON } from '@/helpers/ui';
 import { useIsFetching } from '@tanstack/vue-query';
 
 const { localizeRoute } = useL10n();

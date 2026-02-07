@@ -11,13 +11,15 @@
         @paste="onPaste"
       />
       <div class="sticky top-2 flex flex-col gap-2 h-min">
-        <BaseInputFile @update:modelValue="onUpdateModelValueInputFile" />
+        <BaseButton type="button" class="p-4" @click="onClickButtonAddFile">
+          <BaseIcon class="size-8" :path="mdiFilePlusOutline" />
+        </BaseButton>
       </div>
     </div>
     <div v-if="resetableRefFilesAndAttachments.value.value.length > 0">
       <div class="mb-3 flex items-center gap-2">
         <div class="text-xl">{{ t('files') }}</div>
-        <BaseButton @click="onClickDeleteFiles">
+        <BaseButton type="button" @click="onClickDeleteFiles">
           <BaseIcon :path="mdiClose" />
         </BaseButton>
       </div>
@@ -25,16 +27,17 @@
     </div>
 
     <slot />
+
+    <DialogInputFile ref="dialogInputFile" @update:modelValue="onUpdateModelValueDialogInputFile" />
   </form>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { computed, defineAsyncComponent, useTemplateRef } from 'vue';
-import { mdiClose } from '@mdi/js';
+import { mdiClose, mdiFilePlusOutline } from '@mdi/js';
 
 import BaseTextarea from '@/components/ui/BaseTextarea.vue';
-import BaseInputFile from '@/components/ui/BaseInputFile.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { useResetableRef } from '@/composables/useResetableRef';
@@ -43,6 +46,9 @@ import type { components } from '@/types/openapi';
 import { isFile } from '@/utils/isFile';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { fileToFileWithHashName } from '@/helpers/fileToFileWithHashName';
+import DialogInputFile from '@/components/DialogInputFile.vue';
+
+const dialogInputFile = useTemplateRef('dialogInputFile');
 
 type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 
@@ -121,7 +127,7 @@ const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
   ];
 };
 
-const onUpdateModelValueInputFile: InstanceType<typeof BaseInputFile>['onUpdate:modelValue'] = (_files) => {
+const onUpdateModelValueDialogInputFile: InstanceType<typeof DialogInputFile>['onUpdate:modelValue'] = (_files) => {
   resetableRefFilesAndAttachments.value.value = [...resetableRefFilesAndAttachments.value.value, ..._files];
 };
 
@@ -147,6 +153,10 @@ const onSubmit = async () => {
   resetableRefPostModel.reset();
 
   focusTextarea();
+};
+
+const onClickButtonAddFile = () => {
+  dialogInputFile.value?.open();
 };
 
 defineExpose({

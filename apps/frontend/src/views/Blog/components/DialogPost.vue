@@ -7,7 +7,7 @@
       />
     </article>
     <template #footer>
-      <div class="sticky bottom-0 -mb-4 py-4 bg-background text-sm text-dark flex flex-col items-end">
+      <div class="sticky bottom-0 -mb-4 py-4 bg-background text-sm flex flex-col items-end">
         <time
           v-if="!(isNil(sinceCreatedHumanReadable) || isNil(createdAt))"
           :datetime="createdAt"
