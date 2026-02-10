@@ -106,7 +106,7 @@ if (isServer) {
   useHead({
     style: [
       {
-        textContent: `:root { --theme-hue: ${nonNullable(themes.at(Date.now() % themes.length)).hue}; }`,
+        textContent: `:root { ${nonNullable(themes.at(Date.now() % themes.length)).content} }`,
       },
     ],
   });

@@ -9,17 +9,17 @@
   --color-black: #000;
   --color-white: #fff;
 
-  --color-neutral-50: oklch(98% 0 0);
-  --color-neutral-100: oklch(95% 0 0);
-  --color-neutral-200: oklch(90% 0 0);
-  --color-neutral-300: oklch(82% 0 0);
-  --color-neutral-400: oklch(72% 0 0);
-  --color-neutral-500: oklch(60% 0 0);
-  --color-neutral-600: oklch(48% 0 0);
-  --color-neutral-700: oklch(38% 0 0);
-  --color-neutral-800: oklch(28% 0 0);
-  --color-neutral-900: oklch(22% 0 0);
-  --color-neutral-950: oklch(20% 0 0);
+  --color-neutral-50: oklch(98.5% 0 0);
+  --color-neutral-100: oklch(97% 0 0);
+  --color-neutral-200: oklch(92.2% 0 0);
+  --color-neutral-300: oklch(87% 0 0);
+  --color-neutral-400: oklch(70.8% 0 0);
+  --color-neutral-500: oklch(55.6% 0 0);
+  --color-neutral-600: oklch(43.9% 0 0);
+  --color-neutral-700: oklch(37.1% 0 0);
+  --color-neutral-800: oklch(26.9% 0 0);
+  --color-neutral-900: oklch(20.5% 0 0);
+  --color-neutral-950: oklch(14.5% 0 0);
 
   --spacing: 0.25rem;
 
@@ -164,21 +164,6 @@
       Arial,
       /* Фолбек */
       sans-serif;
-
-
-    --theme-chroma: 0.2;
-
-    --color-primary-50: oklch(98% calc(var(--theme-chroma) * 0.27) var(--theme-hue));
-    --color-primary-100: oklch(95% calc(var(--theme-chroma) * 0.41) var(--theme-hue));
-    --color-primary-200: oklch(90% calc(var(--theme-chroma) * 0.55) var(--theme-hue));
-    --color-primary-300: oklch(82% calc(var(--theme-chroma) * 0.68) var(--theme-hue));
-    --color-primary-400: oklch(72% calc(var(--theme-chroma) * 0.82) var(--theme-hue));
-    --color-primary-500: oklch(60% var(--theme-chroma) var(--theme-hue));
-    --color-primary-600: oklch(48% calc(var(--theme-chroma) * 0.95) var(--theme-hue));
-    --color-primary-700: oklch(38% calc(var(--theme-chroma) * 0.86) var(--theme-hue));
-    --color-primary-800: oklch(28% calc(var(--theme-chroma) * 0.73) var(--theme-hue));
-    --color-primary-900: oklch(22% calc(var(--theme-chroma) * 0.59) var(--theme-hue));
-    --color-primary-950: oklch(20% calc(var(--theme-chroma) * 0.45) var(--theme-hue));
 
     --color-background: var(--color-neutral-50);
     --color-text: var(--color-neutral-950);

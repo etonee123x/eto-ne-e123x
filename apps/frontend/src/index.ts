@@ -102,10 +102,8 @@ app.use((request, response, next) => {
 const syncLocaleCookie: RequestHandler = (request, response, next) => {
   const routeLanguage = /\w+/.exec(request.originalUrl)?.[0];
 
-  if (isKnownLocale(routeLanguage)) {
-    request.cookies.language = routeLanguage;
-    response.cookie('language', routeLanguage, { maxAge: 365 * 24 * 60 * 60 * 1000 });
-  }
+  request.cookies.language = isKnownLocale(routeLanguage) ? routeLanguage : 'en';
+  response.cookie('language', request.cookies.language, { maxAge: 365 * 24 * 60 * 60 * 1000 });
 
   next();
 };

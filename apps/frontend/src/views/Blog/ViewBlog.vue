@@ -1,16 +1,16 @@
 <template>
   <BasePage :h1="t('blog')" ref="basePage">
     <template v-if="authContext.isAdmin.value">
-      <LazyFormPost :post="{ text: '', attachments: [] }" ref="formPost" @submit="onSubmit">
-        <BaseButton
-          type="submit"
-          :disabled="!formPost?.isValid"
-          :isLoading="blogContext.postPostMutation.isPending.value"
-        >
+      <LazyFormPost
+        :post="{ text: '', attachments: [] }"
+        class="mb-8 relative after:w-full after:h-px after:bg-neutral-700 after:absolute after:top-full after:mt-4"
+        ref="formPost"
+        @submit="onSubmit"
+      >
+        <BaseButton v-if="formPost?.isValid" type="submit" :isLoading="blogContext.postPostMutation.isPending.value">
           {{ t('send') }}
         </BaseButton>
       </LazyFormPost>
-      <hr class="my-4" />
     </template>
 
     <template v-if="hasPosts">

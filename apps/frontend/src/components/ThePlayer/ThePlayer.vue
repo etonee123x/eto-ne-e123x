@@ -5,7 +5,6 @@
         :is="ComponentClose"
         v-if="shouldRenderButtonClose"
         class="text-xl absolute end-2 top-2 hover-none:hidden"
-        :class="BUTTON._SECONDARY"
         :aria-label="t('closePlayer')"
         @click="onClickClose"
       >
