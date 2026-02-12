@@ -1,16 +1,11 @@
 <template>
   <RouterLink :to class="explorer-element">
     <article>
-      <header class="flex justify-between">
-        <div class="explorer-element__title">
+      <header class="flex justify-between m-2">
+        <h2 class="explorer-element__title">
           {{ element.name }}
-        </div>
-        <time
-          :datetime="createdAt"
-          data-allow-mismatch="text"
-          :title="t('createdAt', { at: createdAt })"
-          class="text-right m-2"
-        >
+        </h2>
+        <time :datetime="createdAt" data-allow-mismatch="text" :title="t('createdAt', { at: createdAt })">
           {{ sinceCreatedHumanReadable }}
         </time>
       </header>

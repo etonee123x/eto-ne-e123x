@@ -13,7 +13,8 @@ import { cookieAuth } from '@/middlewares/cookieAuth';
 import { rm, writeFile } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 import createHttpError from 'http-errors';
-import { _throw } from '@etonee123x/shared';
+import { _throw } from '@etonee123x/shared/utils/_throw';
+import { pick } from '@etonee123x/shared/utils/pick';
 
 const uploadsPath = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
 
@@ -56,7 +57,7 @@ export const getPosts: RequestHandlerTyped<'/posts', 'get'> = async (request, re
 
   return response.send({
     _meta: {
-      isEnd: indexLast >= posts.length - 1,
+      isEnd: indexLast >= posts.length,
       page,
     },
     rows: posts.slice(indexInitial, indexLast),
@@ -149,7 +150,7 @@ export const updatePostById: RequestHandlerTyped<
     deleteAttachment(attachmentInOldPost);
   });
 
-  const post = tableControllerPosts.writeEntityOrRow(id, postNew);
+  const post = tableControllerPosts.writeEntityOrRow(id, { ...postNew, ...pick(postOld, ['_meta']) });
 
   return response.send(post);
 };

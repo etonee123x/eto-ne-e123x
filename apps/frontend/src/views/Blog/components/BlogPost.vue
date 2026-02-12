@@ -1,6 +1,8 @@
 <template>
-  <article class="border rounded-lg bg-neutral-200 dark:bg-neutral-800 border-primary-500 hover:scale-[1.015]">
+  <article class="post">
+    <LazyFormPost v-if="isInEditMode" class="p-4 flex flex-col" :post ref="formPost" @submit="onSubmit" />
     <RouterLink
+      v-else
       :to="{
         name: ROUTE_NAMES.BLOG_POST,
         params: {
@@ -9,42 +11,31 @@
       }"
       class="p-4 flex flex-col"
     >
-      <LazyFormPost v-if="isInEditMode" :post ref="formPost" @submit="onSubmit" />
-      <template v-else>
-        <PostData :post />
-        <time
-          :datetime="new Date(props.post._meta.createdAt).toISOString()"
-          :title="createdAtUpdatedAt"
-          class="text-sm mt-4 flex justify-end items-center gap-0.5"
-        >
-          {{ sinceCreatedHumanReadable }}
-          <BaseIcon v-if="post._meta.updatedAt" :path="mdiPencil" />
-        </time>
-      </template>
+      <PostData :post />
+      <time
+        :datetime="new Date(props.post._meta.createdAt).toISOString()"
+        :title="createdAtUpdatedAt"
+        class="text-sm mt-4 flex justify-end items-center gap-0.5"
+      >
+        {{ sinceCreatedHumanReadable }}
+        <BaseIcon v-if="post._meta.updatedAt !== post._meta.createdAt" :path="mdiPencil" />
+      </time>
     </RouterLink>
     <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-primary-500 p-1 gap-2">
-      <BaseButton
-        v-for="control in controls"
-        class="p-0.5"
-        :isLoading="control.isLoading"
-        :isDisabled="control.isDisabled"
-        :key="control.key"
-        @click.stop.prevent="control.onClick"
-      >
-        <BaseIcon class="text-2xl" :path="control.iconPath" />
-      </BaseButton>
+      <component :is="Button" v-for="Button in Buttons" :key="Button.key" />
     </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
-import { computed, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
+import { mdiCheck, mdiClose, mdiDelete, mdiPencil } from '@mdi/js';
+import { computed, nextTick, defineAsyncComponent, useTemplateRef, h } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PostData from './PostData.vue';
 
 import BaseIcon from '@/components/ui/BaseIcon.vue';
+import type { Props as PropsBaseIcon } from '@/components/ui/BaseIcon.vue';
 import { ROUTE_NAMES } from '@/router';
 import { RouterLink } from 'vue-router';
 import BaseButton from '@/components/ui/BaseButton.vue';
@@ -138,45 +129,65 @@ const closeEditMode = () => {
   emit('changeEditModeFor', null);
 };
 
-const controls = computed(() => {
-  return [
-    ...(props.isInEditMode
-      ? [
-          {
-            key: 'save',
-            iconPath: mdiContentSave,
-            isLoading: blogContext.patchPostByIdMutation.isPending.value,
-            onClick: () => {
-              return formPost.value?.form?.requestSubmit();
-            },
-          },
-          {
-            key: 'cancel',
-            iconPath: mdiCancel,
-            isDisabled: false,
-            isLoading: false,
-            onClick: closeEditMode,
-          },
-        ]
-      : [
-          {
-            key: 'edit',
-            iconPath: mdiPencil,
-            isDisabled: false,
-            isLoading: blogContext.patchPostByIdMutation.isPending.value,
-            onClick: () => {
-              emit('changeEditModeFor', props.post._meta.id);
+const ButtonIcon = (path: PropsBaseIcon['path']) => {
+  return h(BaseIcon, { path, class: 'text-2xl' });
+};
 
-              nextTick(() => {
-                return formPost.value?.focusTextarea();
-              });
-            },
-          },
-        ]),
+const ButtonSave = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'save',
+      disabled: !formPost.value?.isValid,
+      isLoading: blogContext.patchPostByIdMutation.isPending.value,
+      onClick: () => {
+        return formPost.value?.form?.requestSubmit();
+      },
+    },
+    () => {
+      return ButtonIcon(mdiCheck);
+    },
+  );
+});
+
+const ButtonCancel = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'cancel',
+      onClick: closeEditMode,
+    },
+    () => {
+      return ButtonIcon(mdiClose);
+    },
+  );
+});
+
+const ButtonEdit = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'edit',
+      isLoading: blogContext.patchPostByIdMutation.isPending.value,
+      onClick: () => {
+        emit('changeEditModeFor', props.post._meta.id);
+
+        nextTick(() => {
+          return formPost.value?.focusTextarea();
+        });
+      },
+    },
+    () => {
+      return ButtonIcon(mdiPencil);
+    },
+  );
+});
+
+const ButtonDelete = computed(() => {
+  return h(
+    BaseButton,
     {
       key: 'delete',
-      iconPath: mdiDelete,
-      isDisabled: false,
       isLoading: blogContext.deletePostByIdMutation.isPending.value,
       onClick: async () => {
         if (!(await props.onBeforeDelete())) {
@@ -192,6 +203,23 @@ const controls = computed(() => {
         });
       },
     },
-  ] as const;
+    () => {
+      return ButtonIcon(mdiDelete);
+    },
+  );
+});
+
+const Buttons = computed(() => {
+  return props.isInEditMode
+    ? [
+        //
+        ButtonSave.value,
+        ButtonCancel.value,
+      ]
+    : [
+        //
+        ButtonEdit.value,
+        ButtonDelete.value,
+      ];
 });
 </script>

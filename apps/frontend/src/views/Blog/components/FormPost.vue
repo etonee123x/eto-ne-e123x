@@ -1,13 +1,13 @@
 <template>
   <form class="flex gap-4 flex-col" ref="form" @submit.prevent="onSubmit">
     <div class="flex gap-4">
-      <BaseTextarea
-        class="flex-1"
+      <textarea
         :placeholder="t('textareaPlaceholder')"
         name="text"
-        ref="baseTextarea"
+        class="rounded-lg border border-neutral-700 dark:bg-neutral-950 focus:border-primary-500 overflow-hidden w-full m-0 p-4 resize-none flex bg-none flex-1"
+        ref="textarea"
         v-model="resetableRefPostModel.value.value.text"
-        @keydown:enter="onKeyDownEnter"
+        @keydown.enter="onKeyDownEnter"
         @paste="onPaste"
       />
       <div class="sticky top-2 flex flex-col gap-2 h-min">
@@ -34,10 +34,9 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { computed, defineAsyncComponent, useTemplateRef } from 'vue';
+import { computed, defineAsyncComponent, toRef, useTemplateRef } from 'vue';
 import { mdiClose, mdiFilePlusOutline } from '@mdi/js';
 
-import BaseTextarea from '@/components/ui/BaseTextarea.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { useResetableRef } from '@/composables/useResetableRef';
@@ -47,6 +46,7 @@ import { isFile } from '@/utils/isFile';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { fileToFileWithHashName } from '@/helpers/fileToFileWithHashName';
 import DialogInputFile from '@/components/DialogInputFile.vue';
+import { useTextareaAutosize } from '@vueuse/core';
 
 const dialogInputFile = useTemplateRef('dialogInputFile');
 
@@ -82,8 +82,6 @@ const { t } = useI18n({
   },
 });
 
-const baseTextarea = useTemplateRef('baseTextarea');
-
 const resetableRefFilesAndAttachments = useResetableRef<Array<NonNullable<Post['attachments'][number]> | File>>(() => {
   return props.post.attachments.filter((attachment) => {
     return !isNil(attachment);
@@ -95,9 +93,14 @@ const resetableRefPostModel = useResetableRef<Post>(() => {
   return props.post;
 });
 
+const { textarea } = useTextareaAutosize({
+  input: toRef(resetableRefPostModel.value.value, 'text'),
+  styleProp: 'minHeight',
+});
+
 const isMobile = useIsMobile();
 
-const onKeyDownEnter: InstanceType<typeof BaseTextarea>['onKeydown:enter'] = (event: KeyboardEvent) => {
+const onKeyDownEnter = (event: KeyboardEvent) => {
   if (isMobile) {
     return;
   }
@@ -111,7 +114,7 @@ const onKeyDownEnter: InstanceType<typeof BaseTextarea>['onKeydown:enter'] = (ev
   form.value?.requestSubmit();
 };
 
-const onPaste: InstanceType<typeof BaseTextarea>['onPaste'] = (event) => {
+const onPaste: HTMLTextAreaElement['onpaste'] = (event) => {
   const maybeFileList = event.clipboardData?.files;
 
   if (!maybeFileList?.length) {
@@ -132,7 +135,7 @@ const onUpdateModelValueDialogInputFile: InstanceType<typeof DialogInputFile>['o
 };
 
 const focusTextarea = () => {
-  baseTextarea.value?.focus();
+  textarea.value?.focus();
 };
 
 const onSubmit = async () => {

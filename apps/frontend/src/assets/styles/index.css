@@ -169,7 +169,7 @@
     --color-text: var(--color-neutral-950);
 
     @media (prefers-color-scheme: dark) {
-      --color-background: var(--color-neutral-950);
+      --color-background: var(--color-neutral-900);
       --color-text: var(--color-neutral-50);
     }
 
@@ -210,7 +210,7 @@
 
 
   .button {
-    @apply bg-primary-500 border border-solid rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-primary-600;
+    @apply bg-primary-500 text-white border border-solid border-primary-700 dark:text-black rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-primary-600;
     @apply disabled:pointer-events-none disabled:opacity-50;
   }
 
@@ -223,17 +223,20 @@
   }
 
   .explorer-element {
-    @apply bg-neutral-100 dark:bg-neutral-800 border border-primary-500 rounded-lg hover:scale-[1.015];
-    @apply hover:bg-neutral-300 dark:hover:bg-neutral-800;
+    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-700 dark:hover:bg-neutral-800 border border-primary-500 rounded-lg text-sm;
 
     .explorer-element__title {
-      @apply w-2/3 overflow-x-auto overflow-y-hidden m-2
+      @apply w-2/3 overflow-x-auto overflow-y-hidden text-lg;
     }
 
     &.explorer-element_folder {
       @apply bg-primary-500 border-primary-700 text-white dark:text-black;
       @apply hover:bg-primary-600;
     }
+  }
+
+  .post {
+    @apply border rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-neutral-700 dark:hover:bg-neutral-800 border-primary-500;
   }
 
   .dialog {
