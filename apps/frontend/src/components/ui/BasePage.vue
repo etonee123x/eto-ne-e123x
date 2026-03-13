@@ -1,6 +1,6 @@
 <template>
-  <div class="layout-container">
-    <header class="mb-4">
+  <div class="layout-container py-2">
+    <header class="mb-2">
       <h1 class="text-3xl font-semibold">{{ h1 }}</h1>
     </header>
     <slot />
@@ -14,5 +14,12 @@ const props = defineProps<{
   h1: string;
 }>();
 
-useHead({ title: () => props.h1 }, { tagPriority: 'low' });
+useHead(
+  {
+    title: () => {
+      return props.h1;
+    },
+  },
+  { tagPriority: 'low' },
+);
 </script>

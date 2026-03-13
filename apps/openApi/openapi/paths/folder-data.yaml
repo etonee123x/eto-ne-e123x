@@ -1,0 +1,25 @@
+get:
+  operationId: getFolderData
+  summary: Get folder data by path
+  tags:
+    - FolderData
+  parameters:
+    - name: path
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Path inside folder-data (e.g. path/to/folder)
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/FolderDataResponse.yaml
+    "404":
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Error404.yaml

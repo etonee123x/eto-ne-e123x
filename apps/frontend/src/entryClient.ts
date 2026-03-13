@@ -1,19 +1,28 @@
-import { useCookies } from '@vueuse/integrations/useCookies.mjs';
-import { createApp } from './main';
+import { useCookies } from '@vueuse/integrations/useCookies';
+import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/client';
+import { isKnownLocale } from '@/helpers/isKnownLocale';
+import { hydrate } from '@tanstack/vue-query';
 
-const { app, router, pinia, i18n } = createApp();
+const { app, router, i18n, queryClient, gallery, player } = createApp();
+
+if (globalThis.__QUERY__) {
+  hydrate(queryClient, globalThis.__QUERY__);
+}
+
+player.init();
+gallery.init();
 
 const head = createHead();
 
 app.use(head);
 
-if (globalThis.__PINIA__) {
-  pinia.state.value = globalThis.__PINIA__;
-}
-
 const cookies = useCookies();
 
-i18n.global.locale.value = cookies.get('language');
+await router.isReady();
 
-router.isReady().then(() => app.mount('#app', true));
+const routerLanguage = router.currentRoute.value.params.language?.toString();
+
+i18n.global.locale.value = isKnownLocale(routerLanguage) ? routerLanguage : cookies.get('language');
+
+app.mount('#app', true);

@@ -1,0 +1,41 @@
+openapi: 3.0.0
+
+info:
+  title: eto-ne-e123x
+  version: 1.0.0
+  description: eto-ne-e123x API
+  license:
+    name: UNLICENSED
+    url: UNLICENSED
+
+security: []
+
+servers:
+  - url: https://eto-ne-e123x.dev/api
+
+tags:
+  - name: FolderData
+    description: Folder browsing and files
+  - name: Posts
+    description: Posts CRUD
+  - name: Auth
+    description: Authentication
+
+paths:
+  /auth:
+    $ref: paths/auth.yaml
+
+  /posts:
+    $ref: paths/posts.yaml
+  /posts/{id}:
+    $ref: paths/posts_{id}.yaml
+
+  /folder-data:
+    $ref: paths/folder-data.yaml
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt

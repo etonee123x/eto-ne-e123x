@@ -1,22 +1,20 @@
 <template>
-  <a :href="fileUrl" target="_blank" class="inline-flex items-end gap-0.5" @click.stop>
+  <a :href="attachment.src" target="_blank" class="inline-flex items-end gap-0.5" @click.stop>
     <BaseIcon :path="mdiFileOutline" class="text-2xl" />
     <BaseAlwaysScrollable class="flex-1" duration="12000ms">
-      {{ fileText }}
+      {{ attachment.name }}
     </BaseAlwaysScrollable>
   </a>
 </template>
 
 <script setup lang="ts">
 import { mdiFileOutline } from '@mdi/js';
-import { computed } from 'vue';
 
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
+import type { components } from '@/types/openapi';
 
-const props = defineProps<{
-  fileUrl: string;
+defineProps<{
+  attachment: components['schemas']['FolderDataItemFile'] & components['schemas']['FolderDataItemUnknown'];
 }>();
-
-const fileText = computed(() => props.fileUrl.match(/[^/]+$/)?.[0] || props.fileUrl);
 </script>

@@ -1,18 +1,23 @@
 <template>
-  <ElementFileWrapper :element>
-    <PreviewVideo :src="element.src" />
+  <ElementFileWrapper :to :element>
+    <BaseVideoPreview
+      class="mx-auto"
+      :src="element.src"
+      :width="element.metadata.width"
+      :height="element.metadata.height"
+    />
   </ElementFileWrapper>
 </template>
 
 <script setup lang="ts">
-import type { ItemVideo } from '@etonee123x/shared/helpers/folderData';
-
+import type { components } from '@/types/openapi';
 import ElementFileWrapper from './_ElementFileWrapper.vue';
+import type { Props as PropsElementFileWrapper } from './_ElementFileWrapper.vue';
 
-import PreviewVideo from '@/components/PreviewVideo.vue';
-import type { ItemWithSinceTimestamps } from '@/api/folderData';
+import BaseVideoPreview from '@/components/ui/BaseVideoPreview.vue';
 
 defineProps<{
-  element: ItemWithSinceTimestamps<ItemVideo>;
+  element: components['schemas']['FolderDataItemVideo'];
+  to: PropsElementFileWrapper['to'];
 }>();
 </script>

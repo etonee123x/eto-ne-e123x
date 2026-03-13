@@ -1,0 +1,18 @@
+import { inject } from 'vue';
+import type { FunctionPlugin, InjectionKey } from 'vue';
+
+export const INJECTION_KEY_DIALOGS_IDS: InjectionKey<Array<string>> = Symbol('dialogIds');
+
+export const dialogsIds: FunctionPlugin = (app) => {
+  app.provide(INJECTION_KEY_DIALOGS_IDS, []);
+};
+
+export const useDialogsIds = () => {
+  const dialogsIds = inject(INJECTION_KEY_DIALOGS_IDS);
+
+  if (!dialogsIds) {
+    throw new Error('DialogsIds plugin is not installed');
+  }
+
+  return dialogsIds;
+};

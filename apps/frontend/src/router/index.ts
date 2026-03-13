@@ -3,57 +3,89 @@ import { createMemoryHistory, createRouter as _createRouter, createWebHistory } 
 import { isServer } from '@/constants/target';
 import { isDevelopment } from '@/constants/mode';
 
-export enum RouteName {
-  Explorer = 'Explorer',
-  Home = 'Home',
-  Blog = 'Blog',
-  BlogPost = 'BlogPost',
-  Playground = 'Playground',
-  Page404 = 'Page404',
-}
+export const ROUTE_NAMES = {
+  EXPLORER: 'EXPLORER',
+  INDEX: 'INDEX',
+  BLOG: 'BLOG',
+  BLOG_POST: 'BLOG_POST',
+  PLAYGROUND: 'PLAYGROUND',
+  PAGE_404_GLOBAL: 'PAGE_404_GLOBAL',
+  PAGE_404: 'PAGE_404',
+} as const;
 
-export const createRouter = () =>
-  _createRouter({
+export const ROUTE_NAME_TO_PATH = {
+  [ROUTE_NAMES.EXPLORER]: 'explorer',
+  [ROUTE_NAMES.INDEX]: '',
+  [ROUTE_NAMES.BLOG]: 'blog',
+} as const;
+
+export const createRouter = () => {
+  return _createRouter({
     routes: [
       {
-        name: RouteName.Explorer,
-        path: '/explorer/:links*',
-        component: () => import('@/views/Explorer'),
-      },
-      {
-        name: RouteName.Home,
-        path: '/',
-        redirect: '/blog',
-      },
-      {
-        path: '/blog',
+        path: '/:language(ru|en)',
         children: [
           {
-            name: RouteName.Blog,
-            path: '',
-            component: () => import('@/views/Blog'),
+            name: ROUTE_NAMES.INDEX,
+            path: ROUTE_NAME_TO_PATH.INDEX,
+            component: () => {
+              return import('@/views/Index');
+            },
           },
           {
-            name: RouteName.BlogPost,
-            path: ':postId',
-            component: () => import('@/views/Blog'),
+            path: `${ROUTE_NAME_TO_PATH.EXPLORER}/:segments(.*)*`,
+            name: ROUTE_NAMES.EXPLORER,
+            component: () => {
+              return import('@/views/Explorer/ViewExplorer.vue');
+            },
+          },
+          {
+            path: ROUTE_NAME_TO_PATH.BLOG,
+            children: [
+              {
+                name: ROUTE_NAMES.BLOG,
+                path: '',
+                component: () => {
+                  return import('@/views/Blog/ViewBlog.vue');
+                },
+              },
+              {
+                name: ROUTE_NAMES.BLOG_POST,
+                path: ':postId',
+                component: () => {
+                  return import('@/views/Blog/ViewBlog.vue');
+                },
+              },
+            ],
+          },
+          {
+            name: ROUTE_NAMES.PAGE_404,
+            path: ':pathMatch(.*)*',
+            component: () => {
+              return import('@/views/Page404/ViewPage404.vue');
+            },
           },
         ],
       },
       ...(isDevelopment
         ? [
             {
-              name: RouteName.Playground,
+              name: ROUTE_NAMES.PLAYGROUND,
               path: '/__playground__',
-              component: () => import('@/views/Playground'),
+              component: () => {
+                return import('@/views/Playground');
+              },
             },
           ]
         : []),
       {
-        name: RouteName.Page404,
+        name: ROUTE_NAMES.PAGE_404_GLOBAL,
         path: '/:pathMatch(.*)*',
-        component: () => import('@/views/Page404'),
+        component: () => {
+          return import('@/views/Page404/ViewPage404.vue');
+        },
       },
     ],
     history: isServer ? createMemoryHistory() : createWebHistory('/'),
   });
+};

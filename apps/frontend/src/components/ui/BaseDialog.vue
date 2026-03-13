@@ -5,14 +5,15 @@
     class="dialog"
     :open="model"
     ref="dialog"
-    @close="onClose"
-    @cancel.prevent="onClose"
+    @close="onCloseDialog"
+    @cancel.prevent="onCloseDialog"
+    @click.stop
   >
     <div class="dialog__backdrop" @click="onClickBackdrop" />
     <div class="dialog__content">
       <slot v-if="!isHiddenHeader" name="header" v-bind="{ close }">
         <header class="flex justify-between items-center mb-6">
-          <span v-if="isNotNil(title)" class="text-lg">{{ title }}</span>
+          <span v-if="!isNil(title)" class="text-lg">{{ title }}</span>
           <BaseButton class="ms-auto" @click="onClickCloseIcon">
             <BaseIcon :path="mdiClose" />
           </BaseButton>
@@ -22,8 +23,8 @@
       <slot v-bind="{ close }" />
 
       <slot v-if="!isHiddenFooter" name="footer" v-bind="{ close }">
-        <footer v-if="buttons.length" class="flex justify-end gap-2 mt-auto">
-          <BaseButton v-for="button in buttons" :key="button.id" @click="button.onClick">
+        <footer v-if="buttons.length > 0" class="flex justify-end gap-2 mt-auto">
+          <BaseButton v-for="button in buttons" :key="button.key" @click="button.onClick">
             {{ button.text }}
           </BaseButton>
         </footer>
@@ -37,27 +38,23 @@ import { computed, onBeforeUnmount, useId, useTemplateRef, watchEffect } from 'v
 import { onKeyDown, useToggle } from '@vueuse/core';
 import { mdiClose } from '@mdi/js';
 import { useI18n } from 'vue-i18n';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import type { FunctionCallback } from '@etonee123x/shared/types';
-import { areIdsEqual, toId, type WithId } from '@etonee123x/shared/helpers/id';
-import BaseButton from './BaseButton';
-import BaseIcon from './BaseIcon';
-import { useDialogStore } from '@/stores/dialog';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import { isNil } from '@etonee123x/shared/utils/isNil';
+import { useDialogsIds } from '@/plugins/dialogsIds';
 
 const dialog = useTemplateRef('dialog');
 
 const id = useId();
 
-interface Button extends WithId {
-  text: string;
-  onClick: FunctionCallback;
-}
-
 const props = defineProps<
   Partial<{
     title: string;
-    buttons: Array<Button>;
+    buttons: Array<{
+      key: PropertyKey;
+      text: string;
+      onClick: () => void | Promise<void>;
+    }>;
     isHiddenHeader: boolean;
     isHiddenFooter: boolean;
   }>
@@ -70,7 +67,7 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-const dialogStore = useDialogStore();
+const dialogIds = useDialogsIds();
 
 const model = defineModel<boolean>();
 
@@ -79,22 +76,22 @@ const toggleModel = useToggle(model);
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       confirm: 'Подтвердить',
       cancel: 'Отмена',
     },
-    En: {
+    en: {
       confirm: 'Confirm',
       cancel: 'Cancel',
     },
   },
 });
 
-const buttons = computed(
-  () =>
+const buttons = computed(() => {
+  return (
     props.buttons ?? [
       {
-        id: 0,
+        key: 'cancel',
         text: t('cancel'),
         onClick: () => {
           emit('cancel');
@@ -102,15 +99,16 @@ const buttons = computed(
         },
       },
       {
-        id: 1,
+        key: 'confirm',
         text: t('confirm'),
         onClick: () => {
           emit('confirm');
           close();
         },
       },
-    ],
-);
+    ]
+  );
+});
 
 const open = () => {
   if (model.value) {
@@ -134,27 +132,49 @@ const close = () => {
   emit('close');
 };
 
-const onClose = close;
+const onCloseDialog = close;
 const onClickCloseIcon = close;
 const onClickBackdrop = close;
 
-onKeyDown('Escape', () => {
-  const maybeLastDialogId = dialogStore.getLastId();
+const onOpen = (id: string) => {
+  if (dialogIds.includes(id)) {
+    return;
+  }
 
-  if (isNil(maybeLastDialogId) || !areIdsEqual(maybeLastDialogId, toId(id))) {
+  dialogIds.push(id);
+};
+
+const onClose = (id: string) => {
+  const index = dialogIds.indexOf(id);
+
+  if (index === -1) {
+    return;
+  }
+
+  dialogIds.splice(index, 1);
+};
+
+onKeyDown('Escape', () => {
+  const maybeLastDialogId = dialogIds.at(-1);
+
+  if (isNil(maybeLastDialogId) || maybeLastDialogId !== id) {
     return;
   }
 
   close();
 });
 
-onBeforeUnmount(() => dialogStore.onClose(toId(id)));
+onBeforeUnmount(() => {
+  onClose(id);
+});
 
-watchEffect(() =>
-  model.value //
-    ? dialogStore.onOpen(toId(id))
-    : dialogStore.onClose(toId(id)),
-);
+watchEffect(() => {
+  if (model.value) {
+    onOpen(id);
+  } else {
+    onClose(id);
+  }
+});
 
 defineExpose({
   open,

@@ -1,10 +1,10 @@
-import { resolve } from 'path';
+import path from 'node:path';
 
-import { defineConfig, type UserConfig } from 'vite';
+import { defineConfig } from 'vite';
+import type { UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import VueDevTools from 'vite-plugin-vue-devtools';
-import { ssrAutoKey } from './src/plugins/ssrAutoKey';
 import { getAuthorization } from './src/helpers/getAuthorization';
 import { isAppModeDevelopment } from './src/constants/appMode';
 
@@ -12,14 +12,13 @@ export default defineConfig(() => {
   const config: UserConfig = {
     resolve: {
       alias: {
-        '@': resolve(__dirname, './src'),
+        '@': path.resolve(__dirname, './src'),
       },
     },
     plugins: [
       //
       VueDevTools(),
       vue(),
-      ssrAutoKey(),
       tailwindcss(),
     ],
     publicDir: 'public',
@@ -36,6 +35,9 @@ export default defineConfig(() => {
           secure: true,
           headers: {
             Authorization,
+          },
+          rewrite: (path) => {
+            return path.replace(/^\/api/, '');
           },
         },
         '/uploads': {

@@ -1,5 +1,5 @@
 <template>
-  <ElementFileWrapper :element>
+  <ElementFileWrapper :element :to>
     <ul class="flex gap-4 overflow-x-auto">
       <li
         v-for="metadataItem in metadataItems"
@@ -19,30 +19,31 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
-import type { ItemAudio } from '@etonee123x/shared/helpers/folderData';
 import { mdiClockOutline, mdiAccountOutline, mdiAlbum, mdiCalendarBlankOutline, mdiMetronome } from '@mdi/js';
 
 import ElementFileWrapper from './_ElementFileWrapper.vue';
+import type { Props as PropsElementFileWrapper } from './_ElementFileWrapper.vue';
 
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
-import BaseIcon from '@/components/ui/BaseIcon';
-import type { ItemWithSinceTimestamps } from '@/api/folderData';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
+import type { components } from '@/types/openapi';
 
 const props = defineProps<{
-  element: ItemWithSinceTimestamps<ItemAudio>;
+  element: components['schemas']['FolderDataItemAudio'];
+  to: PropsElementFileWrapper['to'];
 }>();
 
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       duration: 'Длительность',
       artists: 'Исполнитель(-и)',
       album: 'Альбом',
       year: 'Год выхода',
       bpm: 'Темп',
     },
-    En: {
+    en: {
       duration: 'Duration',
       artists: 'Artist(-s)',
       album: 'Album',
@@ -52,56 +53,58 @@ const { t } = useI18n({
   },
 });
 
-const metadataItems = computed(() => [
-  ...(props.element.musicMetadata.duration
-    ? [
-        {
-          key: 'duration',
-          title: t('duration'),
-          path: mdiClockOutline,
-          value: millisecondsToHumanReadable(props.element.musicMetadata.duration),
-        },
-      ]
-    : []),
-  ...(props.element.musicMetadata.artists?.length
-    ? [
-        {
-          key: 'artists',
-          title: t('artists'),
-          path: mdiAccountOutline,
-          value: props.element.musicMetadata.artists.join(' & '),
-        },
-      ]
-    : []),
-  ...(props.element.musicMetadata.album
-    ? [
-        {
-          key: 'album',
-          title: t('album'),
-          path: mdiAlbum,
-          value: props.element.musicMetadata.album,
-        },
-      ]
-    : []),
-  ...(props.element.musicMetadata.year
-    ? [
-        {
-          key: 'year',
-          title: t('year'),
-          path: mdiCalendarBlankOutline,
-          value: String(props.element.musicMetadata.year),
-        },
-      ]
-    : []),
-  ...(props.element.musicMetadata.bpm
-    ? [
-        {
-          key: 'bpm',
-          title: t('bpm'),
-          path: mdiMetronome,
-          value: String(props.element.musicMetadata.bpm),
-        },
-      ]
-    : []),
-]);
+const metadataItems = computed(() => {
+  return [
+    ...(props.element.metadata.duration
+      ? [
+          {
+            key: 'duration',
+            title: t('duration'),
+            path: mdiClockOutline,
+            value: millisecondsToHumanReadable(props.element.metadata.duration),
+          },
+        ]
+      : []),
+    ...(props.element.metadata.artists.length > 0
+      ? [
+          {
+            key: 'artists',
+            title: t('artists'),
+            path: mdiAccountOutline,
+            value: props.element.metadata.artists.join(' & '),
+          },
+        ]
+      : []),
+    ...(props.element.metadata.album
+      ? [
+          {
+            key: 'album',
+            title: t('album'),
+            path: mdiAlbum,
+            value: props.element.metadata.album,
+          },
+        ]
+      : []),
+    ...(props.element.metadata.year
+      ? [
+          {
+            key: 'year',
+            title: t('year'),
+            path: mdiCalendarBlankOutline,
+            value: String(props.element.metadata.year),
+          },
+        ]
+      : []),
+    ...(props.element.metadata.bpm
+      ? [
+          {
+            key: 'bpm',
+            title: t('bpm'),
+            path: mdiMetronome,
+            value: String(props.element.metadata.bpm),
+          },
+        ]
+      : []),
+  ];
+});
 </script>

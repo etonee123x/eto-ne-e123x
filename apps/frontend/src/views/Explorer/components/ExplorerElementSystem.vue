@@ -1,8 +1,8 @@
 <template>
   <component :is="tag" class="explorer-element">
-    <div class="explorer-element__title">
+    <h2 class="explorer-element__title">
       <slot />
-    </div>
+    </h2>
   </component>
 </template>
 

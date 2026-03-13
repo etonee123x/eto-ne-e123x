@@ -1,5 +1,5 @@
 import { isServer } from '@/constants/target';
-import { useSSRContext } from './useSSRContext';
+import { useSSRContext } from '@/composables/useSsrContext';
 import { isMobile } from 'is-mobile';
 
 export const useIsMobile = () => {

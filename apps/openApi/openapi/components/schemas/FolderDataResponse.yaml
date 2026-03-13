@@ -1,0 +1,21 @@
+type: object
+properties:
+  folders:
+    type: array
+    items:
+      $ref: ./FolderDataItemFolder.yaml
+  files:
+    type: array
+    items:
+      $ref: ./FolderDataItemFile.yaml
+  file:
+    oneOf:
+      - $ref: ./FolderDataItemFile.yaml
+      - type: "null"
+  path:
+    type: string
+required:
+  - folders
+  - files
+  - file
+  - path

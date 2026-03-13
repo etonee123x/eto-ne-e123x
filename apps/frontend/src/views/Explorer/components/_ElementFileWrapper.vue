@@ -1,16 +1,15 @@
 <template>
-  <RouterLink :to="element.url" class="explorer-element">
+  <RouterLink :to class="explorer-element">
     <article>
-      <header class="flex justify-between">
-        <div class="explorer-element__title">
+      <header class="flex justify-between p-2">
+        <h2 class="explorer-element__title">
           {{ element.name }}
-        </div>
-        <time :datetime="createdAt" :title="t('createdAt', { at: createdAt })" class="text-right m-2">
+        </h2>
+        <time :datetime="createdAt" data-allow-mismatch="text" :title="t('createdAt', { at: createdAt })">
           {{ sinceCreatedHumanReadable }}
         </time>
       </header>
-      <hr />
-      <div class="p-2">
+      <div class="p-2 border-t border-t-primary-500">
         <slot />
       </div>
     </article>
@@ -18,30 +17,36 @@
 </template>
 
 <script setup lang="ts">
-import type { ItemFile } from '@etonee123x/shared/helpers/folderData';
-
-import type { WithMeta, WithSinceTimestamps } from '@etonee123x/shared/types/database';
 import { useI18n } from 'vue-i18n';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
 import { computed } from 'vue';
+import type { components } from '@/types/openapi';
+import type { RouterLinkProps } from 'vue-router';
 
-const props = defineProps<{
-  element: ItemFile & WithMeta<WithSinceTimestamps>;
-}>();
+export interface Props {
+  element: components['schemas']['FolderDataItemFile'];
+  to: RouterLinkProps['to'];
+}
+
+const props = defineProps<Props>();
 
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       createdAt: 'Создано в { at }',
     },
-    En: {
+    en: {
       createdAt: 'Created at { at }',
     },
   },
 });
 
-const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => -props.element._meta.sinceCreated);
+const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => {
+  return props.element._meta.createdAt - Date.now();
+});
 
-const createdAt = computed(() => new Date(props.element._meta.createdAt).toISOString());
+const createdAt = computed(() => {
+  return new Date(props.element._meta.createdAt).toISOString();
+});
 </script>

@@ -1,5 +1,15 @@
 <template>
-  <BaseButton :class="model && 'text-details-500 border-details-500'" @click="onClick">
+  <BaseButton
+    :style="
+      model && {
+        '--button-color': 'white',
+        '--button-border-color': 'currentColor',
+        '--button-background-color': 'var(--color-primary-800)',
+        '--button-hover-background-color': 'var(--color-primary-900)',
+      }
+    "
+    @click="onClick"
+  >
     <slot />
   </BaseButton>
 </template>
@@ -7,11 +17,13 @@
 <script setup lang="ts">
 import { useToggle } from '@vueuse/core';
 
-import BaseButton from './BaseButton';
+import BaseButton from '@/components/ui/BaseButton.vue';
 
 const model = defineModel<boolean>();
 
 const toggle = useToggle(model);
 
-const onClick = () => toggle();
+const onClick = () => {
+  return toggle();
+};
 </script>
