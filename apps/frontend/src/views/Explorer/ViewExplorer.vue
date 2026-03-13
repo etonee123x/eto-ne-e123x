@@ -6,6 +6,7 @@
         <LazyExplorerElementSystem
           v-if="explorerContext.navigationLinks.value.length > 1"
           :to="nonNullable(explorerContext.navigationLinks.value.at(-2)).to"
+          class="p-2"
           tag="RouterLink"
         >
           {{ t('treeDots') }}

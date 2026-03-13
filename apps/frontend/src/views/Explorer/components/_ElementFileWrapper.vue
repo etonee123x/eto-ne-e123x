@@ -1,7 +1,7 @@
 <template>
   <RouterLink :to class="explorer-element">
     <article>
-      <header class="flex justify-between m-2">
+      <header class="flex justify-between p-2">
         <h2 class="explorer-element__title">
           {{ element.name }}
         </h2>
