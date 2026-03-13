@@ -1,28 +1,36 @@
 <template>
-  <BasePage :h1="t('blog')">
-    <template v-if="authStore.isAdmin">
-      <LazyBaseForm class="flex flex-col gap-4" ref="baseForm" @submit.prevent="onSubmit">
-        <LazyBlogEditPost
-          :v$
-          ref="lazyBlogEditPost"
-          v-model="postData"
-          v-model:files="files"
-          @keydown:enter="onKeyDownEnter"
-        />
-        <BaseButton type="submit" :isLoading="blogStore.isLoadingPost">
+  <BasePage :h1="t('blog')" ref="basePage">
+    <template v-if="authContext.isAdmin.value">
+      <LazyFormPost
+        :post="{ text: '', attachments: [] }"
+        class="mb-8 relative after:w-full after:h-px after:bg-neutral-700 after:absolute after:top-full after:mt-4"
+        ref="formPost"
+        @submit="onSubmit"
+      >
+        <BaseButton v-if="formPost?.isValid" type="submit" :isLoading="blogContext.postPostMutation.isPending.value">
           {{ t('send') }}
         </BaseButton>
-      </LazyBaseForm>
-      <hr v-if="hasPosts" class="my-4" />
+      </LazyFormPost>
     </template>
 
     <template v-if="hasPosts">
-      <BlogPost v-for="post in blogStore.all" class="not-last:mb-4" :post :onBeforeDelete :key="post._meta.id" />
+      <BlogPost
+        v-for="post in posts"
+        class="not-last:mb-4"
+        :post
+        :onBeforeDelete
+        :isInEditMode="editModeFor === post._meta.id"
+        :key="post._meta.id"
+        @changeEditModeFor="onChangeEditModeFor"
+      />
     </template>
-    <div v-else-if="!blogStore.isLoadingGetAll" class="text-lg flex justify-center items-center flex-1 h-full">
+    <div
+      v-else-if="!blogContext.getPostsQuery.isFetching.value"
+      class="text-lg flex justify-center items-center flex-1 h-full"
+    >
       {{ t('nothingWasFound') }}
     </div>
-    <LazyBaseLoading v-if="blogStore.isLoadingGetAll" isFull class="flex justify-center" />
+    <LazyBaseLoading v-if="blogContext.getPostsQuery.isFetching.value" isFull class="flex justify-center" />
 
     <DialogConfirmation
       :title="t('confirmDelete')"
@@ -40,44 +48,38 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
-import { defineAsyncComponent, computed, useTemplateRef, watch, onServerPrefetch } from 'vue';
-import { useRoute } from 'vue-router';
-import { toId } from '@etonee123x/shared/helpers/id';
+import { defineAsyncComponent, computed, useTemplateRef, ref } from 'vue';
 
 import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';
 
-import { useBlogStore } from '@/stores/blog';
-import { useVuelidatePostData } from './composables/useVuelidatePostData';
-import { useAuthStore } from '@/stores/auth';
-import { useGoToPage404 } from '@/composables/useGoToPage404';
 import DialogConfirmation from '@/components/DialogConfirmation.vue';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import { isClient, isServer } from '@/constants/target';
-import { clientOnly } from '@/helpers/clientOnly';
-import BaseButton from '@/components/ui/BaseButton';
-import { useSourcedRef } from '@/composables/useSourcedRef';
-import type { Post } from '@etonee123x/shared/types/blog';
-import type { ForPost } from '@etonee123x/shared/types/database';
+import { isClient } from '@/constants/target';
+import BaseButton from '@/components/ui/BaseButton.vue';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
-import { useOnPostTextareaKeyDownEnter } from './composables/useOnPostTextareaKeyDownEnter';
+import { useAuthContext } from '@/contexts/auth';
+import { useBlogContext } from './contexts/blog';
 
-const LazyBaseForm = defineAsyncComponent(() => import('@/components/ui/BaseForm.vue'));
-const LazyBaseLoading = defineAsyncComponent(() => import('@/components/ui/BaseLoading.vue'));
+const LazyBaseLoading = defineAsyncComponent(() => {
+  return import('@/components/ui/BaseLoading.vue');
+});
 
-const LazyBlogEditPost = defineAsyncComponent(() => import('./components/BlogEditPost.vue'));
+const LazyFormPost = defineAsyncComponent(() => {
+  return import('./components/FormPost.vue');
+});
 
 const dialogConfirmationDelete = useTemplateRef('dialogConfirmationDelete');
-const baseForm = useTemplateRef('baseForm');
-const lazyBlogEditPost = useTemplateRef('lazyBlogEditPost');
+const formPost = useTemplateRef('formPost');
+
+const basePage = useTemplateRef('basePage');
 
 const { reveal, confirm, cancel } = useConfirmDialog();
 
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       blog: 'Блог',
       send: 'Отправить',
       nothingWasFound: 'Ничего не найдено...',
@@ -87,7 +89,7 @@ const { t } = useI18n({
         'Микроблог без чёткой направленности. Что-то из мыслей, что-то случайное. Всё складывается в одну ленту',
       myBlog: 'Мой блог. Пост.',
     },
-    En: {
+    en: {
       blog: 'Blog',
       send: 'Send',
       nothingWasFound: 'Nothing was found...',
@@ -100,45 +102,70 @@ const { t } = useI18n({
   },
 });
 
-const route = useRoute();
+const editModeFor = ref<string | null>(null);
 
-const blogStore = useBlogStore();
+const blogContext = useBlogContext();
 
-const authStore = useAuthStore();
+const authContext = useAuthContext();
 
-const hasPosts = computed(() => Boolean(blogStore.all.length));
-
-const goToPage404 = useGoToPage404();
-
-useInfiniteScroll(isClient ? document.body : null, () => blogStore.getAll().then(() => undefined), {
-  canLoadMore: () => !(blogStore.isLoadingGetAll || blogStore.isEnd),
-  distance: 100,
+const posts = computed(() => {
+  return (
+    blogContext.getPostsQuery.data.value?.pages.flatMap((page) => {
+      return page.rows;
+    }) ?? []
+  );
 });
 
-const [files, resetFiles] = useSourcedRef<Array<File>>([]);
+const hasPosts = computed(() => {
+  return posts.value.length > 0;
+});
 
-const [postData, resetPostModel] = useSourcedRef<ForPost<Post>>(() => ({
-  text: '',
-  filesUrls: [],
-}));
+useInfiniteScroll(
+  () => {
+    return isClient ? (globalThis as unknown as Window) : null;
+  },
+  () => {
+    return (
+      blogContext.getPostsQuery
+        .fetchNextPage()
+        .then(() => {
+          return undefined;
+        })
+        // чтобы не спамить запросами при ошибке (когда нет интернета)
+        .catch(() => {
+          return new Promise((resolve) => {
+            return setTimeout(resolve, 1000);
+          });
+        })
+    );
+  },
+  {
+    canLoadMore: () => {
+      return !blogContext.getPostsQuery.isFetching.value && blogContext.getPostsQuery.hasNextPage.value;
+    },
+    distance: 100,
+  },
+);
 
-const { v$ } = useVuelidatePostData(postData, files);
+const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (post, files) => {
+  return blogContext.postPostMutation.mutateAsync({
+    body: {
+      files: [],
+      text: post.text,
+    },
+    bodySerializer: (body) => {
+      const formData = new FormData();
 
-const onSubmit = async () => {
-  if (!(await v$.value.$validate())) {
-    return;
-  }
+      formData.append('text', body.text);
 
-  blogStore.post(postData.value, files.value).then(() => blogStore.getAll({ shouldReset: true }));
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
 
-  v$.value.$reset();
-  resetFiles();
-  resetPostModel();
-
-  lazyBlogEditPost.value?.focusTextarea();
+      return formData;
+    },
+  });
 };
-
-const onKeyDownEnter = useOnPostTextareaKeyDownEnter(() => baseForm.value?.requestSubmit());
 
 const onBeforeDelete = async () => {
   dialogConfirmationDelete.value?.open();
@@ -148,36 +175,13 @@ const onBeforeDelete = async () => {
   return !isCanceled;
 };
 
-const fetchData = () =>
-  Promise.all([
-    blogStore.getAll(),
-    ...(isNotNil(route.params.postId)
-      ? [
-          //
-          blogStore.getById(toId(String(route.params.postId))).catch(goToPage404),
-        ]
-      : []),
-  ]);
-
-onServerPrefetch(fetchData);
-clientOnly(fetchData);
-
-if (!isServer) {
-  watch(
-    () => route.params.postId,
-    async () => {
-      if (isNotNil(route.params.postId)) {
-        await blogStore.getById(toId(String(route.params.postId)));
-
-        return;
-      }
-
-      blogStore.byId = undefined;
-    },
-  );
-}
+const onChangeEditModeFor: NonNullable<InstanceType<typeof BlogPost>['onChangeEditModeFor']> = (id) => {
+  editModeFor.value = id;
+};
 
 useSeoMeta({
-  description: () => (blogStore.byId ? t('myBlog') : t('microblogWithNoClearDirection')),
+  description: () => {
+    return blogContext.getPostByIdQuery.data.value ? t('myBlog') : t('microblogWithNoClearDirection');
+  },
 });
 </script>

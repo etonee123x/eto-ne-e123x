@@ -13,8 +13,8 @@
 </template>
 
 <script setup lang="ts">
-// TODO: переписать на useSwipe?...
-import { type CSSProperties, reactive, computed, useTemplateRef } from 'vue';
+import { reactive, computed, useTemplateRef } from 'vue';
+import type { CSSProperties } from 'vue';
 import { useElementSize } from '@vueuse/core';
 
 const props = withDefaults(
@@ -38,7 +38,9 @@ const root = useTemplateRef('root');
 
 const { width } = useElementSize(root, undefined, { box: 'border-box' });
 
-const threshold = computed(() => width.value * Number(props.threshold));
+const threshold = computed(() => {
+  return width.value * Number(props.threshold);
+});
 
 let touchStartX = 0;
 let diff = 0;
@@ -46,8 +48,8 @@ let wasStarted = false;
 
 const style = reactive<CSSProperties>({});
 
-const onTouchStart = (e: TouchEvent) => {
-  const maybeChangedTouch = e.changedTouches[0];
+const onTouchStart = (event: TouchEvent) => {
+  const maybeChangedTouch = event.changedTouches[0];
 
   if (!maybeChangedTouch) {
     return;
@@ -58,8 +60,8 @@ const onTouchStart = (e: TouchEvent) => {
   style.transition = 'all 0ms';
 };
 
-const onTouchMove = (e: TouchEvent) => {
-  const maybeTouch = e.touches[0];
+const onTouchMove = (event: TouchEvent) => {
+  const maybeTouch = event.touches[0];
 
   if (!(wasStarted && maybeTouch)) {
     return;
@@ -85,7 +87,9 @@ const onTouchEnd = () => {
   style.transition = `all ${props.disapearDelay}ms`;
   style.transform = `translateX(${globalThis.innerWidth * (wasSwipedLeft ? -1 : 1)}px)`;
 
-  setTimeout(() => emit('swiped'), Number(props.disapearDelay));
+  setTimeout(() => {
+    emit('swiped');
+  }, Number(props.disapearDelay));
 };
 
 const onTouchCancel = () => {

@@ -1,88 +1,81 @@
 <template>
-  <article class="w-full bg-background border border-dark rounded-sm cursor-pointer shadow-lg shadow-dark/15">
-    <component :is="component.Is" v-bind="component.binds">
-      <div class="p-4 flex flex-col">
-        <LazyBlogEditPost
-          v-if="isInEditMode"
-          :v$
-          ref="blogEditPost"
-          v-model="model"
-          v-model:files="files"
-          @keydown:enter="onKeyDownEnter"
-        />
-        <template v-else>
-          <PostData :post />
-          <time
-            :datetime="new Date(props.post._meta.createdAt).toISOString()"
-            :title="createdAtUpdatedAt"
-            class="text-sm mt-4 text-dark flex justify-end items-center gap-0.5"
-          >
-            {{ sinceCreatedHumanReadable }}
-            <BaseIcon v-if="post._meta.updatedAt" :class="ICON.SIZE.SM" :path="mdiPencil" />
-          </time>
-        </template>
-      </div>
-      <div v-if="authStore.isAdmin" class="flex justify-end border-t border-t-dark p-1 gap-2">
-        <BaseButton
-          v-for="control in controls"
-          class="p-0.5"
-          :isLoading="control.isLoading"
-          :isDisabled="control.isDisabled"
-          :key="control.key"
-          @click.stop.prevent="control.onClick"
-        >
-          <BaseIcon class="text-2xl" :path="control.iconPath" />
-        </BaseButton>
-      </div>
-    </component>
+  <article class="post">
+    <LazyFormPost v-if="isInEditMode" class="p-4 flex flex-col" :post ref="formPost" @submit="onSubmit" />
+    <RouterLink
+      v-else
+      :to="{
+        name: ROUTE_NAMES.BLOG_POST,
+        params: {
+          postId: props.post._meta.id,
+        },
+      }"
+      class="p-4 flex flex-col"
+    >
+      <PostData :post />
+      <time
+        :datetime="new Date(props.post._meta.createdAt).toISOString()"
+        :title="createdAtUpdatedAt"
+        class="text-sm mt-4 flex justify-end items-center gap-0.5"
+      >
+        {{ sinceCreatedHumanReadable }}
+        <BaseIcon v-if="post._meta.updatedAt !== post._meta.createdAt" :path="mdiPencil" />
+      </time>
+    </RouterLink>
+    <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-primary-500 p-1 gap-2">
+      <component :is="Button" v-for="Button in Buttons" :key="Button.key" />
+    </div>
   </article>
 </template>
 
 <script setup lang="ts">
-import { mdiCancel, mdiContentSave, mdiDelete, mdiPencil } from '@mdi/js';
-import { areIdsEqual } from '@etonee123x/shared/helpers/id';
-import { computed, ref, nextTick, defineAsyncComponent, useTemplateRef } from 'vue';
+import { mdiCheck, mdiClose, mdiDelete, mdiPencil } from '@mdi/js';
+import { computed, nextTick, defineAsyncComponent, useTemplateRef, h } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PostData from './PostData.vue';
 
-import BaseIcon from '@/components/ui/BaseIcon';
-import { useBlogStore } from '@/stores/blog';
-import { useVuelidatePostData } from '../composables/useVuelidatePostData';
-import { useAuthStore } from '@/stores/auth';
-import { RouteName } from '@/router';
-import { ICON } from '@/helpers/ui';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
+import type { Props as PropsBaseIcon } from '@/components/ui/BaseIcon.vue';
+import { ROUTE_NAMES } from '@/router';
 import { RouterLink } from 'vue-router';
-import { useSourcedRef } from '@/composables/useSourcedRef';
-import BaseButton from '@/components/ui/BaseButton';
-import type { PostWithMetaWithSinseTimestamps } from '@/api/posts';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
+import BaseButton from '@/components/ui/BaseButton.vue';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';
-import { useOnPostTextareaKeyDownEnter } from '../composables/useOnPostTextareaKeyDownEnter';
+import { useAuthContext } from '@/contexts/auth';
+import { useBlogContext } from '../contexts/blog';
+import { isNil } from '@etonee123x/shared/utils/isNil';
+import type { components } from '@/types/openapi';
+import { pick } from '@etonee123x/shared/utils/pick';
 
-const LazyBlogEditPost = defineAsyncComponent(() => import('./BlogEditPost.vue'));
+const LazyFormPost = defineAsyncComponent(() => {
+  return import('./FormPost.vue');
+});
 
 const props = defineProps<{
-  post: PostWithMetaWithSinseTimestamps;
+  post: components['schemas']['PostResponse'];
   onBeforeDelete: () => Promise<boolean>;
+  isInEditMode: boolean;
 }>();
 
-const blogEditPost = useTemplateRef('blogEditPost');
+const emit = defineEmits<{
+  changeEditModeFor: [components['schemas']['PostResponse']['_meta']['id'] | null];
+}>();
 
-const blogStore = useBlogStore();
+const formPost = useTemplateRef<InstanceType<typeof LazyFormPost>>('formPost');
 
-const authStore = useAuthStore();
+const blogContext = useBlogContext();
+
+const authContext = useAuthContext();
 
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       createdAt: 'Создано в { at }',
       updatedAt: 'Изменено в { at }',
       confirmDelete: 'Удалить пост',
       deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
     },
-    En: {
+    en: {
       createdAt: 'Created at { at }',
       updatedAt: 'Edited at { at }',
       confirmDelete: 'Delete Post',
@@ -91,119 +84,142 @@ const { t } = useI18n({
   },
 });
 
-const files = ref<Array<File>>([]);
+const onSubmit: InstanceType<typeof LazyFormPost>['onSubmit'] = async (post, files) => {
+  blogContext.patchPostByIdMutation.mutateAsync({
+    params: {
+      path: {
+        id: props.post._meta.id,
+      },
+    },
+    body: {
+      ...pick(post, ['attachments', 'text']),
+      files: [],
+    },
+    bodySerializer: (body) => {
+      const formData = new FormData();
 
-const [model] = useSourcedRef(() => props.post, { isAutoSynced: true });
+      formData.append('text', body.text);
+      formData.append(`attachments`, JSON.stringify(body.attachments));
 
-const { v$ } = useVuelidatePostData(model, files);
+      files.forEach((file) => {
+        formData.append('files', file);
+      });
 
-const onSubmit = async () => {
-  if (!(await v$.value.$validate())) {
-    return;
-  }
-
-  if (hasChanges.value) {
-    blogStore
-      .putById(props.post._meta.id, model.value, files.value)
-      .then(() => blogStore.getAll({ shouldReset: true }));
-  }
+      return formData;
+    },
+  });
 
   closeEditMode();
-  v$.value.$reset();
 };
 
-const component = computed(() =>
-  isInEditMode.value
-    ? {
-        Is: 'div',
-      }
-    : {
-        Is: RouterLink,
-        binds: {
-          to: {
-            name: RouteName.BlogPost,
-            params: {
-              postId: props.post._meta.id,
-            },
-          },
-          class: 'hover:text-[initial]',
-        },
-      },
-);
+const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => {
+  return props.post._meta.createdAt - Date.now();
+});
 
-const sinceCreatedHumanReadable = useIntlRelativeTimeFormatHumanReadable(() => -props.post._meta.sinceCreated);
-
-const createdAtUpdatedAt = computed(() =>
-  [
+const createdAtUpdatedAt = computed(() => {
+  return [
     t('createdAt', { at: new Date(props.post._meta.createdAt).toISOString() }),
-    ...(isNotNil(props.post._meta.updatedAt)
-      ? [t('updatedAt', { at: new Date(props.post._meta.updatedAt).toISOString() })]
-      : []),
-  ].join('\n'),
-);
-
-const isInEditMode = computed(() => areIdsEqual(blogStore.editModeFor, props.post._meta.id));
-
-const onKeyDownEnter = useOnPostTextareaKeyDownEnter(onSubmit);
-
-const hasChanges = computed(() => {
-  const areTextsDifferent = props.post.text !== model.value.text;
-
-  if (areTextsDifferent) {
-    return true;
-  }
-
-  return false;
+    ...(isNil(props.post._meta.updatedAt)
+      ? []
+      : [t('updatedAt', { at: new Date(props.post._meta.updatedAt).toISOString() })]),
+  ].join('\n');
 });
 
 const closeEditMode = () => {
-  blogStore.editModeFor = null;
+  emit('changeEditModeFor', null);
 };
 
-const controls = computed(() => [
-  ...(isInEditMode.value
-    ? [
-        {
-          key: 'cancel',
-          iconPath: mdiCancel,
-          isLoading: false,
-          onClick: closeEditMode,
-        },
-        {
-          key: 'save',
-          iconPath: mdiContentSave,
-          isDisabled: !hasChanges.value,
-          isLoading: blogStore.isLoadingPutById,
-          onClick: onSubmit,
-        },
-      ]
-    : []),
-  // TODO: Надо придумать как редактировать посты с вложениями...
-  ...(!(isInEditMode.value || props.post.filesUrls.length)
-    ? [
-        {
-          key: 'edit',
-          iconPath: mdiPencil,
-          isLoading: blogStore.isLoadingPutById,
-          onClick: () => {
-            blogStore.editModeFor = props.post._meta.id;
+const ButtonIcon = (path: PropsBaseIcon['path']) => {
+  return h(BaseIcon, { path, class: 'text-2xl' });
+};
 
-            nextTick(() => blogEditPost.value?.focusTextarea());
-          },
-        },
-      ]
-    : []),
-  {
-    key: 'delete',
-    iconPath: mdiDelete,
-    isLoading: blogStore.isLoadingDeleteById,
-    onClick: async () => {
-      if (!(await props.onBeforeDelete())) {
-        return;
-      }
-
-      return blogStore.deleteById(props.post._meta.id).then(() => blogStore.getAll({ shouldReset: true }));
+const ButtonSave = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'save',
+      disabled: !formPost.value?.isValid,
+      isLoading: blogContext.patchPostByIdMutation.isPending.value,
+      onClick: () => {
+        return formPost.value?.form?.requestSubmit();
+      },
     },
-  },
-]);
+    () => {
+      return ButtonIcon(mdiCheck);
+    },
+  );
+});
+
+const ButtonCancel = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'cancel',
+      onClick: closeEditMode,
+    },
+    () => {
+      return ButtonIcon(mdiClose);
+    },
+  );
+});
+
+const ButtonEdit = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'edit',
+      isLoading: blogContext.patchPostByIdMutation.isPending.value,
+      onClick: () => {
+        emit('changeEditModeFor', props.post._meta.id);
+
+        nextTick(() => {
+          return formPost.value?.focusTextarea();
+        });
+      },
+    },
+    () => {
+      return ButtonIcon(mdiPencil);
+    },
+  );
+});
+
+const ButtonDelete = computed(() => {
+  return h(
+    BaseButton,
+    {
+      key: 'delete',
+      isLoading: blogContext.deletePostByIdMutation.isPending.value,
+      onClick: async () => {
+        if (!(await props.onBeforeDelete())) {
+          return;
+        }
+
+        return blogContext.deletePostByIdMutation.mutateAsync({
+          params: {
+            path: {
+              id: props.post._meta.id,
+            },
+          },
+        });
+      },
+    },
+    () => {
+      return ButtonIcon(mdiDelete);
+    },
+  );
+});
+
+const Buttons = computed(() => {
+  return props.isInEditMode
+    ? [
+        //
+        ButtonSave.value,
+        ButtonCancel.value,
+      ]
+    : [
+        //
+        ButtonEdit.value,
+        ButtonDelete.value,
+      ];
+});
 </script>

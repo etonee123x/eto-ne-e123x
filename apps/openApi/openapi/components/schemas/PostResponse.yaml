@@ -1,0 +1,25 @@
+type: object
+properties:
+  _meta:
+    type: object
+    properties:
+      id:
+        type: string
+      createdAt:
+        type: number
+      updatedAt:
+        type: number
+    required:
+      - id
+      - createdAt
+      - updatedAt
+  text:
+    type: string
+  attachments:
+    type: array
+    items:
+      $ref: ./PostAttachment.yaml
+required:
+  - _meta
+  - text
+  - attachments

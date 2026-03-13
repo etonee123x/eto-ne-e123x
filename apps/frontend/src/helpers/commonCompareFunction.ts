@@ -1,1 +1,3 @@
-export const commonCompareFunction = <T>(one: T, another: T): boolean => one === another;
+export const commonCompareFunction = <T>(one: T, another: T): boolean => {
+  return one === another;
+};

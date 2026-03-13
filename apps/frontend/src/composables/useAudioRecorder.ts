@@ -25,8 +25,8 @@ export const useAudioRecorder = (options: Partial<{ onEnd: (blob: Blob) => void 
     toggleIsRecording(false);
   };
 
-  const initStream = async () =>
-    navigator.mediaDevices
+  const initStream = async () => {
+    return navigator.mediaDevices
       .getUserMedia({ audio: true })
       .then((stream) => {
         mediaRecorder.value = new MediaRecorder(stream);
@@ -38,9 +38,12 @@ export const useAudioRecorder = (options: Partial<{ onEnd: (blob: Blob) => void 
           audioChunks.push(event.data);
         };
 
-        mediaRecorder.value.onstop = () => options.onEnd?.(new Blob(audioChunks, { type: 'audio/ogg' }));
+        mediaRecorder.value.onstop = () => {
+          return options.onEnd?.(new Blob(audioChunks, { type: 'audio/ogg' }));
+        };
       })
       .catch(console.error);
+  };
 
   return {
     isRecording,

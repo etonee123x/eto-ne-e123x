@@ -1,0 +1,157 @@
+<template>
+  <header class="bg-primary-500 text-neutral-50 dark:text-neutral-950 relative">
+    <ClientOnly v-if="fetchingNumber > 0">
+      <div
+        class="after:absolute after:bottom-0 rounded-full after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-primary-500 after:animate-runner"
+      />
+    </ClientOnly>
+    <div class="layout-container flex items-center py-2 gap-4">
+      <nav class="flex items-end gap-4">
+        <RouterLink
+          :to="localizeRoute({ name: ROUTE_NAMES.INDEX })"
+          exactActiveClass="font-bold underline"
+          class="text-xl hover:underline underline-offset-2"
+        >
+          {{ SITE_TITLE }}
+        </RouterLink>
+        <ul class="flex gap-2">
+          <li v-for="link in links" :key="link.key">
+            <RouterLink :to="link.to" activeClass="font-bold underline" class="hover:underline underline-offset-2">
+              {{ link.text }}
+            </RouterLink>
+          </li>
+        </ul>
+      </nav>
+      <div class="ms-auto flex gap-2">
+        <BaseButton v-for="button in buttons" :aria-label="button.ariaLabel" :key="button.key" @click="button.onClick">
+          <component :is="button.Component" />
+        </BaseButton>
+      </div>
+    </div>
+  </header>
+</template>
+
+<script setup lang="ts">
+import { mdiLogout } from '@mdi/js';
+import { computed, defineComponent, h } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+import BaseIcon from '@/components/ui/BaseIcon.vue';
+import { ROUTE_NAMES } from '@/router';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import ClientOnly from '@/components/ClientOnly.vue';
+import { SITE_TITLE } from '@/constants/siteTitle';
+import { useLocaleInfo } from '@/composables/useLocaleInfo';
+import { i18n } from '@/i18n';
+import { useL10n } from '@/composables/useL10n';
+import { useCookies } from '@vueuse/integrations/useCookies';
+import { useRouter } from 'vue-router';
+import { pick } from '@etonee123x/shared/utils/pick';
+import { useAuthContext } from '@/contexts/auth';
+import { useIsFetching } from '@tanstack/vue-query';
+
+const { localizeRoute } = useL10n();
+
+const IconLogout = defineComponent({
+  setup: () => {
+    // Не хочу, мне и так нравится
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    return () => {
+      return h(BaseIcon, { path: mdiLogout });
+    };
+  },
+});
+
+const Language = defineComponent({
+  setup: () => {
+    // Не хочу, мне и так нравится
+    // eslint-disable-next-line unicorn/consistent-function-scoping
+    return () => {
+      return h('div', localeInfo.value.locale);
+    };
+  },
+});
+
+const router = useRouter();
+
+const { t } = useI18n({
+  useScope: 'local',
+  messages: {
+    ru: {
+      content: 'Контент',
+      blog: 'Блог',
+      changeLanguage: 'Сменить язык',
+      logout: 'Логаут',
+    },
+    en: {
+      content: 'Content',
+      blog: 'Blog',
+      changeLanguage: 'Change language',
+      logout: 'Logout',
+    },
+  },
+});
+
+const fetchingNumber = useIsFetching();
+
+const authContext = useAuthContext();
+
+const links = computed(() => {
+  return [
+    {
+      text: t('content'),
+      to: localizeRoute({
+        name: ROUTE_NAMES.EXPLORER,
+      }),
+      key: 'content',
+    },
+    {
+      text: t('blog'),
+      to: localizeRoute({
+        name: ROUTE_NAMES.BLOG,
+      }),
+      key: 'blog',
+    },
+  ];
+});
+
+const cookies = useCookies(['language']);
+
+const localeInfo = useLocaleInfo();
+
+const buttons = computed(() => {
+  return [
+    ...(authContext.isAdmin.value
+      ? [
+          {
+            key: 'logout',
+            Component: IconLogout,
+            ariaLabel: t('logout'),
+            onClick: authContext.deleteAuthMutation.mutate,
+          },
+        ]
+      : []),
+    {
+      key: 'changeLanguage',
+      Component: Language,
+      ariaLabel: t('changeLanguage'),
+      onClick: () => {
+        const newLanguage = localeInfo.value.locale === 'ru' ? 'en' : 'ru';
+
+        i18n.global.locale.value = newLanguage;
+        cookies.set('language', newLanguage, { path: '/', maxAge: 365 * 24 * 60 * 60 * 1000 });
+
+        router.replace(
+          localizeRoute({
+            ...pick(router.currentRoute.value, ['name', 'query', 'hash']),
+            params: {
+              ...router.currentRoute.value.params,
+              language: newLanguage,
+            },
+          }),
+        );
+      },
+    },
+  ];
+});
+</script>

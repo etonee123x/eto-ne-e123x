@@ -1,37 +1,38 @@
 import 'dotenv/config';
 
 import { readFile } from 'node:fs/promises';
-import express, { type ErrorRequestHandler, type RequestHandler } from 'express';
+import express from 'express';
+import type { ErrorRequestHandler, RequestHandler } from 'express';
 import type { ViteDevServer } from 'vite';
 import cookieParser from 'cookie-parser';
 import { transformHtmlTemplate } from '@unhead/vue/server';
-import { resolve } from 'path';
-import { pick } from '@etonee123x/shared/utils/pick';
-import { postAuth } from '@/api/auth';
 import { isProduction } from '@/constants/mode';
 import { KEY_JWT } from '@/constants/keys';
-import http from 'http';
-import { type Locals, type RequestWithLocals } from '@/types';
+import http from 'node:http';
 import { requestToOrigin } from '@/utils/requestToOrigin';
-import { isNil } from '@etonee123x/shared/utils/isNil';
-import type { ExpressContext } from '@/constants/injectionKeyExpressContext.js';
+import type { ExpressContext } from '@/types/ExpressContext';
 import { throwError } from '@etonee123x/shared/utils/throwError';
+import { LOCALES_INFO } from '@/constants/localesInfo';
+import { isKnownLocale } from '@/helpers/isKnownLocale';
+import Negotiator from 'negotiator';
+import { propertyCurried } from '@etonee123x/shared/utils/property';
+import { ROUTE_NAME_TO_PATH } from '@/router';
+import { nonNullable } from '@/utils/nonNullable';
+import { client } from '@/api/client';
 
-// Constants
 const port = process.env.PORT ?? throwError('PORT is not defined');
 const BASE = '/';
 
-// Cached production assets
-const templateHtml = isProduction ? await readFile('./dist/client/index.html', 'utf-8') : '';
+const templateHtml = isProduction ? await readFile('./dist/client/index.html', 'utf8') : '';
 
 const renderHTML = async (url: string, expressContext: ExpressContext) => {
   const template = isProduction
     ? templateHtml
-    : await vite.transformIndexHtml(url, await readFile('index.html', 'utf-8'));
+    : await nonNullable(vite).transformIndexHtml(url, await readFile('index.html', 'utf8'));
 
   const { render } = isProduction
     ? await import('../dist/server/entryServer.js')
-    : await vite.ssrLoadModule('./src/entryServer.ts');
+    : await nonNullable(vite).ssrLoadModule('./src/entryServer.ts');
 
   const rendered = await render(url, expressContext);
 
@@ -43,7 +44,6 @@ const renderHTML = async (url: string, expressContext: ExpressContext) => {
   );
 };
 
-// Create http server
 const app = express();
 
 app.disable('x-powered-by');
@@ -51,13 +51,11 @@ app.set('trust proxy', true);
 
 app.use(cookieParser());
 
-let vite: ViteDevServer;
+let vite: ViteDevServer | null = null;
 
 if (isProduction) {
-  const compression = (await import('compression')).default;
-  // const helmet = (await import('helmet')).default;
+  const { default: compression } = await import('compression');
 
-  // app.use(helmet());
   app.use(compression());
 } else {
   const { createServer } = await import('vite');
@@ -76,66 +74,73 @@ if (isProduction) {
   });
 }
 
-app.get('/healthz', (...[, response]) => void response.send('ok'));
+app.get('/healthz', (...[, response]) => {
+  return response.send('ok');
+});
 
-const auth: RequestHandler = async (request, response, next) => {
-  const maybeQueryJwt = request.query[KEY_JWT]?.toString();
-
-  if (isNil(maybeQueryJwt)) {
-    return next();
+app.use((request, response, next) => {
+  if (
+    !Object.values(ROUTE_NAME_TO_PATH).some((routePath) => {
+      return new RegExp(String.raw`^/${routePath}(/|$|\?)`).test(request.path);
+    })
+  ) {
+    next();
+    return;
   }
 
-  await postAuth(maybeQueryJwt)
-    .then((cookies) => {
+  if (!isKnownLocale(request.cookies.language)) {
+    const negotiatorLanguage = new Negotiator(request).language(LOCALES_INFO.map(propertyCurried('locale')));
+
+    request.cookies.language = isKnownLocale(negotiatorLanguage) ? negotiatorLanguage : 'en';
+
+    response.cookie('language', request.cookies.language, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+  }
+
+  response.redirect(301, `${request.cookies.language}${request.originalUrl}`);
+});
+
+const syncLocaleCookie: RequestHandler = (request, response, next) => {
+  const routeLanguage = /\w+/.exec(request.originalUrl)?.[0];
+
+  request.cookies.language = isKnownLocale(routeLanguage) ? routeLanguage : 'en';
+  response.cookie('language', request.cookies.language, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+
+  next();
+};
+
+const auth: RequestHandler = async (request, response, next) => {
+  const maybeQueryJwt = request.query[KEY_JWT];
+
+  if (typeof maybeQueryJwt !== 'string') {
+    next();
+    return;
+  }
+
+  await client['/auth']
+    .POST({ params: { query: { jwt: maybeQueryJwt } } })
+    .then((_response) => {
       const isHttps = (request.headers['x-forwarded-proto'] ?? '').toString().startsWith('https');
 
       response.setHeader(
         'Set-Cookie',
-        cookies.map((c) => `${c}; ${isHttps ? 'Secure' : ''}; SameSite=Lax`),
+        _response.response.headers.getSetCookie().map((cookie) => {
+          return `${cookie}; ${isHttps ? 'Secure' : ''}; SameSite=Lax`;
+        }),
       );
     })
-    .catch(() => response.clearCookie(KEY_JWT));
+    .catch(() => {
+      return response.clearCookie(KEY_JWT);
+    });
 
   const requestUrl = new URL(request.url, requestToOrigin(request));
 
   requestUrl.searchParams.delete(KEY_JWT);
 
-  return response.redirect(requestUrl.toString());
+  response.redirect(303, requestUrl.toString());
 };
 
-const settings: RequestHandler = async (request: RequestWithLocals, response, next) => {
-  const initialSettings = JSON.parse(await readFile(resolve('./public/settings.json'), 'utf-8'));
-
-  const settings = {
-    ...initialSettings,
-    ...pick(request.cookies, ['themeColor', 'language']),
-  };
-
-  const locals: Locals = {
-    settings,
-  };
-
-  const isHttps = (request.headers['x-forwarded-proto'] ?? '').toString().startsWith('https');
-
-  response.cookie('language', settings.language, {
-    maxAge: 365 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
-    secure: isHttps,
-  });
-
-  response.cookie('themeColor', settings.themeColor, {
-    maxAge: 365 * 24 * 60 * 60 * 1000,
-    sameSite: 'lax',
-    secure: isHttps,
-  });
-
-  request.locals = locals;
-
-  next();
-};
-
-const main: RequestHandler = async (request: RequestWithLocals, response, next) => {
-  renderHTML(request.originalUrl.replace(BASE, ''), { request, response, next })
+const main: RequestHandler = async (request, response, next) => {
+  return renderHTML(request.originalUrl.replace(BASE, ''), { request, response, next })
     .then((html) => {
       if (response.headersSent) {
         return;
@@ -156,18 +161,22 @@ const error: ErrorRequestHandler = async (error, request, response, next) => {
     console.error('Unknown error', error);
   }
 
-  renderHTML('404', { request, response, next }).then((html) =>
-    response
+  renderHTML('404', { request, response, next }).then((html) => {
+    return response
       .status(response.statusCode || 500)
       .set({ 'Content-Type': 'text/html' })
-      .send(html),
-  );
+      .send(html);
+  });
 };
 
-app.use('*all', auth, settings, main, error);
+app.use('*all', syncLocaleCookie, auth, main, error);
 
 http
   .createServer(app)
-  .once('listening', () => console.info(`HTTP server is listening on http://127.0.0.1:${port}`))
+  .once('listening', () => {
+    console.info(`HTTP server is listening on http://127.0.0.1:${port}`);
+  })
   .listen(port)
-  .on('error', (error) => console.error('Failed to start HTTP server due to:', error));
+  .on('error', (error) => {
+    console.error('Failed to start HTTP server due to:', error);
+  });

@@ -1,94 +1,86 @@
 <template>
-  <Suspense>
-    <div class="contents group/app">
-      <TheHeader />
-      <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
-        <RouterView />
-        <LazyTheToasts
-          v-if="toastsStore.hasToasts"
-          class="sticky bottom-4 group-has-[[data-player]]/app:bottom-30 mx-auto"
-        />
-      </main>
-      <LazyThePlayer v-if="playerStore.theTrack" class="sticky bottom-0" />
-      <LazyTheFooter v-else />
-      <TheDialogGallery />
-    </div>
-  </Suspense>
+  <div class="flex flex-col min-h-dvh group/app">
+    <TheHeader />
+    <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
+      <RouterView />
+      <LazyTheNotifications
+        v-if="notifications.notifications.length > 0"
+        class="sticky bottom-4 group-has-data-player/app:bottom-30 mx-auto"
+      />
+    </main>
+    <LazyThePlayer v-if="player.theTrack.value" class="sticky bottom-0" />
+    <LazyTheFooter v-else />
+    <TheDialogGallery />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { defineAsyncComponent, onServerPrefetch } from 'vue';
+import { defineAsyncComponent } from 'vue';
+import themes from '@/assets/styles/themes.json';
 
-import { usePlayerStore } from '@/stores/player';
-import { useToastsStore } from '@/stores/toasts';
-import TheHeader from '@/components/TheHeader';
-import { useSettingsStore } from '@/stores/settings';
-import { themeColorToThemeColorClass } from '@/helpers/themeColor';
+import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
-import { nonNullable } from '@/utils/nonNullable';
-import { useExplorerStore } from '@/stores/explorer';
-import { useRoute } from 'vue-router';
-import { RouteName } from '@/router';
-import { clientOnly } from '@/helpers/clientOnly';
 import { i18n } from '@/i18n';
-import { isNotNil } from '@etonee123x/shared/utils/isNotNil';
-import { useGoToPage404 } from '@/composables/useGoToPage404';
-import { useSSRContext } from '@/composables/useSSRContext';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
+import { useNotifications } from '@/plugins/notifications';
+import { usePlayer } from '@/plugins/player';
+import { provideAuthContext } from '@/contexts/auth';
+import { provideExplorerContext } from '@/views/Explorer/contexts/explorer';
+import { nonNullable } from '@/utils/nonNullable';
+import { provideBlogContext } from '@/views/Blog/contexts/blog';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 
-const LazyThePlayer = defineAsyncComponent(() => import('@/components/ThePlayer'));
-const LazyTheToasts = defineAsyncComponent(() => import('@/components/TheToasts.vue'));
-const LazyTheFooter = defineAsyncComponent(() => import('@/components/TheFooter'));
+const LazyThePlayer = defineAsyncComponent(() => {
+  return import('@/components/ThePlayer/ThePlayer.vue');
+});
+const LazyTheNotifications = defineAsyncComponent(() => {
+  return import('@/components/TheNotifications.vue');
+});
+const LazyTheFooter = defineAsyncComponent(() => {
+  return import('@/components/TheFooter.vue');
+});
 
-const route = useRoute();
+provideAuthContext();
 
-const goToPage404 = useGoToPage404();
+// Странно, да. Контексты отправляю тут, а не на страницах. Контексты получились асинхронными, в них грузятся данные.
+// Если их инициализировать на страницах, то СТАТИЧЕСКИЕ названия не будут отображться при загрузке страницы на клиенте
+await Promise.all([
+  //
+  provideExplorerContext(),
+  provideBlogContext(),
+]);
 
-const playerStore = usePlayerStore();
-const toastsStore = useToastsStore();
-
-if (isServer) {
-  const ssrContext = nonNullable(useSSRContext());
-
-  const maybeSettings = ssrContext.express.request.locals?.settings;
-
-  const settingsStore = useSettingsStore();
-
-  if (maybeSettings) {
-    settingsStore.initSettings(maybeSettings);
-  }
-
-  useHead({
-    bodyAttrs: {
-      class: themeColorToThemeColorClass(settingsStore.settings.themeColor),
-    },
-  });
-}
-
-if (route.name === RouteName.Explorer) {
-  const explorerStore = useExplorerStore();
-
-  const getFolderData = () => explorerStore.getFolderData(route).catch(goToPage404);
-
-  onServerPrefetch(getFolderData);
-  clientOnly(getFolderData);
-}
+const player = usePlayer();
+const notifications = useNotifications();
 
 useHead({
-  titleTemplate: (title) =>
-    [
-      ...(isNotNil(title)
-        ? [
+  titleTemplate: (title) => {
+    return [
+      ...(isNil(title)
+        ? []
+        : [
             //
             title,
-          ]
-        : []),
+          ]),
       SITE_TITLE,
-    ].join(' | '),
+    ].join(' | ');
+  },
   htmlAttrs: {
-    lang: () => i18n.global.locale.value.toLocaleLowerCase(),
+    lang: () => {
+      return i18n.global.locale.value.toLocaleLowerCase();
+    },
   },
 });
+
+if (isServer) {
+  useHead({
+    style: [
+      {
+        textContent: `:root { ${nonNullable(themes.at(Date.now() % themes.length)).content} }`,
+      },
+    ],
+  });
+}
 </script>

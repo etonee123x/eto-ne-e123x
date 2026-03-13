@@ -1,2 +1,3 @@
-export const getAuthorization = () =>
-  `Basic ${Buffer.from([process.env.BASIC_USER, process.env.BASIC_PASSWORD].join(':')).toString('base64')}`;
+export const getAuthorization = () => {
+  return `Basic ${Buffer.from([process.env.BASIC_USER, process.env.BASIC_PASSWORD].join(':')).toString('base64')}`;
+};

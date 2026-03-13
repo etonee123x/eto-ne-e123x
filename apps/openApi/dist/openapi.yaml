@@ -1,0 +1,565 @@
+openapi: 3.0.0
+info:
+  title: eto-ne-e123x
+  version: 1.0.0
+  description: eto-ne-e123x API
+  license:
+    name: UNLICENSED
+    url: UNLICENSED
+servers:
+  - url: https://eto-ne-e123x.dev/api
+security: []
+tags:
+  - name: FolderData
+    description: Folder browsing and files
+  - name: Posts
+    description: Posts CRUD
+  - name: Auth
+    description: Authentication
+paths:
+  /auth:
+    post:
+      operationId: createAuth
+      summary: Create auth cookie
+      tags:
+        - Auth
+      parameters:
+        - in: query
+          name: jwt
+          schema:
+            type: string
+          description: JWT token to set in auth cookie
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jwt:
+                    type: string
+                required:
+                  - jwt
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+    delete:
+      operationId: deleteAuth
+      summary: Clear auth cookie
+      tags:
+        - Auth
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jwt:
+                    type: string
+                    nullable: true
+                    enum:
+                      - null
+                required:
+                  - jwt
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+  /posts:
+    get:
+      operationId: getPosts
+      summary: Get posts
+      tags:
+        - Posts
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Page number (0-based)
+        - in: query
+          name: pageSize
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Items per page
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostsResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+    post:
+      operationId: createPost
+      summary: Create post
+      tags:
+        - Posts
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateRequest'
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+  /posts/{id}:
+    get:
+      operationId: getPostById
+      summary: Get post by ID
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+    patch:
+      operationId: updatePostById
+      summary: Update post by ID
+      tags:
+        - Posts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostUpdateRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+    delete:
+      operationId: deletePostById
+      summary: Delete post by ID
+      tags:
+        - Posts
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error401'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+  /folder-data:
+    get:
+      operationId: getFolderData
+      summary: Get folder data by path
+      tags:
+        - FolderData
+      parameters:
+        - name: path
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Path inside folder-data (e.g. path/to/folder)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderDataResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error404'
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+  schemas:
+    Error401:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    FolderDataItemMeta:
+      type: object
+      properties:
+        createdAt:
+          type: number
+        updatedAt:
+          type: number
+      required:
+        - createdAt
+        - updatedAt
+    FolderDataItemBase:
+      type: object
+      properties:
+        name:
+          type: string
+        path:
+          type: string
+        _meta:
+          $ref: '#/components/schemas/FolderDataItemMeta'
+      required:
+        - name
+        - path
+        - _meta
+    ItemType:
+      type: string
+      enum:
+        - FOLDER
+        - FILE
+    FolderDataItemFileBase:
+      allOf:
+        - $ref: '#/components/schemas/FolderDataItemBase'
+        - type: object
+          properties:
+            itemType:
+              allOf:
+                - $ref: '#/components/schemas/ItemType'
+                - enum:
+                    - FILE
+            src:
+              type: string
+          required:
+            - itemType
+            - src
+    FileType:
+      type: string
+      enum:
+        - IMAGE
+        - VIDEO
+        - AUDIO
+        - UNKNOWN
+    FolderDataItemAudio:
+      allOf:
+        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - type: object
+          properties:
+            fileType:
+              allOf:
+                - $ref: '#/components/schemas/FileType'
+                - enum:
+                    - AUDIO
+            metadata:
+              type: object
+              properties:
+                album:
+                  type: string
+                  nullable: true
+                bpm:
+                  type: number
+                  nullable: true
+                year:
+                  type: number
+                  nullable: true
+                artists:
+                  type: array
+                  items:
+                    type: string
+                bitrate:
+                  type: number
+                  nullable: true
+                duration:
+                  type: number
+                  nullable: true
+              required:
+                - bitrate
+                - duration
+                - album
+                - artists
+                - bpm
+                - year
+          required:
+            - metadata
+            - fileType
+    FolderDataSize:
+      type: object
+      properties:
+        width:
+          type: number
+        height:
+          type: number
+      required:
+        - width
+        - height
+    FolderDataItemImage:
+      allOf:
+        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - type: object
+          properties:
+            fileType:
+              allOf:
+                - $ref: '#/components/schemas/FileType'
+                - enum:
+                    - IMAGE
+            metadata:
+              $ref: '#/components/schemas/FolderDataSize'
+          required:
+            - metadata
+            - fileType
+    FolderDataItemVideo:
+      allOf:
+        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - type: object
+          properties:
+            fileType:
+              allOf:
+                - $ref: '#/components/schemas/FileType'
+                - enum:
+                    - VIDEO
+            metadata:
+              $ref: '#/components/schemas/FolderDataSize'
+          required:
+            - metadata
+            - fileType
+    FolderDataItemUnknown:
+      allOf:
+        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - type: object
+          properties:
+            fileType:
+              allOf:
+                - $ref: '#/components/schemas/FileType'
+                - enum:
+                    - UNKNOWN
+          required:
+            - fileType
+    FolderDataItemFile:
+      oneOf:
+        - $ref: '#/components/schemas/FolderDataItemAudio'
+        - $ref: '#/components/schemas/FolderDataItemImage'
+        - $ref: '#/components/schemas/FolderDataItemVideo'
+        - $ref: '#/components/schemas/FolderDataItemUnknown'
+    PostResponse:
+      type: object
+      properties:
+        _meta:
+          type: object
+          properties:
+            id:
+              type: string
+            createdAt:
+              type: number
+            updatedAt:
+              type: number
+          required:
+            - id
+            - createdAt
+            - updatedAt
+        text:
+          type: string
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderDataItemFile'
+      required:
+        - _meta
+        - text
+        - attachments
+    PostsResponse:
+      type: object
+      properties:
+        _meta:
+          type: object
+          properties:
+            isEnd:
+              type: boolean
+            page:
+              type: integer
+          required:
+            - isEnd
+            - page
+        rows:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostResponse'
+      required:
+        - _meta
+        - rows
+    Error400:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    PostCreateRequest:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+        text:
+          type: string
+      required:
+        - text
+        - files
+    Error404:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    PostUpdateRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        attachments:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/FolderDataItemFile'
+              - type: 'null'
+        files:
+          type: array
+          items:
+            type: string
+      required:
+        - text
+        - attachments
+        - files
+    FolderDataItemFolder:
+      allOf:
+        - $ref: '#/components/schemas/FolderDataItemBase'
+        - type: object
+          properties:
+            itemType:
+              allOf:
+                - $ref: '#/components/schemas/ItemType'
+                - enum:
+                    - FOLDER
+          required:
+            - itemType
+    FolderDataResponse:
+      type: object
+      properties:
+        folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderDataItemFolder'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderDataItemFile'
+        file:
+          oneOf:
+            - $ref: '#/components/schemas/FolderDataItemFile'
+            - type: 'null'
+        path:
+          type: string
+      required:
+        - folders
+        - files
+        - file
+        - path

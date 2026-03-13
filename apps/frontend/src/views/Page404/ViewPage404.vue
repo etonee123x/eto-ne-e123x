@@ -1,8 +1,8 @@
 <template>
   <BasePage h1="404" class="flex justify-center items-center flex-1 flex-col">
     <p>{{ t('pageNotFound') }}</p>
-    <I18nT keypath="tryReturning" tag="p">
-      <RouterLink :to="{ name: RouteName.Home }" class="underline">
+    <I18nT keypath="tryNavigate" tag="p">
+      <RouterLink :to="localizeRoute({ name: ROUTE_NAMES.INDEX })" class="underline">
         {{ t('toTheMainPage') }}
       </RouterLink>
     </I18nT>
@@ -12,30 +12,35 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { RouteName } from '@/router';
+import { ROUTE_NAMES } from '@/router';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
-import { useSSRContext } from '@/composables/useSSRContext';
+import { useSSRContext } from '@/composables/useSsrContext';
 import { isServer } from '@/constants/target';
+import { useL10n } from '@/composables/useL10n';
+
+const { localizeRoute } = useL10n();
 
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    En: {
+    en: {
       pageNotFound: 'Page not found. It may have been removed or the URL is incorrect.',
-      tryReturning: 'Try returning {0}.',
+      tryNavigate: 'Try navigate {0}.',
       toTheMainPage: 'to the main page',
     },
-    Ru: {
+    ru: {
       pageNotFound: 'Страница не найдена. Возможно, она была удалена или вы ошиблись в адресе.',
-      tryReturning: 'Попробуйте вернуться {0}.',
+      tryNavigate: 'Попробуйте перейти {0}.',
       toTheMainPage: 'на главную страницу',
     },
   },
 });
 
 useSeoMeta({
-  description: () => t('pageNotFound'),
+  description: () => {
+    return t('pageNotFound');
+  },
 });
 
 if (isServer) {

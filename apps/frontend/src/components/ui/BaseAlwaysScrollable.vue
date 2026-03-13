@@ -5,7 +5,7 @@
         '--scroll-x-diff': diffFormatted,
         '--scroll-x-duration': duration,
       }"
-      class="whitespace-nowrap m-[var(--base-always-scrollable--content--margin)]"
+      class="whitespace-nowrap m-(--base-always-scrollable--content--margin)"
       :class="isAnimated && 'animate-scroll-x [animation-duration:var(--scroll-x-duration)]'"
       ref="content"
     >
@@ -35,9 +35,15 @@ const content = useTemplateRef('content');
 const { width: widthContainer } = useElementSize(container, undefined, { box: 'border-box' });
 const { width: widthContent } = useElementSize(content, undefined, { box: 'border-box' });
 
-const diff = computed(() => widthContent.value - widthContainer.value);
+const diff = computed(() => {
+  return widthContent.value - widthContainer.value;
+});
 
-const diffFormatted = computed(() => `-${diff.value}px`);
+const diffFormatted = computed(() => {
+  return `-${diff.value}px`;
+});
 
-const isAnimated = computed(() => diff.value > 0);
+const isAnimated = computed(() => {
+  return diff.value > 0;
+});
 </script>

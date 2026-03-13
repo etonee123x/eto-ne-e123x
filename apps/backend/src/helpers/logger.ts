@@ -1,21 +1,11 @@
-import { isModeTest } from './mode';
-
 type ConsoleFunctionParameters = Parameters<typeof console.log>;
 
-const logger = (...args: ConsoleFunctionParameters) => {
-  if (isModeTest) {
-    return;
-  }
-
-  console.info(`${new Date().toISOString()}:`, ...args);
+const logger = (...parameters: ConsoleFunctionParameters) => {
+  console.info(`${new Date().toISOString()}:`, ...parameters);
 };
 
-logger.error = (...args: ConsoleFunctionParameters) => {
-  if (isModeTest) {
-    return;
-  }
-
-  console.error(`[error] ${new Date().toISOString()}:`, ...args);
+logger.error = (...parameters: ConsoleFunctionParameters) => {
+  console.error(`[error] ${new Date().toISOString()}:`, ...parameters);
 };
 
 export { logger };

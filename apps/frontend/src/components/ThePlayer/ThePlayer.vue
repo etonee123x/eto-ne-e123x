@@ -1,9 +1,5 @@
 <template>
-  <BaseSwipable
-    data-player
-    class="bg-background z-player shadow-[0_-2px_4px_0_rgba(34,60,80,0.2)] py-2 w-full"
-    @swiped="onSwiped"
-  >
+  <BaseSwipable data-player class="bg-background z-player border-t border-primary-500 py-2 w-full" @swiped="onSwiped">
     <div class="layout-container flex flex-col gap-1 justify-center">
       <component
         :is="ComponentClose"
@@ -15,16 +11,12 @@
         <BaseIcon :path="mdiClose" />
       </component>
       <BaseAlwaysScrollable class="[--base-always-scrollable--content--margin:0_auto]">
-        <header
-          class="cursor-pointer flex items-start gap-0.5 border-b border-b-dark border-dashed"
-          :title="t('copyLink')"
-          @click="onClickTitle"
-        >
-          <h2>{{ playerStore.theTrack?.name }}</h2>
+        <header class="cursor-pointer flex items-center gap-0.5" :title="t('copyLink')" @click="onClickTitle">
+          <h2>{{ player.theTrack.value?.name }}</h2>
           <BaseIcon :path="mdiLinkVariant" />
         </header>
       </BaseAlwaysScrollable>
-      <audio :src="playerStore.theTrack?.src" autoplay ref="audio" @ended="onEnded" />
+      <audio :src="player.theTrack.value?.src" autoplay ref="audio" @ended="onEnded" />
       <div class="h-5 w-full mx-auto flex justify-between items-center gap-2">
         <time :datetime="currentTimeFormats.iso">
           {{ currentTimeFormats.humanReadable }}
@@ -43,15 +35,15 @@
       <div class="grid grid-cols-[1fr_min-content_1fr] grid-areas-['left_center_right'] gap-x-4 items-center">
         <BaseToggler
           class="whitespace-nowrap min-w-6 justify-self-end"
-          :aria-label="playerStore.isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')"
-          v-model="playerStore.isShuffleModeEnabled"
+          :aria-label="isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')"
+          v-model="isShuffleModeEnabled"
         >
           <BaseIcon class="text-2xl" :path="mdiShuffleVariant" />
         </BaseToggler>
         <ul class="flex justify-center gap-2">
           <li v-for="controlButton in controlButtons" :key="controlButton.key">
             <BaseButton
-              :isDisabled="controlButton.isDisabled"
+              :disabled="controlButton.disabled"
               class="whitespace-nowrap min-w-6 h-6 w-8"
               :aria-label="controlButton.ariaLabel"
               @click="controlButton.onClick"
@@ -71,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
+import { identity, syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
 import {
   mdiClose,
   mdiShuffleVariant,
@@ -81,33 +73,37 @@ import {
   mdiSkipBackward,
   mdiSkipForward,
 } from '@mdi/js';
-import { computed, useTemplateRef, h } from 'vue';
+import { computed, useTemplateRef, h, shallowReactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PlayerSlider from './components/PlayerSlider.vue';
 
-import BaseButton from '@/components/ui/BaseButton';
-import BaseIcon from '@/components/ui/BaseIcon';
+import BaseButton from '@/components/ui/BaseButton.vue';
+import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseSwipable from '@/components/ui/BaseSwipable.vue';
 import BaseToggler from '@/components/ui/BaseToggler.vue';
-import { usePlayerStore } from '@/stores/player';
-import { useToastsStore } from '@/stores/toasts';
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
 import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import { Temporal } from 'temporal-polyfill';
-import { useExplorerStore } from '@/stores/explorer';
-import { useRoute, RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
 import { useIsMobile } from '@/composables/useIsMobile';
 import ClientOnly from '../ClientOnly.vue';
+import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
+import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
+import { usePlayer } from '@/plugins/player';
+import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
+import { useL10n } from '@/composables/useL10n';
+
+const l10n = useL10n();
 
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       copied: 'Скопировано!',
       copyLink: 'Скопировать ссылку',
       previousTrack: 'Предыдущий трек',
@@ -118,7 +114,7 @@ const { t } = useI18n({
       enableShuffleTracks: 'Включить перемешивание треков',
       disableShuffleTracks: 'Выключить перемешивание треков',
     },
-    En: {
+    en: {
       copied: 'Copied!',
       copyLink: 'Copy link',
       previousTrack: 'Previous track',
@@ -132,14 +128,26 @@ const { t } = useI18n({
   },
 });
 
+const historyItems = shallowReactive<Array<number>>([]);
+const [isShuffleModeEnabled] = useToggle();
+const currentPlayingNumber = computed({
+  get: () => {
+    return player.playlist.value.findIndex((playlistItem) => {
+      return playlistItem.src === player.theTrack.value?.src;
+    });
+  },
+  set: (value) => {
+    player.theTrack.value = player.playlist.value[value] ?? null;
+  },
+});
+
 const isMobile = useIsMobile();
 
-const route = useRoute();
 const router = useRouter();
 
-const explorerStore = useExplorerStore();
-const playerStore = usePlayerStore();
-const toastsStore = useToastsStore();
+const explorerContext = useExplorerContext();
+const player = usePlayer();
+const notifications = useNotifications();
 
 const audio = useTemplateRef('audio');
 
@@ -149,45 +157,71 @@ const { playing: isPlaying, waiting: isWaiting, currentTime: currentTimeSeconds,
 if (isMobile) {
   volume.value = 1;
 } else {
-  syncRef(volumeLocalStorage, volume);
+  syncRef(volumeLocalStorage, volume, { transform: { ltr: identity, rtl: identity } });
 }
 
-const duration = computed(() => playerStore.theTrack?.musicMetadata.duration ?? 0);
+const duration = computed(() => {
+  return player.theTrack.value?.metadata.duration ?? 0;
+});
 
 const toggleIsPlaying = useToggle(isPlaying);
 
-const shouldRenderButtonClose = computed(() => !(isPlaying.value || isWaiting.value));
+const shouldRenderButtonClose = computed(() => {
+  return !(isPlaying.value || isWaiting.value);
+});
 
-const controlButtons = computed(() => [
-  {
-    key: 'previous',
-    icon: mdiSkipBackward,
-    onClick: playerStore.loadPrev,
-    isDisabled: playerStore.isShuffleModeEnabled && playerStore.historyItems.length === 0,
-    ariaLabel: t('previousTrack'),
-  },
-  isPlaying.value
-    ? {
-        key: 'pause',
-        icon: mdiPause,
-        onClick: () => toggleIsPlaying(false),
-        ariaLabel: t('pauseTrack'),
-      }
-    : {
-        key: 'play',
-        icon: mdiPlay,
-        onClick: () => toggleIsPlaying(true),
-        ariaLabel: t('playTrack'),
-      },
-  {
-    key: 'next',
-    icon: mdiSkipForward,
-    onClick: playerStore.loadNext,
-    ariaLabel: t('nextTrack'),
-  },
-]);
+const load = {
+  next: () => {
+    historyItems.push(currentPlayingNumber.value);
 
-const onEnded = playerStore.loadNext;
+    currentPlayingNumber.value = isShuffleModeEnabled.value
+      ? getRandomExceptCurrentIndex(player.playlist.value.length, currentPlayingNumber.value)
+      : (currentPlayingNumber.value + 1) % player.playlist.value.length;
+  },
+  previous: () => {
+    currentPlayingNumber.value =
+      historyItems.length > 0
+        ? (historyItems.pop() ?? 0)
+        : (currentPlayingNumber.value - 1 + player.playlist.value.length) % player.playlist.value.length;
+  },
+};
+
+const controlButtons = computed(() => {
+  return [
+    {
+      key: 'previous',
+      icon: mdiSkipBackward,
+      onClick: load.previous,
+      disabled: isShuffleModeEnabled.value && historyItems.length === 0,
+      ariaLabel: t('previousTrack'),
+    },
+    isPlaying.value
+      ? {
+          key: 'pause',
+          icon: mdiPause,
+          onClick: () => {
+            return toggleIsPlaying(false);
+          },
+          ariaLabel: t('pauseTrack'),
+        }
+      : {
+          key: 'play',
+          icon: mdiPlay,
+          onClick: () => {
+            return toggleIsPlaying(true);
+          },
+          ariaLabel: t('playTrack'),
+        },
+    {
+      key: 'next',
+      icon: mdiSkipForward,
+      onClick: load.next,
+      ariaLabel: t('nextTrack'),
+    },
+  ];
+});
+
+const onEnded = load.next;
 
 const ComponentClose = computed(() => {
   const to = toOnClose();
@@ -196,32 +230,37 @@ const ComponentClose = computed(() => {
 });
 
 const toOnClose = () => {
-  if (isNil(playerStore.theTrack?.url)) {
+  if (!player.theTrack.value) {
     return;
   }
 
-  const maybeFolderData = explorerStore.routePathToFolderData[route.fullPath];
-  const maybeFolderDataLinkedFile = maybeFolderData?.linkedFile;
+  const currentFolderData = explorerContext.getFolderDataQuery.data.value;
 
-  if (!maybeFolderDataLinkedFile) {
+  const maybeFile = currentFolderData?.file;
+
+  if (!maybeFile) {
     return;
   }
 
-  const lastNavigationItem = maybeFolderData.navigationItems.at(-1);
+  const lastNavigationItem = explorerContext.navigationLinks.value.at(-1);
 
   if (!lastNavigationItem) {
     return;
   }
 
-  if (!playerStore.playlist.some((track) => track.src === maybeFolderDataLinkedFile.src)) {
+  if (
+    !player.playlist.value.some((track) => {
+      return track.src === maybeFile.src;
+    })
+  ) {
     return;
   }
 
-  return lastNavigationItem.link;
+  return lastNavigationItem.to;
 };
 
 const unloadTrack = () => {
-  playerStore.theTrack = null;
+  player.theTrack.value = null;
 
   // Такой вот костыль... Нужен чтобы выгрузить текущий трек из управления аудио.
   // Без этого при закрытии плеера и нажатии на кнопку play/pause будет играть/останавливаться трек.
@@ -240,22 +279,22 @@ const onSwiped = () => {
   router.push(to).then(unloadTrack);
 };
 
-const { copy } = useClipboard({
+const clipboard = useClipboard({
   source: () => {
-    let _url = [globalThis.location.origin, nonNullable(playerStore.theTrack).url].join('');
-
-    try {
-      _url = encodeURI(_url);
-    } catch (e) {
-      console.error(e);
-    }
-
-    return _url;
+    return encodeURI(
+      new URL(
+        l10n.localizePath(['explorer', nonNullable(player.theTrack.value).path].join('/')),
+        globalThis.location.origin,
+      ).toString(),
+    );
   },
   legacy: true,
 });
 
-const onClickTitle = () => copy().then(() => toastsStore.toastSuccess(t('copied')));
+const onClickTitle = async () => {
+  await clipboard.copy();
+  notifications.notify(t('copied'), { type: NOTIFICATION_TYPES.SUCCESS });
+};
 
 const onKeyDownRightTime = () => {
   currentTimeSeconds.value += 5;
@@ -273,11 +312,17 @@ const onKeyDownLeftVolume = () => {
   volume.value = to0To1Borders(volume.value - 0.05);
 };
 
-const millisecondsToTimeFormats = (milliseconds: number) => ({
-  humanReadable: millisecondsToHumanReadable(milliseconds),
-  iso: Temporal.Duration.from({ milliseconds: Math.ceil(milliseconds) }).toString(),
-});
+const millisecondsToTimeFormats = (milliseconds: number) => {
+  return {
+    humanReadable: millisecondsToHumanReadable(milliseconds),
+    iso: Temporal.Duration.from({ milliseconds: Math.ceil(milliseconds) }).toString(),
+  };
+};
 
-const currentTimeFormats = computed(() => millisecondsToTimeFormats(currentTimeSeconds.value * 1000));
-const durationFormats = computed(() => millisecondsToTimeFormats(duration.value));
+const currentTimeFormats = computed(() => {
+  return millisecondsToTimeFormats(currentTimeSeconds.value * 1000);
+});
+const durationFormats = computed(() => {
+  return millisecondsToTimeFormats(duration.value);
+});
 </script>

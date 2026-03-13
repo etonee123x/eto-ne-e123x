@@ -1,0 +1,19 @@
+type: object
+properties:
+  _meta:
+    type: object
+    properties:
+      isEnd:
+        type: boolean
+      page:
+        type: integer
+    required:
+      - isEnd
+      - page
+  rows:
+    type: array
+    items:
+      $ref: ./PostResponse.yaml
+required:
+  - _meta
+  - rows

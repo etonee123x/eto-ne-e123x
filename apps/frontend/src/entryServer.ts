@@ -1,14 +1,18 @@
 import { renderToString } from 'vue/server-renderer';
 import { createApp } from '@/main';
 import { createHead } from '@unhead/vue/server';
-import type { ExpressContext } from '@/constants/injectionKeyExpressContext';
+import type { ExpressContext } from '@/types/ExpressContext';
 import { isClient } from './constants/target';
-import { type SSRContext } from '@/composables/useSSRContext';
+import type { SSRContext } from '@/composables/useSsrContext';
+import { isKnownLocale } from '@/helpers/isKnownLocale';
+import { dehydrate } from '@tanstack/vue-query';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
-  const { app, router, pinia } = createApp({ url });
+  const { app, router, i18n, player, gallery, queryClient } = createApp({ url });
 
-  app.config.errorHandler = () => {
+  app.config.errorHandler = (error) => {
+    console.error('Error in app', error);
+
     if (isClient || expressContext.response.headersSent) {
       return;
     }
@@ -21,30 +25,37 @@ export const render = async (url: string, expressContext: ExpressContext) => {
   app.use(head);
 
   const context: SSRContext = {
-    payload: {},
     teleports: {},
     express: expressContext,
   };
 
-  return router
-    .isReady()
-    .then(() => renderToString(app, context))
-    .then((html) => {
-      head.push({
-        script: [
-          {
-            innerHTML: `window.__PINIA__ = ${JSON.stringify(pinia.state.value)}`,
-          },
-          {
-            innerHTML: `window.__PAYLOAD__ = ${JSON.stringify(context.payload)}`,
-          },
-        ],
-      });
+  await router.isReady();
 
-      return {
-        html,
-        head,
-        teleports: context.teleports,
-      };
-    });
+  const routerLanguage = router.currentRoute.value.params.language?.toString();
+
+  i18n.global.locale.value = isKnownLocale(routerLanguage) //
+    ? routerLanguage
+    : expressContext.request.cookies.language;
+
+  const html = await renderToString(app, context);
+
+  head.push({
+    script: [
+      {
+        innerHTML: `window.__QUERY__ = ${JSON.stringify(dehydrate(queryClient))}`,
+      },
+      {
+        innerHTML: `window.__PLAYER__ = ${JSON.stringify(player.state.value)}`,
+      },
+      {
+        innerHTML: `window.__GALLERY__ = ${JSON.stringify(gallery.state.value)}`,
+      },
+    ],
+  });
+
+  return {
+    html,
+    head,
+    teleports: context.teleports,
+  };
 };

@@ -1,13 +1,23 @@
-import express from 'express';
+import Express from 'express';
 import cookieParser from 'cookie-parser';
 
+import { errorHandler } from '@/middlewares/errorHandler';
+import { send404 } from '@/middlewares/send404';
+import { nonNullable } from '@/utils/nonNullable';
+import { isNodeEnvDevelopment } from '@/constants/nodeEnv';
 import { router } from '@/router';
-import { logger, errorHandler, send404 } from '@/middleware';
 
-export const app = express()
+export const app = Express() //
   .use(cookieParser())
-  .use(express.json())
-  .use(logger)
+  .use(Express.json());
+
+if (isNodeEnvDevelopment) {
+  app
+    .use('/content', Express.static(nonNullable(process.env.CONTENT_PATH)))
+    .use('/uploads', Express.static(nonNullable(process.env.UPLOADS_PATH)));
+}
+
+app //
   .use(router)
   .use(errorHandler)
   .use(send404);

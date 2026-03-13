@@ -15,10 +15,10 @@ defineProps<{ isFull?: boolean }>();
 const { t } = useI18n({
   useScope: 'local',
   messages: {
-    Ru: {
+    ru: {
       loading: 'Загрузка',
     },
-    En: {
+    en: {
       loading: 'Loading',
     },
   },
