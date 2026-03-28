@@ -11,7 +11,7 @@ import type {
 } from '@tanstack/vue-query';
 import { useRoute } from 'vue-router';
 import { isNil } from '@etonee123x/shared/utils/isNil';
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
 import { client } from '@/api/client';
 import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';

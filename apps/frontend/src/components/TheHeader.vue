@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-primary-500 text-neutral-50 dark:text-neutral-950 relative">
+  <header class="bg-primary-500 dark:bg-primary-700 dark:text-neutral-50 text-neutral-950">
     <ClientOnly v-if="fetchingNumber > 0">
       <div
         class="after:absolute after:bottom-0 rounded-full after:translate-y-1/2 after:h-1 after:rounded-full after:z-[calc(var(--z-index-explorer-navbar)+1)] after:w-1/6 after:bg-primary-500 after:animate-runner"
@@ -37,12 +37,12 @@ import { computed, defineComponent, h } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import BaseIcon from '@/components/ui/BaseIcon.vue';
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import ClientOnly from '@/components/ClientOnly.vue';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import { useLocaleInfo } from '@/composables/useLocaleInfo';
-import { i18n } from '@/i18n';
+import { i18n } from '@/plugins/i18n';
 import { useL10n } from '@/composables/useL10n';
 import { useCookies } from '@vueuse/integrations/useCookies';
 import { useRouter } from 'vue-router';

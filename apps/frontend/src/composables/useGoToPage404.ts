@@ -1,6 +1,6 @@
 import { isServer } from '@/constants/target';
 import { Error404 } from '@/helpers/errors';
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { useRouter } from 'vue-router';
 

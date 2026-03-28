@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col min-h-dvh group/app">
-    <TheHeader />
-    <main class="[scrollbar-gutter:stable_both-edges] relative flex flex-col flex-1">
+    <TheHeader class="fixed top-0 w-full z-1 h-12" />
+    <main class="[scrollbar-gutter:stable_both-edges] pt-12 relative flex flex-col flex-1">
       <RouterView />
       <LazyTheNotifications
         v-if="notifications.notifications.length > 0"
@@ -21,7 +21,7 @@ import themes from '@/assets/styles/themes.json';
 
 import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
-import { i18n } from '@/i18n';
+import { i18n } from '@/plugins/i18n';
 import { SITE_TITLE } from '@/constants/siteTitle';
 import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { useNotifications } from '@/plugins/notifications';

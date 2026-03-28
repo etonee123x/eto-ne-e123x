@@ -36,7 +36,7 @@ import PostData from './PostData.vue';
 
 import BaseIcon from '@/components/ui/BaseIcon.vue';
 import type { Props as PropsBaseIcon } from '@/components/ui/BaseIcon.vue';
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import { RouterLink } from 'vue-router';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import { useIntlRelativeTimeFormatHumanReadable } from '@/composables/useIntlRelativeTimeFormatHumanReadable';

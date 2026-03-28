@@ -2,7 +2,6 @@ import { client } from '@/api/client';
 import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
 import { useGetCookie } from '@/composables/useGetCookie';
 import { KEY_JWT } from '@/constants/keys';
-import { isDevelopment } from '@/constants/mode';
 import { nonNullable } from '@/utils/nonNullable';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import { useMutation } from '@tanstack/vue-query';
@@ -51,10 +50,6 @@ export const provideAuthContext = () => {
 
     if (typeof cookieJwt !== 'string') {
       return false;
-    }
-
-    if (cookieJwt === 'dev-jwt') {
-      return isDevelopment;
     }
 
     const parseBase64Payload =

@@ -210,7 +210,7 @@
 
 
   .button {
-    @apply bg-primary-500 text-white border border-solid border-primary-700 dark:text-black rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-primary-600;
+    @apply bg-primary-500 dark:text-white border border-solid border-primary-700 text-black rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-primary-600;
     @apply disabled:pointer-events-none disabled:opacity-50;
   }
 
@@ -223,7 +223,7 @@
   }
 
   .explorer-element {
-    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-700 dark:hover:bg-neutral-800 border border-primary-500 rounded-lg text-sm;
+    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border border-primary-500 rounded-lg text-sm;
 
     .explorer-element__title {
       @apply w-2/3 overflow-x-auto overflow-y-hidden text-lg;
@@ -236,7 +236,7 @@
   }
 
   .post {
-    @apply border rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-neutral-700 dark:hover:bg-neutral-800 border-primary-500;
+    @apply border rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border-primary-500;
   }
 
   .dialog {

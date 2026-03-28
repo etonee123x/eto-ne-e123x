@@ -28,7 +28,7 @@ import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import BaseDialog from '@/components/ui/BaseDialog.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FILE_TYPES } from '@/helpers/folderData';
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import { useGallery } from '@/plugins/gallery';
 import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
 

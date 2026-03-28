@@ -1,7 +1,7 @@
 import { createSSRApp, h, Suspense } from 'vue';
 
-import { createRouter } from '@/router';
-import { i18n } from '@/i18n';
+import { createRouter } from '@/plugins/router';
+import { i18n } from '@/plugins/i18n';
 import App from '@/App.vue';
 import { dialogsIds } from '@/plugins/dialogsIds';
 import { notifications } from '@/plugins/notifications';

@@ -2,7 +2,7 @@ import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
 import { useGallery } from '@/plugins/gallery';
 import { usePlayer } from '@/plugins/player';
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import { nonNullable } from '@/utils/nonNullable';
 import { FILE_TYPES } from '@/helpers/folderData';
 import { useQuery } from '@tanstack/vue-query';
