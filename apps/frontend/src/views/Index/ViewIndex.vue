@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import BasePage from '@/components/ui/BasePage.vue';
 import { useL10n } from '@/composables/useL10n';
-import { ROUTE_NAME_TO_PATH, ROUTE_NAMES } from '@/router';
+import { ROUTE_NAME_TO_PATH, ROUTE_NAMES } from '@/plugins/router';
 import { useI18n } from 'vue-i18n';
 
 const { localizeRoute } = useL10n();
