@@ -1,7 +1,12 @@
 <template>
-  <div class="flex flex-col min-h-dvh group/app">
-    <TheHeader class="fixed top-0 w-full z-1 h-12" />
-    <main class="[scrollbar-gutter:stable_both-edges] pt-12 relative flex flex-col flex-1">
+  <div
+    :style="{
+      '--header-height': '3rem',
+    }"
+    class="flex flex-col min-h-dvh group/app"
+  >
+    <TheHeader class="fixed top-0 w-full z-1 h-(--header-height)" />
+    <main class="[scrollbar-gutter:stable_both-edges] pt-(--header-height) relative flex flex-col flex-1">
       <RouterView />
       <LazyTheNotifications
         v-if="notifications.notifications.length > 0"
