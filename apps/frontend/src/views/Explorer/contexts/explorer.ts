@@ -5,10 +5,10 @@ import { usePlayer } from '@/plugins/player';
 import { ROUTE_NAMES } from '@/plugins/router';
 import { nonNullable } from '@/utils/nonNullable';
 import { FILE_TYPES } from '@/helpers/folderData';
-import { useQuery } from '@tanstack/vue-query';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import type { UseQueryReturnType } from '@tanstack/vue-query';
-import { computed, inject, provide, watchEffect } from 'vue';
-import type { ComputedRef, InjectionKey, UnwrapRef } from 'vue';
+import { computed, inject, provide, reactive, watch, watchEffect } from 'vue';
+import type { ComputedRef, InjectionKey, Reactive, UnwrapRef } from 'vue';
 import { useRoute } from 'vue-router';
 import { client } from '@/api/client';
 import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
@@ -16,7 +16,7 @@ import type { components } from '@/types/openapi';
 import { useL10n } from '@/composables/useL10n';
 
 interface ExplorerContext {
-  getFolderDataQuery: UseQueryReturnType<components['schemas']['FolderDataResponse'], unknown>;
+  getFolderDataQuery: Reactive<UseQueryReturnType<components['schemas']['FolderDataResponse'], unknown>>;
   navigationLinks: ComputedRef<Array<{ text: string; to: string }>>;
 }
 
@@ -31,6 +31,7 @@ export const provideExplorerContext = async () => {
   const gallery = useGallery();
   const goToPage404 = useGoToPage404();
   const l10n = useL10n();
+  const queryClient = useQueryClient();
 
   const segments = computed(() => {
     return typeof route.params.segments === 'string' && route.params.segments !== ''
@@ -39,9 +40,9 @@ export const provideExplorerContext = async () => {
   });
 
   const navigationLinks: ExplorerContext['navigationLinks'] = computed(() => {
-    const segments = getFolderDataQuery.data.value?.path.split('/').filter(Boolean) ?? [];
+    const segments = getFolderDataQuery.data?.path.split('/').filter(Boolean) ?? [];
 
-    return (segments.at(-1) === getFolderDataQuery.data.value?.file?.name ? segments.slice(0, -1) : segments).reduce(
+    return (segments.at(-1) === getFolderDataQuery.data?.file?.name ? segments.slice(0, -1) : segments).reduce(
       (segments, segment) => {
         return [
           ...segments,
@@ -60,24 +61,26 @@ export const provideExplorerContext = async () => {
     );
   });
 
-  const getFolderDataQuery: ExplorerContext['getFolderDataQuery'] = useQuery({
-    queryKey: [
-      'folderData',
-      computed(() => {
-        return segments.value.join('/');
-      }),
-    ] as const,
-    queryFn: (...parameters): Promise<UnwrapRef<ExplorerContext['getFolderDataQuery']['data']>> => {
-      return clientRequestPromiseWrapper(
-        client['/folder-data'].GET({ params: { query: { path: parameters[0].queryKey[1] } } }),
-      ).catch(() => {
-        return goToPage404();
-      });
-    },
-    enabled: () => {
-      return route.name === ROUTE_NAMES.EXPLORER;
-    },
-  });
+  const getFolderDataQuery: ExplorerContext['getFolderDataQuery'] = reactive(
+    useQuery({
+      queryKey: [
+        'folderData',
+        computed(() => {
+          return segments.value.join('/');
+        }),
+      ] as const,
+      queryFn: (...parameters): Promise<UnwrapRef<ExplorerContext['getFolderDataQuery']['data']>> => {
+        return clientRequestPromiseWrapper(
+          client['/folder-data'].GET({ params: { query: { path: parameters[0].queryKey[1] } } }),
+        ).catch(() => {
+          return goToPage404();
+        });
+      },
+      enabled: () => {
+        return route.name === ROUTE_NAMES.EXPLORER;
+      },
+    }),
+  );
 
   const explorerContext = {
     getFolderDataQuery,
@@ -86,10 +89,37 @@ export const provideExplorerContext = async () => {
 
   provide(INJECTION_KEY_EXPLORER, explorerContext);
 
-  await awaitSuspensesIfNecessary([[getFolderDataQuery.isEnabled.value, getFolderDataQuery.suspense]]);
+  await awaitSuspensesIfNecessary([[getFolderDataQuery.isEnabled, getFolderDataQuery.suspense]]);
+
+  watch(
+    () => {
+      return getFolderDataQuery.data;
+    },
+    () => {
+      if (!getFolderDataQuery.data) {
+        return;
+      }
+
+      if (!getFolderDataQuery.data.file) {
+        return;
+      }
+
+      getFolderDataQuery.data.files.forEach((file) => {
+        queryClient.setQueryData(['folderData', [...segments.value.slice(0, -1), file.name].join('/')], () => {
+          return {
+            ...getFolderDataQuery.data,
+            file,
+          };
+        });
+      });
+    },
+    {
+      immediate: true,
+    },
+  );
 
   watchEffect(() => {
-    const folderData = getFolderDataQuery.data.value;
+    const folderData = getFolderDataQuery.data;
 
     const maybeFile = folderData?.file;
 

@@ -1,28 +1,3 @@
-get:
-  operationId: getPostById
-  summary: Get post by ID
-  tags:
-    - Posts
-  parameters:
-    - name: id
-      in: path
-      required: true
-      schema: 
-        type: string
-  responses:
-    "200":
-      description: OK
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/PostResponse.yaml
-    "404":
-      description: Not Found
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/Error404.yaml
-
 patch:
   operationId: updatePostById
   summary: Update post by ID

@@ -1,3 +1,4 @@
+import { nonNullable } from '@/utils/nonNullable';
 import { inject } from 'vue';
 import type { FunctionPlugin, InjectionKey } from 'vue';
 
@@ -8,11 +9,5 @@ export const dialogsIds: FunctionPlugin = (app) => {
 };
 
 export const useDialogsIds = () => {
-  const dialogsIds = inject(INJECTION_KEY_DIALOGS_IDS);
-
-  if (!dialogsIds) {
-    throw new Error('DialogsIds plugin is not installed');
-  }
-
-  return dialogsIds;
+  return nonNullable(inject(INJECTION_KEY_DIALOGS_IDS));
 };

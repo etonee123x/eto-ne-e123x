@@ -31,6 +31,7 @@ import { FILE_TYPES } from '@/helpers/folderData';
 import { ROUTE_NAMES } from '@/plugins/router';
 import { useGallery } from '@/plugins/gallery';
 import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
+import { useSeoMeta } from '@unhead/vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -38,8 +39,12 @@ const route = useRoute();
 const gallery = useGallery();
 const explorerContext = useExplorerContext();
 
-onKeyStroke('ArrowRight', gallery.next);
-onKeyStroke('ArrowLeft', gallery.prev);
+onKeyStroke('ArrowRight', () => {
+  gallery.next();
+});
+onKeyStroke('ArrowLeft', () => {
+  gallery.prev();
+});
 
 const mediaContainer = useTemplateRef('mediaContainer');
 
@@ -74,7 +79,7 @@ const onClose = () => {
     return;
   }
 
-  const currentFolderData = explorerContext.getFolderDataQuery.data.value;
+  const currentFolderData = explorerContext.getFolderDataQuery.data;
 
   if (!currentFolderData?.file) {
     return;
@@ -93,5 +98,40 @@ const [isDialogOpen, toggleIsDialogOpen] = useToggle(Boolean(gallery.item.value)
 
 watchEffect(() => {
   return toggleIsDialogOpen(Boolean(gallery.item.value));
+});
+
+useSeoMeta({
+  ogImage: () => {
+    if (!gallery.item.value) {
+      return;
+    }
+
+    if (gallery.item.value.fileType !== FILE_TYPES.IMAGE) {
+      return;
+    }
+
+    return {
+      url: gallery.item.value.src,
+      width: gallery.item.value.metadata.width,
+      height: gallery.item.value.metadata.height,
+      alt: gallery.item.value.name,
+    };
+  },
+  ogVideo: () => {
+    if (!gallery.item.value) {
+      return;
+    }
+
+    if (gallery.item.value.fileType !== FILE_TYPES.VIDEO) {
+      return;
+    }
+
+    return {
+      url: gallery.item.value.src,
+      width: gallery.item.value.metadata.width,
+      height: gallery.item.value.metadata.height,
+      alt: gallery.item.value.name,
+    };
+  },
 });
 </script>

@@ -112,7 +112,8 @@ export default defineConfig(
       'unicorn/no-unreadable-array-destructuring': 'off',
       'unicorn/no-useless-undefined': 'off',
       'unicorn/no-array-reduce': 'off',
-      'unicorn/filename-case': ['error', { case: 'camelCase', ignore: ['TableController.ts', 'RequestHandlerTyped.ts'] }],
+      'unicorn/filename-case': ['error', { case: 'camelCase' }],
+      'sonarjs/cognitive-complexity': ['off'],
 
       'prettier/prettier': [
         'error',

@@ -1,5 +1,6 @@
 import { isFolderDataItemFileAudio } from '@/helpers/folderData';
 import type { components } from '@/types/openapi';
+import { nonNullable } from '@/utils/nonNullable';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { computed, inject, shallowRef } from 'vue';
 import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
@@ -53,11 +54,5 @@ export const createPlayer = () => {
 };
 
 export const usePlayer = () => {
-  const player = inject(INJECTION_KEY_PLAYER);
-
-  if (!player) {
-    throw new Error('Player plugin is not installed');
-  }
-
-  return player;
+  return nonNullable(inject(INJECTION_KEY_PLAYER));
 };

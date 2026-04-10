@@ -1,6 +1,6 @@
 <template>
   <BasePage :h1="t('content')">
-    <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
+    <ExplorerNavbar class="-mt-2 mb-2 sticky top-header-height" />
     <div class="flex flex-col gap-2">
       <nav v-if="shouldRenderNav" class="contents">
         <LazyExplorerElementSystem
@@ -12,7 +12,7 @@
           {{ t('treeDots') }}
         </LazyExplorerElementSystem>
         <LazyExplorerElementFolder
-          v-for="folder in explorerContext.getFolderDataQuery.data.value?.folders"
+          v-for="folder in explorerContext.getFolderDataQuery.data?.folders"
           :to="folderDataItemToTo(folder)"
           :element="folder"
           :key="folder.name"
@@ -22,7 +22,7 @@
       </nav>
       <component
         :is="itemFileToComponent(file)"
-        v-for="file in explorerContext.getFolderDataQuery.data.value?.files"
+        v-for="file in explorerContext.getFolderDataQuery.data?.files"
         :to="folderDataItemToTo(file)"
         :element="file"
         :key="file.name"
@@ -101,8 +101,7 @@ const explorerContext = useExplorerContext();
 const shouldRenderNav = computed(() => {
   return Boolean(
     explorerContext.navigationLinks.value.length > 1 ||
-      (explorerContext.getFolderDataQuery.data.value &&
-        explorerContext.getFolderDataQuery.data.value.folders.length > 0),
+      (explorerContext.getFolderDataQuery.data && explorerContext.getFolderDataQuery.data.folders.length > 0),
   );
 });
 

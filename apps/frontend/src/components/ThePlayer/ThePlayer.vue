@@ -234,7 +234,7 @@ const toOnClose = () => {
     return;
   }
 
-  const currentFolderData = explorerContext.getFolderDataQuery.data.value;
+  const currentFolderData = explorerContext.getFolderDataQuery.data;
 
   const maybeFile = currentFolderData?.file;
 

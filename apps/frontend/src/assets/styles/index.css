@@ -2,6 +2,9 @@
 
 @theme {
   --*: initial;
+
+  --spacing-header-height: 3rem;
+
   --z-player: 1000;
   --z-index-modal: 10000;
   --z-index-explorer-navbar: 10;
@@ -114,6 +117,30 @@
 
     100% {
       transform: translateX(0);
+    }
+  }
+
+  --animate-post-highlight: post-highlight 1s ease forwards;
+
+  @keyframes post-highlight {
+    0% {
+      transform: scale(1.03);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  --animate-post-fade: post-fade 3s ease forwards;
+
+  @keyframes post-fade {
+    0% {
+      opacity: 0.6;
+    }
+
+    100% {
+      opacity: 0;
     }
   }
 }
@@ -236,7 +263,11 @@
   }
 
   .post {
-    @apply border rounded-lg bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border-primary-500;
+    @apply border rounded-lg bg-primary-50 dark:bg-neutral-800 border-primary-500;
+
+    &.post_selected {
+      @apply relative animate-post-highlight after:content-[''] after:absolute after:-inset-1.5 after:rounded-xl after:bg-primary-200/60 after:animate-post-fade after:-z-10;
+    }
   }
 
   .dialog {

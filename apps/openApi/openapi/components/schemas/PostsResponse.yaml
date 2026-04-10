@@ -3,13 +3,15 @@ properties:
   _meta:
     type: object
     properties:
-      isEnd:
-        type: boolean
-      page:
+      cursorPrevious:
         type: integer
+        nullable: true
+      cursorNext:
+        type: integer
+        nullable: true
     required:
-      - isEnd
-      - page
+      - cursorPrevious
+      - cursorNext
   rows:
     type: array
     items:

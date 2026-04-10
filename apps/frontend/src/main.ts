@@ -47,7 +47,10 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
       },
     },
   });
-  app.use(VueQueryPlugin, { queryClient });
+  app.use(VueQueryPlugin, {
+    queryClient,
+    enableDevtoolsV6Plugin: true,
+  });
 
   return { app, router, i18n, player, gallery, queryClient };
 };

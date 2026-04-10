@@ -1,5 +1,6 @@
 import { isFolderDataItemImage, isFolderDataItemVideo } from '@/helpers/folderData';
 import type { components } from '@/types/openapi';
+import { nonNullable } from '@/utils/nonNullable';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { useCycleList } from '@vueuse/core';
 import { computed, inject, shallowRef } from 'vue';
@@ -78,11 +79,5 @@ export const createGallery = () => {
 };
 
 export const useGallery = () => {
-  const gallery = inject(INJECTION_KEY_GALLERY);
-
-  if (!gallery) {
-    throw new Error('Gallery plugin is not installed');
-  }
-
-  return gallery;
+  return nonNullable(inject(INJECTION_KEY_GALLERY));
 };

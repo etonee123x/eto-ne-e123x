@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/filename-case */
 import { _throw } from '@etonee123x/shared/utils/_throw';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';

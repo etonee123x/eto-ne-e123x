@@ -6,6 +6,8 @@ import { isClient } from './constants/target';
 import type { SSRContext } from '@/composables/useSsrContext';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 import { dehydrate } from '@tanstack/vue-query';
+import { CanonicalPlugin, InferSeoMetaPlugin } from 'unhead/plugins';
+import { requestToOrigin } from './utils/requestToOrigin';
 
 export const render = async (url: string, expressContext: ExpressContext) => {
   const { app, router, i18n, player, gallery, queryClient } = createApp({ url });
@@ -20,7 +22,16 @@ export const render = async (url: string, expressContext: ExpressContext) => {
     expressContext.response.redirect('/404');
   };
 
-  const head = createHead();
+  const head = createHead({
+    plugins: [
+      InferSeoMetaPlugin({
+        twitterCard: false,
+      }),
+      CanonicalPlugin({
+        canonicalHost: requestToOrigin(expressContext.request),
+      }),
+    ],
+  });
 
   app.use(head);
 

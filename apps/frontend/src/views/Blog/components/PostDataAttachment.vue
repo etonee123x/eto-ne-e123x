@@ -46,7 +46,7 @@ const loadToGallery = () => {
 
   gallery.loadGalleryItem(
     props.attachment,
-    blogContext.getPostsQuery.data.value?.pages
+    blogContext.getPostsQuery.data?.pages
       .flatMap(propertyCurried('rows'))
       .reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((items, post) => {
         return [

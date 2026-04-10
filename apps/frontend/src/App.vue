@@ -1,12 +1,7 @@
 <template>
-  <div
-    :style="{
-      '--header-height': '3rem',
-    }"
-    class="flex flex-col min-h-dvh group/app"
-  >
-    <TheHeader class="fixed top-0 w-full z-1 h-(--header-height)" />
-    <main class="[scrollbar-gutter:stable_both-edges] pt-(--header-height) relative flex flex-col flex-1">
+  <div class="flex flex-col min-h-dvh group/app">
+    <TheHeader class="fixed top-0 w-full z-1 h-header-height" />
+    <main class="[scrollbar-gutter:stable_both-edges] pt-header-height relative flex flex-col flex-1">
       <RouterView />
       <LazyTheNotifications
         v-if="notifications.notifications.length > 0"
@@ -20,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { useHead } from '@unhead/vue';
+import { useHead, useSeoMeta } from '@unhead/vue';
 import { defineAsyncComponent } from 'vue';
 import themes from '@/assets/styles/themes.json';
 
@@ -36,6 +31,8 @@ import { provideExplorerContext } from '@/views/Explorer/contexts/explorer';
 import { nonNullable } from '@/utils/nonNullable';
 import { provideBlogContext } from '@/views/Blog/contexts/blog';
 import { isNil } from '@etonee123x/shared/utils/isNil';
+import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 const LazyThePlayer = defineAsyncComponent(() => {
   return import('@/components/ThePlayer/ThePlayer.vue');
@@ -47,6 +44,17 @@ const LazyTheFooter = defineAsyncComponent(() => {
   return import('@/components/TheFooter.vue');
 });
 
+const { t } = useI18n({
+  messages: {
+    ru: {
+      siteLogo: 'Логотип сайта',
+    },
+    en: {
+      siteLogo: 'Site logo',
+    },
+  },
+});
+
 provideAuthContext();
 
 // Странно, да. Контексты отправляю тут, а не на страницах. Контексты получились асинхронными, в них грузятся данные.
@@ -56,6 +64,8 @@ await Promise.all([
   provideExplorerContext(),
   provideBlogContext(),
 ]);
+
+const route = useRoute();
 
 const player = usePlayer();
 const notifications = useNotifications();
@@ -77,15 +87,30 @@ useHead({
       return i18n.global.locale.value.toLocaleLowerCase();
     },
   },
+
+  ...(isServer
+    ? {
+        style: [
+          {
+            textContent: `:root { ${nonNullable(themes.at(Date.now() % themes.length)).content} }`,
+          },
+        ],
+      }
+    : {}),
 });
 
-if (isServer) {
-  useHead({
-    style: [
-      {
-        textContent: `:root { ${nonNullable(themes.at(Date.now() % themes.length)).content} }`,
-      },
-    ],
-  });
-}
+useSeoMeta({
+  ogUrl: () => {
+    return route.fullPath;
+  },
+  ogImage: () => {
+    return {
+      url: '/E123.jpg',
+      alt: t('siteLogo'),
+      width: 1000,
+      height: 1000,
+      type: 'image/jpeg',
+    };
+  },
+});
 </script>
