@@ -5,20 +5,19 @@ import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { computed, inject, shallowRef } from 'vue';
 import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
 
-type TheTrack = components['schemas']['FolderDataItemAudio'] | null;
-type Playlist = Array<components['schemas']['FolderDataItemAudio']>;
+interface Context {
+  theTrack: ShallowRef<components['schemas']['FolderDataItemAudio'] | null>;
+  playlist: ShallowRef<Array<components['schemas']['FolderDataItemAudio']>>;
+}
 
-export const INJECTION_KEY_PLAYER: InjectionKey<{
-  theTrack: ShallowRef<TheTrack>;
-  playlist: ShallowRef<Playlist>;
-}> = Symbol('player');
+const INJECTION_KEY: InjectionKey<Context> = Symbol('player');
 
 export const createPlayer = () => {
-  const theTrack = shallowRef<TheTrack>(null);
-  const playlist = shallowRef<Playlist>([]);
+  const theTrack: Context['theTrack'] = shallowRef(null);
+  const playlist: Context['playlist'] = shallowRef([]);
 
   const install: FunctionPlugin = (app) => {
-    app.provide(INJECTION_KEY_PLAYER, {
+    app.provide(INJECTION_KEY, {
       theTrack,
       playlist,
     });
@@ -54,5 +53,5 @@ export const createPlayer = () => {
 };
 
 export const usePlayer = () => {
-  return nonNullable(inject(INJECTION_KEY_PLAYER));
+  return nonNullable(inject(INJECTION_KEY));
 };

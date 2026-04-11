@@ -1,5 +1,4 @@
 import { clone } from '@/utils/clone';
-import { makeDestructurable } from '@vueuse/core';
 import { computed, ref, toValue } from 'vue';
 import type { MaybeRefOrGetter } from 'vue';
 
@@ -18,5 +17,5 @@ export const useResetableRef = <Source>(source: MaybeRefOrGetter<Source>) => {
     value.value = getClonedSourceValue();
   };
 
-  return makeDestructurable({ value, reset } as const, [value, reset] as const);
+  return { value, reset };
 };

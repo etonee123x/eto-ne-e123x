@@ -1,6 +1,5 @@
 import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
-import { useGallery } from '@/plugins/gallery';
 import { usePlayer } from '@/plugins/player';
 import { ROUTE_NAMES } from '@/plugins/router';
 import { nonNullable } from '@/utils/nonNullable';
@@ -28,7 +27,6 @@ export const provideExplorerContext = async () => {
 
   const route = useRoute();
   const player = usePlayer();
-  const gallery = useGallery();
   const goToPage404 = useGoToPage404();
   const l10n = useL10n();
   const queryClient = useQueryClient();
@@ -124,7 +122,8 @@ export const provideExplorerContext = async () => {
     const maybeFile = folderData?.file;
 
     if (!maybeFile) {
-      gallery.items.value = [];
+      // это зачем?
+      // gallery.items.value = [];
 
       return;
     }
@@ -134,17 +133,6 @@ export const provideExplorerContext = async () => {
         return file.fileType === FILE_TYPES.AUDIO;
       });
       player.theTrack.value = maybeFile;
-
-      return;
-    }
-
-    if (maybeFile.fileType === FILE_TYPES.IMAGE || maybeFile.fileType === FILE_TYPES.VIDEO) {
-      gallery.loadGalleryItem(
-        maybeFile,
-        folderData.files.filter((file) => {
-          return file.fileType === FILE_TYPES.IMAGE || file.fileType === FILE_TYPES.VIDEO;
-        }),
-      );
     }
   });
 

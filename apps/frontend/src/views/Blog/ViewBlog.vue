@@ -54,6 +54,20 @@
       @cancel="cancel"
       @close="cancel"
     />
+
+    <LazyDialogGallery
+      v-if="galleryItemContext.value"
+      :item="galleryItemContext.value"
+      :items="
+        blogContext.getPostsQuery.data?.pages
+          .flatMap(propertyCurried('rows'))
+          .flatMap(propertyCurried('attachments'))
+          .filter((attachment) => {
+            return isFolderDataGalleryItem(attachment);
+          }) ?? []
+      "
+      :onClose="onCloseGallery"
+    />
   </BasePage>
 </template>
 
@@ -74,7 +88,19 @@ import { useRoute, useRouter } from 'vue-router';
 import { mdiArrowUp } from '@mdi/js';
 import { useQueryClient } from '@tanstack/vue-query';
 import { ROUTE_NAMES } from '@/plugins/router';
-import { FILE_TYPES } from '@/helpers/folderData';
+import { FILE_TYPES, isFolderDataGalleryItem } from '@/helpers/folderData';
+import { propertyCurried } from '@etonee123x/shared/utils/property';
+import { provideGalleryItemContext } from './contexts/galleryItem';
+
+const galleryItemContext = provideGalleryItemContext();
+
+const onCloseGallery = () => {
+  galleryItemContext.reset();
+};
+
+const LazyDialogGallery = defineAsyncComponent(() => {
+  return import('@/components/DialogGallery.vue');
+});
 
 const LazyBaseLoading = defineAsyncComponent({
   loader: () => {

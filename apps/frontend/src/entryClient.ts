@@ -5,14 +5,13 @@ import { isKnownLocale } from '@/helpers/isKnownLocale';
 import { hydrate } from '@tanstack/vue-query';
 import { CanonicalPlugin, InferSeoMetaPlugin } from 'unhead/plugins';
 
-const { app, router, i18n, queryClient, gallery, player } = createApp();
+const { app, router, i18n, queryClient, player } = createApp();
 
 if (globalThis.__QUERY__) {
   hydrate(queryClient, globalThis.__QUERY__);
 }
 
 player.init();
-gallery.init();
 
 const head = createHead({
   plugins: [

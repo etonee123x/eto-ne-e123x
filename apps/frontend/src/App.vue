@@ -10,7 +10,6 @@
     </main>
     <LazyThePlayer v-if="player.theTrack.value" class="sticky bottom-0" />
     <LazyTheFooter v-else />
-    <TheDialogGallery />
   </div>
 </template>
 
@@ -23,7 +22,6 @@ import TheHeader from '@/components/TheHeader.vue';
 import { isServer } from '@/constants/target';
 import { i18n } from '@/plugins/i18n';
 import { SITE_TITLE } from '@/constants/siteTitle';
-import TheDialogGallery from '@/components/TheDialogGallery.vue';
 import { useNotifications } from '@/plugins/notifications';
 import { usePlayer } from '@/plugins/player';
 import { provideAuthContext } from '@/contexts/auth';

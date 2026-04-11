@@ -6,11 +6,11 @@
 import { computed, defineAsyncComponent } from 'vue';
 
 import { useI18n } from 'vue-i18n';
-import { useGallery } from '@/plugins/gallery';
-import { useBlogContext } from '../contexts/blog';
-import { FILE_TYPES } from '@/helpers/folderData';
-import { propertyCurried } from '@etonee123x/shared/utils/property';
+import { FILE_TYPES, isFolderDataGalleryItem } from '@/helpers/folderData';
 import type { components } from '@/types/openapi';
+import { useGalleryItemContext } from '../contexts/galleryItem';
+
+const galleryItemContext = useGalleryItemContext();
 
 const LazyAttachmentWithUnknownExtension = defineAsyncComponent(() => {
   return import('./AttachmentWithUnknownExtension.vue');
@@ -36,32 +36,12 @@ const { t } = useI18n({
   },
 });
 
-const gallery = useGallery();
-const blogContext = useBlogContext();
-
 const loadToGallery = () => {
-  if (!(props.attachment.fileType === FILE_TYPES.IMAGE || props.attachment.fileType === FILE_TYPES.VIDEO)) {
+  if (!isFolderDataGalleryItem(props.attachment)) {
     return;
   }
 
-  gallery.loadGalleryItem(
-    props.attachment,
-    blogContext.getPostsQuery.data?.pages
-      .flatMap(propertyCurried('rows'))
-      .reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>((items, post) => {
-        return [
-          ...items, //
-          ...post.attachments.reduce<NonNullable<Parameters<typeof gallery.loadGalleryItem>[1]>>(
-            (accumulator, attachment) => {
-              return attachment.fileType === FILE_TYPES.IMAGE || attachment.fileType === FILE_TYPES.VIDEO
-                ? [...accumulator, attachment]
-                : accumulator;
-            },
-            [],
-          ),
-        ];
-      }, []) ?? [],
-  );
+  galleryItemContext.value = props.attachment;
 };
 
 const component = computed(() => {

@@ -1,36 +1,40 @@
 <template>
-  <dialog
-    :id="String(id)"
-    v-bind="$attrs"
-    class="dialog"
-    :open="model"
-    ref="dialog"
-    @close="onCloseDialog"
-    @cancel.prevent="onCloseDialog"
-    @click.stop
-  >
-    <div class="dialog__backdrop" @click="onClickBackdrop" />
-    <div class="dialog__content">
-      <slot v-if="!isHiddenHeader" name="header" v-bind="{ close }">
-        <header class="flex justify-between items-center mb-6">
-          <span v-if="!isNil(title)" class="text-lg">{{ title }}</span>
-          <BaseButton class="ms-auto" @click="onClickCloseIcon">
-            <BaseIcon :path="mdiClose" />
-          </BaseButton>
-        </header>
-      </slot>
+  <Teleport to="#teleported">
+    <dialog
+      :id="String(id)"
+      v-bind="$attrs"
+      class="dialog"
+      :open="model"
+      ref="dialog"
+      @close="onCloseDialog"
+      @cancel.prevent="onCloseDialog"
+      @click.stop
+    >
+      <!-- у модалки есть фокус трапа, бэкдроп не сможет сфокуситься, есть escape листенер, вроде ничо плохого... -->
+      <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events vuejs-accessibility/no-static-element-interactions -->
+      <div class="dialog__backdrop" @click="onClickBackdrop" />
+      <article class="dialog__content">
+        <slot v-if="!isHiddenHeader" name="header" v-bind="{ close }">
+          <header class="flex justify-between items-center mb-4">
+            <h2 v-if="!isNil(title)" class="text-lg">{{ title }}</h2>
+            <BaseButton class="ms-auto" @click="onClickCloseIcon">
+              <BaseIcon :path="mdiClose" />
+            </BaseButton>
+          </header>
+        </slot>
 
-      <slot v-bind="{ close }" />
+        <slot v-bind="{ close }" />
 
-      <slot v-if="!isHiddenFooter" name="footer" v-bind="{ close }">
-        <footer v-if="buttons.length > 0" class="flex justify-end gap-2 mt-auto">
-          <BaseButton v-for="button in buttons" :key="button.key" @click="button.onClick">
-            {{ button.text }}
-          </BaseButton>
-        </footer>
-      </slot>
-    </div>
-  </dialog>
+        <slot v-if="!isHiddenFooter" name="footer" v-bind="{ close }">
+          <footer v-if="buttons.length > 0" class="flex justify-end gap-2 mt-auto">
+            <BaseButton v-for="button in buttons" :key="button.key" @click="button.onClick">
+              {{ button.text }}
+            </BaseButton>
+          </footer>
+        </slot>
+      </article>
+    </dialog>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -137,25 +141,25 @@ const onClickCloseIcon = close;
 const onClickBackdrop = close;
 
 const onOpen = (id: string) => {
-  if (dialogIds.includes(id)) {
+  if (dialogIds.value.includes(id)) {
     return;
   }
 
-  dialogIds.push(id);
+  dialogIds.value = [...dialogIds.value, id];
 };
 
 const onClose = (id: string) => {
-  const index = dialogIds.indexOf(id);
+  const index = dialogIds.value.indexOf(id);
 
   if (index === -1) {
     return;
   }
 
-  dialogIds.splice(index, 1);
+  dialogIds.value = dialogIds.value.toSpliced(index, 1);
 };
 
 onKeyDown('Escape', () => {
-  const maybeLastDialogId = dialogIds.at(-1);
+  const maybeLastDialogId = dialogIds.value.at(-1);
 
   if (isNil(maybeLastDialogId) || maybeLastDialogId !== id) {
     return;

@@ -1,5 +1,5 @@
 <template>
-  <!-- eslint-disable-next-line vue/no-v-html -->
+  <!-- eslint-disable-next-line vue/no-v-html vuejs-accessibility/click-events-have-key-events vuejs-accessibility/no-static-element-interactions -->
   <div class="custom-html" @click="onClick" v-html="html" />
 </template>
 

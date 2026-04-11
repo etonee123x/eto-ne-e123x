@@ -107,3 +107,9 @@ export const isFolderDataItemImage = (
     typeof objectGet(parameter, 'metadata.height') === 'number'
   );
 };
+
+export const isFolderDataGalleryItem = (
+  parameter: unknown,
+): parameter is components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'] => {
+  return isFolderDataItemVideo(parameter) || isFolderDataItemImage(parameter);
+};

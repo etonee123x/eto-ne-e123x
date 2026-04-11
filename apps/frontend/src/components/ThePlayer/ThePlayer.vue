@@ -11,12 +11,14 @@
         <BaseIcon :path="mdiClose" />
       </component>
       <BaseAlwaysScrollable class="[--base-always-scrollable--content--margin:0_auto]">
-        <header class="cursor-pointer flex items-center gap-0.5" :title="t('copyLink')" @click="onClickTitle">
+        <header class="cursor-pointer flex items-center gap-0.5">
           <h2>{{ player.theTrack.value?.name }}</h2>
-          <BaseIcon :path="mdiLinkVariant" />
+          <BaseButton :aria-label="t('copyLink')" @click="onClickTitle">
+            <BaseIcon :path="mdiLinkVariant" />
+          </BaseButton>
         </header>
       </BaseAlwaysScrollable>
-      <audio :src="player.theTrack.value?.src" autoplay ref="audio" @ended="onEnded" />
+      <audio :src="player.theTrack.value?.src" autoplay :onEnded ref="audio" />
       <div class="h-5 w-full mx-auto flex justify-between items-center gap-2">
         <time :datetime="currentTimeFormats.iso">
           {{ currentTimeFormats.humanReadable }}

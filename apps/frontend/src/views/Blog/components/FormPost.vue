@@ -1,7 +1,9 @@
 <template>
   <form class="flex gap-4 flex-col" ref="form" @submit.prevent="onSubmit">
     <div class="flex gap-4">
+      <label class="sr-only" for="text">{{ t('textareaPlaceholder') }}</label>
       <textarea
+        id="text"
         :placeholder="t('textareaPlaceholder')"
         name="text"
         class="rounded-lg border border-neutral-700 dark:bg-neutral-950 focus:border-primary-500 overflow-hidden w-full m-0 p-4 resize-none flex bg-none flex-1"

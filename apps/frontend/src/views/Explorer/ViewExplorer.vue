@@ -28,13 +28,20 @@
         :key="file.name"
       />
     </div>
+    <LazyDialogGallery
+      v-if="galleryItem"
+      :item="galleryItem"
+      :items="explorerContext.getFolderDataQuery.data?.files.filter((file) => isFolderDataGalleryItem(file)) ?? []"
+      :onClose="onCloseGallery"
+    >
+    </LazyDialogGallery>
   </BasePage>
 </template>
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, watchEffect } from 'vue';
 import type { UnwrapRef } from 'vue';
-import { FILE_TYPES } from '@/helpers/folderData';
+import { FILE_TYPES, isFolderDataGalleryItem } from '@/helpers/folderData';
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
@@ -44,15 +51,18 @@ import { useSeoMeta } from '@unhead/vue';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { useResetableRef } from '@/composables/useResetableRef';
 import { usePlayer } from '@/plugins/player';
-import { useGallery } from '@/plugins/gallery';
 import { useExplorerContext } from './contexts/explorer';
 import { nonNullable } from '@/utils/nonNullable';
 import type { components } from '@/types/openapi';
 import { useL10n } from '@/composables/useL10n';
+import { useRouter } from 'vue-router';
 
 const l10n = useL10n();
 const player = usePlayer();
-const gallery = useGallery();
+
+const LazyDialogGallery = defineAsyncComponent(() => {
+  return import('@/components/DialogGallery.vue');
+});
 
 const LazyExplorerElementSystem = defineAsyncComponent(() => {
   return import('./components/ExplorerElementSystem.vue');
@@ -101,7 +111,7 @@ const explorerContext = useExplorerContext();
 const shouldRenderNav = computed(() => {
   return Boolean(
     explorerContext.navigationLinks.value.length > 1 ||
-      (explorerContext.getFolderDataQuery.data && explorerContext.getFolderDataQuery.data.folders.length > 0),
+    (explorerContext.getFolderDataQuery.data && explorerContext.getFolderDataQuery.data.folders.length > 0),
   );
 });
 
@@ -132,7 +142,39 @@ const maybeLastNavigationItemText = computed(() => {
   return explorerContext.navigationLinks.value.at(-1)?.text;
 });
 
-const resetableRefSelectedFile = useResetableRef<UnwrapRef<typeof player.theTrack | typeof gallery.item> | null>(null);
+const galleryItem = computed(() => {
+  const file = explorerContext.getFolderDataQuery.data?.file;
+
+  if (!file) {
+    return undefined;
+  }
+
+  if (!isFolderDataGalleryItem(file)) {
+    return undefined;
+  }
+
+  return file;
+});
+
+const router = useRouter();
+
+const onCloseGallery = () => {
+  const currentFolderData = explorerContext.getFolderDataQuery.data;
+
+  if (!currentFolderData?.file) {
+    return;
+  }
+
+  const lastNavigationItem = explorerContext.navigationLinks.value.at(-1);
+
+  if (!lastNavigationItem) {
+    return;
+  }
+
+  router.push(lastNavigationItem.to);
+};
+
+const resetableRefSelectedFile = useResetableRef<UnwrapRef<typeof player.theTrack | typeof galleryItem> | null>(null);
 
 // Два watchEffect нужны, чтобы отображался крайний выбранный + актуальный файл (плеер или галерея)
 watchEffect(() => {
@@ -142,8 +184,8 @@ watchEffect(() => {
     return;
   }
 
-  if (gallery.item.value) {
-    resetableRefSelectedFile.value.value = gallery.item.value;
+  if (galleryItem.value) {
+    resetableRefSelectedFile.value.value = galleryItem.value;
 
     return;
   }
@@ -151,8 +193,8 @@ watchEffect(() => {
   resetableRefSelectedFile.reset();
 });
 watchEffect(() => {
-  if (gallery.item.value) {
-    resetableRefSelectedFile.value.value = gallery.item.value;
+  if (galleryItem.value) {
+    resetableRefSelectedFile.value.value = galleryItem.value;
     return;
   }
 

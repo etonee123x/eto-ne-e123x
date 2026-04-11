@@ -5,10 +5,13 @@ import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import pluginI18n from '@intlify/eslint-plugin-vue-i18n';
-import importPlugin from 'eslint-plugin-import';
+// import importPlugin from 'eslint-plugin-import';
 import vueEslintParser from 'vue-eslint-parser';
 import sonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import pluginVueA11y from 'eslint-plugin-vuejs-accessibility';
+import { importX } from 'eslint-plugin-import-x';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 
 export default defineConfig(
   {
@@ -33,7 +36,7 @@ export default defineConfig(
   {
     files: ['**/*.ts', '**/*.vue'],
     extends: [
-      importPlugin.flatConfigs.recommended,
+      // importPlugin.flatConfigs.recommended,
       pluginJs.configs.recommended,
       pluginI18n.configs.recommended,
       tseslint.configs.strictTypeChecked,
@@ -41,9 +44,17 @@ export default defineConfig(
       sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
       eslintPluginPrettierRecommended,
+      pluginVueA11y.configs['flat/recommended'],
+      importX.configs['flat/recommended'],
     ],
 
+    plugins: {
+      'import-x': importX,
+    },
+
     languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parser: vueEslintParser,
       parserOptions: {
         projectService: true,
@@ -57,16 +68,10 @@ export default defineConfig(
         localeDir: './src/i18n/messages/*.{json,json5,yaml,yml}',
         messageSyntaxVersion: '^11.0.0',
       },
-      'import/resolver': {
-        typescript: true,
-      },
+      'import-x/resolver-next': [createTypeScriptImportResolver()],
     },
 
     rules: {
-      'import/no-empty-named-blocks': 'error',
-      'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-      'import/no-duplicates': 'error',
-
       'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
       'no-unexpected-multiline': 'error',
       'no-var': 'error',
@@ -200,6 +205,9 @@ export default defineConfig(
       'vue/no-template-shadow': 'off',
       'vue/no-dupe-keys': 'off',
       'vue/one-component-per-file': 'off',
+
+      'vuejs-accessibility/label-has-for': ['error', { required: { some: ['nesting', 'id'] } }],
+      'vuejs-accessibility/media-has-caption': 'off',
 
       '@intlify/vue-i18n/no-deprecated-i18n-component': 'error',
       '@intlify/vue-i18n/no-deprecated-i18n-place-attr': 'error',
