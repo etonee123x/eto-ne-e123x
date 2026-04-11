@@ -3,7 +3,7 @@
     <template #header="context">
       <header class="flex gap-2 mb-4">
         <BaseAlwaysScrollable class="w-full [--base-always-scrollable--content--margin:0_auto]" duration="12000ms">
-          {{ cycleList.state.name }}
+          <h2>{{ cycleList.state.name }}</h2>
         </BaseAlwaysScrollable>
         <BaseButton class="ms-auto" @click="context.close">
           <BaseIcon :path="mdiClose" />
