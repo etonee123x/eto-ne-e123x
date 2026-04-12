@@ -98,8 +98,6 @@ import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
 import { usePlayer } from '@/plugins/player';
 import { useL10n } from '@/composables/useL10n';
-import { useSeoMeta } from '@unhead/vue';
-import { useIntlListFormat } from '@/composables/useIntlListFormat';
 
 const l10n = useL10n();
 
@@ -116,14 +114,6 @@ const { t } = useI18n({
       closePlayer: 'Закрыть плеер',
       enableShuffleTracks: 'Включить перемешивание треков',
       disableShuffleTracks: 'Выключить перемешивание треков',
-      description: {
-        checkOutTrack: 'Зацени трек "{name}" — {artists}{album}{year}{duration} и чо нибудь ещё',
-        artists: ' {artists}',
-        album: ' из "{album}"',
-        year: ' ({year})',
-        duration: ' длительностью {duration}',
-        idkWho: 'хз кто',
-      },
     },
     en: {
       copied: 'Copied!',
@@ -135,14 +125,6 @@ const { t } = useI18n({
       closePlayer: 'Close player',
       enableShuffleTracks: 'Enable shuffle tracks',
       disableShuffleTracks: 'Disable shuffle tracks',
-      description: {
-        checkOutTrack: 'Check out the track "{name}" — {artists}{album}{year}{duration} and something else',
-        artists: ' {artists}',
-        album: ' from "{album}"',
-        year: ' ({year})',
-        duration: ' with a duration of {duration}',
-        idkWho: 'idk who',
-      },
     },
   },
 });
@@ -298,38 +280,5 @@ const currentTimeFormats = computed(() => {
 });
 const durationFormats = computed(() => {
   return millisecondsToTimeFormats(duration.value);
-});
-
-const intlListFormat = useIntlListFormat(undefined, { style: 'long', type: 'conjunction' });
-
-useSeoMeta({
-  title: () => {
-    return player.theTrack.value?.name;
-  },
-  description: () => {
-    const track = player.theTrack.value;
-
-    if (!track) {
-      return undefined;
-    }
-
-    const folderName = player.playlist.value.pathDirectory?.split('/').at(-1);
-
-    return t('description.checkOutTrack', {
-      name: track.name,
-      artists:
-        track.metadata.artists.length > 0
-          ? intlListFormat.value.format(track.metadata.artists)
-          : t('description.idkWho'),
-      album:
-        track.metadata.album || folderName
-          ? t('description.album', { album: track.metadata.album ?? folderName })
-          : undefined,
-      year: track.metadata.year ? t('description.year', { year: track.metadata.year }) : undefined,
-      duration: track.metadata.duration
-        ? t('description.duration', { duration: millisecondsToHumanReadable(track.metadata.duration) })
-        : undefined,
-    });
-  },
 });
 </script>

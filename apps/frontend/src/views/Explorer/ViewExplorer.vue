@@ -41,20 +41,27 @@
 
 <script setup lang="ts">
 import { computed, defineAsyncComponent, onScopeDispose } from 'vue';
-import { FILE_TYPES, isFolderDataGalleryItem, isFolderDataItemImage } from '@/helpers/folderData';
+import {
+  FILE_TYPES,
+  isFolderDataGalleryItem,
+  isFolderDataItemFileAudio,
+  isFolderDataItemFileImage,
+  isFolderDataItemFileVideo,
+} from '@/helpers/folderData';
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
 import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
-import { isNil } from '@etonee123x/shared/utils/isNil';
 import { usePlayer } from '@/plugins/player';
 import { provideExplorerContext } from './contexts/explorer';
 import { nonNullable } from '@/utils/nonNullable';
 import type { components } from '@/types/openapi';
 import { useL10n } from '@/composables/useL10n';
 import { useRouter } from 'vue-router';
+import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
+import { useIntlListFormat } from '@/composables/useIntlListFormat';
 
 const explorerContext = await provideExplorerContext();
 
@@ -144,22 +151,42 @@ const { t } = useI18n({
       content: 'Контент',
       treeDots: '...',
       description: {
-        soWhatWeHaveHere:
-          'Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками',
-        watch: ', смотреть {type} {fileName}',
-        image: 'изображение',
-        video: 'видео',
+        common: {
+          soWhatWeHaveHere:
+            'Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками',
+          watch: ', смотреть {type} {fileName}',
+          image: 'изображение',
+          video: 'видео',
+        },
+        audio: {
+          checkOutTrack: 'Зацени трек "{name}" — {artists}{album}{year}{duration} и чо нибудь ещё',
+          artists: ' {artists}',
+          album: ' из "{album}"',
+          year: ' ({year})',
+          duration: ' длительностью {duration}',
+          idkWho: 'хз кто',
+        },
       },
     },
     en: {
       content: 'Content',
       treeDots: '...',
       description: {
-        soWhatWeHaveHere:
-          'Hmm-m, what do we have here? Folder {folderName}{fileDescription} and other folders and files; with music, pictures, videos',
-        watch: ', watch the {type} {fileName}',
-        image: 'image',
-        video: 'video',
+        common: {
+          soWhatWeHaveHere:
+            'Hmm-m, what do we have here? Folder {folderName}{fileDescription} and other folders and files; with music, pictures, videos',
+          watch: ', watch the {type} {fileName}',
+          image: 'image',
+          video: 'video',
+        },
+        audio: {
+          checkOutTrack: 'Check out the track "{name}" — {artists}{album}{year}{duration} and something else',
+          artists: ' {artists}',
+          album: ' from "{album}"',
+          year: ' ({year})',
+          duration: ' with a duration of {duration}',
+          idkWho: 'idk who',
+        },
       },
     },
   },
@@ -227,26 +254,125 @@ const onChangeGalleryItem = (
   router.replace(folderDataItemToTo(item));
 };
 
+const intlListFormat = useIntlListFormat(undefined, { style: 'long', type: 'conjunction' });
+
 useSeoMeta({
   title: () => {
-    return folderName.value ?? undefined;
+    return explorerContext.getFolderDataQuery.data?.file?.name ?? folderName.value ?? undefined;
   },
+
   description: () => {
-    if (isNil(folderName.value)) {
-      return undefined;
+    if (isFolderDataItemFileAudio(explorerContext.getFolderDataQuery.data?.file)) {
+      return t('description.audio.checkOutTrack', {
+        name: explorerContext.getFolderDataQuery.data.file.name,
+        artists:
+          explorerContext.getFolderDataQuery.data.file.metadata.artists.length > 0
+            ? intlListFormat.value.format(explorerContext.getFolderDataQuery.data.file.metadata.artists)
+            : t('description.audio.idkWho'),
+        album:
+          explorerContext.getFolderDataQuery.data.file.metadata.album || folderName.value
+            ? t('description.audio.album', {
+                album: explorerContext.getFolderDataQuery.data.file.metadata.album ?? folderName.value,
+              })
+            : undefined,
+        year: explorerContext.getFolderDataQuery.data.file.metadata.year
+          ? t('description.audio.year', { year: explorerContext.getFolderDataQuery.data.file.metadata.year })
+          : undefined,
+        duration: explorerContext.getFolderDataQuery.data.file.metadata.duration
+          ? t('description.audio.duration', {
+              duration: millisecondsToHumanReadable(explorerContext.getFolderDataQuery.data.file.metadata.duration),
+            })
+          : undefined,
+      });
     }
 
-    return t('description.soWhatWeHaveHere', {
+    return t('description.common.soWhatWeHaveHere', {
       folderName: folderName.value,
       fileDescription: galleryItem.value
-        ? t('description.watch', {
-            type: isFolderDataItemImage(galleryItem.value) //
-              ? t('description.image')
-              : t('description.video'),
+        ? t('description.common.watch', {
+            type: isFolderDataItemFileImage(galleryItem.value) //
+              ? t('description.common.image')
+              : t('description.common.video'),
             fileName: galleryItem.value.name,
           })
         : undefined,
     });
+  },
+
+  // именно так и надо
+  ogImage: () => {
+    const images = (
+      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
+        if (isFolderDataItemFileImage(file)) {
+          return [
+            {
+              height: file.metadata.height,
+              width: file.metadata.width,
+              url: file.src,
+              alt: file.name,
+            },
+          ];
+        }
+
+        return [];
+      }) ?? []
+    ).toSorted((image1) => {
+      if (image1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return images.length > 0 ? images : undefined;
+  },
+
+  // именно так и надо
+  ogVideo: () => {
+    const videos = (
+      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
+        if (isFolderDataItemFileVideo(file)) {
+          return [
+            {
+              url: file.src,
+              alt: file.name,
+              width: file.metadata.width,
+              height: file.metadata.height,
+            },
+          ];
+        }
+        return [];
+      }) ?? []
+    ).toSorted((video1) => {
+      if (video1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return videos.length > 0 ? videos : undefined;
+  },
+
+  // именно так и надо
+  ogAudio: () => {
+    const audios = (
+      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
+        if (isFolderDataItemFileAudio(file)) {
+          return [
+            {
+              url: file.src,
+            },
+          ];
+        }
+        return [];
+      }) ?? []
+    ).toSorted((audio1) => {
+      if (audio1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return audios.length > 0 ? audios : undefined;
   },
 });
 </script>

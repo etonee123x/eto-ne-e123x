@@ -30,7 +30,7 @@ const { t } = useI18n({
       toTheMainPage: 'to the main page',
     },
     ru: {
-      pageNotFound: 'Страница не найдена. Возможно, она была удалена или вы ошиблись в адресе.',
+      pageNotFound: 'Страница не найдена. Возможно, она была удалена или URL некорректен.',
       tryNavigate: 'Попробуйте перейти {0}.',
       toTheMainPage: 'на главную страницу',
     },

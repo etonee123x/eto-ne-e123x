@@ -32,7 +32,6 @@ import type { components } from '@/types/openapi';
 import BaseButton from './ui/BaseButton.vue';
 import { mdiClose } from '@mdi/js';
 import BaseIcon from './ui/BaseIcon.vue';
-import { useSeoMeta } from '@unhead/vue';
 
 type Item = components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'];
 
@@ -118,45 +117,4 @@ const [isDialogOpen, toggleIsDialogOpen] = useToggle(hasItem.value);
 watchEffect(() => {
   return toggleIsDialogOpen(hasItem.value);
 });
-
-useSeoMeta({
-  title: () => {
-    return props.item.name;
-  },
-});
-
-// useSeoMeta({
-//   ogImage: () => {
-//     if (!gallery.item.value) {
-//       return;
-//     }
-
-//     if (gallery.item.value.fileType !== FILE_TYPES.IMAGE) {
-//       return;
-//     }
-
-//     return {
-//       url: gallery.item.value.src,
-//       width: gallery.item.value.metadata.width,
-//       height: gallery.item.value.metadata.height,
-//       alt: gallery.item.value.name,
-//     };
-//   },
-//   ogVideo: () => {
-//     if (!gallery.item.value) {
-//       return;
-//     }
-
-//     if (gallery.item.value.fileType !== FILE_TYPES.VIDEO) {
-//       return;
-//     }
-
-//     return {
-//       url: gallery.item.value.src,
-//       width: gallery.item.value.metadata.width,
-//       height: gallery.item.value.metadata.height,
-//       alt: gallery.item.value.name,
-//     };
-//   },
-// });
 </script>

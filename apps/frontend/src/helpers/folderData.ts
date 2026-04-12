@@ -86,7 +86,7 @@ export const isFolderDataItemFileAudio = (
   );
 };
 
-export const isFolderDataItemVideo = (
+export const isFolderDataItemFileVideo = (
   parameter: unknown,
 ): parameter is components['schemas']['FolderDataItemVideo'] => {
   return (
@@ -97,7 +97,7 @@ export const isFolderDataItemVideo = (
   );
 };
 
-export const isFolderDataItemImage = (
+export const isFolderDataItemFileImage = (
   parameter: unknown,
 ): parameter is components['schemas']['FolderDataItemImage'] => {
   return (
@@ -111,5 +111,5 @@ export const isFolderDataItemImage = (
 export const isFolderDataGalleryItem = (
   parameter: unknown,
 ): parameter is components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'] => {
-  return isFolderDataItemVideo(parameter) || isFolderDataItemImage(parameter);
+  return isFolderDataItemFileVideo(parameter) || isFolderDataItemFileImage(parameter);
 };
