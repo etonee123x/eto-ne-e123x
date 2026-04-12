@@ -1,6 +1,6 @@
 import { pick } from '@etonee123x/shared/utils/pick';
 import { extensionToFileType, FILE_TYPES, ITEM_TYPES } from '@/helpers/folderData';
-import { fileTypeFromBuffer } from 'file-type/node';
+import { fileTypeFromBuffer } from 'file-type';
 import { readFile, stat } from 'node:fs/promises';
 import { parseBuffer } from 'music-metadata';
 import nodePath from 'node:path';

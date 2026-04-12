@@ -95,14 +95,9 @@ export default defineConfig(
       ],
       '@typescript-eslint/no-floating-promises': 'off',
 
-      // https://github.com/typescript-eslint/typescript-eslint/issues/2865
-      // TODO: пофиксить правила ниже vue типами
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
+      // TODO: фиксить
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-redundant-type-constituents': 'off',
 
       'sonarjs/todo-tag': 'warn',
 
@@ -117,7 +112,8 @@ export default defineConfig(
       'unicorn/no-unreadable-array-destructuring': 'off',
       'unicorn/no-useless-undefined': 'off',
       'unicorn/no-array-reduce': 'off',
-      'unicorn/filename-case': ['error', { case: 'camelCase', ignore: ['TableController.ts', 'RequestHandlerTyped.ts'] }],
+      'unicorn/filename-case': ['error', { case: 'camelCase' }],
+      'sonarjs/cognitive-complexity': ['off'],
 
       'prettier/prettier': [
         'error',

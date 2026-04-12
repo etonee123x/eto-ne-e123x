@@ -8,13 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { useHead } from '@unhead/vue';
+import { useSeoMeta } from '@unhead/vue';
 
 const props = defineProps<{
   h1: string;
 }>();
 
-useHead(
+useSeoMeta(
   {
     title: () => {
       return props.h1;

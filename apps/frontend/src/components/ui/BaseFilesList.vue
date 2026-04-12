@@ -134,8 +134,12 @@ watch(ol, () => {
         return;
       }
 
-      // TODO: заменить на toSpliced, проверить внимательно
-      model.value.splice(event.newIndex, 0, ...model.value.splice(event.oldIndex, 1));
+      const old = model.value[event.oldIndex];
+      if (!old) {
+        return;
+      }
+
+      model.value = model.value.toSpliced(event.oldIndex, 1).toSpliced(event.newIndex, 0, old);
     },
   });
 });

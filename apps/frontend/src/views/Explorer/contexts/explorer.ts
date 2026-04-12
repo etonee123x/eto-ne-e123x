@@ -1,120 +1,86 @@
-import { useGoToPage404 } from '@/composables/useGoToPage404';
 import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
-import { useGallery } from '@/plugins/gallery';
 import { usePlayer } from '@/plugins/player';
-import { ROUTE_NAMES } from '@/router';
 import { nonNullable } from '@/utils/nonNullable';
-import { FILE_TYPES } from '@/helpers/folderData';
-import { useQuery } from '@tanstack/vue-query';
+import { FILE_TYPES, isFolderDataItemFileAudio } from '@/helpers/folderData';
+import { useQueryClient } from '@tanstack/vue-query';
 import type { UseQueryReturnType } from '@tanstack/vue-query';
-import { computed, inject, provide, watchEffect } from 'vue';
-import type { ComputedRef, InjectionKey, UnwrapRef } from 'vue';
-import { useRoute } from 'vue-router';
-import { client } from '@/api/client';
-import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
+import { inject, provide, reactive, watch, watchEffect } from 'vue';
+import type { InjectionKey, Reactive } from 'vue';
 import type { components } from '@/types/openapi';
-import { useL10n } from '@/composables/useL10n';
+import { useSegments } from '../composables/useSegments';
+import { useQueryGetFolderData } from '../composables/useQueryGetFolderData';
 
 interface ExplorerContext {
-  getFolderDataQuery: UseQueryReturnType<components['schemas']['FolderDataResponse'], unknown>;
-  navigationLinks: ComputedRef<Array<{ text: string; to: string }>>;
+  getFolderDataQuery: Reactive<UseQueryReturnType<components['schemas']['FolderDataResponse'], unknown>>;
 }
 
 const INJECTION_KEY_EXPLORER: InjectionKey<ExplorerContext> = Symbol('explorer');
-const MODULE_NAME = 'explorer';
 
 export const provideExplorerContext = async () => {
-  const clientRequestPromiseWrapper = useClientRequestPromiseWrapper();
+  const player = reactive(usePlayer());
+  const queryClient = useQueryClient();
 
-  const route = useRoute();
-  const player = usePlayer();
-  const gallery = useGallery();
-  const goToPage404 = useGoToPage404();
-  const l10n = useL10n();
+  const segments = useSegments();
 
-  const segments = computed(() => {
-    return typeof route.params.segments === 'string' && route.params.segments !== ''
-      ? [route.params.segments]
-      : route.params.segments || [];
-  });
-
-  const navigationLinks: ExplorerContext['navigationLinks'] = computed(() => {
-    const segments = getFolderDataQuery.data.value?.path.split('/').filter(Boolean) ?? [];
-
-    return (segments.at(-1) === getFolderDataQuery.data.value?.file?.name ? segments.slice(0, -1) : segments).reduce(
-      (segments, segment) => {
-        return [
-          ...segments,
-          {
-            text: segment,
-            to: [nonNullable(segments.at(-1)).to, segment].join('/'),
-          },
-        ];
-      },
-      [
-        {
-          text: 'root',
-          to: l10n.localizePath(MODULE_NAME),
-        },
-      ],
-    );
-  });
-
-  const getFolderDataQuery: ExplorerContext['getFolderDataQuery'] = useQuery({
-    queryKey: [
-      'folderData',
-      computed(() => {
-        return segments.value.join('/');
-      }),
-    ] as const,
-    queryFn: (...parameters): Promise<UnwrapRef<ExplorerContext['getFolderDataQuery']['data']>> => {
-      return clientRequestPromiseWrapper(
-        client['/folder-data'].GET({ params: { query: { path: parameters[0].queryKey[1] } } }),
-      ).catch(() => {
-        return goToPage404();
-      });
-    },
-    enabled: () => {
-      return route.name === ROUTE_NAMES.EXPLORER;
-    },
-  });
+  const getFolderDataQuery: ExplorerContext['getFolderDataQuery'] = reactive(useQueryGetFolderData({ segments }));
 
   const explorerContext = {
     getFolderDataQuery,
-    navigationLinks,
   };
 
   provide(INJECTION_KEY_EXPLORER, explorerContext);
 
-  await awaitSuspensesIfNecessary([[getFolderDataQuery.isEnabled.value, getFolderDataQuery.suspense]]);
+  await awaitSuspensesIfNecessary([[getFolderDataQuery.isEnabled, getFolderDataQuery.suspense]]);
+
+  watch(
+    () => {
+      return getFolderDataQuery.data;
+    },
+    () => {
+      if (!getFolderDataQuery.data) {
+        return;
+      }
+
+      if (!getFolderDataQuery.data.file) {
+        return;
+      }
+
+      getFolderDataQuery.data.files.forEach((file) => {
+        queryClient.setQueryData(['folderData', [...segments.value.slice(0, -1), file.name].join('/')], () => {
+          return {
+            ...getFolderDataQuery.data,
+            path: [getFolderDataQuery.data.pathDirectory, file.name].join('/'),
+            file,
+          };
+        });
+      });
+    },
+    {
+      immediate: true,
+    },
+  );
 
   watchEffect(() => {
-    const folderData = getFolderDataQuery.data.value;
+    const folderData = getFolderDataQuery.data;
 
     const maybeFile = folderData?.file;
 
     if (!maybeFile) {
-      gallery.items.value = [];
+      // это зачем?
+      // gallery.items.value = [];
 
       return;
     }
 
     if (maybeFile.fileType === FILE_TYPES.AUDIO) {
-      player.playlist.value = folderData.files.filter((file) => {
-        return file.fileType === FILE_TYPES.AUDIO;
-      });
       player.theTrack.value = maybeFile;
 
-      return;
-    }
-
-    if (maybeFile.fileType === FILE_TYPES.IMAGE || maybeFile.fileType === FILE_TYPES.VIDEO) {
-      gallery.loadGalleryItem(
-        maybeFile,
-        folderData.files.filter((file) => {
-          return file.fileType === FILE_TYPES.IMAGE || file.fileType === FILE_TYPES.VIDEO;
+      player.playlist.value = {
+        tracks: folderData.files.filter((file) => {
+          return isFolderDataItemFileAudio(file);
         }),
-      );
+        pathDirectory: folderData.pathDirectory,
+      };
     }
   });
 

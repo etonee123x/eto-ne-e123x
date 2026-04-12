@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/filename-case */
 import type { RequestHandler } from 'express';
 import type { paths } from '@/types/openapi';
 

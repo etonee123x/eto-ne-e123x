@@ -1,18 +1,18 @@
 <template>
   <BasePage :h1="t('content')">
-    <ExplorerNavbar class="-mt-2 mb-2 sticky top-0" />
+    <ExplorerNavbar class="-mt-2 mb-2 sticky top-header-height" :navigationItems />
     <div class="flex flex-col gap-2">
       <nav v-if="shouldRenderNav" class="contents">
         <LazyExplorerElementSystem
-          v-if="explorerContext.navigationLinks.value.length > 1"
-          :to="nonNullable(explorerContext.navigationLinks.value.at(-2)).to"
+          v-if="navigationItems.length > 1"
+          :to="nonNullable(navigationItems.at(-2)).to"
           class="p-2"
           tag="RouterLink"
         >
           {{ t('treeDots') }}
         </LazyExplorerElementSystem>
         <LazyExplorerElementFolder
-          v-for="folder in explorerContext.getFolderDataQuery.data.value?.folders"
+          v-for="folder in explorerContext.getFolderDataQuery.data?.folders"
           :to="folderDataItemToTo(folder)"
           :element="folder"
           :key="folder.name"
@@ -22,37 +22,84 @@
       </nav>
       <component
         :is="itemFileToComponent(file)"
-        v-for="file in explorerContext.getFolderDataQuery.data.value?.files"
+        v-for="file in explorerContext.getFolderDataQuery.data?.files"
         :to="folderDataItemToTo(file)"
         :element="file"
         :key="file.name"
       />
     </div>
+    <LazyDialogGallery
+      v-if="galleryItem"
+      :item="galleryItem"
+      :items="explorerContext.getFolderDataQuery.data?.files.filter((file) => isFolderDataGalleryItem(file)) ?? []"
+      :onClose="onCloseGallery"
+      :onChangeItem="onChangeGalleryItem"
+    >
+    </LazyDialogGallery>
   </BasePage>
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, watchEffect } from 'vue';
-import type { UnwrapRef } from 'vue';
-import { FILE_TYPES } from '@/helpers/folderData';
+import { computed, defineAsyncComponent, onScopeDispose } from 'vue';
+import {
+  FILE_TYPES,
+  isFolderDataGalleryItem,
+  isFolderDataItemFileAudio,
+  isFolderDataItemFileImage,
+  isFolderDataItemFileVideo,
+} from '@/helpers/folderData';
 
 import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
 import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
 import { useSeoMeta } from '@unhead/vue';
-import { isNil } from '@etonee123x/shared/utils/isNil';
-import { useResetableRef } from '@/composables/useResetableRef';
 import { usePlayer } from '@/plugins/player';
-import { useGallery } from '@/plugins/gallery';
-import { useExplorerContext } from './contexts/explorer';
+import { provideExplorerContext } from './contexts/explorer';
 import { nonNullable } from '@/utils/nonNullable';
 import type { components } from '@/types/openapi';
 import { useL10n } from '@/composables/useL10n';
+import { useRouter } from 'vue-router';
+import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
+import { useIntlListFormat } from '@/composables/useIntlListFormat';
+
+const explorerContext = await provideExplorerContext();
 
 const l10n = useL10n();
 const player = usePlayer();
-const gallery = useGallery();
+
+const lastNavigationItem = computed(() => {
+  return navigationItems.value.at(-1);
+});
+
+const folderName = computed(() => {
+  return lastNavigationItem.value?.text;
+});
+
+const onBeforeUnload = () => {
+  if (!explorerContext.getFolderDataQuery.data?.file) {
+    return;
+  }
+
+  if (player.playlist.value.pathDirectory !== explorerContext.getFolderDataQuery.data.pathDirectory) {
+    return;
+  }
+
+  if (!lastNavigationItem.value) {
+    return;
+  }
+
+  router.push(lastNavigationItem.value.to);
+};
+
+player.hooksOnUnload.before.add(onBeforeUnload);
+onScopeDispose(() => {
+  player.hooksOnUnload.before.delete(onBeforeUnload);
+});
+
+const LazyDialogGallery = defineAsyncComponent(() => {
+  return import('@/components/DialogGallery.vue');
+});
 
 const LazyExplorerElementSystem = defineAsyncComponent(() => {
   return import('./components/ExplorerElementSystem.vue');
@@ -72,37 +119,83 @@ const LazyExplorerElementFileVideo = defineAsyncComponent(() => {
   return import('./components/ExplorerElementFileVideo.vue');
 });
 
+const navigationItems = computed(() => {
+  return (
+    explorerContext.getFolderDataQuery.data?.pathDirectory
+      .split('/')
+      .filter(Boolean)
+      .reduce(
+        (segments, segment) => {
+          return [
+            ...segments,
+            {
+              text: segment,
+              to: [nonNullable(segments.at(-1)).to, segment].join('/'),
+            },
+          ];
+        },
+        [
+          {
+            text: 'root',
+            to: l10n.localizePath('explorer'),
+          },
+        ],
+      ) ?? []
+  );
+});
+
 const { t } = useI18n({
   useScope: 'local',
   messages: {
     ru: {
       content: 'Контент',
-      thatsWhatCloseToMe: 'То, что мне близко. Папка {folderName}, {description}',
-      foldersAndFiles: 'папки и файлы; с музыкой, картинками, видосиками',
-      listenToAudio: 'слушать аудио {fileName}, и другие @:foldersAndFiles',
-      watchTheImage: 'смотреть изображение {fileName}, и другие @:foldersAndFiles',
-      watchTheVideo: 'смотреть видео {fileName}, и другие @:foldersAndFiles',
       treeDots: '...',
+      description: {
+        common: {
+          soWhatWeHaveHere:
+            'Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками',
+          watch: ', смотреть {type} {fileName}',
+          image: 'изображение',
+          video: 'видео',
+        },
+        audio: {
+          checkOutTrack: 'Зацени трек "{name}" — {artists}{album}{year}{duration} и чо нибудь ещё',
+          artists: ' {artists}',
+          album: ' из "{album}"',
+          year: ' ({year})',
+          duration: ' длительностью {duration}',
+          idkWho: 'хз кто',
+        },
+      },
     },
     en: {
       content: 'Content',
-      thatsWhatCloseToMe: 'Thats what close to me. Folder {folderName}, {description}',
-      foldersAndFiles: 'folders and files; with music, pictures, videos',
-      listenToAudio: 'listen to audio {fileName}, and other @:foldersAndFiles',
-      watchTheImage: 'watch the image {fileName}, and other @:foldersAndFiles',
-      watchTheVideo: 'watch the video {fileName}, and other @:foldersAndFiles',
       treeDots: '...',
+      description: {
+        common: {
+          soWhatWeHaveHere:
+            'Hmm-m, what do we have here? Folder {folderName}{fileDescription} and other folders and files; with music, pictures, videos',
+          watch: ', watch the {type} {fileName}',
+          image: 'image',
+          video: 'video',
+        },
+        audio: {
+          checkOutTrack: 'Check out the track "{name}" — {artists}{album}{year}{duration} and something else',
+          artists: ' {artists}',
+          album: ' from "{album}"',
+          year: ' ({year})',
+          duration: ' with a duration of {duration}',
+          idkWho: 'idk who',
+        },
+      },
     },
   },
 });
 
-const explorerContext = useExplorerContext();
-
 const shouldRenderNav = computed(() => {
   return Boolean(
-    explorerContext.navigationLinks.value.length > 1 ||
-      (explorerContext.getFolderDataQuery.data.value &&
-        explorerContext.getFolderDataQuery.data.value.folders.length > 0),
+    navigationItems.value.length > 1 ||
+    (explorerContext.getFolderDataQuery.data && explorerContext.getFolderDataQuery.data.folders.length > 0),
   );
 });
 
@@ -129,77 +222,157 @@ const folderDataItemToTo = (
   return l10n.localizePath(['/explorer', folderDataItem.path].join('/'));
 };
 
-const maybeLastNavigationItemText = computed(() => {
-  return explorerContext.navigationLinks.value.at(-1)?.text;
+const galleryItem = computed(() => {
+  if (!explorerContext.getFolderDataQuery.data?.file) {
+    return undefined;
+  }
+
+  if (!isFolderDataGalleryItem(explorerContext.getFolderDataQuery.data.file)) {
+    return undefined;
+  }
+
+  return explorerContext.getFolderDataQuery.data.file;
 });
 
-const resetableRefSelectedFile = useResetableRef<UnwrapRef<typeof player.theTrack | typeof gallery.item> | null>(null);
+const router = useRouter();
 
-// Два watchEffect нужны, чтобы отображался крайний выбранный + актуальный файл (плеер или галерея)
-watchEffect(() => {
-  if (player.theTrack.value) {
-    resetableRefSelectedFile.value.value = player.theTrack.value;
-
+const onCloseGallery = () => {
+  if (!explorerContext.getFolderDataQuery.data?.file) {
     return;
   }
 
-  if (gallery.item.value) {
-    resetableRefSelectedFile.value.value = gallery.item.value;
-
+  if (!lastNavigationItem.value) {
     return;
   }
 
-  resetableRefSelectedFile.reset();
-});
-watchEffect(() => {
-  if (gallery.item.value) {
-    resetableRefSelectedFile.value.value = gallery.item.value;
-    return;
-  }
+  router.push(lastNavigationItem.value.to);
+};
 
-  if (player.theTrack.value) {
-    resetableRefSelectedFile.value.value = player.theTrack.value;
+const onChangeGalleryItem = (
+  item: components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'],
+) => {
+  router.replace(folderDataItemToTo(item));
+};
 
-    return;
-  }
-
-  resetableRefSelectedFile.reset();
-});
+const intlListFormat = useIntlListFormat(undefined, { style: 'long', type: 'conjunction' });
 
 useSeoMeta({
   title: () => {
-    return (
-      [
-        ...(isNil(maybeLastNavigationItemText.value) ? [] : [maybeLastNavigationItemText.value]),
-        ...(isNil(resetableRefSelectedFile.value.value) ? [] : [resetableRefSelectedFile.value.value.name]),
-      ].join(' – ') || undefined
-    );
+    return explorerContext.getFolderDataQuery.data?.file?.name ?? folderName.value ?? undefined;
   },
+
   description: () => {
-    if (isNil(maybeLastNavigationItemText.value)) {
-      return undefined;
+    if (isFolderDataItemFileAudio(explorerContext.getFolderDataQuery.data?.file)) {
+      return t('description.audio.checkOutTrack', {
+        name: explorerContext.getFolderDataQuery.data.file.name,
+        artists:
+          explorerContext.getFolderDataQuery.data.file.metadata.artists.length > 0
+            ? intlListFormat.value.format(explorerContext.getFolderDataQuery.data.file.metadata.artists)
+            : t('description.audio.idkWho'),
+        album:
+          explorerContext.getFolderDataQuery.data.file.metadata.album || folderName.value
+            ? t('description.audio.album', {
+                album: explorerContext.getFolderDataQuery.data.file.metadata.album ?? folderName.value,
+              })
+            : undefined,
+        year: explorerContext.getFolderDataQuery.data.file.metadata.year
+          ? t('description.audio.year', { year: explorerContext.getFolderDataQuery.data.file.metadata.year })
+          : undefined,
+        duration: explorerContext.getFolderDataQuery.data.file.metadata.duration
+          ? t('description.audio.duration', {
+              duration: millisecondsToHumanReadable(explorerContext.getFolderDataQuery.data.file.metadata.duration),
+            })
+          : undefined,
+      });
     }
 
-    let description: string | null = null;
-
-    if (resetableRefSelectedFile.value.value?.fileType === FILE_TYPES.AUDIO) {
-      description ??= t('listenToAudio', { fileName: resetableRefSelectedFile.value.value.name });
-    }
-
-    if (resetableRefSelectedFile.value.value?.fileType === FILE_TYPES.VIDEO) {
-      description ??= t('watchTheVideo', { fileName: resetableRefSelectedFile.value.value.name });
-    }
-
-    if (resetableRefSelectedFile.value.value?.fileType === FILE_TYPES.IMAGE) {
-      description ??= t('watchTheImage', { fileName: resetableRefSelectedFile.value.value.name });
-    }
-
-    description ??= t('foldersAndFiles');
-
-    return t('thatsWhatCloseToMe', {
-      folderName: maybeLastNavigationItemText.value,
-      description,
+    return t('description.common.soWhatWeHaveHere', {
+      folderName: folderName.value,
+      fileDescription: galleryItem.value
+        ? t('description.common.watch', {
+            type: isFolderDataItemFileImage(galleryItem.value) //
+              ? t('description.common.image')
+              : t('description.common.video'),
+            fileName: galleryItem.value.name,
+          })
+        : undefined,
     });
+  },
+
+  // именно так и надо
+  ogImage: () => {
+    const images = (
+      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
+        if (isFolderDataItemFileImage(file)) {
+          return [
+            {
+              height: file.metadata.height,
+              width: file.metadata.width,
+              url: file.src,
+              alt: file.name,
+            },
+          ];
+        }
+
+        return [];
+      }) ?? []
+    ).toSorted((image1) => {
+      if (image1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return images.length > 0 ? images : undefined;
+  },
+
+  // именно так и надо
+  ogVideo: () => {
+    const videos = (
+      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
+        if (isFolderDataItemFileVideo(file)) {
+          return [
+            {
+              url: file.src,
+              alt: file.name,
+              width: file.metadata.width,
+              height: file.metadata.height,
+            },
+          ];
+        }
+        return [];
+      }) ?? []
+    ).toSorted((video1) => {
+      if (video1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return videos.length > 0 ? videos : undefined;
+  },
+
+  // именно так и надо
+  ogAudio: () => {
+    const audios = (
+      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
+        if (isFolderDataItemFileAudio(file)) {
+          return [
+            {
+              url: file.src,
+            },
+          ];
+        }
+        return [];
+      }) ?? []
+    ).toSorted((audio1) => {
+      if (audio1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
+        return -1;
+      }
+      return 0;
+    });
+
+    return audios.length > 0 ? audios : undefined;
   },
 });
 </script>

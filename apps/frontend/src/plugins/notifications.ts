@@ -1,3 +1,4 @@
+import { nonNullable } from '@/utils/nonNullable';
 import { inject, shallowReactive } from 'vue';
 import type { FunctionPlugin, InjectionKey, ShallowReactive } from 'vue';
 
@@ -57,11 +58,5 @@ export const notifications: FunctionPlugin = (app) => {
 };
 
 export const useNotifications = () => {
-  const notifications = inject(INJECTION_KEY_NOTIFICATIONS);
-
-  if (!notifications) {
-    throw new Error('Notifications plugin is not installed');
-  }
-
-  return notifications;
+  return nonNullable(inject(INJECTION_KEY_NOTIFICATIONS));
 };

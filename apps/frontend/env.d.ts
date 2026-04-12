@@ -8,18 +8,7 @@ declare module '*.vue' {
   export default component;
 }
 
-declare module '*.yaml' {
-  type Value = string | number | boolean | null | undefined | Record<string, Value> | Array<Value>;
-
-  type ObjectValue = Record<string, Value>;
-
-  const content: ObjectValue;
-
-  export default content;
-}
-
 declare global {
-  var __GALLERY__: unknown;
   var __PLAYER__: unknown;
   var __QUERY__: unknown;
 }

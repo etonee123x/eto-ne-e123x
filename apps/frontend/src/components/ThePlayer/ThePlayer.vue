@@ -1,22 +1,27 @@
 <template>
-  <BaseSwipable data-player class="bg-background z-player border-t border-primary-500 py-2 w-full" @swiped="onSwiped">
-    <div class="layout-container flex flex-col gap-1 justify-center">
-      <component
-        :is="ComponentClose"
+  <BaseSwipable
+    data-player
+    class="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full"
+    @swiped="onSwiped"
+  >
+    <div class="layout-container flex flex-col gap-2 justify-center">
+      <BaseButton
         v-if="shouldRenderButtonClose"
-        class="text-xl absolute end-2 top-2 hover-none:hidden"
+        class="text-xl absolute inset-e-2 top-2 hover-none:hidden"
         :aria-label="t('closePlayer')"
         @click="onClickClose"
       >
         <BaseIcon :path="mdiClose" />
-      </component>
+      </BaseButton>
       <BaseAlwaysScrollable class="[--base-always-scrollable--content--margin:0_auto]">
-        <header class="cursor-pointer flex items-center gap-0.5" :title="t('copyLink')" @click="onClickTitle">
+        <header class="flex items-center gap-2 text-lg">
           <h2>{{ player.theTrack.value?.name }}</h2>
-          <BaseIcon :path="mdiLinkVariant" />
+          <BaseButton :aria-label="t('copyLink')" class="p-1" @click="onClickTitle">
+            <BaseIcon :path="mdiLinkVariant" />
+          </BaseButton>
         </header>
       </BaseAlwaysScrollable>
-      <audio :src="player.theTrack.value?.src" autoplay ref="audio" @ended="onEnded" />
+      <audio :src="player.theTrack.value?.src" autoplay :onEnded ref="audio" />
       <div class="h-5 w-full mx-auto flex justify-between items-center gap-2">
         <time :datetime="currentTimeFormats.iso">
           {{ currentTimeFormats.humanReadable }}
@@ -44,7 +49,7 @@
           <li v-for="controlButton in controlButtons" :key="controlButton.key">
             <BaseButton
               :disabled="controlButton.disabled"
-              class="whitespace-nowrap min-w-6 h-6 w-8"
+              class="whitespace-nowrap h-full w-8"
               :aria-label="controlButton.ariaLabel"
               @click="controlButton.onClick"
             >
@@ -73,7 +78,7 @@ import {
   mdiSkipBackward,
   mdiSkipForward,
 } from '@mdi/js';
-import { computed, useTemplateRef, h, shallowReactive } from 'vue';
+import { computed, useTemplateRef, shallowReactive, onScopeDispose, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PlayerSlider from './components/PlayerSlider.vue';
@@ -86,16 +91,12 @@ import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable
 import { to0To1Borders } from '@/utils/to0To1Borders';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import { Temporal } from 'temporal-polyfill';
-import { RouterLink, useRouter } from 'vue-router';
-import { isNil } from '@etonee123x/shared/utils/isNil';
-import { BUTTON } from '@/helpers/ui';
 import { nonNullable } from '@/utils/nonNullable';
 import { useIsMobile } from '@/composables/useIsMobile';
 import ClientOnly from '../ClientOnly.vue';
 import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
 import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
 import { usePlayer } from '@/plugins/player';
-import { useExplorerContext } from '@/views/Explorer/contexts/explorer';
 import { useL10n } from '@/composables/useL10n';
 
 const l10n = useL10n();
@@ -132,21 +133,18 @@ const historyItems = shallowReactive<Array<number>>([]);
 const [isShuffleModeEnabled] = useToggle();
 const currentPlayingNumber = computed({
   get: () => {
-    return player.playlist.value.findIndex((playlistItem) => {
+    return player.playlist.value.tracks.findIndex((playlistItem) => {
       return playlistItem.src === player.theTrack.value?.src;
     });
   },
   set: (value) => {
-    player.theTrack.value = player.playlist.value[value] ?? null;
+    player.theTrack.value = player.playlist.value.tracks[value] ?? null;
   },
 });
 
 const isMobile = useIsMobile();
 
-const router = useRouter();
-
-const explorerContext = useExplorerContext();
-const player = usePlayer();
+const player = reactive(usePlayer());
 const notifications = useNotifications();
 
 const audio = useTemplateRef('audio');
@@ -175,14 +173,14 @@ const load = {
     historyItems.push(currentPlayingNumber.value);
 
     currentPlayingNumber.value = isShuffleModeEnabled.value
-      ? getRandomExceptCurrentIndex(player.playlist.value.length, currentPlayingNumber.value)
-      : (currentPlayingNumber.value + 1) % player.playlist.value.length;
+      ? getRandomExceptCurrentIndex(player.playlist.value.tracks.length, currentPlayingNumber.value)
+      : (currentPlayingNumber.value + 1) % player.playlist.value.tracks.length;
   },
   previous: () => {
     currentPlayingNumber.value =
       historyItems.length > 0
         ? (historyItems.pop() ?? 0)
-        : (currentPlayingNumber.value - 1 + player.playlist.value.length) % player.playlist.value.length;
+        : (currentPlayingNumber.value - 1 + player.playlist.value.tracks.length) % player.playlist.value.tracks.length;
   },
 };
 
@@ -223,61 +221,19 @@ const controlButtons = computed(() => {
 
 const onEnded = load.next;
 
-const ComponentClose = computed(() => {
-  const to = toOnClose();
-
-  return to ? h(RouterLink, { to, class: BUTTON.default }) : BaseButton;
-});
-
-const toOnClose = () => {
-  if (!player.theTrack.value) {
-    return;
-  }
-
-  const currentFolderData = explorerContext.getFolderDataQuery.data.value;
-
-  const maybeFile = currentFolderData?.file;
-
-  if (!maybeFile) {
-    return;
-  }
-
-  const lastNavigationItem = explorerContext.navigationLinks.value.at(-1);
-
-  if (!lastNavigationItem) {
-    return;
-  }
-
-  if (
-    !player.playlist.value.some((track) => {
-      return track.src === maybeFile.src;
-    })
-  ) {
-    return;
-  }
-
-  return lastNavigationItem.to;
-};
-
-const unloadTrack = () => {
-  player.theTrack.value = null;
-
+const reloadAudio = () => {
   // Такой вот костыль... Нужен чтобы выгрузить текущий трек из управления аудио.
   // Без этого при закрытии плеера и нажатии на кнопку play/pause будет играть/останавливаться трек.
   audio.value?.load();
 };
 
-const onClickClose = unloadTrack;
+player.hooksOnUnload.after.add(reloadAudio);
+onScopeDispose(() => {
+  player.hooksOnUnload.after.delete(reloadAudio);
+});
 
-const onSwiped = () => {
-  const to = toOnClose();
-
-  if (isNil(to)) {
-    return;
-  }
-
-  router.push(to).then(unloadTrack);
-};
+const onClickClose = player.unload;
+const onSwiped = player.unload;
 
 const clipboard = useClipboard({
   source: () => {

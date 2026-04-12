@@ -1,38 +1,52 @@
 <template>
-  <BasePage :h1="t('blog')" ref="basePage">
-    <template v-if="authContext.isAdmin.value">
-      <LazyFormPost
-        :post="{ text: '', attachments: [] }"
-        class="mb-8 relative after:w-full after:h-px after:bg-neutral-700 after:absolute after:top-full after:mt-4"
-        ref="formPost"
-        @submit="onSubmit"
-      >
-        <BaseButton v-if="formPost?.isValid" type="submit" :isLoading="blogContext.postPostMutation.isPending.value">
-          {{ t('send') }}
-        </BaseButton>
-      </LazyFormPost>
-    </template>
-
-    <template v-if="hasPosts">
-      <BlogPost
-        v-for="post in posts"
-        class="not-last:mb-4"
-        :post
-        :onBeforeDelete
-        :isInEditMode="editModeFor === post._meta.id"
-        :key="post._meta.id"
-        @changeEditModeFor="onChangeEditModeFor"
-      />
-    </template>
-    <div
-      v-else-if="!blogContext.getPostsQuery.isFetching.value"
-      class="text-lg flex justify-center items-center flex-1 h-full"
+  <BasePage :h1="t('blog')">
+    <LazyFormPost
+      v-if="authContext.isAdmin.value"
+      :post="{ text: '', attachments: [] }"
+      class="mb-8 relative after:w-full after:h-px after:bg-neutral-700 after:absolute after:top-full after:mt-4"
+      ref="formPost"
+      @submit="onSubmit"
     >
-      {{ t('nothingWasFound') }}
-    </div>
-    <LazyBaseLoading v-if="blogContext.getPostsQuery.isFetching.value" isFull class="flex justify-center" />
+      <BaseButton v-if="formPost?.isValid" type="submit" :isLoading="blogContext.postPostMutation.isPending">
+        {{ t('send') }}
+      </BaseButton>
+    </LazyFormPost>
 
-    <DialogConfirmation
+    <div class="flex flex-col gap-4">
+      <BaseButton
+        v-if="shouldRenderButtonUp"
+        class="fixed z-10 inset-x-0 top-header-height"
+        :propsIconPrepend="{ path: mdiArrowUp }"
+        @click="onClickButtonUp"
+      >
+        {{ t('toTheBeginning') }}
+      </BaseButton>
+
+      <LazyBaseLoading v-if="blogContext.getPostsQuery.isFetchingPreviousPage" isFull class="flex justify-center" />
+
+      <template v-if="hasPosts">
+        <BlogPost
+          v-for="post in posts"
+          :post
+          :onBeforeDelete
+          :isInEditMode="editModeFor === post._meta.id"
+          :data-id="post._meta.id"
+          :key="post._meta.id"
+          @changeEditModeFor="onChangeEditModeFor"
+        />
+      </template>
+      <div
+        v-else-if="!blogContext.getPostsQuery.isFetching"
+        class="text-lg flex justify-center items-center flex-1 h-full"
+      >
+        {{ t('nothingWasFound') }}
+      </div>
+
+      <LazyBaseLoading v-if="blogContext.getPostsQuery.isFetchingNextPage" isFull class="flex justify-center" />
+    </div>
+
+    <LazyDialogConfirmation
+      v-if="authContext.isAdmin.value"
       :title="t('confirmDelete')"
       :message="t('deleteMessage')"
       ref="dialogConfirmationDelete"
@@ -41,40 +55,76 @@
       @close="cancel"
     />
 
-    <DialogPost />
+    <LazyDialogGallery
+      v-if="galleryItemContext.value"
+      :item="galleryItemContext.value"
+      :items="
+        blogContext.getPostsQuery.data?.pages
+          .flatMap(propertyCurried('rows'))
+          .flatMap(propertyCurried('attachments'))
+          .filter((attachment) => {
+            return isFolderDataGalleryItem(attachment);
+          }) ?? []
+      "
+      :onClose="onCloseGallery"
+    />
   </BasePage>
 </template>
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useConfirmDialog, useInfiniteScroll } from '@vueuse/core';
-import { defineAsyncComponent, computed, useTemplateRef, ref } from 'vue';
+import { useConfirmDialog, useInfiniteScroll, useWindowScroll } from '@vueuse/core';
+import { defineAsyncComponent, computed, useTemplateRef, ref, onMounted, reactive } from 'vue';
 
-import DialogPost from './components/DialogPost.vue';
 import BlogPost from './components/BlogPost.vue';
 
-import DialogConfirmation from '@/components/DialogConfirmation.vue';
 import { isClient } from '@/constants/target';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
 import { useAuthContext } from '@/contexts/auth';
-import { useBlogContext } from './contexts/blog';
+import { provideBlogContext } from './contexts/blog';
+import { useRoute, useRouter } from 'vue-router';
+import { mdiArrowUp } from '@mdi/js';
+import { useQueryClient } from '@tanstack/vue-query';
+import { ROUTE_NAMES } from '@/plugins/router';
+import { FILE_TYPES, isFolderDataGalleryItem } from '@/helpers/folderData';
+import { propertyCurried } from '@etonee123x/shared/utils/property';
+import { provideGalleryItemContext } from './contexts/galleryItem';
 
-const LazyBaseLoading = defineAsyncComponent(() => {
-  return import('@/components/ui/BaseLoading.vue');
+const galleryItemContext = provideGalleryItemContext();
+
+const onCloseGallery = () => {
+  galleryItemContext.reset();
+};
+
+const LazyDialogGallery = defineAsyncComponent(() => {
+  return import('@/components/DialogGallery.vue');
+});
+
+const LazyBaseLoading = defineAsyncComponent({
+  loader: () => {
+    return import('@/components/ui/BaseLoading.vue');
+  },
+  suspensible: false,
 });
 
 const LazyFormPost = defineAsyncComponent(() => {
   return import('./components/FormPost.vue');
 });
 
+const LazyDialogConfirmation = defineAsyncComponent(() => {
+  return import('@/components/DialogConfirmation.vue');
+});
+
+const route = useRoute();
+
 const dialogConfirmationDelete = useTemplateRef('dialogConfirmationDelete');
 const formPost = useTemplateRef('formPost');
 
-const basePage = useTemplateRef('basePage');
-
 const { reveal, confirm, cancel } = useConfirmDialog();
+
+const windowScroll = reactive(useWindowScroll());
 
 const { t } = useI18n({
   useScope: 'local',
@@ -85,9 +135,16 @@ const { t } = useI18n({
       nothingWasFound: 'Ничего не найдено...',
       confirmDelete: 'Удалить пост',
       deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
-      microblogWithNoClearDirection:
-        'Микроблог без чёткой направленности. Что-то из мыслей, что-то случайное. Всё складывается в одну ленту',
-      myBlog: 'Мой блог. Пост.',
+      myBlog:
+        'Мой блог, тут можно заценить мои посты; пишу о жизни непростой, о мыслях, что меня волнуют! Вот и думай головой.',
+      postInMyBlog: 'Пост в моём блоге',
+      toTheBeginning: 'Наверх',
+      postAttachmentN: {
+        _default: 'Вложение к посту №{n},',
+        image: '@:postAttachmentN._default изображение',
+        video: '@:postAttachmentN._default видик',
+        audio: '@:postAttachmentN._default аудио',
+      },
     },
     en: {
       blog: 'Blog',
@@ -95,22 +152,31 @@ const { t } = useI18n({
       nothingWasFound: 'Nothing was found...',
       confirmDelete: 'Delete Post',
       deleteMessage: 'Are you sure you want to delete this post?',
-      microblogWithNoClearDirection:
-        'Microblog with no clear direction. Something from thoughts, something random. Everything is combined into one feed.',
-      myBlog: 'My blog. Post.',
+      myBlog:
+        'My blog, here you can check out my posts; I write about the complexities of life, about thoughts that concern me! So think with your head.',
+      postInMyBlog: 'A post in my blog',
+      toTheBeginning: 'To the beginning',
+      postAttachmentN: {
+        _default: 'Post attachment №{n},',
+        image: '@:postAttachmentN._default image',
+        video: '@:postAttachmentN._default video',
+        audio: '@:postAttachmentN._default audio',
+      },
     },
   },
 });
 
+const router = useRouter();
+
 const editModeFor = ref<string | null>(null);
 
-const blogContext = useBlogContext();
+const blogContext = await provideBlogContext();
 
 const authContext = useAuthContext();
 
 const posts = computed(() => {
   return (
-    blogContext.getPostsQuery.data.value?.pages.flatMap((page) => {
+    blogContext.getPostsQuery.data?.pages.flatMap((page) => {
       return page.rows;
     }) ?? []
   );
@@ -124,7 +190,11 @@ useInfiniteScroll(
   () => {
     return isClient ? (globalThis as unknown as Window) : null;
   },
-  () => {
+  (state) => {
+    if (!state.isScrolling) {
+      return;
+    }
+
     return (
       blogContext.getPostsQuery
         .fetchNextPage()
@@ -141,9 +211,51 @@ useInfiniteScroll(
   },
   {
     canLoadMore: () => {
-      return !blogContext.getPostsQuery.isFetching.value && blogContext.getPostsQuery.hasNextPage.value;
+      return !blogContext.getPostsQuery.isFetchingNextPage && blogContext.getPostsQuery.hasNextPage;
     },
-    distance: 100,
+    distance: isClient ? globalThis.innerHeight / 2 : 0,
+  },
+);
+
+useInfiniteScroll(
+  () => {
+    return isClient ? (globalThis as unknown as Window) : null;
+  },
+  (state) => {
+    if (!state.isScrolling) {
+      return;
+    }
+
+    const scrollingElement = globalThis.document.scrollingElement;
+
+    if (!scrollingElement) {
+      return;
+    }
+
+    const scrollTop = scrollingElement.scrollTop;
+    const scrollHeightBefore = scrollingElement.scrollHeight;
+
+    return (
+      blogContext.getPostsQuery
+        .fetchPreviousPage()
+        .then(() => {
+          scrollingElement.scrollTop = scrollingElement.scrollHeight - scrollHeightBefore + scrollTop;
+          return undefined;
+        })
+        // чтобы не спамить запросами при ошибке (когда нет интернета)
+        .catch(() => {
+          return new Promise((resolve) => {
+            return setTimeout(resolve, 1000);
+          });
+        })
+    );
+  },
+  {
+    canLoadMore: () => {
+      return !blogContext.getPostsQuery.isFetchingPreviousPage && blogContext.getPostsQuery.hasPreviousPage;
+    },
+    distance: isClient ? globalThis.innerHeight / 2 : 0,
+    direction: 'top',
   },
 );
 
@@ -179,9 +291,89 @@ const onChangeEditModeFor: NonNullable<InstanceType<typeof BlogPost>['onChangeEd
   editModeFor.value = id;
 };
 
+const post = computed(() => {
+  if (!route.params.postId) {
+    return null;
+  }
+
+  return (
+    posts.value.find((post) => {
+      return post._meta.id === route.params.postId;
+    }) ?? null
+  );
+});
+
 useSeoMeta({
   description: () => {
-    return blogContext.getPostByIdQuery.data.value ? t('myBlog') : t('microblogWithNoClearDirection');
+    if (!route.params.postId) {
+      return t('myBlog');
+    }
+
+    if (!post.value?.text) {
+      return t('postInMyBlog');
+    }
+
+    const max = 140;
+    const text = post.value.text.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim();
+
+    if (text.length <= max) {
+      return text;
+    }
+
+    const textSliced = text.slice(0, max);
+    const indexOfLastSpace = textSliced.lastIndexOf(' ');
+
+    if (indexOfLastSpace === -1) {
+      return textSliced.slice(0, max - 1) + '…';
+    }
+
+    return textSliced.slice(0, indexOfLastSpace) + '…';
   },
+  ogImage: () => {
+    return post.value?.attachments.flatMap((attachment, index) => {
+      if (attachment.fileType !== FILE_TYPES.IMAGE) {
+        return [];
+      }
+
+      return [
+        {
+          url: attachment.src,
+          width: attachment.metadata.width,
+          height: attachment.metadata.height,
+          alt: t('postAttachmentN.image', { n: index }),
+        },
+      ];
+    });
+  },
+});
+
+const shouldRenderButtonUp = computed(() => {
+  return isClient && windowScroll.y > globalThis.innerHeight / 2;
+});
+
+const queryClient = useQueryClient();
+
+const onClickButtonUp = async () => {
+  await router.push({ name: ROUTE_NAMES.BLOG });
+
+  queryClient.setQueryData<(typeof blogContext.getPostsQuery)['data']>(['posts'], () => {
+    return {
+      pages: [],
+      pageParams: [],
+    };
+  });
+
+  await queryClient.invalidateQueries({ queryKey: ['posts'] });
+};
+
+onMounted(() => {
+  if (!route.params.postId) {
+    return;
+  }
+
+  globalThis.document.querySelector(`[data-id="${String(route.params.postId)}"]`)?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
 });
 </script>

@@ -16,7 +16,7 @@ import { LOCALES_INFO } from '@/constants/localesInfo';
 import { isKnownLocale } from '@/helpers/isKnownLocale';
 import Negotiator from 'negotiator';
 import { propertyCurried } from '@etonee123x/shared/utils/property';
-import { ROUTE_NAME_TO_PATH } from '@/router';
+import { ROUTE_NAME_TO_PATH } from '@/plugins/router';
 import { nonNullable } from '@/utils/nonNullable';
 import { client } from '@/api/client';
 
@@ -132,10 +132,8 @@ const auth: RequestHandler = async (request, response, next) => {
       return response.clearCookie(KEY_JWT);
     });
 
-  const requestUrl = new URL(request.url, requestToOrigin(request));
-
+  const requestUrl = new URL(request.originalUrl, requestToOrigin(request));
   requestUrl.searchParams.delete(KEY_JWT);
-
   response.redirect(303, requestUrl.toString());
 };
 

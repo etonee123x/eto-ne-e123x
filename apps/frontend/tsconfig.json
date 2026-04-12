@@ -32,9 +32,7 @@
     "allowSyntheticDefaultImports": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "env.d.ts",
-    "vite.config.ts"
+    "**/*.ts",
+    "**/*.vue",
   ]
 }

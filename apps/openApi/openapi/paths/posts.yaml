@@ -4,14 +4,50 @@ get:
   tags: 
     - Posts
   parameters:
+    # - in: query
+    #   name: cursorNext
+    #   required: false
+    #   schema:
+    #     type: integer
+    #     minimum: 0
+    #     default: 0
+    #   description: Cursor for the next page
+    # - in: query
+    #   name: cursorPrevious
+    #   required: false
+    #   schema:
+    #     type: integer
+    #     minimum: 0
+    #     default: 0
+    #   description: Cursor for the previous page
+    # - in: query
+    #   name: postId
+    #   required: false
+    #   schema:
+    #     type: integer
+    #     minimum: 0
+    #     default: 0
+    #   description: ID of the post
     - in: query
-      name: page
+      name: filters
       required: false
       schema:
-        type: integer
-        minimum: 0
-        default: 0
-      description: Page number (0-based)
+        type: object
+        oneOf:
+          - properties:
+              cursorNext:
+                type: integer
+                minimum: 0
+                description: Cursor for the next page
+          - properties:
+              cursorPrevious:
+                type: integer
+                minimum: 0
+                description: Cursor for the previous page
+          - properties:
+              postId:
+                type: string
+                description: ID of the post
     - in: query
       name: pageSize
       required: false

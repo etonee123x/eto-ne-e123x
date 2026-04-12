@@ -1,12 +1,11 @@
 import { createSSRApp, h, Suspense } from 'vue';
 
-import { createRouter } from '@/router';
-import { i18n } from '@/i18n';
+import { createRouter } from '@/plugins/router';
+import { i18n } from '@/plugins/i18n';
 import App from '@/App.vue';
 import { dialogsIds } from '@/plugins/dialogsIds';
 import { notifications } from '@/plugins/notifications';
 import { createPlayer } from '@/plugins/player';
-import { createGallery } from '@/plugins/gallery';
 import { VueQueryPlugin, QueryClient, keepPreviousData } from '@tanstack/vue-query';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 
@@ -24,9 +23,6 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
   app.use(notifications);
   app.use(dialogsIds);
   app.use(i18n);
-
-  const gallery = createGallery();
-  app.use(gallery);
 
   const player = createPlayer();
   app.use(player);
@@ -47,7 +43,10 @@ export const createApp = (context: Partial<{ url: string }> = {}) => {
       },
     },
   });
-  app.use(VueQueryPlugin, { queryClient });
+  app.use(VueQueryPlugin, {
+    queryClient,
+    enableDevtoolsV6Plugin: true,
+  });
 
-  return { app, router, i18n, player, gallery, queryClient };
+  return { app, router, i18n, player, queryClient };
 };

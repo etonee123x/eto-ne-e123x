@@ -85,13 +85,25 @@ paths:
         - Posts
       parameters:
         - in: query
-          name: page
+          name: filters
           required: false
           schema:
-            type: integer
-            minimum: 0
-            default: 0
-          description: Page number (0-based)
+            type: object
+            oneOf:
+              - properties:
+                  cursorNext:
+                    type: integer
+                    minimum: 0
+                    description: Cursor for the next page
+              - properties:
+                  cursorPrevious:
+                    type: integer
+                    minimum: 0
+                    description: Cursor for the previous page
+              - properties:
+                  postId:
+                    type: string
+                    description: ID of the post
         - in: query
           name: pageSize
           required: false
@@ -147,30 +159,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error401'
   /posts/{id}:
-    get:
-      operationId: getPostById
-      summary: Get post by ID
-      tags:
-        - Posts
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PostResponse'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error404'
     patch:
       operationId: updatePostById
       summary: Update post by ID
@@ -469,13 +457,15 @@ components:
         _meta:
           type: object
           properties:
-            isEnd:
-              type: boolean
-            page:
+            cursorPrevious:
               type: integer
+              nullable: true
+            cursorNext:
+              type: integer
+              nullable: true
           required:
-            - isEnd
-            - page
+            - cursorPrevious
+            - cursorNext
         rows:
           type: array
           items:
@@ -525,6 +515,7 @@ components:
           type: array
           items:
             type: string
+            format: binary
       required:
         - text
         - attachments
@@ -556,10 +547,10 @@ components:
           oneOf:
             - $ref: '#/components/schemas/FolderDataItemFile'
             - type: 'null'
-        path:
+        pathDirectory:
           type: string
       required:
         - folders
         - files
         - file
-        - path
+        - pathDirectory

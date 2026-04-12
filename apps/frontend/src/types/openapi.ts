@@ -47,8 +47,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get post by ID */
-        get: operations["getPostById"];
+        get?: never;
         put?: never;
         post?: never;
         /** Delete post by ID */
@@ -138,8 +137,8 @@ export interface components {
         };
         PostsResponse: {
             _meta: {
-                isEnd: boolean;
-                page: number;
+                cursorPrevious: number | null;
+                cursorNext: number | null;
             };
             rows: components["schemas"]["PostResponse"][];
         };
@@ -165,7 +164,7 @@ export interface components {
             folders: components["schemas"]["FolderDataItemFolder"][];
             files: components["schemas"]["FolderDataItemFile"][];
             file: components["schemas"]["FolderDataItemFile"] | null;
-            path: string;
+            pathDirectory: string;
         };
     };
     responses: never;
@@ -245,8 +244,16 @@ export interface operations {
     getPosts: {
         parameters: {
             query?: {
-                /** @description Page number (0-based) */
-                page?: number;
+                filters?: {
+                    /** @description Cursor for the next page */
+                    cursorNext?: number;
+                } | {
+                    /** @description Cursor for the previous page */
+                    cursorPrevious?: number;
+                } | {
+                    /** @description ID of the post */
+                    postId?: string;
+                };
                 /** @description Items per page */
                 pageSize?: number;
             };
@@ -314,37 +321,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error401"];
-                };
-            };
-        };
-    };
-    getPostById: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PostResponse"];
-                };
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Error404"];
                 };
             };
         };
@@ -475,16 +451,19 @@ export interface operations {
         };
     };
 }
+type FlattenedDeepRequired<T> = {
+    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
+};
 type ReadonlyArray<T> = [
     Exclude<T, undefined>
 ] extends [
     unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
-export const itemTypeValues: ReadonlyArray<components["schemas"]["ItemType"]> = ["FOLDER", "FILE"];
-export const folderDataItemFileBaseItemTypeValues: ReadonlyArray<components["schemas"]["FolderDataItemFileBase"]["itemType"]> = ["FILE"];
-export const fileTypeValues: ReadonlyArray<components["schemas"]["FileType"]> = ["IMAGE", "VIDEO", "AUDIO", "UNKNOWN"];
-export const folderDataItemAudioFileTypeValues: ReadonlyArray<components["schemas"]["FolderDataItemAudio"]["fileType"]> = ["AUDIO"];
-export const folderDataItemImageFileTypeValues: ReadonlyArray<components["schemas"]["FolderDataItemImage"]["fileType"]> = ["IMAGE"];
-export const folderDataItemVideoFileTypeValues: ReadonlyArray<components["schemas"]["FolderDataItemVideo"]["fileType"]> = ["VIDEO"];
-export const folderDataItemUnknownFileTypeValues: ReadonlyArray<components["schemas"]["FolderDataItemUnknown"]["fileType"]> = ["UNKNOWN"];
-export const folderDataItemFolderItemTypeValues: ReadonlyArray<components["schemas"]["FolderDataItemFolder"]["itemType"]> = ["FOLDER"];
+export const itemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["ItemType"]> = ["FOLDER", "FILE"];
+export const folderDataItemFileBaseItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemFileBase"]["itemType"]> = ["FILE"];
+export const fileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FileType"]> = ["IMAGE", "VIDEO", "AUDIO", "UNKNOWN"];
+export const folderDataItemAudioFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemAudio"]["fileType"]> = ["AUDIO"];
+export const folderDataItemImageFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemImage"]["fileType"]> = ["IMAGE"];
+export const folderDataItemVideoFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemVideo"]["fileType"]> = ["VIDEO"];
+export const folderDataItemUnknownFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemUnknown"]["fileType"]> = ["UNKNOWN"];
+export const folderDataItemFolderItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemFolder"]["itemType"]> = ["FOLDER"];

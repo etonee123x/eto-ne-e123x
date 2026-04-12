@@ -2,7 +2,7 @@
   <nav class="z-explorer-navbar">
     <ul class="bg-background -mx-(--container-padding) px-(--container-padding) flex items-center overflow-x-auto py-1">
       <li
-        v-for="navigationItem in explorerContext.navigationLinks.value"
+        v-for="navigationItem in navigationItems"
         class="whitespace-nowrap last:text-primary-500 after:px-2 after:content-['>'] last:after:content-['']"
         :key="navigationItem.to"
       >
@@ -15,7 +15,5 @@
 </template>
 
 <script setup lang="ts">
-import { useExplorerContext } from '../contexts/explorer';
-
-const explorerContext = useExplorerContext();
+defineProps<{ navigationItems: Array<{ to: string; text: string }> }>();
 </script>

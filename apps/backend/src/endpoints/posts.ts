@@ -48,28 +48,85 @@ const tableControllerPosts = new TableController<Omit<components['schemas']['Pos
 
 export const getPosts: RequestHandlerTyped<'/posts', 'get'> = async (request, response) => {
   const url = requestToUrl(request);
-  const pageSize = Number(nonNullable(url.searchParams.get('pageSize')));
-  const page = Number(nonNullable(url.searchParams.get('page')));
+  const pageSize = Number(nonNullable(url.searchParams.get('pageSize') ?? 10));
+  const cursorPrevious = url.searchParams.get('filters[cursorPrevious]');
+  const cursorNext = url.searchParams.get('filters[cursorNext]');
+  const postId = url.searchParams.get('filters[postId]');
 
-  const indexInitial = page * pageSize;
-  const indexLast = indexInitial + pageSize;
   const posts = tableControllerPosts.read();
 
-  return response.send({
-    _meta: {
-      isEnd: indexLast >= posts.length,
-      page,
-    },
-    rows: posts.slice(indexInitial, indexLast),
-  });
-};
+  if (!cursorPrevious && !cursorNext && !postId) {
+    return response.send({
+      _meta: {
+        cursorPrevious: null,
+        cursorNext: posts[pageSize]?._meta.createdAt ?? null,
+      },
+      rows: posts.slice(0, pageSize),
+    });
+  }
 
-export const getPostById: RequestHandlerTyped<'/posts/{id}', 'get'> = async (request, response) => {
-  const id = request.params.id;
+  if (postId) {
+    const index = posts.findIndex((post) => {
+      return post._meta.id === postId;
+    });
 
-  const post = tableControllerPosts.readRowById(id);
+    if (index === -1) {
+      throw createHttpError(404, 'Post not found');
+    }
 
-  return response.send(post);
+    const start = Math.max(0, index - pageSize);
+    const end = Math.min(index + pageSize, posts.length);
+
+    return response.send({
+      _meta: {
+        cursorPrevious: posts[start - 1]?._meta.createdAt ?? null,
+        cursorNext: posts[end]?._meta.createdAt ?? null,
+      },
+      rows: posts.slice(start, end),
+    });
+  }
+
+  if (cursorPrevious) {
+    const index = posts.findIndex((post) => {
+      return String(post._meta.createdAt) === cursorPrevious;
+    });
+
+    if (index === -1) {
+      throw createHttpError(400, 'Invalid cursorPrevious');
+    }
+
+    const indexLast = Math.min(posts.length, index + 1);
+    const indexInitial = Math.max(0, indexLast - pageSize);
+
+    return response.send({
+      _meta: {
+        cursorPrevious: posts[indexInitial - 1]?._meta.createdAt ?? null,
+        cursorNext: posts[indexLast]?._meta.createdAt ?? null,
+      },
+      rows: posts.slice(indexInitial, indexLast),
+    });
+  }
+
+  if (cursorNext) {
+    const index = posts.findIndex((post) => {
+      return String(post._meta.createdAt) === cursorNext;
+    });
+
+    if (index === -1) {
+      throw createHttpError(400, 'Invalid cursorNext');
+    }
+
+    const indexInitial = index;
+    const indexLast = Math.min(posts.length, indexInitial + pageSize);
+
+    return response.send({
+      _meta: {
+        cursorPrevious: posts[indexInitial - 1]?._meta.createdAt ?? null,
+        cursorNext: posts[indexLast]?._meta.createdAt ?? null,
+      },
+      rows: posts.slice(indexInitial, indexLast),
+    });
+  }
 };
 
 const saveMulterFile = async (file: globalThis.Express.Multer.File) => {
@@ -171,7 +228,6 @@ export const router = Express.Router();
 
 router.post('/posts', cookieAuth, parseFiles, createPost);
 router.get('/posts', getPosts);
-router.get('/posts/:id', getPostById);
 router.patch(
   '/posts/:id',
   cookieAuth,

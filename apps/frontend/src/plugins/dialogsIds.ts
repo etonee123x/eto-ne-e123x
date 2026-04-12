@@ -1,18 +1,30 @@
-import { inject } from 'vue';
-import type { FunctionPlugin, InjectionKey } from 'vue';
+import { isServer } from '@/constants/target';
+import { nonNullable } from '@/utils/nonNullable';
+import { inject, shallowRef, watchEffect } from 'vue';
+import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
 
-export const INJECTION_KEY_DIALOGS_IDS: InjectionKey<Array<string>> = Symbol('dialogIds');
+type Context = ShallowRef<Array<string>>;
+
+const INJECTION_KEY: InjectionKey<Context> = Symbol('dialog-ids');
 
 export const dialogsIds: FunctionPlugin = (app) => {
-  app.provide(INJECTION_KEY_DIALOGS_IDS, []);
+  const ids: Context = shallowRef([]);
+
+  app.provide(INJECTION_KEY, ids);
+
+  watchEffect(() => {
+    if (isServer) {
+      return;
+    }
+
+    if (ids.value.length > 0) {
+      document.body.querySelector('#app')?.setAttribute('inert', '');
+    } else {
+      document.body.querySelector('#app')?.removeAttribute('inert');
+    }
+  });
 };
 
 export const useDialogsIds = () => {
-  const dialogsIds = inject(INJECTION_KEY_DIALOGS_IDS);
-
-  if (!dialogsIds) {
-    throw new Error('DialogsIds plugin is not installed');
-  }
-
-  return dialogsIds;
+  return nonNullable(inject(INJECTION_KEY));
 };

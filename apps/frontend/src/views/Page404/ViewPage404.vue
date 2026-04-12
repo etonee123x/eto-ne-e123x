@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { ROUTE_NAMES } from '@/router';
+import { ROUTE_NAMES } from '@/plugins/router';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
 import { useSSRContext } from '@/composables/useSsrContext';
@@ -30,7 +30,7 @@ const { t } = useI18n({
       toTheMainPage: 'to the main page',
     },
     ru: {
-      pageNotFound: 'Страница не найдена. Возможно, она была удалена или вы ошиблись в адресе.',
+      pageNotFound: 'Страница не найдена. Возможно, она была удалена или URL некорректен.',
       tryNavigate: 'Попробуйте перейти {0}.',
       toTheMainPage: 'на главную страницу',
     },
