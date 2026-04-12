@@ -7,13 +7,13 @@
         :placeholder="t('textareaPlaceholder')"
         name="text"
         class="rounded-lg border border-neutral-700 dark:bg-neutral-950 focus:border-primary-500 overflow-hidden w-full m-0 p-4 resize-none flex bg-none flex-1"
+        :onPaste
         ref="textarea"
         v-model="resetableRefPostModel.value.value.text"
         @keydown.enter="onKeyDownEnter"
-        @paste="onPaste"
       />
-      <div class="sticky top-2 flex flex-col gap-2 h-min">
-        <BaseButton type="button" class="p-4" @click="onClickButtonAddFile">
+      <div class="sticky top-[calc(var(--spacing-header-height)+var(--spacing)*2)] flex flex-col gap-2 h-min">
+        <BaseButton type="button" class="p-2" @click="onClickButtonAddFile">
           <BaseIcon class="size-8" :path="mdiFilePlusOutline" />
         </BaseButton>
       </div>

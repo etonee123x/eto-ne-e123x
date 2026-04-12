@@ -164,7 +164,7 @@ export interface components {
             folders: components["schemas"]["FolderDataItemFolder"][];
             files: components["schemas"]["FolderDataItemFile"][];
             file: components["schemas"]["FolderDataItemFile"] | null;
-            path: string;
+            pathDirectory: string;
         };
     };
     responses: never;

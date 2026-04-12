@@ -12,10 +12,10 @@ properties:
     oneOf:
       - $ref: ./FolderDataItemFile.yaml
       - type: "null"
-  path:
+  pathDirectory:
     type: string
 required:
   - folders
   - files
   - file
-  - path
+  - pathDirectory

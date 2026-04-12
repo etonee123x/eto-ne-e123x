@@ -1,42 +1,77 @@
-import { isFolderDataItemFileAudio } from '@/helpers/folderData';
+import { useResetableRef } from '@/composables/useResetableRef';
 import type { components } from '@/types/openapi';
 import { nonNullable } from '@/utils/nonNullable';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
-import { computed, inject, shallowRef } from 'vue';
-import type { FunctionPlugin, InjectionKey, ShallowRef } from 'vue';
+import { computed, inject, reactive } from 'vue';
+import type { FunctionPlugin, InjectionKey, Reactive } from 'vue';
 
 interface Context {
-  theTrack: ShallowRef<components['schemas']['FolderDataItemAudio'] | null>;
-  playlist: ShallowRef<Array<components['schemas']['FolderDataItemAudio']>>;
+  theTrack: Reactive<ReturnType<typeof useResetableRef<components['schemas']['FolderDataItemAudio'] | null>>>;
+  playlist: Reactive<
+    ReturnType<
+      typeof useResetableRef<{
+        tracks: Array<components['schemas']['FolderDataItemAudio']>;
+        pathDirectory: string | null;
+      }>
+    >
+  >;
+  unload: () => Promise<boolean>;
+  hooksOnUnload: {
+    before: Set<() => void | boolean | Promise<void | boolean>>;
+    after: Set<() => void>;
+  };
 }
 
 const INJECTION_KEY: InjectionKey<Context> = Symbol('player');
 
 export const createPlayer = () => {
-  const theTrack: Context['theTrack'] = shallowRef(null);
-  const playlist: Context['playlist'] = shallowRef([]);
+  const theTrack: Context['theTrack'] = reactive(useResetableRef(null));
+  const playlist: Context['playlist'] = reactive(
+    useResetableRef({
+      tracks: [],
+      pathDirectory: null,
+    }),
+  );
+
+  const hooksOnUnload: Context['hooksOnUnload'] = {
+    before: new Set(),
+    after: new Set(),
+  };
+
+  const unload: Context['unload'] = async () => {
+    for (const hook of hooksOnUnload.before) {
+      const result = await hook();
+
+      if (result === false) {
+        return false;
+      }
+    }
+
+    theTrack.reset();
+    playlist.reset();
+
+    for (const hook of hooksOnUnload.after) {
+      hook();
+    }
+
+    return true;
+  };
 
   const install: FunctionPlugin = (app) => {
     app.provide(INJECTION_KEY, {
       theTrack,
       playlist,
+      unload,
+      hooksOnUnload,
     });
   };
 
   const init = () => {
-    const _theTrack = objectGet(globalThis.__PLAYER__, 'theTrack');
-    const _playlist = objectGet(globalThis.__PLAYER__, 'playlist');
-
-    if (
-      (_theTrack === null || isFolderDataItemFileAudio(_theTrack)) &&
-      Array.isArray(_playlist) &&
-      _playlist.every((item) => {
-        return isFolderDataItemFileAudio(item);
-      })
-    ) {
-      theTrack.value = _theTrack;
-      playlist.value = _playlist;
-    }
+    // нет, правда, давайте считать, что так оно и будет!
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    theTrack.value = objectGet(globalThis.__PLAYER__, 'theTrack') as any;
+    playlist.value = objectGet(globalThis.__PLAYER__, 'playlist') as any;
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   };
 
   return {

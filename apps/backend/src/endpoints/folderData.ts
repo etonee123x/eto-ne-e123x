@@ -97,7 +97,10 @@ const getFolderData: RequestHandlerTyped<'/folder-data', 'get'> = async (request
   return response.send({
     ...items,
     file,
-    path,
+    pathDirectory:
+      file && file.name === path.split('/').at(-1) //
+        ? path.split('/').slice(0, -1).join('/')
+        : path,
   });
 };
 

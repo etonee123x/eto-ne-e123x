@@ -5,7 +5,6 @@ import tseslint from 'typescript-eslint';
 import pluginVue from 'eslint-plugin-vue';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import pluginI18n from '@intlify/eslint-plugin-vue-i18n';
-// import importPlugin from 'eslint-plugin-import';
 import vueEslintParser from 'vue-eslint-parser';
 import sonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
@@ -36,11 +35,11 @@ export default defineConfig(
   {
     files: ['**/*.ts', '**/*.vue'],
     extends: [
-      // importPlugin.flatConfigs.recommended,
       pluginJs.configs.recommended,
       pluginI18n.configs.recommended,
       tseslint.configs.strictTypeChecked,
       pluginVue.configs['flat/recommended'],
+      // @ts-expect-error - нет типов для flat-конфига
       sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
       eslintPluginPrettierRecommended,
@@ -123,6 +122,7 @@ export default defineConfig(
         },
       ],
       '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-invalid-void-type': 'off',
 
       // https://github.com/typescript-eslint/typescript-eslint/issues/2865
       // TODO: пофиксить правила ниже vue типами

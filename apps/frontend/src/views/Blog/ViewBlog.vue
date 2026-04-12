@@ -83,7 +83,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import BasePage from '@/components/ui/BasePage.vue';
 import { useSeoMeta } from '@unhead/vue';
 import { useAuthContext } from '@/contexts/auth';
-import { useBlogContext } from './contexts/blog';
+import { provideBlogContext } from './contexts/blog';
 import { useRoute, useRouter } from 'vue-router';
 import { mdiArrowUp } from '@mdi/js';
 import { useQueryClient } from '@tanstack/vue-query';
@@ -170,7 +170,7 @@ const router = useRouter();
 
 const editModeFor = ref<string | null>(null);
 
-const blogContext = useBlogContext();
+const blogContext = await provideBlogContext();
 
 const authContext = useAuthContext();
 

@@ -11,10 +11,7 @@ const baseUrl = (() => {
   }
 
   if (isAppModeDevelopment) {
-    return [
-      process.env.SERVER_ORIGIN ?? throwError('SERVER_ORIGIN is not defined'),
-      // process.env.VITE_API_PREFIX ?? throwError('VITE_API_PREFIX is not defined'),
-    ].join('');
+    return [process.env.SERVER_ORIGIN ?? throwError('SERVER_ORIGIN is not defined')].join('');
   }
 
   return process.env.INTERNAL_API_URL ?? throwError('INTERNAL_API_URL is not defined');

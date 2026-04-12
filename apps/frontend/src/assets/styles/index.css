@@ -211,7 +211,7 @@
   }
 
   #app {
-    @apply contents;
+    @apply flex flex-col min-h-dvh;
   }
 
   button {

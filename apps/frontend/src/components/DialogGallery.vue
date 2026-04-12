@@ -32,12 +32,14 @@ import type { components } from '@/types/openapi';
 import BaseButton from './ui/BaseButton.vue';
 import { mdiClose } from '@mdi/js';
 import BaseIcon from './ui/BaseIcon.vue';
+import { useSeoMeta } from '@unhead/vue';
 
 type Item = components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'];
 
 const props = defineProps<{
-  item?: Item;
+  item: Item;
   items: Array<Item>;
+  onChangeItem?: (item: Item) => void;
 }>();
 
 const cycleList = reactive(
@@ -58,12 +60,28 @@ const cycleList = reactive(
   ),
 );
 
-onKeyStroke('ArrowRight', () => {
+const onChange = () => {
+  if (!cycleList.state) {
+    return;
+  }
+
+  props.onChangeItem?.(cycleList.state);
+};
+
+const next = () => {
   cycleList.next();
-});
-onKeyStroke('ArrowLeft', () => {
+  onChange();
+};
+
+// новояз
+// eslint-disable-next-line unicorn/prevent-abbreviations
+const prev = () => {
   cycleList.prev();
-});
+  onChange();
+};
+
+onKeyStroke('ArrowRight', next);
+onKeyStroke('ArrowLeft', prev);
 
 const mediaContainer = useTemplateRef('mediaContainer');
 
@@ -84,9 +102,9 @@ const component = computed(() => {
 useSwipe(mediaContainer, {
   onSwipeEnd: (...[, direction]) => {
     if (direction === 'right') {
-      cycleList.prev();
+      prev();
     } else if (direction === 'left') {
-      cycleList.next();
+      next();
     }
   },
 });
@@ -99,6 +117,12 @@ const [isDialogOpen, toggleIsDialogOpen] = useToggle(hasItem.value);
 
 watchEffect(() => {
   return toggleIsDialogOpen(hasItem.value);
+});
+
+useSeoMeta({
+  title: () => {
+    return props.item.name;
+  },
 });
 
 // useSeoMeta({

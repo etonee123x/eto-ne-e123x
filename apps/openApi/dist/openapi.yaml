@@ -547,10 +547,10 @@ components:
           oneOf:
             - $ref: '#/components/schemas/FolderDataItemFile'
             - type: 'null'
-        path:
+        pathDirectory:
           type: string
       required:
         - folders
         - files
         - file
-        - path
+        - pathDirectory

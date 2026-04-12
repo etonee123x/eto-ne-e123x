@@ -1,10 +1,11 @@
 <template>
   <Teleport to="#teleported">
     <dialog
+      v-if="model"
       :id="String(id)"
       v-bind="$attrs"
       class="dialog"
-      :open="model"
+      open
       ref="dialog"
       @close="onCloseDialog"
       @cancel.prevent="onCloseDialog"

@@ -5,7 +5,6 @@ import { nonNullable } from '@/utils/nonNullable';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/vue-query';
 import type { InfiniteData, UseInfiniteQueryReturnType, UseMutationReturnType } from '@tanstack/vue-query';
 import { useRoute } from 'vue-router';
-import { ROUTE_NAMES } from '@/plugins/router';
 import { awaitSuspensesIfNecessary } from '@/helpers/awaitSuspensesIfNecessary';
 import { client } from '@/api/client';
 import { useClientRequestPromiseWrapper } from '@/composables/useClientRequestPromiseWrapper';
@@ -104,9 +103,6 @@ export const provideBlogContext = async () => {
             : {};
         },
       ),
-      enabled: () => {
-        return route.name === ROUTE_NAMES.BLOG || route.name === ROUTE_NAMES.BLOG_POST;
-      },
     }),
   );
 
