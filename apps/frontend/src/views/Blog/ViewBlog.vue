@@ -139,11 +139,11 @@ const { t } = useI18n({
         'Мой блог, тут можно заценить мои посты; пишу о жизни непростой, о мыслях, что меня волнуют! Вот и думай головой.',
       postInMyBlog: 'Пост в моём блоге',
       toTheBeginning: 'Наверх',
-      postAttachmentN: {
-        _default: 'Вложение к посту №{n},',
-        image: '@:postAttachmentN._default изображение',
-        video: '@:postAttachmentN._default видик',
-        audio: '@:postAttachmentN._default аудио',
+      postAttachment: {
+        _default: 'Вложение к посту,',
+        image: '@:postAttachment._default изображение',
+        video: '@:postAttachment._default видик',
+        audio: '@:postAttachment._default аудио',
       },
     },
     en: {
@@ -156,11 +156,11 @@ const { t } = useI18n({
         'My blog, here you can check out my posts; I write about the complexities of life, about thoughts that concern me! So think with your head.',
       postInMyBlog: 'A post in my blog',
       toTheBeginning: 'To the beginning',
-      postAttachmentN: {
-        _default: 'Post attachment №{n},',
-        image: '@:postAttachmentN._default image',
-        video: '@:postAttachmentN._default video',
-        audio: '@:postAttachmentN._default audio',
+      postAttachment: {
+        _default: 'Post attachment,',
+        image: '@:postAttachment._default image',
+        video: '@:postAttachment._default video',
+        audio: '@:postAttachment._default audio',
       },
     },
   },
@@ -303,50 +303,6 @@ const post = computed(() => {
   );
 });
 
-useSeoMeta({
-  description: () => {
-    if (!route.params.postId) {
-      return t('myBlog');
-    }
-
-    if (!post.value?.text) {
-      return t('postInMyBlog');
-    }
-
-    const max = 140;
-    const text = post.value.text.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim();
-
-    if (text.length <= max) {
-      return text;
-    }
-
-    const textSliced = text.slice(0, max);
-    const indexOfLastSpace = textSliced.lastIndexOf(' ');
-
-    if (indexOfLastSpace === -1) {
-      return textSliced.slice(0, max - 1) + '…';
-    }
-
-    return textSliced.slice(0, indexOfLastSpace) + '…';
-  },
-  ogImage: () => {
-    return post.value?.attachments.flatMap((attachment, index) => {
-      if (attachment.fileType !== FILE_TYPES.IMAGE) {
-        return [];
-      }
-
-      return [
-        {
-          url: attachment.src,
-          width: attachment.metadata.width,
-          height: attachment.metadata.height,
-          alt: t('postAttachmentN.image', { n: index }),
-        },
-      ];
-    });
-  },
-});
-
 const shouldRenderButtonUp = computed(() => {
   return isClient && windowScroll.y > globalThis.innerHeight / 2;
 });
@@ -375,5 +331,78 @@ onMounted(() => {
     behavior: 'smooth',
     block: 'center',
   });
+});
+
+useSeoMeta({
+  description: () => {
+    if (!route.params.postId) {
+      return t('myBlog');
+    }
+
+    if (!post.value?.text) {
+      return t('postInMyBlog');
+    }
+
+    const max = 140;
+    const text = post.value.text.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim();
+
+    if (text.length <= max) {
+      return text;
+    }
+
+    const textSliced = text.slice(0, max);
+    const indexOfLastSpace = textSliced.lastIndexOf(' ');
+
+    if (indexOfLastSpace === -1) {
+      return textSliced.slice(0, max - 1) + '…';
+    }
+
+    return textSliced.slice(0, indexOfLastSpace) + '…';
+  },
+  ogImage: () => {
+    const image = post.value?.attachments.find((attachment) => {
+      return attachment.fileType === FILE_TYPES.IMAGE;
+    });
+
+    if (!image) {
+      return undefined;
+    }
+
+    return {
+      url: image.src,
+      width: image.metadata.width,
+      height: image.metadata.height,
+      alt: t('postAttachment.image'),
+    };
+  },
+  ogVideo: () => {
+    const video = post.value?.attachments.find((attachment) => {
+      return attachment.fileType === FILE_TYPES.VIDEO;
+    });
+
+    if (!video) {
+      return undefined;
+    }
+
+    return {
+      url: video.src,
+      width: video.metadata.width,
+      height: video.metadata.height,
+      alt: t('postAttachment.video'),
+    };
+  },
+  ogAudio: () => {
+    const audio = post.value?.attachments.find((attachment) => {
+      return attachment.fileType === FILE_TYPES.AUDIO;
+    });
+
+    if (!audio) {
+      return undefined;
+    }
+
+    return {
+      url: audio.src,
+    };
+  },
 });
 </script>

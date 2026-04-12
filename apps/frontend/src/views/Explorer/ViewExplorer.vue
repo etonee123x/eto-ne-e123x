@@ -301,78 +301,59 @@ useSeoMeta({
 
   // именно так и надо
   ogImage: () => {
-    const images = (
-      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
-        if (isFolderDataItemFileImage(file)) {
-          return [
-            {
-              height: file.metadata.height,
-              width: file.metadata.width,
-              url: file.src,
-              alt: file.name,
-            },
-          ];
-        }
+    const image = isFolderDataItemFileImage(explorerContext.getFolderDataQuery.data?.file)
+      ? explorerContext.getFolderDataQuery.data.file
+      : explorerContext.getFolderDataQuery.data?.files.find((file) => {
+          return isFolderDataItemFileImage(file);
+        });
 
-        return [];
-      }) ?? []
-    ).toSorted((image1) => {
-      if (image1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
-        return -1;
-      }
-      return 0;
-    });
+    if (!image) {
+      return undefined;
+    }
 
-    return images.length > 0 ? images : undefined;
+    return {
+      url: image.src,
+      alt: image.name,
+      width: image.metadata.width,
+      height: image.metadata.height,
+    };
   },
 
   // именно так и надо
   ogVideo: () => {
-    const videos = (
-      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
-        if (isFolderDataItemFileVideo(file)) {
-          return [
-            {
-              url: file.src,
-              alt: file.name,
-              width: file.metadata.width,
-              height: file.metadata.height,
-            },
-          ];
-        }
-        return [];
-      }) ?? []
-    ).toSorted((video1) => {
-      if (video1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
-        return -1;
-      }
-      return 0;
-    });
+    const video = isFolderDataItemFileVideo(explorerContext.getFolderDataQuery.data?.file)
+      ? explorerContext.getFolderDataQuery.data.file
+      : explorerContext.getFolderDataQuery.data?.files.find((file) => {
+          return isFolderDataItemFileVideo(file);
+        });
 
-    return videos.length > 0 ? videos : undefined;
+    if (!video) {
+      return undefined;
+    }
+
+    return {
+      url: video.src,
+      alt: video.name,
+      width: video.metadata.width,
+      height: video.metadata.height,
+    };
   },
 
   // именно так и надо
   ogAudio: () => {
-    const audios = (
-      explorerContext.getFolderDataQuery.data?.files.flatMap((file) => {
-        if (isFolderDataItemFileAudio(file)) {
-          return [
-            {
-              url: file.src,
-            },
-          ];
-        }
-        return [];
-      }) ?? []
-    ).toSorted((audio1) => {
-      if (audio1.url === explorerContext.getFolderDataQuery.data?.file?.src) {
-        return -1;
-      }
-      return 0;
-    });
+    const audio = isFolderDataItemFileAudio(explorerContext.getFolderDataQuery.data?.file)
+      ? explorerContext.getFolderDataQuery.data.file
+      : explorerContext.getFolderDataQuery.data?.files.find((file) => {
+          return isFolderDataItemFileAudio(file);
+        });
 
-    return audios.length > 0 ? audios : undefined;
+    if (!audio) {
+      return undefined;
+    }
+
+    return {
+      url: audio.src,
+    };
   },
 });
 </script>
