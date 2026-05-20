@@ -1,8 +1,8 @@
 <template>
-  <article class="post" :class="route.params.postId === post._meta.id && 'post_selected'">
+  <article class="post" :class="route.params.postId === post._meta.id && 'post_selected'" :aria-label="t('post')">
     <LazyFormPost v-if="isInEditMode" class="p-4 flex flex-col" :post ref="formPost" @submit="onSubmit" />
     <div v-else class="p-4 flex flex-col gap-4">
-      <BaseHtml v-if="content" :html="content" />
+      <BaseHtml v-if="content" lang="ru" :html="content" />
       <PostDataAttachment v-for="(attachment, index) in post.attachments" :attachment :index :key="index" />
       <RouterLink
         :to="{
@@ -23,7 +23,7 @@
         </time>
       </RouterLink>
     </div>
-    <div v-if="authContext.isAdmin.value" class="flex justify-end border-t border-t-primary-500 p-1 gap-2">
+    <div v-if="authContext.isAdmin" class="flex justify-end border-t border-t-primary-500 p-1 gap-2">
       <component :is="Button" v-for="Button in Buttons" :key="Button.key" />
     </div>
   </article>
@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { mdiCheck, mdiClose, mdiDelete, mdiPencil } from '@mdi/js';
-import { computed, nextTick, defineAsyncComponent, useTemplateRef, h } from 'vue';
+import { computed, nextTick, defineAsyncComponent, useTemplateRef, h, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import BaseIcon from '@/components/ui/BaseIcon.vue';
@@ -73,7 +73,7 @@ const route = useRoute();
 
 const blogContext = useBlogContext();
 
-const authContext = useAuthContext();
+const authContext = reactive(useAuthContext());
 
 const { t } = useI18n({
   useScope: 'local',
@@ -83,12 +83,14 @@ const { t } = useI18n({
       updatedAt: 'Изменено в { at }',
       confirmDelete: 'Удалить пост',
       deleteMessage: 'Вы уверены, что хотите удалить этот пост?',
+      post: 'Пост',
     },
     en: {
       createdAt: 'Created at { at }',
       updatedAt: 'Edited at { at }',
       confirmDelete: 'Delete Post',
       deleteMessage: 'Are you sure you want to delete this post?',
+      post: 'Post',
     },
   },
 });

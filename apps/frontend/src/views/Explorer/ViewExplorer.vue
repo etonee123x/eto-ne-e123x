@@ -1,6 +1,20 @@
 <template>
   <BasePage :h1="t('content')">
-    <ExplorerNavbar class="-mt-2 mb-2 sticky top-header-height" :navigationItems />
+    <nav class="z-explorer-navbar -mt-2 mb-2 sticky top-header-height">
+      <ul
+        class="bg-background -mx-(--container-padding) px-(--container-padding) flex items-center overflow-x-auto py-1"
+      >
+        <li
+          v-for="navigationItem in navigationItems"
+          class="whitespace-nowrap last:text-primary-500 after:px-2 after:content-['>'] last:after:content-['']"
+          :key="navigationItem.to"
+        >
+          <RouterLink :to="navigationItem.to">
+            {{ navigationItem.text }}
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
     <div class="flex flex-col gap-2">
       <nav v-if="shouldRenderNav" class="contents">
         <LazyExplorerElementSystem
@@ -48,8 +62,6 @@ import {
   isFolderDataItemFileImage,
   isFolderDataItemFileVideo,
 } from '@/helpers/folderData';
-
-import ExplorerNavbar from './components/ExplorerNavbar.vue';
 
 import BasePage from '@/components/ui/BasePage.vue';
 import { useI18n } from 'vue-i18n';
@@ -130,7 +142,7 @@ const navigationItems = computed(() => {
             ...segments,
             {
               text: segment,
-              to: [nonNullable(segments.at(-1)).to, segment].join('/'),
+              to: [nonNullable(segments.at(-1)).to, encodeURIComponent(segment)].join('/'),
             },
           ];
         },
@@ -219,7 +231,17 @@ const itemFileToComponent = (itemFile: components['schemas']['FolderDataItemFile
 const folderDataItemToTo = (
   folderDataItem: components['schemas']['FolderDataItemFolder'] | components['schemas']['FolderDataItemFile'],
 ) => {
-  return l10n.localizePath(['/explorer', folderDataItem.path].join('/'));
+  return l10n.localizePath(
+    [
+      '/explorer',
+      folderDataItem.path
+        .split('/')
+        .map((uriComponent) => {
+          return encodeURIComponent(uriComponent);
+        })
+        .join('/'),
+    ].join('/'),
+  );
 };
 
 const galleryItem = computed(() => {
