@@ -1,19 +1,20 @@
 <template>
-  <RouterLink :to class="explorer-element">
-    <article>
-      <header class="flex justify-between p-2">
+  <article class="explorer-element">
+    <RouterLink data-overlay-link :to class="inset-0 absolute focus:outline-none z-1" />
+
+    <header class="flex p-(--explorer-element-padding) relative">
+      <slot name="title">
         <h2 class="explorer-element__title">
           {{ element.name }}
         </h2>
-        <time :datetime="createdAt" data-allow-mismatch="text" :title="t('createdAt', { at: createdAt })">
-          {{ sinceCreatedHumanReadable }}
-        </time>
-      </header>
-      <div class="p-2 border-t border-t-primary-500">
-        <slot />
-      </div>
-    </article>
-  </RouterLink>
+      </slot>
+      <time class="ms-auto" :datetime="createdAt" data-allow-mismatch="text" :title="t('createdAt', { at: createdAt })">
+        {{ sinceCreatedHumanReadable }}
+      </time>
+    </header>
+
+    <slot />
+  </article>
 </template>
 
 <script setup lang="ts">

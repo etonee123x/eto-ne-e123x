@@ -9,7 +9,7 @@
         class="rounded-lg border border-neutral-700 dark:bg-neutral-950 focus:border-primary-500 overflow-hidden w-full m-0 p-4 resize-none flex bg-none flex-1"
         :onPaste
         ref="textarea"
-        v-model="resetableRefPostModel.value.value.text"
+        v-model="resetableRefPostModel.value.text"
         @keydown.enter="onKeyDownEnter"
       />
       <div class="sticky top-[calc(var(--spacing-header-height)+var(--spacing)*2)] flex flex-col gap-2 h-min">
@@ -18,14 +18,14 @@
         </BaseButton>
       </div>
     </div>
-    <div v-if="resetableRefFilesAndAttachments.value.value.length > 0">
+    <div v-if="resetableRefFilesAndAttachments.value.length > 0">
       <div class="mb-3 flex items-center gap-2">
         <div class="text-xl">{{ t('files') }}</div>
         <BaseButton type="button" @click="onClickDeleteFiles">
           <BaseIcon :path="mdiClose" />
         </BaseButton>
       </div>
-      <LazyBaseFilesList v-model="resetableRefFilesAndAttachments.value.value" />
+      <LazyBaseFilesList v-model="resetableRefFilesAndAttachments.value" />
     </div>
 
     <slot />
@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { computed, defineAsyncComponent, toRef, useTemplateRef } from 'vue';
+import { computed, defineAsyncComponent, reactive, toRef, useTemplateRef } from 'vue';
 import { mdiClose, mdiFilePlusOutline } from '@mdi/js';
 
 import BaseButton from '@/components/ui/BaseButton.vue';
@@ -84,19 +84,23 @@ const { t } = useI18n({
   },
 });
 
-const resetableRefFilesAndAttachments = useResetableRef<Array<NonNullable<Post['attachments'][number]> | File>>(() => {
-  return props.post.attachments.filter((attachment) => {
-    return !isNil(attachment);
-  });
-});
+const resetableRefFilesAndAttachments = reactive(
+  useResetableRef<Array<NonNullable<Post['attachments'][number]> | File>>(() => {
+    return props.post.attachments.filter((attachment) => {
+      return !isNil(attachment);
+    });
+  }),
+);
 const onClickDeleteFiles = resetableRefFilesAndAttachments.reset;
 
-const resetableRefPostModel = useResetableRef<Post>(() => {
-  return props.post;
-});
+const resetableRefPostModel = reactive(
+  useResetableRef<Post>(() => {
+    return props.post;
+  }),
+);
 
 const { textarea } = useTextareaAutosize({
-  input: toRef(resetableRefPostModel.value.value, 'text'),
+  input: toRef(resetableRefPostModel.value, 'text'),
   styleProp: 'minHeight',
 });
 
@@ -124,8 +128,8 @@ const onPaste: HTMLTextAreaElement['onpaste'] = (event) => {
   }
 
   event.preventDefault();
-  resetableRefFilesAndAttachments.value.value = [
-    ...resetableRefFilesAndAttachments.value.value,
+  resetableRefFilesAndAttachments.value = [
+    ...resetableRefFilesAndAttachments.value,
     ...[...maybeFileList].map((file) => {
       return fileToFileWithHashName(file);
     }),
@@ -133,7 +137,7 @@ const onPaste: HTMLTextAreaElement['onpaste'] = (event) => {
 };
 
 const onUpdateModelValueDialogInputFile: InstanceType<typeof DialogInputFile>['onUpdate:modelValue'] = (_files) => {
-  resetableRefFilesAndAttachments.value.value = [...resetableRefFilesAndAttachments.value.value, ..._files];
+  resetableRefFilesAndAttachments.value = [...resetableRefFilesAndAttachments.value, ..._files];
 };
 
 const focusTextarea = () => {
@@ -144,12 +148,12 @@ const onSubmit = async () => {
   emit(
     'submit',
     {
-      text: resetableRefPostModel.value.value.text,
-      attachments: resetableRefFilesAndAttachments.value.value.map((fileOrAttachment) => {
+      text: resetableRefPostModel.value.text,
+      attachments: resetableRefFilesAndAttachments.value.map((fileOrAttachment) => {
         return isFile(fileOrAttachment) ? null : fileOrAttachment;
       }),
     },
-    resetableRefFilesAndAttachments.value.value.filter((fileOrAttachment) => {
+    resetableRefFilesAndAttachments.value.filter((fileOrAttachment) => {
       return isFile(fileOrAttachment);
     }),
   );
@@ -169,9 +173,9 @@ defineExpose({
   form,
   isValid: computed(() => {
     return (
-      resetableRefPostModel.value.value.text.trim().length > 0 ||
-      resetableRefFilesAndAttachments.value.value.length > 0 ||
-      resetableRefPostModel.value.value.attachments.length > 0
+      resetableRefPostModel.value.text.trim().length > 0 ||
+      resetableRefFilesAndAttachments.value.length > 0 ||
+      resetableRefPostModel.value.attachments.length > 0
     );
   }),
 });

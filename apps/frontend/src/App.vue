@@ -1,6 +1,6 @@
 <template>
   <div class="contents group/app">
-    <TheHeader class="fixed top-0 w-full z-1 h-header-height" />
+    <TheHeader class="fixed top-0 w-full z-header h-header-height" />
     <main class="pt-header-height relative flex flex-col flex-1">
       <Suspense suspensible>
         <RouterView />

@@ -5,7 +5,8 @@
 
   --spacing-header-height: 3rem;
 
-  --z-player: 1000;
+  --z-index-header: 1000;
+  --z-index-player: 1000;
   --z-index-modal: 10000;
   --z-index-explorer-navbar: 10;
 
@@ -250,10 +251,16 @@
   }
 
   .explorer-element {
-    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border border-primary-500 rounded-lg text-sm;
+    --explorer-element-padding: calc(2 * var(--spacing));
+
+    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border border-primary-500 rounded-lg text-sm relative overflow-hidden has-[[data-overlay-link]:focus]:on-focus;
 
     .explorer-element__title {
       @apply w-2/3 overflow-x-auto overflow-y-hidden text-lg;
+    }
+
+    .explorer-element__body {
+      @apply p-(--explorer-element-padding) border-t border-t-primary-500 relative;
     }
 
     &.explorer-element_folder {

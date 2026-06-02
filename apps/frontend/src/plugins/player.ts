@@ -2,8 +2,8 @@ import { useResetableRef } from '@/composables/useResetableRef';
 import type { components } from '@/types/openapi';
 import { nonNullable } from '@/utils/nonNullable';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
-import { computed, inject, reactive } from 'vue';
-import type { FunctionPlugin, InjectionKey, Reactive } from 'vue';
+import { computed, inject, reactive, shallowRef } from 'vue';
+import type { FunctionPlugin, InjectionKey, Reactive, ShallowRef } from 'vue';
 
 interface Context {
   theTrack: Reactive<ReturnType<typeof useResetableRef<components['schemas']['FolderDataItemAudio'] | null>>>;
@@ -20,11 +20,14 @@ interface Context {
     before: Set<() => void | boolean | Promise<void | boolean>>;
     after: Set<() => void>;
   };
+  audio: ShallowRef<HTMLAudioElement | null>;
 }
 
 const INJECTION_KEY: InjectionKey<Context> = Symbol('player');
 
 export const createPlayer = () => {
+  const audio: Context['audio'] = shallowRef(null);
+
   const theTrack: Context['theTrack'] = reactive(useResetableRef(null));
   const playlist: Context['playlist'] = reactive(
     useResetableRef({
@@ -63,6 +66,7 @@ export const createPlayer = () => {
       playlist,
       unload,
       hooksOnUnload,
+      audio,
     });
   };
 

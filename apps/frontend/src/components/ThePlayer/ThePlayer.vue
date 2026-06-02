@@ -29,7 +29,7 @@
         <PlayerSlider
           :multiplier="duration / 1000"
           isLazy
-          v-model="currentTimeSeconds"
+          v-model="mediaControls.currentTime"
           @keydown.right="onKeyDownRightTime"
           @keydown.left="onKeyDownLeftTime"
         />
@@ -59,7 +59,11 @@
         </ul>
         <ClientOnly v-if="!isMobile">
           <div class="flex h-full w-5/6 max-w-20 items-center">
-            <PlayerSlider v-model="volume" @keydown.right="onKeyDownRightVolume" @keydown.left="onKeyDownLeftVolume" />
+            <PlayerSlider
+              v-model="mediaControls.volume"
+              @keydown.right="onKeyDownRightVolume"
+              @keydown.left="onKeyDownLeftVolume"
+            />
           </div>
         </ClientOnly>
       </div>
@@ -68,7 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import { identity, syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
+import { identity, syncRef, syncRefs, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
 import {
   mdiClose,
   mdiShuffleVariant,
@@ -78,7 +82,7 @@ import {
   mdiSkipBackward,
   mdiSkipForward,
 } from '@mdi/js';
-import { computed, useTemplateRef, shallowReactive, onScopeDispose, reactive } from 'vue';
+import { computed, useTemplateRef, shallowReactive, onScopeDispose, reactive, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PlayerSlider from './components/PlayerSlider.vue';
@@ -148,24 +152,25 @@ const player = reactive(usePlayer());
 const notifications = useNotifications();
 
 const audio = useTemplateRef('audio');
+syncRefs(audio, toRef(player, 'audio'));
 
 const volumeLocalStorage = useLocalStorage('player-volume', 1);
-const { playing: isPlaying, waiting: isWaiting, currentTime: currentTimeSeconds, volume } = useMediaControls(audio);
+const mediaControls = reactive(useMediaControls(audio));
 
 if (isMobile) {
-  volume.value = 1;
+  mediaControls.volume = 1;
 } else {
-  syncRef(volumeLocalStorage, volume, { transform: { ltr: identity, rtl: identity } });
+  syncRef(volumeLocalStorage, toRef(mediaControls, 'volume'), { transform: { ltr: identity, rtl: identity } });
 }
 
 const duration = computed(() => {
   return player.theTrack.value?.metadata.duration ?? 0;
 });
 
-const toggleIsPlaying = useToggle(isPlaying);
+const toggleIsPlaying = useToggle(toRef(mediaControls, 'playing'));
 
 const shouldRenderButtonClose = computed(() => {
-  return !(isPlaying.value || isWaiting.value);
+  return !(mediaControls.playing || mediaControls.waiting);
 });
 
 const load = {
@@ -193,7 +198,7 @@ const controlButtons = computed(() => {
       disabled: isShuffleModeEnabled.value && historyItems.length === 0,
       ariaLabel: t('previousTrack'),
     },
-    isPlaying.value
+    mediaControls.playing
       ? {
           key: 'pause',
           icon: mdiPause,
@@ -253,19 +258,19 @@ const onClickTitle = async () => {
 };
 
 const onKeyDownRightTime = () => {
-  currentTimeSeconds.value += 5;
+  mediaControls.currentTime += 5;
 };
 
 const onKeyDownLeftTime = () => {
-  currentTimeSeconds.value -= 5;
+  mediaControls.currentTime -= 5;
 };
 
 const onKeyDownRightVolume = () => {
-  volume.value = to0To1Borders(volume.value + 0.05);
+  mediaControls.volume = to0To1Borders(mediaControls.volume + 0.05);
 };
 
 const onKeyDownLeftVolume = () => {
-  volume.value = to0To1Borders(volume.value - 0.05);
+  mediaControls.volume = to0To1Borders(mediaControls.volume - 0.05);
 };
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
@@ -276,7 +281,7 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
 };
 
 const currentTimeFormats = computed(() => {
-  return millisecondsToTimeFormats(currentTimeSeconds.value * 1000);
+  return millisecondsToTimeFormats(mediaControls.currentTime * 1000);
 });
 const durationFormats = computed(() => {
   return millisecondsToTimeFormats(duration.value);

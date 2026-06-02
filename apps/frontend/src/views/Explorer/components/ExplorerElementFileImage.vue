@@ -1,7 +1,7 @@
 <template>
   <ElementFileWrapper :to :element>
     <img
-      class="max-w-full mx-auto"
+      class="explorer-element__body max-w-full mx-auto"
       :width="element.metadata.width"
       :height="element.metadata.height"
       :src="element.src"

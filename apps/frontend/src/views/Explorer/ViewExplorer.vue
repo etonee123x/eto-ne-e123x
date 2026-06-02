@@ -38,6 +38,7 @@
         :is="itemFileToComponent(file)"
         v-for="file in explorerContext.getFolderDataQuery.data?.files"
         :to="folderDataItemToTo(file)"
+        v-bind="itemFileToBinds(file)"
         :element="file"
         :key="file.name"
       />
@@ -54,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onScopeDispose } from 'vue';
+import { computed, defineAsyncComponent, onScopeDispose, reactive, toRef } from 'vue';
 import {
   FILE_TYPES,
   isFolderDataGalleryItem,
@@ -74,11 +75,44 @@ import { useL10n } from '@/composables/useL10n';
 import { useRouter } from 'vue-router';
 import { millisecondsToHumanReadable } from '@/utils/millisecondsToHumanReadable';
 import { useIntlListFormat } from '@/composables/useIntlListFormat';
+import { useMediaControls } from '@vueuse/core';
+
+const LazyDialogGallery = defineAsyncComponent(() => {
+  return import('@/components/DialogGallery.vue');
+});
+
+const LazyExplorerElementSystem = defineAsyncComponent(() => {
+  return import('./components/ExplorerElementSystem.vue');
+});
+
+const LazyExplorerElementFolder = defineAsyncComponent(() => {
+  return import('./components/ExplorerElementFolder.vue');
+});
+
+const LazyExplorerElementFileAudio = defineAsyncComponent(() => {
+  return import('./components/ExplorerElementFileAudio.vue');
+});
+const LazyExplorerElementFileImage = defineAsyncComponent(() => {
+  return import('./components/ExplorerElementFileImage.vue');
+});
+const LazyExplorerElementFileVideo = defineAsyncComponent(() => {
+  return import('./components/ExplorerElementFileVideo.vue');
+});
 
 const explorerContext = await provideExplorerContext();
 
 const l10n = useL10n();
-const player = usePlayer();
+const player = reactive(usePlayer());
+
+const mediaControls = reactive(useMediaControls(toRef(player, 'audio')));
+
+const progress = computed(() => {
+  if (!player.theTrack.value?.metadata.duration) {
+    return 0;
+  }
+
+  return ((mediaControls.currentTime * 1000) / player.theTrack.value.metadata.duration) * 100;
+});
 
 const lastNavigationItem = computed(() => {
   return navigationItems.value.at(-1);
@@ -107,28 +141,6 @@ const onBeforeUnload = () => {
 player.hooksOnUnload.before.add(onBeforeUnload);
 onScopeDispose(() => {
   player.hooksOnUnload.before.delete(onBeforeUnload);
-});
-
-const LazyDialogGallery = defineAsyncComponent(() => {
-  return import('@/components/DialogGallery.vue');
-});
-
-const LazyExplorerElementSystem = defineAsyncComponent(() => {
-  return import('./components/ExplorerElementSystem.vue');
-});
-
-const LazyExplorerElementFolder = defineAsyncComponent(() => {
-  return import('./components/ExplorerElementFolder.vue');
-});
-
-const LazyExplorerElementFileAudio = defineAsyncComponent(() => {
-  return import('./components/ExplorerElementFileAudio.vue');
-});
-const LazyExplorerElementFileImage = defineAsyncComponent(() => {
-  return import('./components/ExplorerElementFileImage.vue');
-});
-const LazyExplorerElementFileVideo = defineAsyncComponent(() => {
-  return import('./components/ExplorerElementFileVideo.vue');
 });
 
 const navigationItems = computed(() => {
@@ -224,6 +236,22 @@ const itemFileToComponent = (itemFile: components['schemas']['FolderDataItemFile
     }
     default: {
       return LazyExplorerElementSystem;
+    }
+  }
+};
+
+const itemFileToBinds = (itemFile: components['schemas']['FolderDataItemFile']) => {
+  // будет масштабироваться, когда таких условий станет больше, так что пока так, а там посмотрим
+  // eslint-disable-next-line sonarjs/no-small-switch
+  switch (itemFile.fileType) {
+    case FILE_TYPES.AUDIO: {
+      return {
+        progress: player.theTrack.value?.src === itemFile.src ? progress.value : undefined,
+        isPlaying: player.theTrack.value?.src === itemFile.src ? mediaControls.playing : undefined,
+      };
+    }
+    default: {
+      return {};
     }
   }
 };

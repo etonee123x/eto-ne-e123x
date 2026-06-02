@@ -1,6 +1,6 @@
 <template>
   <RouterLink :to class="explorer-element explorer-element_folder">
-    <h2 class="explorer-element__title w-2/3 overflow-x-auto overflow-y-hidden p-2">
+    <h2 class="explorer-element__title w-2/3 overflow-x-auto overflow-y-hidden p-(--explorer-element-padding)">
       {{ element.name }}
     </h2>
   </RouterLink>

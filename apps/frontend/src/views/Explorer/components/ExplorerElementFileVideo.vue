@@ -1,7 +1,7 @@
 <template>
   <ElementFileWrapper :to :element>
     <BaseVideoPreview
-      class="mx-auto"
+      class="explorer-element__body mx-auto"
       :src="element.src"
       :width="element.metadata.width"
       :height="element.metadata.height"
