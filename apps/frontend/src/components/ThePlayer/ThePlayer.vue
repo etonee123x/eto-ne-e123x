@@ -21,7 +21,6 @@
           </BaseButton>
         </header>
       </BaseAlwaysScrollable>
-      <audio :src="player.theTrack.value?.src" autoplay :onEnded ref="audio" />
       <div class="h-5 w-full mx-auto flex justify-between items-center gap-2">
         <time :datetime="currentTimeFormats.iso">
           {{ currentTimeFormats.humanReadable }}
@@ -40,8 +39,8 @@
       <div class="grid grid-cols-[1fr_min-content_1fr] grid-areas-['left_center_right'] gap-x-4 items-center">
         <BaseToggler
           class="whitespace-nowrap min-w-6 justify-self-end"
-          :aria-label="isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')"
-          v-model="isShuffleModeEnabled"
+          :aria-label="player.isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')"
+          v-model="player.isShuffleModeEnabled"
         >
           <BaseIcon class="text-2xl" :path="mdiShuffleVariant" />
         </BaseToggler>
@@ -72,7 +71,7 @@
 </template>
 
 <script lang="ts" setup>
-import { identity, syncRef, syncRefs, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
+import { identity, syncRef, useClipboard, useLocalStorage, useMediaControls, useToggle } from '@vueuse/core';
 import {
   mdiClose,
   mdiShuffleVariant,
@@ -82,7 +81,7 @@ import {
   mdiSkipBackward,
   mdiSkipForward,
 } from '@mdi/js';
-import { computed, useTemplateRef, shallowReactive, onScopeDispose, reactive, toRef } from 'vue';
+import { computed, onScopeDispose, reactive, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PlayerSlider from './components/PlayerSlider.vue';
@@ -99,7 +98,6 @@ import { nonNullable } from '@/utils/nonNullable';
 import { useIsMobile } from '@/composables/useIsMobile';
 import ClientOnly from '../ClientOnly.vue';
 import { NOTIFICATION_TYPES, useNotifications } from '@/plugins/notifications';
-import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex';
 import { usePlayer } from '@/plugins/player';
 import { useL10n } from '@/composables/useL10n';
 
@@ -133,29 +131,13 @@ const { t } = useI18n({
   },
 });
 
-const historyItems = shallowReactive<Array<number>>([]);
-const [isShuffleModeEnabled] = useToggle();
-const currentPlayingNumber = computed({
-  get: () => {
-    return player.playlist.value.tracks.findIndex((playlistItem) => {
-      return playlistItem.src === player.theTrack.value?.src;
-    });
-  },
-  set: (value) => {
-    player.theTrack.value = player.playlist.value.tracks[value] ?? null;
-  },
-});
-
 const isMobile = useIsMobile();
 
 const player = reactive(usePlayer());
 const notifications = useNotifications();
 
-const audio = useTemplateRef('audio');
-syncRefs(audio, toRef(player, 'audio'));
-
 const volumeLocalStorage = useLocalStorage('player-volume', 1);
-const mediaControls = reactive(useMediaControls(audio));
+const mediaControls = reactive(useMediaControls(player.audio));
 
 if (isMobile) {
   mediaControls.volume = 1;
@@ -173,29 +155,13 @@ const shouldRenderButtonClose = computed(() => {
   return !(mediaControls.playing || mediaControls.waiting);
 });
 
-const load = {
-  next: () => {
-    historyItems.push(currentPlayingNumber.value);
-
-    currentPlayingNumber.value = isShuffleModeEnabled.value
-      ? getRandomExceptCurrentIndex(player.playlist.value.tracks.length, currentPlayingNumber.value)
-      : (currentPlayingNumber.value + 1) % player.playlist.value.tracks.length;
-  },
-  previous: () => {
-    currentPlayingNumber.value =
-      historyItems.length > 0
-        ? (historyItems.pop() ?? 0)
-        : (currentPlayingNumber.value - 1 + player.playlist.value.tracks.length) % player.playlist.value.tracks.length;
-  },
-};
-
 const controlButtons = computed(() => {
   return [
     {
       key: 'previous',
       icon: mdiSkipBackward,
-      onClick: load.previous,
-      disabled: isShuffleModeEnabled.value && historyItems.length === 0,
+      onClick: player.load.previous,
+      disabled: player.isShuffleModeEnabled && player.historyItems.length === 0,
       ariaLabel: t('previousTrack'),
     },
     mediaControls.playing
@@ -218,18 +184,16 @@ const controlButtons = computed(() => {
     {
       key: 'next',
       icon: mdiSkipForward,
-      onClick: load.next,
+      onClick: player.load.next,
       ariaLabel: t('nextTrack'),
     },
   ];
 });
 
-const onEnded = load.next;
-
 const reloadAudio = () => {
   // Такой вот костыль... Нужен чтобы выгрузить текущий трек из управления аудио.
   // Без этого при закрытии плеера и нажатии на кнопку play/pause будет играть/останавливаться трек.
-  audio.value?.load();
+  player.audio?.load();
 };
 
 player.hooksOnUnload.after.add(reloadAudio);

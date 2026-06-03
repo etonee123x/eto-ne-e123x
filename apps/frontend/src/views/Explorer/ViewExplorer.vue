@@ -247,7 +247,6 @@ const itemFileToBinds = (itemFile: components['schemas']['FolderDataItemFile']) 
     case FILE_TYPES.AUDIO: {
       return {
         progress: player.theTrack.value?.src === itemFile.src ? progress.value : undefined,
-        isPlaying: player.theTrack.value?.src === itemFile.src ? mediaControls.playing : undefined,
       };
     }
     default: {

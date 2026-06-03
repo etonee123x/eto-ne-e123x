@@ -7,11 +7,7 @@
   >
     <template #title>
       <div class="explorer-element__title flex items-center gap-1">
-        <BaseIcon
-          v-if="!isNil(progress)"
-          class="text-2xl"
-          :path="isPlaying ? mdiPlayCircleOutline : mdiPauseCircleOutline"
-        />
+        <!-- <AudioSpectrum v-if="!isNil(progress)" /> -->
         <h2>{{ element.name }}</h2>
         <button class="z-1 text-xl" @click="() => toggleIsMetadataShown(!isMetadataShown)">
           <BaseIcon :path="isMetadataShown ? mdiChevronUp : mdiChevronDown" />
@@ -43,10 +39,8 @@ import {
   mdiAlbum,
   mdiCalendarBlankOutline,
   mdiMetronome,
-  mdiPlayCircleOutline,
   mdiChevronDown,
   mdiChevronUp,
-  mdiPauseCircleOutline,
 } from '@mdi/js';
 
 import ElementFileWrapper from './_ElementFileWrapper.vue';
@@ -62,7 +56,6 @@ const props = defineProps<{
   element: components['schemas']['FolderDataItemAudio'];
   to: PropsElementFileWrapper['to'];
   progress?: number;
-  isPlaying?: boolean;
 }>();
 
 const { t } = useI18n({
@@ -145,4 +138,39 @@ const metadataItems = computed(() => {
 });
 
 const [isMetadataShown, toggleIsMetadataShown] = useToggle();
+
+// const player = reactive(usePlayer());
+
+// const data = new Uint8Array(128);
+
+// watchEffect((onCleanup) => {
+//   if (isNil(props.progress) || !player.audio) {
+//     return;
+//   }
+
+//   const audioContext = new AudioContext();
+
+//   const mediaElementSource = audioContext.createMediaElementSource(player.audio);
+//   const analyser = audioContext.createAnalyser();
+
+//   mediaElementSource.connect(analyser);
+//   analyser.connect(audioContext.destination);
+
+//   let frameId: number;
+
+//   const update = () => {
+//     analyser.getByteFrequencyData(data);
+
+//     frameId = requestAnimationFrame(update);
+//   };
+
+//   update();
+
+//   onCleanup(() => {
+//     mediaElementSource.disconnect(analyser);
+//     analyser.disconnect(audioContext.destination);
+//     audioContext.close();
+//     cancelAnimationFrame(frameId);
+//   });
+// });
 </script>
