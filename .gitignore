@@ -1,3 +1,3 @@
-node_modules
-infra
-.github
+node_modules/
+infra/
+.DS_Store
