@@ -39,8 +39,6 @@ export default defineConfig(
       pluginI18n.configs.recommended,
       tseslint.configs.strictTypeChecked,
       pluginVue.configs['flat/recommended'],
-      // @ts-expect-error - нет типов для flat-конфига
-      sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
       eslintPluginPrettierRecommended,
       pluginVueA11y.configs['flat/recommended'],
@@ -49,6 +47,7 @@ export default defineConfig(
 
     plugins: {
       'import-x': importX,
+      sonarjs,
     },
 
     languageOptions: {

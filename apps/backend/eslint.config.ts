@@ -1,12 +1,13 @@
 import { defineConfig } from 'eslint/config';
 
 import globals from 'globals';
-import importPlugin from 'eslint-plugin-import';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import sonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import { importX } from 'eslint-plugin-import-x';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 
 export default defineConfig(
   {
@@ -15,12 +16,11 @@ export default defineConfig(
   {
     files: ['**/*.ts'],
     extends: [
-      importPlugin.flatConfigs.recommended,
       pluginJs.configs.recommended,
       tseslint.configs.strictTypeChecked,
-      sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
       eslintPluginPrettierRecommended,
+      importX.configs['flat/recommended'],
     ],
 
     languageOptions: {
@@ -33,10 +33,15 @@ export default defineConfig(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    plugins: {
+      'import-x': importX,
+      sonarjs,
+    },
     settings: {
       'import/resolver': {
         typescript: true,
       },
+      'import-x/resolver-next': [createTypeScriptImportResolver()],
     },
     rules: {
       'import/no-empty-named-blocks': 'error',
