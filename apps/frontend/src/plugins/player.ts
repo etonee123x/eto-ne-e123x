@@ -5,7 +5,7 @@ import { getRandomExceptCurrentIndex } from '@/utils/getRandomExceptCurrentIndex
 import { nonNullable } from '@/utils/nonNullable';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
 import { useEventListener, useToggle } from '@vueuse/core';
-import { computed, inject, reactive, ref, shallowReactive, watch } from 'vue';
+import { computed, inject, reactive, shallowReactive, watch } from 'vue';
 import type { FunctionPlugin, InjectionKey, Reactive, Ref, ShallowReactive } from 'vue';
 
 interface Context {
@@ -24,7 +24,6 @@ interface Context {
     after: Set<() => void>;
   };
   audio: HTMLAudioElement | null;
-  buffer: Ref<Uint8Array>;
   load: {
     next: () => void;
     previous: () => void;
@@ -68,51 +67,14 @@ export const createPlayer = () => {
     return true;
   };
 
-  const buffer = ref(new Uint8Array(32));
-
   let audio: HTMLAudioElement | null = null;
 
   if (isClient) {
     audio = new Audio();
 
-    let audioContext: AudioContext | null = null;
-    let sourceNode: MediaElementAudioSourceNode | null = null;
-    let analyser: AnalyserNode | null = null;
-
-    let frameId: number | null = null;
-
     useEventListener(audio, 'ended', () => {
       load.next();
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    useEventListener(audio, 'play', async () => {
-      if (!audioContext) {
-        return;
-      }
-
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-
-      const loop = () => {
-        analyser?.getByteFrequencyData(buffer.value);
-        frameId = requestAnimationFrame(loop);
-      };
-
-      loop();
-    });
-
-    const cleanup = () => {
-      if (frameId) {
-        cancelAnimationFrame(frameId);
-        frameId = null;
-      }
-
-      audioContext?.suspend();
-    };
-
-    useEventListener(audio, 'pause', cleanup);
 
     watch(
       () => {
@@ -128,8 +90,6 @@ export const createPlayer = () => {
           audio.removeAttribute('src');
           audio.load();
 
-          cleanup();
-
           return;
         }
 
@@ -137,20 +97,6 @@ export const createPlayer = () => {
         audio.play().catch(() => {
           return null;
         });
-
-        if (audioContext) {
-          return;
-        }
-
-        audioContext = new AudioContext();
-
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 512;
-
-        sourceNode = audioContext.createMediaElementSource(audio);
-
-        sourceNode.connect(analyser);
-        analyser.connect(audioContext.destination);
       },
     );
   }
@@ -193,7 +139,6 @@ export const createPlayer = () => {
       unload,
       hooksOnUnload,
       audio,
-      buffer,
       load,
       isShuffleModeEnabled,
       historyItems,
