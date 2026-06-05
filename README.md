@@ -2,11 +2,11 @@
 
 ## Repository Overview
 
-This monorepo consists of three working apps and infrastructure directories:
+This monorepo contains three main application packages and shared infrastructure directories.
 
 - Frontend (SSR): Vue 3 + Express
 - Backend API: Express + TypeScript
-- Contracts: OpenAPI 3.0 (source of truth for API)
+- API contracts package
 - Infra: local data, content, and uploaded files
 
 Detailed docs for each part:
@@ -20,14 +20,14 @@ Detailed docs for each part:
 ```text
 .
 ├── apps/
-│   ├── frontend/     # SSR UI app
-│   ├── backend/      # API and file/post handling
-│   └── openApi/      # OpenAPI contracts
+│   ├── frontend/
+│   ├── backend/
+│   └── openApi/
 ├── infra/
-│   ├── content/      # source content for explorer
-│   ├── database/     # JSON tables (posts.json)
-│   └── uploads/      # uploaded post attachments
-└── deploy/           # deployment artifacts directory (currently empty)
+│   ├── content/
+│   ├── database/
+│   └── uploads/
+└── deploy/
 ```
 
 ## Requirements
@@ -70,23 +70,19 @@ npm run lint
 npm run bundle
 ```
 
-## How Components Connect
+## High-Level Architecture
 
-```mermaid
-flowchart LR
-  FE[Frontend SSR\napps/frontend] -->|HTTP /api| BE[Backend API\napps/backend]
-  FE -->|OpenAPI types| OA[Contracts\napps/openApi]
-  BE -->|OpenAPI types| OA
-  BE --> DB[infra/database/posts.json]
-  BE --> CT[infra/content]
-  BE --> UP[infra/uploads]
-```
+Frontend consumes backend APIs.
+
+Both frontend and backend consume shared API contracts.
+
+Infrastructure directories are used for local runtime data and static assets.
 
 ## Unified Change Workflow
 
 If API changes:
 
-1. Update contract in [apps/openApi/openapi](apps/openApi/openapi).
+1. Update the contracts package.
 2. Validate contract:
   - `cd apps/openApi && npm run lint`
   - `cd apps/openApi && npm run bundle`
@@ -124,7 +120,7 @@ Contracts:
 
 - `cd apps/openApi && npm run lint`
 - `cd apps/openApi && npm run bundle`
-- `cd apps/openApi && npm run preview -- openapi/openapi.yaml`
+- `cd apps/openApi && npm run preview`
 
 ## Environment Files
 
@@ -133,11 +129,11 @@ Contracts:
 - Frontend prod: [apps/frontend/.env.prod.example](apps/frontend/.env.prod.example)
 - Frontend test: [apps/frontend/.env.test.example](apps/frontend/.env.test.example)
 
-## Current Infra State
+## Infrastructure Notes
 
-- [infra/database/posts.json](infra/database/posts.json) is used as posts table.
-- [infra/content](infra/content) is used by folder-data API endpoint.
-- [infra/uploads](infra/uploads) stores uploaded post attachments.
+- `infra/database` stores local runtime data.
+- `infra/content` stores local content assets.
+- `infra/uploads` stores uploaded assets.
 
 ## Notes
 

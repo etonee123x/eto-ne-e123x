@@ -7,10 +7,10 @@ Frontend is a Vue 3 + TypeScript SSR application with Express runtime.
 Main features:
 
 - SSR + hydration
-- i18n with locale in URL (`/ru`, `/en`)
-- Content Explorer
-- Blog with infinite pagination and admin post management
-- Audio player integrated with explorer data
+- internationalization support
+- dynamic content rendering
+- API-driven UI state management
+- media-aware client experience
 
 OpenAPI source files live in `apps/openApi/openapi`.
 
@@ -73,20 +73,20 @@ npm run start
 - `npm run lint` - lint
 - `npm run lint:fix` - lint with autofix
 - `npm run typecheck` - Vue TypeScript checks
-- `npm run generate:openapi` - regenerate `src/types/openapi.ts`
+- `npm run generate:openapi` - regenerate frontend API types from contracts
 
 ## Application Architecture
 
 ### SSR Flow
 
-Server entry is `src/index.ts`:
+Server entry:
 
 - creates Express app
 - in development, mounts Vite middleware mode
-- for app routes, renders HTML using `src/entryServer.ts`
+- renders HTML for application routes
 - injects dehydrated Vue Query cache and player state into HTML
 
-Client entry is `src/entryClient.ts`:
+Client entry:
 
 - recreates app
 - hydrates Vue Query cache from `window.__QUERY__`
@@ -95,7 +95,7 @@ Client entry is `src/entryClient.ts`:
 
 ### API Client
 
-`src/api/client.ts` uses OpenAPI path-based client.
+The app uses an OpenAPI path-based API client.
 
 Base URL strategy:
 
@@ -107,26 +107,13 @@ Requests use `credentials: include`.
 
 ### Development Proxy
 
-In development (`vite.config.ts`), Vite proxies:
-
-- `/api` -> backend origin (rewritten without `/api` prefix)
-- `/uploads` -> backend origin
-- `/content` -> backend origin
+In development, Vite proxies client requests to backend services.
 
 Proxy also attaches Authorization header built from `BASIC_USER:BASIC_PASSWORD`.
 
 ## Routing And Localization
 
-Router config is in `src/plugins/router.ts`.
-
-Main localized routes:
-
-- `/:language(ru|en)`
-- `/:language/explorer/:segments*`
-- `/:language/blog`
-- `/:language/blog/:postId`
-
-Global behavior in server (`src/index.ts`):
+Global server behavior:
 
 - if request path matches app route without locale prefix, server redirects to locale-prefixed URL
 - locale is taken from `language` cookie or Negotiator fallback
@@ -134,60 +121,32 @@ Global behavior in server (`src/index.ts`):
 
 ## Auth Integration
 
-JWT cookie key is `jwt`.
-
 Behavior in SSR server:
 
-- if request has `?jwt=...`, frontend calls backend `POST /auth`
+- if request contains auth-related query data, frontend performs backend auth synchronization
 - backend response cookies are forwarded to browser
-- user is redirected to same URL without `jwt` query parameter
+- user is redirected to a normalized URL
 
-Auth state for UI is derived from JWT payload (`isAdmin`) in `src/contexts/auth.ts`.
+Auth state for UI is derived from cookie-backed authentication data.
 
 ## Data Layer
 
-TanStack Query is configured in `src/main.ts` with:
+TanStack Query is configured with:
 
 - `retry: false`
 - `staleTime: Infinity`
 - `throwOnError: true`
 
-Key data contexts:
-
-- Blog context (`src/views/Blog/contexts/blog.ts`)
-  - infinite query for posts
-  - mutations for create/update/delete post
-- Explorer context (`src/views/Explorer/contexts/explorer.ts`)
-  - query for folder data
-  - sync with audio player state
+Key data contexts manage list queries, mutations, and media synchronization.
 
 ## SEO
 
-Unhead is used both on server and client.
+Unhead is used on both server and client.
 
 - canonical host plugin is enabled
-- title template and Open Graph tags are set in app/views
+- title template and Open Graph tags are configured in the app
 - SSR injects head tags into HTML template
 
-## Main UI Areas
+## Additional Notes
 
-- Home: `src/views/Index/ViewIndex.vue`
-- Explorer: `src/views/Explorer/ViewExplorer.vue`
-- Blog: `src/views/Blog/ViewBlog.vue`
-- 404 page: `src/views/Page404/ViewPage404.vue`
-
-## Useful Endpoints (Frontend Server)
-
-- `GET /healthz` -> `ok`
-- App requests are handled by catch-all SSR route (`*all`)
-
-## Source Map
-
-- SSR server: `src/index.ts`
-- App factory: `src/main.ts`
-- Client entry: `src/entryClient.ts`
-- Server renderer: `src/entryServer.ts`
-- Router: `src/plugins/router.ts`
-- I18n: `src/plugins/i18n.ts`
-- API client: `src/api/client.ts`
-- Auth context: `src/contexts/auth.ts`
+- Internal route definitions, page-level mappings, and source file map are intentionally omitted from this document.

@@ -13,17 +13,9 @@ Main goals:
 
 ## Structure
 
-- `openapi/openapi.yaml` - root spec
-- `openapi/paths/*.yaml` - endpoint operations by path
-- `openapi/components/schemas/*.yaml` - reusable request/response schemas
-- `dist/openapi.yaml` - bundled output (generated)
-
-Current path contracts:
-
-- `/auth`
-- `/posts`
-- `/posts/{id}`
-- `/folder-data`
+- contract source files
+- shared schema definitions
+- bundled output artifacts
 
 ## Tooling
 
@@ -33,9 +25,9 @@ NPM scripts in this package:
 
 - `npm run lint` - validate OpenAPI spec
 - `npm run bundle` - bundle split yaml files into `dist/openapi.yaml`
-- `npm run preview -- openapi/openapi.yaml` - start local docs preview
+- `npm run preview` - start local docs preview
 
-Note: `preview` script calls Redocly preview command. Pass the spec path explicitly as shown above.
+Note: `preview` script uses Redocly preview.
 
 ## Local Workflow
 
@@ -50,15 +42,15 @@ npm run bundle
 For local documentation preview:
 
 ```bash
-npm run preview -- openapi/openapi.yaml
+npm run preview
 ```
 
 ## Contract Update Checklist
 
 When you change API behavior:
 
-1. Update relevant path files in `openapi/paths`.
-2. Update or add schemas in `openapi/components/schemas`.
+1. Update relevant contract definitions.
+2. Update or add shared schema definitions.
 3. Run `npm run lint`.
 4. Run `npm run bundle`.
 5. Regenerate TypeScript API types in app packages.
@@ -81,37 +73,33 @@ npm run generate:openapi
 
 Generated files:
 
-- backend: `apps/backend/src/types/openapi.ts`
-- frontend: `apps/frontend/src/types/openapi.ts`
+- backend API type output
+- frontend API type output
 
 ## Conventions Used In This Spec
 
-- Root spec references paths via `$ref` to keep files small.
-- Shared models are stored in `components/schemas`.
-- Authentication scheme is `cookieAuth` with cookie name `jwt`.
-- Server base URL is defined in root spec `servers`.
+- Contracts are modularized for maintainability.
+- Shared models are reused across operations.
+- Validation and bundling are required before publishing changes.
 
 ## Common Changes
 
 ### Add New Endpoint
 
-1. Create new file in `openapi/paths` (for example `users.yaml`).
-2. Register it in `openapi/openapi.yaml` under `paths`.
-3. Add or reuse schemas in `openapi/components/schemas`.
+1. Add a new operation definition in the contract source.
+2. Register it in the contract index/root definition.
+3. Add or reuse shared schemas.
 4. Lint and bundle.
 5. Regenerate types in backend and frontend.
 
 ### Change Existing Response Schema
 
-1. Update schema file in `openapi/components/schemas`.
-2. Ensure endpoint response in `openapi/paths/*.yaml` references correct schema.
+1. Update the relevant shared schema definition.
+2. Ensure related operations reference the updated schema.
 3. Lint and bundle.
 4. Regenerate types in both app packages.
 5. Fix compile errors in consumers if contract changed.
 
-## Source Map
+## Additional Notes
 
-- Root contract: `openapi/openapi.yaml`
-- Paths: `openapi/paths/`
-- Schemas: `openapi/components/schemas/`
-- Bundled artifact: `dist/openapi.yaml`
+- Detailed contract inventory and operation-level documentation are intentionally omitted from this README.
