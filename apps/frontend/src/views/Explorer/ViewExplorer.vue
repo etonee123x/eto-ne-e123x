@@ -241,8 +241,6 @@ const itemFileToComponent = (itemFile: components['schemas']['FolderDataItemFile
 };
 
 const itemFileToBinds = (itemFile: components['schemas']['FolderDataItemFile']) => {
-  // будет масштабироваться, когда таких условий станет больше, так что пока так, а там посмотрим
-  // eslint-disable-next-line sonarjs/no-small-switch
   switch (itemFile.fileType) {
     case FILE_TYPES.AUDIO: {
       return {
