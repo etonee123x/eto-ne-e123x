@@ -3,7 +3,7 @@
     <RouterLink data-overlay-link :to class="inset-0 absolute focus:outline-none z-1" />
 
     <header class="flex p-(--explorer-element-padding) relative">
-      <slot name="title">
+      <slot name="title" class="explorer-element__title">
         <h2 class="explorer-element__title">
           {{ element.name }}
         </h2>
@@ -13,7 +13,7 @@
       </time>
     </header>
 
-    <slot />
+    <slot class="explorer-element__body" />
   </article>
 </template>
 

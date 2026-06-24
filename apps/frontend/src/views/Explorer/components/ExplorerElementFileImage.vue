@@ -1,12 +1,16 @@
 <template>
   <ElementFileWrapper :to :element>
-    <img
-      class="explorer-element__body max-w-full mx-auto"
-      :width="element.metadata.width"
-      :height="element.metadata.height"
-      :src="element.src"
-      :alt="element.name"
-    />
+    <template #default="props">
+      <div :class="props.class">
+        <img
+          class="mx-auto"
+          :width="element.metadata.width"
+          :height="element.metadata.height"
+          :src="element.src"
+          :alt="element.name"
+        />
+      </div>
+    </template>
   </ElementFileWrapper>
 </template>
 

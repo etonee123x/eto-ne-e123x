@@ -8,7 +8,7 @@
         '--button-hover-background-color': 'var(--color-primary-900)',
       }
     "
-    @click="onClick"
+    :onClick
   >
     <slot />
   </BaseButton>
@@ -24,6 +24,6 @@ const model = defineModel<boolean>();
 const toggle = useToggle(model);
 
 const onClick = () => {
-  return toggle();
+  toggle();
 };
 </script>

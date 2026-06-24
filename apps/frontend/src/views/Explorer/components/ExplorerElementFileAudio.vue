@@ -5,8 +5,8 @@
     :element
     :to
   >
-    <template #title>
-      <div class="explorer-element__title flex items-center gap-1">
+    <template #title="props">
+      <div :class="props.class" class="flex items-center gap-1">
         <!-- <AudioSpectrum v-if="!isNil(progress)" /> -->
         <h2>{{ element.name }}</h2>
         <button class="z-1 text-xl" @click="() => toggleIsMetadataShown(!isMetadataShown)">
@@ -14,19 +14,21 @@
         </button>
       </div>
     </template>
-    <ul v-show="isMetadataShown" class="explorer-element__body flex gap-4 overflow-x-auto">
-      <li
-        v-for="metadataItem in metadataItems"
-        :title="metadataItem.title"
-        class="flex flex-col items-center"
-        :key="metadataItem.key"
-      >
-        <BaseIcon class="text-2xl h-6" :path="metadataItem.path" />
-        <span class="text-center max-w-40">
-          {{ metadataItem.value }}
-        </span>
-      </li>
-    </ul>
+    <template #default="props">
+      <ul v-show="isMetadataShown" :class="props.class" class="flex gap-4 overflow-x-auto">
+        <li
+          v-for="metadataItem in metadataItems"
+          :title="metadataItem.title"
+          class="flex flex-col items-center"
+          :key="metadataItem.key"
+        >
+          <BaseIcon class="text-2xl h-6" :path="metadataItem.path" />
+          <span class="text-center max-w-40">
+            {{ metadataItem.value }}
+          </span>
+        </li>
+      </ul>
+    </template>
   </ElementFileWrapper>
 </template>
 

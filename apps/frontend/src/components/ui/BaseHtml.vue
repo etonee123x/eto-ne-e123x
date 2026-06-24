@@ -1,6 +1,6 @@
 <template>
   <!-- eslint-disable-next-line vue/no-v-html vuejs-accessibility/click-events-have-key-events vuejs-accessibility/no-static-element-interactions -->
-  <div class="custom-html" @click="onClick" v-html="html" />
+  <div class="custom-html" :onClick v-html="html" />
 </template>
 
 <script setup lang="ts">

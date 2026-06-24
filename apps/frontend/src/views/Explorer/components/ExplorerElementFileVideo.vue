@@ -1,11 +1,15 @@
 <template>
   <ElementFileWrapper :to :element>
-    <BaseVideoPreview
-      class="explorer-element__body mx-auto"
-      :src="element.src"
-      :width="element.metadata.width"
-      :height="element.metadata.height"
-    />
+    <template #default="props">
+      <div :class="props.class">
+        <BaseVideoPreview
+          class="mx-auto"
+          :src="element.src"
+          :width="element.metadata.width"
+          :height="element.metadata.height"
+        />
+      </div>
+    </template>
   </ElementFileWrapper>
 </template>
 
