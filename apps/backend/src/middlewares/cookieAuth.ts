@@ -1,14 +1,14 @@
 import jsonWebToken from 'jsonwebtoken';
-import createHttpError from 'http-errors';
 import { KEY_COOKIE_JWT } from '@/constants/keyCookieJwt';
 import Express from 'express';
+import { AppError } from '@/shared/errors/AppError';
 
 export const cookieAuth: Express.RequestHandler = (request, response, next) => {
   const jwt = request.cookies[KEY_COOKIE_JWT] || request.query.jwt;
 
   if (typeof jwt !== 'string') {
     response.clearCookie(KEY_COOKIE_JWT);
-    throw createHttpError(401);
+    throw new AppError(401);
   }
 
   try {
@@ -22,6 +22,6 @@ export const cookieAuth: Express.RequestHandler = (request, response, next) => {
     next();
   } catch (error) {
     response.clearCookie(KEY_COOKIE_JWT);
-    throw createHttpError(401, String(error));
+    throw new AppError(401, String(error));
   }
 };

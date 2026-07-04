@@ -77,21 +77,19 @@ export const parseFileByPath = async (path: string) => {
   const fileType = fileTypeResult ? extensionToFileType(`.${fileTypeResult.ext}`) : null;
 
   if (fileType === FILE_TYPES.AUDIO) {
-    const metadata = await parseBuffer(buffer).then((audioMetadata) => {
-      return {
+    const audioMetadata = await parseBuffer(buffer);
+
+    return {
+      ...base,
+      fileType: FILE_TYPES.AUDIO,
+      metadata: {
         duration: (audioMetadata.format.duration ?? 0) * 1000,
         bitrate: audioMetadata.format.bitrate ? audioMetadata.format.bitrate / 1000 : null,
         album: audioMetadata.common.album ?? null,
         artists: audioMetadata.common.artists ?? [],
         bpm: audioMetadata.common.bpm ?? null,
         year: audioMetadata.common.year ?? null,
-      };
-    });
-
-    return {
-      ...base,
-      fileType: FILE_TYPES.AUDIO,
-      metadata,
+      },
     } satisfies Omit<components['schemas']['FolderDataItemAudio'], 'path' | 'src'>;
   }
 

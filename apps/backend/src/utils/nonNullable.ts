@@ -1,4 +1,4 @@
-import { logger } from '@/helpers/logger';
+import { logger } from '@/shared/logger';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 
