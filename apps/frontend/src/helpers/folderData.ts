@@ -37,7 +37,7 @@ export const extensionToFileType = (extension: string) => {
     return FILE_TYPES.VIDEO;
   }
 
-  return null;
+  return FILE_TYPES.UNKNOWN;
 };
 
 export const isFolderDataItemBase = (parameter: unknown): parameter is components['schemas']['FolderDataItemBase'] => {

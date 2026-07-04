@@ -28,6 +28,7 @@ import BaseButton from '@/components/ui/BaseButton.vue';
 import { extensionToFileType, FILE_TYPES } from '@/helpers/folderData';
 import { nonNullable } from '@/utils/nonNullable';
 import type { components } from '@/types/openapi';
+import { checkExhaustive } from '@etonee123x/shared/utils/checkExhaustive';
 
 type FileOrFolderDataItemFile = File | components['schemas']['FolderDataItemFile'];
 
@@ -114,8 +115,11 @@ const fileToComponent = (file: FileOrFolderDataItemFile) => {
     case FILE_TYPES.VIDEO: {
       return PreviewVideo(file);
     }
-    default: {
+    case FILE_TYPES.UNKNOWN: {
       return PreviewUnknown();
+    }
+    default: {
+      throw checkExhaustive(type);
     }
   }
 };

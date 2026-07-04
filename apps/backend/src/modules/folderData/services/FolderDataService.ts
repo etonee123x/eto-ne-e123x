@@ -1,37 +1,37 @@
 import nodePath from 'node:path';
-import { access, stat, readdir } from 'node:fs/promises';
-import { throwError } from '@etonee123x/shared/utils/throwError';
+import nodeFsPromises from 'node:fs/promises';
 import { ITEM_TYPES } from '@/helpers/folderData';
-import { parseFileByPath } from '@/helpers/parseFileByPath';
-import type { components } from '@/types/openapi';
 import { AppError } from '@/shared/errors/AppError';
 import type { FilesService } from '@/infrastructure/files/services/FilesService';
+import type { StoredFile } from '@/infrastructure/files/entities/StoredFile';
+import type { FilesLocation } from '@/infrastructure/files/locations/FilesLocation';
 
 const PROHIBITED_ELEMENTS_NAMES = new Set(['.git']);
 
-const contentPath = process.env.CONTENT_PATH ?? throwError('CONTENT_PATH is not defined');
-
-const pathToSystemPath = (path: string) => {
-  return nodePath.join(contentPath, path);
-};
-
 export class FolderDataService {
+  private readonly filesLocation: FilesLocation;
   private readonly filesService: FilesService;
 
-  constructor(parameters: { filesService: FilesService }) {
+  constructor(parameters: { filesService: FilesService; filesLocation: FilesLocation }) {
     this.filesService = parameters.filesService;
+    this.filesLocation = parameters.filesLocation;
   }
 
-  async getFolderData(path: string) {
-    const systemPath = pathToSystemPath(path);
+  private pathAsRelativeUrlToSystemPath(pathAsRelativeUrl: string) {
+    const systemPath = nodePath.join(this.filesLocation.fs, pathAsRelativeUrl);
+    return systemPath;
+  }
+
+  async getFolderData(parameters: { pathAsRelativeUrl: string }) {
+    const systemPath = this.pathAsRelativeUrlToSystemPath(parameters.pathAsRelativeUrl);
 
     try {
-      await access(systemPath);
+      await nodeFsPromises.access(systemPath);
     } catch {
       throw new AppError(404, 'Path was not found');
     }
 
-    const statAwaited = await stat(systemPath);
+    const statAwaited = await nodeFsPromises.stat(systemPath);
 
     const {
       //
@@ -40,29 +40,37 @@ export class FolderDataService {
     } = statAwaited.isFile()
       ? {
           file: {
-            path,
-            src: [
-              '/content',
-              path
-                .split('/')
-                .map((uriComponent) => {
-                  return encodeURIComponent(uriComponent);
-                })
-                .join('/'),
-            ].join('/'),
-            ...(await parseFileByPath(systemPath)),
+            path: parameters.pathAsRelativeUrl,
+            ...(await this.filesService.getStoredFile({ key: parameters.pathAsRelativeUrl })),
           },
-          currentDirectory: nodePath.dirname(path),
+          currentDirectory: nodePath.dirname(parameters.pathAsRelativeUrl),
         }
       : {
           file: null,
-          currentDirectory: path,
+          currentDirectory: parameters.pathAsRelativeUrl,
         };
 
-    const readdirAwaited = await readdir(pathToSystemPath(currentDirectory), { withFileTypes: true });
+    const readdirAwaited = await nodeFsPromises.readdir(this.pathAsRelativeUrlToSystemPath(currentDirectory), {
+      withFileTypes: true,
+    });
 
     const items = await readdirAwaited.reduce<
-      Promise<Pick<components['schemas']['FolderDataResponse'], 'files' | 'folders'>>
+      Promise<{
+        folders: Array<{
+          name: string;
+          itemType: (typeof ITEM_TYPES)['FOLDER'];
+          _meta: {
+            createdAt: number;
+            updatedAt: number;
+          };
+          path: string;
+        }>;
+        files: Array<
+          StoredFile & {
+            path: string;
+          }
+        >;
+      }>
     >(
       async (promiseItems, item) => {
         if (PROHIBITED_ELEMENTS_NAMES.has(item.name)) {
@@ -71,10 +79,10 @@ export class FolderDataService {
 
         const items = await promiseItems;
 
-        const outerFilePath = nodePath.join(currentDirectory, item.name);
-        const systemPath = pathToSystemPath(outerFilePath);
+        const pathAsRelativeUrl = nodePath.join(currentDirectory, item.name);
+        const systemPath = this.pathAsRelativeUrlToSystemPath(pathAsRelativeUrl);
 
-        const statAwaited = await stat(systemPath);
+        const statAwaited = await nodeFsPromises.stat(systemPath);
 
         const baseItem = {
           name: item.name,
@@ -91,7 +99,7 @@ export class FolderDataService {
                 ...items.folders,
                 {
                   ...baseItem,
-                  path: outerFilePath,
+                  path: pathAsRelativeUrl,
                   itemType: ITEM_TYPES.FOLDER,
                 },
               ],
@@ -102,17 +110,8 @@ export class FolderDataService {
                 ...items.files,
                 {
                   ...baseItem,
-                  path: outerFilePath,
-                  src: [
-                    '/content',
-                    outerFilePath
-                      .split('/')
-                      .map((uriComponent) => {
-                        return encodeURIComponent(uriComponent);
-                      })
-                      .join('/'),
-                  ].join('/'),
-                  ...(await parseFileByPath(systemPath)),
+                  path: pathAsRelativeUrl,
+                  ...(await this.filesService.getStoredFile({ key: systemPath })),
                 },
               ],
             };
@@ -124,9 +123,9 @@ export class FolderDataService {
       ...items,
       file,
       pathDirectory:
-        file && file.name === path.split('/').at(-1) //
-          ? path.split('/').slice(0, -1).join('/')
-          : path,
+        file && file.name === parameters.pathAsRelativeUrl.split('/').at(-1) //
+          ? parameters.pathAsRelativeUrl.split('/').slice(0, -1).join('/')
+          : parameters.pathAsRelativeUrl,
     };
   }
 }

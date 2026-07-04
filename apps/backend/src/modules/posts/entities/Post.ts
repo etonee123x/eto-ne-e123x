@@ -1,3 +1,5 @@
+import type { StoredFile } from '@/infrastructure/files/entities/StoredFile';
+
 export interface Post {
   _meta: {
     id: string;
@@ -6,4 +8,5 @@ export interface Post {
   };
 
   text: string;
+  attachments: Array<StoredFile>;
 }

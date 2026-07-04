@@ -4,7 +4,13 @@ import type { CursorPage } from '@/shared/types/CursorPage';
 import type { Post } from '../entities/Post';
 
 export class PostsRepo {
-  findFirstPosts(parameters: { pageSize: number }): CursorPage<Post> {
+  private readonly pool: Pool;
+
+  constructor(parameters: { pool: Pool }) {
+    this.pool = parameters.pool;
+  }
+
+  async findFirstPosts(parameters: { pageSize: number }): Promise<CursorPage<Post>> {
     const { pageSize } = parameters;
 
     return {
@@ -16,7 +22,7 @@ export class PostsRepo {
     };
   }
 
-  findPostsAroundPostId(parameters: { postId: string; pageSize: number }): CursorPage<Post> | null {
+  async findPostsAroundPostId(parameters: { postId: string; pageSize: number }): Promise<CursorPage<Post> | null> {
     const { postId, pageSize } = parameters;
 
     const index = posts.findIndex((post) => {
@@ -39,7 +45,10 @@ export class PostsRepo {
     };
   }
 
-  findPostsByCursorPrevious(parameters: { cursorPrevious: string; pageSize: number }): CursorPage<Post> | null {
+  async findPostsByCursorPrevious(parameters: {
+    cursorPrevious: string;
+    pageSize: number;
+  }): Promise<CursorPage<Post> | null> {
     const { cursorPrevious, pageSize } = parameters;
 
     const index = posts.findIndex((post) => {
@@ -62,7 +71,7 @@ export class PostsRepo {
     };
   }
 
-  findPostsByCursorNext(parameters: { cursorNext: string; pageSize: number }): CursorPage<Post> | null {
+  async findPostsByCursorNext(parameters: { cursorNext: string; pageSize: number }): Promise<CursorPage<Post> | null> {
     const { cursorNext, pageSize } = parameters;
 
     const index = posts.findIndex((post) => {
@@ -122,6 +131,4 @@ export class PostsRepo {
 
     return tableControllerPosts.deleteRowById(id);
   }
-
-  constructor(private readonly pool: Pool) {}
 }

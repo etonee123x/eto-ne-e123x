@@ -2,17 +2,22 @@ import type { components } from '@/types/openapi';
 import { isNil } from '@etonee123x/shared';
 import { nonNullable } from '@/utils/nonNullable';
 import { PostsRepo } from '../repos/PostsRepo';
-import type { FilesRepo } from '../repos/FilesRepo';
 import type { CursorPage } from '@/shared/types/CursorPage';
 import type { Post } from '../entities/Post';
+import type { FilesService } from '@/infrastructure/files/services/FilesService';
+import { AppError } from '@/shared/errors/AppError';
 
 export class PostsService {
   private readonly postsRepo: PostsRepo;
-  private readonly filesRepo: FilesRepo;
+  private readonly filesService: FilesService;
 
-  constructor(parameters: { postsRepo: PostsRepo; filesRepo: FilesRepo }) {
+  constructor(parameters: { postsRepo: PostsRepo; filesService: FilesService }) {
     this.postsRepo = parameters.postsRepo;
-    this.filesRepo = parameters.filesRepo;
+    this.filesService = parameters.filesService;
+  }
+
+  private getKeyByFile(file: Express.Multer.File) {
+    return file.filename;
   }
 
   async getPosts(parameters: {
@@ -21,33 +26,53 @@ export class PostsService {
     postId: string | null;
     pageSize: number;
   }): Promise<CursorPage<Post>> {
-    const { cursorPrevious, cursorNext, postId, pageSize } = parameters;
+    if (parameters.postId) {
+      const posts = await this.postsRepo.findPostsAroundPostId({
+        postId: parameters.postId,
+        pageSize: parameters.pageSize,
+      });
+      if (!posts) {
+        throw new AppError(404, 'Posts was not found');
+      }
 
-    if (postId) {
-      return this.postsRepo.findPostsAroundPostId({ postId, pageSize });
+      return posts;
     }
 
-    if (cursorPrevious) {
-      return this.postsRepo.findPostsByCursorPrevious({ cursorPrevious, pageSize });
+    if (parameters.cursorPrevious) {
+      const posts = await this.postsRepo.findPostsByCursorPrevious({
+        cursorPrevious: parameters.cursorPrevious,
+        pageSize: parameters.pageSize,
+      });
+      if (!posts) {
+        throw new AppError(404, 'Posts was not found');
+      }
+
+      return posts;
     }
 
-    if (cursorNext) {
-      return this.postsRepo.findPostsByCursorNext({ cursorNext, pageSize });
+    if (parameters.cursorNext) {
+      const posts = await this.postsRepo.findPostsByCursorNext({
+        cursorNext: parameters.cursorNext,
+        pageSize: parameters.pageSize,
+      });
+      if (!posts) {
+        throw new AppError(404, 'Posts was not found');
+      }
+
+      return posts;
     }
 
-    return this.postsRepo.findFirstPosts({ pageSize });
+    return this.postsRepo.findFirstPosts({ pageSize: parameters.pageSize });
   }
 
   async createPost(parameters: { text: string; files: Array<globalThis.Express.Multer.File> }): Promise<Post> {
-    const { text, files } = parameters;
-
     return this.postsRepo.createPost({
       attachments: await Promise.all(
-        files.map((file) => {
-          return this.postsRepo.createFileByMulterFile(file);
+        parameters.files.map((file) => {
+          return this.filesService.upload({ buffer: file.buffer, key: this.getKeyByFile(file) });
         }),
       ),
-      text,
+      text: parameters.text,
     });
   }
 
@@ -59,18 +84,16 @@ export class PostsService {
   }): Promise<Post> {
     let index = 0;
 
-    const { id, files, attachments: _attachments, text } = parameters;
-
-    const postOld = await this.postsRepo.findPostById({ id });
+    const postOld = await this.postsRepo.findPostById({ id: parameters.id });
 
     const attachments = await Promise.all([
-      ..._attachments.map(async (attachment) => {
-        return isNil(attachment) && index < files.length
-          ? this.postsRepo.createFileByMulterFile(nonNullable(files[index++]))
+      ...parameters.attachments.map(async (attachment) => {
+        return isNil(attachment) && index < parameters.files.length
+          ? this.filesService.upload(nonNullable(parameters.files[index++]))
           : attachment;
       }),
-      ...files.slice(index).map((file) => {
-        return this.postsRepo.createFileByMulterFile(file);
+      ...parameters.files.slice(index).map((file) => {
+        return this.filesService.upload(file);
       }),
     ]).then((attachments) => {
       return attachments.filter((attachment) => {
@@ -87,26 +110,24 @@ export class PostsService {
         return;
       }
 
-      this.postsRepo.deleteFileByName({ name: attachmentInOldPost.name });
+      this.filesService.delete({ key: attachmentInOldPost.name });
     });
 
     const post = await this.postsRepo.updatePostById({
-      id,
-      text,
-      attachments,
+      id: parameters.id,
+      text: parameters.text,
+      attachments: parameters.attachments,
     });
 
     return post;
   }
 
   async deletePostById(parameters: { id: string }): Promise<Post> {
-    const { id } = parameters;
+    const post = await this.postsRepo.deletePostById({ id: parameters.id });
 
-    const post = await this.postsRepo.deletePostById({ id });
-
-    post.attachments.forEach((attachment) => {
-      this.postsRepo.deleteFileByName({ name: attachment.name });
-    });
+    for (const attachment of post.attachments) {
+      this.filesService.delete({ key: attachment.name });
+    }
 
     return post;
   }

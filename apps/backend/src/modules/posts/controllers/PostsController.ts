@@ -6,7 +6,6 @@ import { cookieAuth } from '@/middlewares/cookieAuth';
 import { PostsService } from '../services/PostsService';
 import { idioticFieldMultipartFormDataToJsonParser } from '../middlewares/idioticFieldMultipartFormDataToJsonParser';
 import { parseFiles } from '../middlewares/parseFiles';
-import { PostsRepo } from '../repos/PostsRepo';
 import { Controller } from '@/shared/Controller';
 
 export class PostsController extends Controller {
@@ -17,7 +16,9 @@ export class PostsController extends Controller {
     const cursorNext = url.searchParams.get('filters[cursorNext]');
     const postId = url.searchParams.get('filters[postId]');
 
-    response.send(await this.postsService.getPosts({ cursorPrevious, cursorNext, postId, pageSize }));
+    const posts = await this.postsService.getPosts({ cursorPrevious, cursorNext, postId, pageSize });
+
+    response.send(posts);
   };
 
   private createPost: RequestHandlerTyped<'/posts', 'post', Omit<components['schemas']['PostCreateRequest'], 'files'>> =
@@ -25,7 +26,9 @@ export class PostsController extends Controller {
       const files = request.files as Array<globalThis.Express.Multer.File>;
       const text = request.body.text;
 
-      return response.send(await this.postsService.createPost({ text, files }));
+      const createdPost = await this.postsService.createPost({ text, files });
+
+      return response.send(createdPost);
     };
 
   private updatePostById: RequestHandlerTyped<
@@ -38,20 +41,22 @@ export class PostsController extends Controller {
     const attachments = request.body.attachments;
     const text = request.body.text;
 
-    return response.send(
-      await this.postsService.updatePostById({
-        id,
-        text,
-        files,
-        attachments,
-      }),
-    );
+    const updatedPost = await this.postsService.updatePostById({
+      id,
+      text,
+      files,
+      attachments,
+    });
+
+    return response.send(updatedPost);
   };
 
   private deletePostById: RequestHandlerTyped<'/posts/{id}', 'delete'> = async (request, response) => {
     const id = request.params.id;
 
-    return response.send(await this.postsService.deletePostById({ id }));
+    const deletedPost = await this.postsService.deletePostById({ id });
+
+    return response.send(deletedPost);
   };
 
   constructor(private readonly postsService: PostsService) {

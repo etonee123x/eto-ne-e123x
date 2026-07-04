@@ -1,6 +1,16 @@
+import type { Readable } from 'node:stream';
+import type { StoredFileBase } from '../types/StoredFileBase';
+
 export interface FilesStorage {
   put(parameters: { buffer: Buffer; key: string }): Promise<unknown>;
-  get(parameters: { key: string }): Promise<Buffer>;
+
+  getStream(parameters: { key: string }): Promise<Readable>;
+
+  getBuffer(parameters: { key: string }): Promise<Buffer>;
+
   delete(parameters: { key: string }): Promise<void>;
+
+  getStoredFileBase(parameters: { key: string }): Promise<StoredFileBase>;
+
   exists(parameters: { key: string }): Promise<boolean>;
 }

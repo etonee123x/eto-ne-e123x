@@ -11,7 +11,7 @@ export class FolderDataController extends Controller {
 
     const path = url.searchParams.get('path') ?? '/';
 
-    const folderData = await this.folderDataService.getFolderData(path);
+    const folderData = await this.folderDataService.getFolderData({ pathAsRelativeUrl: path });
 
     return response.send(folderData);
   };
