@@ -1,11 +1,10 @@
-import type { components } from '@/types/openapi';
-import { isNil } from '@etonee123x/shared';
 import { nonNullable } from '@/utils/nonNullable';
 import { PostsRepo } from '../repos/PostsRepo';
 import type { CursorPage } from '@/shared/types/CursorPage';
 import type { Post } from '../entities/Post';
 import type { FilesService } from '@/infrastructure/files/services/FilesService';
 import { AppError } from '@/shared/errors/AppError';
+import type { StoredFile } from '@/infrastructure/files/entities/StoredFile';
 
 export class PostsService {
   private readonly postsRepo: PostsRepo;
@@ -79,7 +78,7 @@ export class PostsService {
   async updatePostById(parameters: {
     id: string;
     files: Array<globalThis.Express.Multer.File>;
-    attachments: components['schemas']['PostUpdateRequest']['attachments'];
+    attachments: Array<StoredFile | null>;
     text: string;
   }): Promise<Post> {
     let index = 0;
@@ -87,36 +86,45 @@ export class PostsService {
     const postOld = await this.postsRepo.findPostById({ id: parameters.id });
 
     const attachments = await Promise.all([
-      ...parameters.attachments.map(async (attachment) => {
-        return isNil(attachment) && index < parameters.files.length
-          ? this.filesService.upload(nonNullable(parameters.files[index++]))
-          : attachment;
+      ...parameters.attachments.flatMap((attachment) => {
+        if (attachment) {
+          return [Promise.resolve(attachment)];
+        }
+
+        if (index >= parameters.files.length) {
+          return [];
+        }
+
+        const file = nonNullable(parameters.files[index++]);
+
+        return [
+          this.filesService.upload({
+            buffer: file.buffer,
+            key: this.getKeyByFile(file),
+          }),
+        ];
       }),
       ...parameters.files.slice(index).map((file) => {
-        return this.filesService.upload(file);
+        return this.filesService.upload({ buffer: file.buffer, key: this.getKeyByFile(file) });
       }),
-    ]).then((attachments) => {
-      return attachments.filter((attachment) => {
-        return !isNil(attachment);
-      });
-    });
+    ]);
 
-    postOld.attachments.forEach((attachmentInOldPost) => {
+    for (const attachmentInOldPost of postOld.attachments) {
       if (
         attachments.some((attachmentInNewPost) => {
           return attachmentInNewPost.src === attachmentInOldPost.src;
         })
       ) {
-        return;
+        continue;
       }
 
       this.filesService.delete({ key: attachmentInOldPost.name });
-    });
+    }
 
     const post = await this.postsRepo.updatePostById({
       id: parameters.id,
       text: parameters.text,
-      attachments: parameters.attachments,
+      attachments,
     });
 
     return post;
