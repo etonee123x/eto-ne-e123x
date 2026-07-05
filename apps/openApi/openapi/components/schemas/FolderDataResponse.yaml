@@ -3,14 +3,35 @@ properties:
   folders:
     type: array
     items:
-      $ref: ./FolderDataItemFolder.yaml
+      allOf:
+        - $ref: ./FolderDataItemFolder.yaml
+        - type: object
+          properties:
+            path:
+              type: string
+          required:
+            - path
   files:
     type: array
     items:
-      $ref: ./FolderDataItemFile.yaml
+      allOf:
+        - $ref: ./StoredFile.yaml
+        - type: object
+          properties:
+            path:
+              type: string
+          required:
+            - path
   file:
     oneOf:
-      - $ref: ./FolderDataItemFile.yaml
+      - allOf:
+        - $ref: ./StoredFile.yaml
+        - type: object
+          properties:
+            path:
+              type: string
+          required:
+            - path
       - type: "null"
   pathDirectory:
     type: string

@@ -15,7 +15,7 @@ interface Meta {
   updatedAt: number;
 }
 
-export class FsDatabase<
+export class FsDatabaseTable<
   const Entity extends object,
   const Row extends Omit<Entity, '_meta'> & {
     _meta: Meta;
@@ -64,9 +64,9 @@ export class FsDatabase<
     const row = {
       ...entityOrRow,
       _meta: {
-        id: '_meta' in entityOrRow ? entityOrRow._meta.id : FsDatabase.generateId(),
-        createdAt: '_meta' in entityOrRow ? entityOrRow._meta.createdAt : FsDatabase.getCreatedAt(),
-        updatedAt: FsDatabase.getUpdatedAt(),
+        id: '_meta' in entityOrRow ? entityOrRow._meta.id : FsDatabaseTable.generateId(),
+        createdAt: '_meta' in entityOrRow ? entityOrRow._meta.createdAt : FsDatabaseTable.getCreatedAt(),
+        updatedAt: FsDatabaseTable.getUpdatedAt(),
       },
     } as Row;
 

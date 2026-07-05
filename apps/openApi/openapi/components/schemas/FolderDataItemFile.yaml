@@ -1,5 +1,0 @@
-oneOf:
-  - $ref: ./FolderDataItemAudio.yaml
-  - $ref: ./FolderDataItemImage.yaml
-  - $ref: ./FolderDataItemVideo.yaml
-  - $ref: ./FolderDataItemUnknown.yaml

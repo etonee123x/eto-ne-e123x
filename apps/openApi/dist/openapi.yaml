@@ -290,13 +290,10 @@ components:
       properties:
         name:
           type: string
-        path:
-          type: string
         _meta:
           $ref: '#/components/schemas/FolderDataItemMeta'
       required:
         - name
-        - path
         - _meta
     ItemType:
       type: string
@@ -538,14 +535,35 @@ components:
         folders:
           type: array
           items:
-            $ref: '#/components/schemas/FolderDataItemFolder'
+            allOf:
+              - $ref: '#/components/schemas/FolderDataItemFolder'
+              - type: object
+                properties:
+                  path:
+                    type: string
+                required:
+                  - path
         files:
           type: array
           items:
-            $ref: '#/components/schemas/FolderDataItemFile'
+            allOf:
+              - $ref: '#/components/schemas/FolderDataItemFile'
+              - type: object
+                properties:
+                  path:
+                    type: string
+                required:
+                  - path
         file:
           oneOf:
-            - $ref: '#/components/schemas/FolderDataItemFile'
+            - allOf:
+                - $ref: '#/components/schemas/FolderDataItemFile'
+                - type: object
+                  properties:
+                    path:
+                      type: string
+                  required:
+                    - path
             - type: 'null'
         pathDirectory:
           type: string

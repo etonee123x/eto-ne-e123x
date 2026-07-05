@@ -1,5 +1,5 @@
 allOf:
-  - $ref: ./FolderDataItemFileBase.yaml
+  - $ref: ./StoredFileBase.yaml
   - type: object
     properties:
       fileType:

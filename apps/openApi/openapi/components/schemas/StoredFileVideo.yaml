@@ -1,0 +1,22 @@
+allOf:
+  - $ref: ./StoredFileBase.yaml
+  - type: object
+    properties:
+      fileType:
+        allOf:
+          - $ref: ./FileType.yaml
+          - enum:
+            - VIDEO
+      metadata:
+        type: object
+        properties:
+          width:
+            type: number
+          height:
+            type: number
+        required:
+          - width
+          - height
+    required:
+      - metadata
+      - fileType

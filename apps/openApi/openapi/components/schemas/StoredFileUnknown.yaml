@@ -1,14 +1,11 @@
 allOf:
-  - $ref: ./FolderDataItemFileBase.yaml
+  - $ref: ./StoredFileBase.yaml
   - type: object
     properties:
       fileType:
         allOf:
           - $ref: ./FileType.yaml
           - enum:
-            - IMAGE
-      metadata:
-        $ref: ./FolderDataSize.yaml
+            - UNKNOWN
     required:
-      - metadata
       - fileType

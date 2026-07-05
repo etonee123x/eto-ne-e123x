@@ -88,7 +88,6 @@ export interface components {
         };
         FolderDataItemBase: {
             name: string;
-            path: string;
             _meta: components["schemas"]["FolderDataItemMeta"];
         };
         /** @enum {string} */
@@ -161,9 +160,15 @@ export interface components {
             itemType: components["schemas"]["ItemType"] & "FOLDER";
         };
         FolderDataResponse: {
-            folders: components["schemas"]["FolderDataItemFolder"][];
-            files: components["schemas"]["FolderDataItemFile"][];
-            file: components["schemas"]["FolderDataItemFile"] | null;
+            folders: (components["schemas"]["FolderDataItemFolder"] & {
+                path: string;
+            })[];
+            files: (components["schemas"]["FolderDataItemFile"] & {
+                path: string;
+            })[];
+            file: (components["schemas"]["FolderDataItemFile"] & {
+                path: string;
+            }) | null;
             pathDirectory: string;
         };
     };
