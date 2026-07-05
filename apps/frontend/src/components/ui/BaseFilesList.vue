@@ -26,7 +26,6 @@ import BaseIcon from '@/components/ui/BaseIcon.vue';
 import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import BaseButton from '@/components/ui/BaseButton.vue';
 import { extensionToFileType, FILE_TYPES } from '@/helpers/folderData';
-import { nonNullable } from '@/utils/nonNullable';
 import type { components } from '@/types/openapi';
 import { checkExhaustive } from '@etonee123x/shared/utils/checkExhaustive';
 
@@ -102,7 +101,7 @@ const fileToKey = (file: FileOrFolderDataItemFile) => {
 
 const fileToComponent = (file: FileOrFolderDataItemFile) => {
   const type = isFile(file)
-    ? extensionToFileType(`.${nonNullable(/^[^/]+\/(?<extension>.*)$/.exec(file.type)?.groups?.extension)}`)
+    ? extensionToFileType(/^[^/]+\/(?<extension>.*)$/.exec(file.type)?.groups?.extension ?? null)
     : file.fileType;
 
   switch (type) {

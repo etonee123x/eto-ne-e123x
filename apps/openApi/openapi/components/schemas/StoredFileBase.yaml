@@ -9,6 +9,11 @@ allOf:
             - FILE
       src:
         type: string
+      extension:
+        type:
+          - string
+          - "null"
     required:
       - itemType
       - src
+      - extension

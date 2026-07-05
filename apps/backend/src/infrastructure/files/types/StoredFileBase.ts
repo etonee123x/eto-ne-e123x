@@ -2,7 +2,7 @@ import { ITEM_TYPES } from '@/helpers/folderData';
 
 export interface StoredFileBase {
   name: string;
-  ext: string;
+  extension: string | null;
   itemType: (typeof ITEM_TYPES)['FILE'];
   _meta: {
     createdAt: number;

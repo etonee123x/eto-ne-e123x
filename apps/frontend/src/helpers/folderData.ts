@@ -1,5 +1,6 @@
 import { fileTypeValues, itemTypeValues } from '@/types/openapi';
 import type { components } from '@/types/openapi';
+import { isNil } from '@etonee123x/shared/utils/isNil';
 import { objectGet } from '@etonee123x/shared/utils/objectGet';
 
 export const FILE_TYPES = Object.fromEntries(
@@ -18,22 +19,26 @@ export const ITEM_TYPES = Object.fromEntries(
   [Value in (typeof itemTypeValues)[number]]: Value;
 };
 
-export const extensionToFileType = (extension: string) => {
-  const EXTENSIONS_AUDIO = ['.mp3', '.ogg', '.wav'];
-  const EXTENSIONS_IMAGE = ['.jpg', '.jpeg', '.png'];
-  const EXTENSIONS_VIDEO = ['.mp4', '.webm'];
+const EXTENSIONS_AUDIO = new Set(['mp3', 'ogg', 'wav']);
+const EXTENSIONS_IMAGE = new Set(['jpg', 'jpeg', 'png']);
+const EXTENSIONS_VIDEO = new Set(['mp4', 'webm']);
+
+export const extensionToFileType = (extension: string | null) => {
+  if (isNil(extension)) {
+    return FILE_TYPES.UNKNOWN;
+  }
 
   const extensionLowerCased = extension.toLowerCase();
 
-  if (EXTENSIONS_AUDIO.includes(extensionLowerCased)) {
+  if (EXTENSIONS_AUDIO.has(extensionLowerCased)) {
     return FILE_TYPES.AUDIO;
   }
 
-  if (EXTENSIONS_IMAGE.includes(extensionLowerCased)) {
+  if (EXTENSIONS_IMAGE.has(extensionLowerCased)) {
     return FILE_TYPES.IMAGE;
   }
 
-  if (EXTENSIONS_VIDEO.includes(extensionLowerCased)) {
+  if (EXTENSIONS_VIDEO.has(extensionLowerCased)) {
     return FILE_TYPES.VIDEO;
   }
 

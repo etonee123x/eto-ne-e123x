@@ -32,7 +32,7 @@ export class FileInspectorRouter {
     const buffer = await parameters.fileSource.getBuffer();
 
     const fileTypeResult = await fileTypeFromBuffer(buffer);
-    const fileType = fileTypeResult ? extensionToFileType(`.${fileTypeResult.ext}`) : FILE_TYPES.UNKNOWN;
+    const fileType = fileTypeResult ? extensionToFileType(fileTypeResult.ext) : FILE_TYPES.UNKNOWN;
 
     return this.fileTypeToInspector[fileType].inspect(parameters);
   }

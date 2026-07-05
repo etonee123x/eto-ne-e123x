@@ -8,6 +8,15 @@ import type { FilesLocation } from '@/infrastructure/files/locations/FilesLocati
 
 const PROHIBITED_ELEMENTS_NAMES = new Set(['.git']);
 
+const getStat = async (parameters: { path: string }) => {
+  try {
+    await nodeFsPromises.access(parameters.path);
+  } catch {
+    return null;
+  }
+
+  return nodeFsPromises.stat(parameters.path);
+};
 export class FolderDataService {
   private readonly filesLocation: FilesLocation;
   private readonly filesService: FilesService;
@@ -18,20 +27,17 @@ export class FolderDataService {
   }
 
   private pathAsRelativeUrlToSystemPath(pathAsRelativeUrl: string) {
-    const systemPath = nodePath.join(this.filesLocation.fs, pathAsRelativeUrl);
-    return systemPath;
+    return nodePath.join(this.filesLocation.fs, pathAsRelativeUrl);
   }
 
   async getFolderData(parameters: { pathAsRelativeUrl: string }) {
-    const systemPath = this.pathAsRelativeUrlToSystemPath(parameters.pathAsRelativeUrl);
+    const statAwaited = await getStat({
+      path: this.pathAsRelativeUrlToSystemPath(parameters.pathAsRelativeUrl),
+    });
 
-    try {
-      await nodeFsPromises.access(systemPath);
-    } catch {
+    if (!statAwaited) {
       throw new AppError(404, 'Path was not found');
     }
-
-    const statAwaited = await nodeFsPromises.stat(systemPath);
 
     const {
       //
@@ -50,11 +56,11 @@ export class FolderDataService {
           currentDirectory: parameters.pathAsRelativeUrl,
         };
 
-    const readdirAwaited = await nodeFsPromises.readdir(this.pathAsRelativeUrlToSystemPath(currentDirectory), {
+    const directoryItems = await nodeFsPromises.readdir(this.pathAsRelativeUrlToSystemPath(currentDirectory), {
       withFileTypes: true,
     });
 
-    const items = await readdirAwaited.reduce<
+    const { folders, files } = await directoryItems.reduce<
       Promise<{
         folders: Array<{
           name: string;
@@ -82,7 +88,13 @@ export class FolderDataService {
         const pathAsRelativeUrl = nodePath.join(currentDirectory, item.name);
         const systemPath = this.pathAsRelativeUrlToSystemPath(pathAsRelativeUrl);
 
-        const statAwaited = await nodeFsPromises.stat(systemPath);
+        const statAwaited = await getStat({
+          path: systemPath,
+        });
+
+        if (!statAwaited) {
+          return promiseItems;
+        }
 
         const baseItem = {
           name: item.name,
@@ -119,13 +131,21 @@ export class FolderDataService {
       Promise.resolve({ files: [], folders: [] }),
     );
 
+    const pathDirectory = (() => {
+      if (file && file.name === parameters.pathAsRelativeUrl.split('/').at(-1)) {
+        return parameters.pathAsRelativeUrl.split('/').slice(0, -1).join('/');
+      }
+
+      return parameters.pathAsRelativeUrl.length > 1 && parameters.pathAsRelativeUrl.endsWith('/')
+        ? parameters.pathAsRelativeUrl.slice(0, -1)
+        : parameters.pathAsRelativeUrl;
+    })();
+
     return {
-      ...items,
+      folders,
+      files,
       file,
-      pathDirectory:
-        file && file.name === parameters.pathAsRelativeUrl.split('/').at(-1) //
-          ? parameters.pathAsRelativeUrl.split('/').slice(0, -1).join('/')
-          : parameters.pathAsRelativeUrl,
+      pathDirectory,
     };
   }
 }

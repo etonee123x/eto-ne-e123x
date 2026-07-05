@@ -27,7 +27,6 @@ allOf:
             nullable: true
           duration:
             type: number
-            nullable: true
         required:
           - bitrate
           - duration
