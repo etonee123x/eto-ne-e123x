@@ -1,8 +1,7 @@
 import { Module } from '@/shared/Module';
 import { PostsController } from './controllers/PostsController';
 import { PostsService } from './services/PostsService';
-import { PostsRepo } from './repos/PostsRepo';
-import { pool } from '@/infrastructure/pool';
+import { PostsFsDatabaseRepo } from './repos/PostsFsDatabaseRepo';
 import { FilesService } from '@/infrastructure/files/services/FilesService';
 import { FsFilesStorage } from '@/infrastructure/files/storages/FsFilesStorage';
 import { FileInspectorRouter } from '@/infrastructure/files/inspectors/FileInspectorRouter';
@@ -12,6 +11,8 @@ import { ImageFileInspector } from '@/infrastructure/files/inspectors/ImageFileI
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/UnknownFileInspector';
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { FilesLocation } from '@/infrastructure/files/locations/FilesLocation';
+import { FsDatabaseFile } from '@/infrastructure/FsDatabaseFile';
+import type { Post } from './entities/Post';
 
 export class PostsModule extends Module {
   constructor() {
@@ -19,7 +20,9 @@ export class PostsModule extends Module {
 
     const filesLocation = new FilesLocation({ fs: uploadsPath, src: '/content' });
 
-    const postsRepo = new PostsRepo({ pool });
+    const fsDatabaseFile = new FsDatabaseFile<Post>({ fileName: 'posts.json' });
+
+    const postsRepo = new PostsFsDatabaseRepo({ fsDatabaseFile });
 
     const filesStorage = new FsFilesStorage({ filesLocation });
 

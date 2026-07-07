@@ -1,6 +1,6 @@
 import type { Pool } from 'pg';
 
-export class Repo {
+export class PgRepo {
   protected readonly pool: Pool;
 
   constructor(parameters: { pool: Pool }) {

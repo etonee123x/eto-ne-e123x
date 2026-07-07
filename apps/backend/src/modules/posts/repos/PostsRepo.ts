@@ -1,41 +1,24 @@
 import type { CursorPage } from '@/shared/types/CursorPage';
 import type { Post } from '../entities/Post';
-import { Repo } from '@/shared/Repo';
 import type { StoredFile } from '@/infrastructure/files/entities/StoredFile';
 
-export class PostsRepo extends Repo {
-  async findFirstPosts(parameters: { pageSize: number }): Promise<CursorPage<Post>> {
-    throw new Error('Not implemented');
-  }
+export interface PostsRepo {
+  findFirstPosts: (parameters: { pageSize: number }) => Promise<CursorPage<Post>>;
 
-  async findPostsAroundPostId(parameters: { postId: string; pageSize: number }): Promise<CursorPage<Post> | null> {
-    throw new Error('Not implemented');
-  }
+  findPostsAroundPostId: (parameters: { postId: string; pageSize: number }) => Promise<CursorPage<Post> | null>;
 
-  async findPostsByCursorPrevious(parameters: {
+  findPostsByCursorPrevious: (parameters: {
     cursorPrevious: string;
     pageSize: number;
-  }): Promise<CursorPage<Post> | null> {
-    throw new Error('Not implemented');
-  }
+  }) => Promise<CursorPage<Post> | null>;
 
-  async findPostsByCursorNext(parameters: { cursorNext: string; pageSize: number }): Promise<CursorPage<Post> | null> {
-    throw new Error('Not implemented');
-  }
+  findPostsByCursorNext: (parameters: { cursorNext: string; pageSize: number }) => Promise<CursorPage<Post> | null>;
 
-  async findPostById(parameters: { id: string }): Promise<Post> {
-    throw new Error('Not implemented');
-  }
+  findPostById: (parameters: { id: string }) => Promise<Post>;
 
-  async createPost(parameters: { text: string; attachments: Array<StoredFile> }): Promise<Post> {
-    throw new Error('Not implemented');
-  }
+  createPost: (parameters: { text: string; attachments: Array<StoredFile> }) => Promise<Post>;
 
-  async updatePostById(parameters: { id: string; text: string; attachments: Array<StoredFile> }): Promise<Post> {
-    throw new Error('Not implemented');
-  }
+  updatePostById: (parameters: { id: string; text: string; attachments: Array<StoredFile> }) => Promise<Post>;
 
-  async deletePostById(parameters: { id: string }): Promise<Post> {
-    throw new Error('Not implemented');
-  }
+  deletePostById: (parameters: { id: string }) => Promise<Post>;
 }

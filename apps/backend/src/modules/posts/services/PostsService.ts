@@ -1,5 +1,5 @@
 import { nonNullable } from '@/utils/nonNullable';
-import { PostsRepo } from '../repos/PostsRepo';
+import type { PostsRepo } from '../repos/PostsRepo';
 import type { CursorPage } from '@/shared/types/CursorPage';
 import type { Post } from '../entities/Post';
 import type { FilesService } from '@/infrastructure/files/services/FilesService';
