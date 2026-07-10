@@ -20,7 +20,7 @@ const LazyBaseVideoPreview = defineAsyncComponent(() => {
 });
 
 const props = defineProps<{
-  attachment: components['schemas']['FolderDataItemFile'];
+  attachment: components['schemas']['StoredFile'];
   index: number;
 }>();
 

@@ -12,23 +12,30 @@ export class FsFilesStorage implements FilesStorage {
     this.filesLocation = parameters.filesLocation;
   }
 
-  private getPath(name: string) {
-    return nodePath.join(this.filesLocation.fs, name);
+  private getPath(parameters: { key: string }) {
+    return nodePath.join(this.filesLocation.fs, parameters.key);
   }
 
   async getStream(parameters: { key: string }) {
-    const fileHandle = await fsPromises.open(this.getPath(parameters.key), 'r');
+    const fileHandle = await fsPromises.open(this.getPath(parameters), 'r');
     return fileHandle.createReadStream();
   }
 
   async getBuffer(parameters: { key: string }) {
-    return fsPromises.readFile(this.getPath(parameters.key));
+    return fsPromises.readFile(this.getPath(parameters));
   }
 
   async getStoredFileBase(parameters: { key: string }) {
-    const statAwaited = await fsPromises.stat(this.getPath(parameters.key));
+    const statAwaited = await fsPromises.stat(this.getPath(parameters));
 
-    const parsedPath = nodePath.parse(this.getPath(parameters.key));
+    const parsedPath = nodePath.parse(this.getPath(parameters));
+
+    // console.log({
+    //   src: this.filesLocation.src,
+    //   fs: this.filesLocation.fs,
+    //   key: parameters.key,
+    //   res: parameters.key.replace(this.filesLocation.fs, ''),
+    // });
 
     const source = [this.filesLocation.src, parameters.key.replace(this.filesLocation.fs, '')].join('');
 
@@ -47,16 +54,16 @@ export class FsFilesStorage implements FilesStorage {
   }
 
   async put(...[parameters]: Parameters<FilesStorage['put']>) {
-    await fsPromises.writeFile(this.getPath(parameters.key), parameters.buffer);
+    await fsPromises.writeFile(this.getPath(parameters), parameters.buffer);
   }
 
   async delete(...[parameters]: Parameters<FilesStorage['delete']>) {
-    return fsPromises.unlink(this.getPath(parameters.key));
+    return fsPromises.unlink(this.getPath(parameters));
   }
 
   async exists(...[parameters]: Parameters<FilesStorage['exists']>) {
     try {
-      await fsPromises.access(this.getPath(parameters.key));
+      await fsPromises.access(this.getPath(parameters));
       return true;
     } catch {
       return false;

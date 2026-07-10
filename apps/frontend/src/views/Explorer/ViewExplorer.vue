@@ -223,7 +223,7 @@ const shouldRenderNav = computed(() => {
   );
 });
 
-const itemFileToComponent = (itemFile: components['schemas']['FolderDataItemFile']) => {
+const itemFileToComponent = (itemFile: components['schemas']['StoredFile']) => {
   switch (itemFile.fileType) {
     case FILE_TYPES.AUDIO: {
       return LazyExplorerElementFileAudio;
@@ -240,7 +240,7 @@ const itemFileToComponent = (itemFile: components['schemas']['FolderDataItemFile
   }
 };
 
-const itemFileToBinds = (itemFile: components['schemas']['FolderDataItemFile']) => {
+const itemFileToBinds = (itemFile: components['schemas']['StoredFile']) => {
   switch (itemFile.fileType) {
     case FILE_TYPES.AUDIO: {
       return {

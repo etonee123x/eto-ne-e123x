@@ -16,7 +16,7 @@ export class PostsService {
   }
 
   private getKeyByFile(file: Express.Multer.File) {
-    return file.filename;
+    return file.originalname;
   }
 
   async getPosts(parameters: {

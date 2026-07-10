@@ -17,12 +17,12 @@ export const useQueryGetFolderData = (
     queryKey: [
       'folderData',
       computed(() => {
-        return toValue(parameters.segments).join('/');
+        return toValue(parameters.segments).join('/') || null;
       }),
     ] as const,
     queryFn: (...parameters) => {
       return clientRequestPromiseWrapper(
-        client['/folder-data'].GET({ params: { query: { path: parameters[0].queryKey[1] } } }),
+        client['/folder-data'].GET({ params: { query: { path: parameters[0].queryKey[1] ?? '/' } } }),
       ).catch(() => {
         return goToPage404();
       });

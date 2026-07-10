@@ -1,0 +1,3 @@
+allOf:
+  - $ref: ./StoredFileAudio.yaml
+  - $ref: ./FolderDataItemBase.yaml

@@ -82,16 +82,14 @@ export interface components {
         Error401: {
             message: string;
         };
-        FolderDataItemBase: {
+        /** @enum {string} */
+        ItemType: "FOLDER" | "FILE";
+        StoredFileBase: {
             name: string;
             _meta: {
                 createdAt: number;
                 updatedAt: number;
             };
-        };
-        /** @enum {string} */
-        ItemType: "FOLDER" | "FILE";
-        StoredFileBase: components["schemas"]["FolderDataItemBase"] & {
             itemType: components["schemas"]["ItemType"] & "FILE";
             src: string;
             extension: string | null;
@@ -158,19 +156,26 @@ export interface components {
             attachments: (components["schemas"]["StoredFile"] | null)[];
             files: string[];
         };
+        FolderDataItemBase: {
+            name: string;
+            _meta: {
+                createdAt: number;
+                updatedAt: number;
+            };
+            path: string;
+        };
         FolderDataItemFolder: components["schemas"]["FolderDataItemBase"] & {
             itemType: components["schemas"]["ItemType"] & "FOLDER";
         };
+        FolderDataItemAudio: components["schemas"]["StoredFileAudio"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemImage: components["schemas"]["StoredFileImage"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemVideo: components["schemas"]["StoredFileVideo"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemUnknown: components["schemas"]["StoredFileUnknown"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemFile: components["schemas"]["FolderDataItemAudio"] | components["schemas"]["FolderDataItemImage"] | components["schemas"]["FolderDataItemVideo"] | components["schemas"]["FolderDataItemUnknown"];
         FolderDataResponse: {
-            folders: (components["schemas"]["FolderDataItemFolder"] & {
-                path: string;
-            })[];
-            files: (components["schemas"]["StoredFile"] & {
-                path: string;
-            })[];
-            file: (components["schemas"]["StoredFile"] & {
-                path: string;
-            }) | null;
+            folders: components["schemas"]["FolderDataItemFolder"][];
+            files: components["schemas"]["FolderDataItemFile"][];
+            file: components["schemas"]["FolderDataItemFile"] | null;
             pathDirectory: string;
         };
     };
@@ -428,7 +433,7 @@ export interface operations {
     getFolderData: {
         parameters: {
             query: {
-                /** @description Path inside folder-data (e.g. path/to/folder) */
+                /** @description Path inside folder-data (e.g. /path/to/folder) */
                 path: string;
             };
             header?: never;

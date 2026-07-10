@@ -82,24 +82,21 @@ export interface components {
         Error401: {
             message: string;
         };
-        FolderDataItemMeta: {
-            createdAt: number;
-            updatedAt: number;
-        };
-        FolderDataItemBase: {
-            name: string;
-            path: string;
-            _meta: components["schemas"]["FolderDataItemMeta"];
-        };
         /** @enum {string} */
         ItemType: "FOLDER" | "FILE";
-        FolderDataItemFileBase: components["schemas"]["FolderDataItemBase"] & {
+        StoredFileBase: {
+            name: string;
+            _meta: {
+                createdAt: number;
+                updatedAt: number;
+            };
             itemType: components["schemas"]["ItemType"] & "FILE";
             src: string;
+            extension: string | null;
         };
         /** @enum {string} */
         FileType: "IMAGE" | "VIDEO" | "AUDIO" | "UNKNOWN";
-        FolderDataItemAudio: components["schemas"]["FolderDataItemFileBase"] & {
+        StoredFileAudio: components["schemas"]["StoredFileBase"] & {
             fileType: components["schemas"]["FileType"] & "AUDIO";
             metadata: {
                 album: string | null;
@@ -107,25 +104,27 @@ export interface components {
                 year: number | null;
                 artists: string[];
                 bitrate: number | null;
-                duration: number | null;
+                duration: number;
             };
         };
-        FolderDataSize: {
-            width: number;
-            height: number;
-        };
-        FolderDataItemImage: components["schemas"]["FolderDataItemFileBase"] & {
+        StoredFileImage: components["schemas"]["StoredFileBase"] & {
             fileType: components["schemas"]["FileType"] & "IMAGE";
-            metadata: components["schemas"]["FolderDataSize"];
+            metadata: {
+                width: number;
+                height: number;
+            };
         };
-        FolderDataItemVideo: components["schemas"]["FolderDataItemFileBase"] & {
+        StoredFileVideo: components["schemas"]["StoredFileBase"] & {
             fileType: components["schemas"]["FileType"] & "VIDEO";
-            metadata: components["schemas"]["FolderDataSize"];
+            metadata: {
+                width: number;
+                height: number;
+            };
         };
-        FolderDataItemUnknown: components["schemas"]["FolderDataItemFileBase"] & {
+        StoredFileUnknown: components["schemas"]["StoredFileBase"] & {
             fileType: components["schemas"]["FileType"] & "UNKNOWN";
         };
-        FolderDataItemFile: components["schemas"]["FolderDataItemAudio"] | components["schemas"]["FolderDataItemImage"] | components["schemas"]["FolderDataItemVideo"] | components["schemas"]["FolderDataItemUnknown"];
+        StoredFile: components["schemas"]["StoredFileAudio"] | components["schemas"]["StoredFileImage"] | components["schemas"]["StoredFileVideo"] | components["schemas"]["StoredFileUnknown"];
         PostResponse: {
             _meta: {
                 id: string;
@@ -133,7 +132,7 @@ export interface components {
                 updatedAt: number;
             };
             text: string;
-            attachments: components["schemas"]["FolderDataItemFile"][];
+            attachments: components["schemas"]["StoredFile"][];
         };
         PostsResponse: {
             _meta: {
@@ -154,12 +153,25 @@ export interface components {
         };
         PostUpdateRequest: {
             text: string;
-            attachments: (components["schemas"]["FolderDataItemFile"] | null)[];
+            attachments: (components["schemas"]["StoredFile"] | null)[];
             files: string[];
+        };
+        FolderDataItemBase: {
+            name: string;
+            _meta: {
+                createdAt: number;
+                updatedAt: number;
+            };
+            path: string;
         };
         FolderDataItemFolder: components["schemas"]["FolderDataItemBase"] & {
             itemType: components["schemas"]["ItemType"] & "FOLDER";
         };
+        FolderDataItemAudio: components["schemas"]["StoredFileAudio"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemImage: components["schemas"]["StoredFileImage"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemVideo: components["schemas"]["StoredFileVideo"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemUnknown: components["schemas"]["StoredFileUnknown"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemFile: components["schemas"]["FolderDataItemAudio"] | components["schemas"]["FolderDataItemImage"] | components["schemas"]["FolderDataItemVideo"] | components["schemas"]["FolderDataItemUnknown"];
         FolderDataResponse: {
             folders: components["schemas"]["FolderDataItemFolder"][];
             files: components["schemas"]["FolderDataItemFile"][];
@@ -421,7 +433,7 @@ export interface operations {
     getFolderData: {
         parameters: {
             query: {
-                /** @description Path inside folder-data (e.g. path/to/folder) */
+                /** @description Path inside folder-data (e.g. /path/to/folder) */
                 path: string;
             };
             header?: never;
@@ -460,10 +472,10 @@ type ReadonlyArray<T> = [
     unknown[]
 ] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
 export const itemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["ItemType"]> = ["FOLDER", "FILE"];
-export const folderDataItemFileBaseItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemFileBase"]["itemType"]> = ["FILE"];
+export const storedFileBaseItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileBase"]["itemType"]> = ["FILE"];
 export const fileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FileType"]> = ["IMAGE", "VIDEO", "AUDIO", "UNKNOWN"];
-export const folderDataItemAudioFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemAudio"]["fileType"]> = ["AUDIO"];
-export const folderDataItemImageFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemImage"]["fileType"]> = ["IMAGE"];
-export const folderDataItemVideoFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemVideo"]["fileType"]> = ["VIDEO"];
-export const folderDataItemUnknownFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemUnknown"]["fileType"]> = ["UNKNOWN"];
+export const storedFileAudioFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileAudio"]["fileType"]> = ["AUDIO"];
+export const storedFileImageFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileImage"]["fileType"]> = ["IMAGE"];
+export const storedFileVideoFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileVideo"]["fileType"]> = ["VIDEO"];
+export const storedFileUnknownFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileUnknown"]["fileType"]> = ["UNKNOWN"];
 export const folderDataItemFolderItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemFolder"]["itemType"]> = ["FOLDER"];

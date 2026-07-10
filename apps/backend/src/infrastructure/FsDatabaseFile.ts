@@ -1,7 +1,7 @@
 import { throwError } from '@etonee123x/shared/utils/throwError';
 import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import nodeFsPromises from 'node:fs/promises';
-import path from 'node:path';
+import nodePath from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { isNil } from '@etonee123x/shared/utils/isNil';
 import { AppError } from '@/shared/errors/AppError';
@@ -37,14 +37,14 @@ export class FsDatabaseFile<
   constructor(parameters: { fileName: `${string}.json` }) {
     const tableDatabasePath = process.env.DATABASE_PATH ?? throwError('DATABASE_PATH is not defined');
 
-    this.pathToFile = path.join(tableDatabasePath, parameters.fileName);
+    this.pathToFile = nodePath.join(tableDatabasePath, parameters.fileName);
   }
 
   private async ensureInit() {
     try {
       await nodeFsPromises.access(this.pathToFile);
     } catch {
-      await nodeFsPromises.mkdir(path.dirname(this.pathToFile), { recursive: true });
+      await nodeFsPromises.mkdir(nodePath.dirname(this.pathToFile), { recursive: true });
       await nodeFsPromises.writeFile(this.pathToFile, JSON.stringify([]));
     }
   }

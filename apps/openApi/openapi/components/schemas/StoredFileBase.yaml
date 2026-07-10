@@ -1,19 +1,31 @@
-allOf:
-  - $ref: ./FolderDataItemBase.yaml
-  - type: object
+type: object
+properties:
+  name:
+    type: string
+  _meta:
+    type: object
     properties:
-      itemType:
-        allOf:
-          - $ref: ./ItemType.yaml
-          - enum:
-            - FILE
-      src:
-        type: string
-      extension:
-        type:
-          - string
-          - "null"
+      createdAt:
+        type: number
+      updatedAt:
+        type: number
     required:
-      - itemType
-      - src
-      - extension
+      - createdAt
+      - updatedAt
+  itemType:
+    allOf:
+      - $ref: ./ItemType.yaml
+      - enum:
+        - FILE
+  src:
+    type: string
+  extension:
+    type:
+      - string
+      - "null"
+required:
+  - name
+  - _meta
+  - itemType
+  - src
+  - extension

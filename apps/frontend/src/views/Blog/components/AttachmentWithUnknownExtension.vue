@@ -15,6 +15,6 @@ import BaseAlwaysScrollable from '@/components/ui/BaseAlwaysScrollable.vue';
 import type { components } from '@/types/openapi';
 
 defineProps<{
-  attachment: components['schemas']['FolderDataItemFile'] & components['schemas']['FolderDataItemUnknown'];
+  attachment: components['schemas']['StoredFile'] & components['schemas']['StoredFileUnknown'];
 }>();
 </script>

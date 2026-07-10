@@ -247,7 +247,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Path inside folder-data (e.g. path/to/folder)
+          description: Path inside folder-data (e.g. /path/to/folder)
       responses:
         '200':
           description: OK
@@ -275,7 +275,12 @@ components:
           type: string
       required:
         - message
-    FolderDataItemBase:
+    ItemType:
+      type: string
+      enum:
+        - FOLDER
+        - FILE
+    StoredFileBase:
       type: object
       properties:
         name:
@@ -290,34 +295,23 @@ components:
           required:
             - createdAt
             - updatedAt
+        itemType:
+          allOf:
+            - $ref: '#/components/schemas/ItemType'
+            - enum:
+                - FILE
+        src:
+          type: string
+        extension:
+          type:
+            - string
+            - 'null'
       required:
         - name
         - _meta
-    ItemType:
-      type: string
-      enum:
-        - FOLDER
-        - FILE
-    StoredFileBase:
-      allOf:
-        - $ref: '#/components/schemas/FolderDataItemBase'
-        - type: object
-          properties:
-            itemType:
-              allOf:
-                - $ref: '#/components/schemas/ItemType'
-                - enum:
-                    - FILE
-            src:
-              type: string
-            extension:
-              type:
-                - string
-                - 'null'
-          required:
-            - itemType
-            - src
-            - extension
+        - itemType
+        - src
+        - extension
     FileType:
       type: string
       enum:
@@ -525,6 +519,27 @@ components:
         - text
         - attachments
         - files
+    FolderDataItemBase:
+      type: object
+      properties:
+        name:
+          type: string
+        _meta:
+          type: object
+          properties:
+            createdAt:
+              type: number
+            updatedAt:
+              type: number
+          required:
+            - createdAt
+            - updatedAt
+        path:
+          type: string
+      required:
+        - name
+        - _meta
+        - path
     FolderDataItemFolder:
       allOf:
         - $ref: '#/components/schemas/FolderDataItemBase'
@@ -537,41 +552,42 @@ components:
                     - FOLDER
           required:
             - itemType
+    FolderDataItemAudio:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileAudio'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemImage:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileImage'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemVideo:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileVideo'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemUnknown:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileUnknown'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemFile:
+      oneOf:
+        - $ref: '#/components/schemas/FolderDataItemAudio'
+        - $ref: '#/components/schemas/FolderDataItemImage'
+        - $ref: '#/components/schemas/FolderDataItemVideo'
+        - $ref: '#/components/schemas/FolderDataItemUnknown'
     FolderDataResponse:
       type: object
       properties:
         folders:
           type: array
           items:
-            allOf:
-              - $ref: '#/components/schemas/FolderDataItemFolder'
-              - type: object
-                properties:
-                  path:
-                    type: string
-                required:
-                  - path
+            $ref: '#/components/schemas/FolderDataItemFolder'
         files:
           type: array
           items:
-            allOf:
-              - $ref: '#/components/schemas/StoredFile'
-              - type: object
-                properties:
-                  path:
-                    type: string
-                required:
-                  - path
+            $ref: '#/components/schemas/FolderDataItemFile'
         file:
           oneOf:
-            - allOf:
-                - $ref: '#/components/schemas/StoredFile'
-                - type: object
-                  properties:
-                    path:
-                      type: string
-                  required:
-                    - path
+            - $ref: '#/components/schemas/FolderDataItemFile'
             - type: 'null'
         pathDirectory:
           type: string

@@ -58,7 +58,7 @@ export const isFolderDataItemBase = (parameter: unknown): parameter is component
 
 export const isFolderDataItemFileBase = (
   parameter: unknown,
-): parameter is components['schemas']['FolderDataItemFileBase'] => {
+): parameter is components['schemas']['FolderDataItemBase'] => {
   return (
     isFolderDataItemBase(parameter) &&
     typeof objectGet(parameter, 'src') === 'string' &&

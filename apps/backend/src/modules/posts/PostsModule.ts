@@ -18,7 +18,7 @@ export class PostsModule extends Module {
   constructor() {
     const uploadsPath = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
 
-    const filesLocation = new FilesLocation({ fs: uploadsPath, src: '/content' });
+    const filesLocation = new FilesLocation({ fs: uploadsPath, src: '/uploads' });
 
     const fsDatabaseFile = new FsDatabaseFile<Post>({ fileName: 'posts.json' });
 

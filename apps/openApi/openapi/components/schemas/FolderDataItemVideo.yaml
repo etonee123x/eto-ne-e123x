@@ -1,0 +1,3 @@
+allOf:
+  - $ref: ./StoredFileVideo.yaml
+  - $ref: ./FolderDataItemBase.yaml

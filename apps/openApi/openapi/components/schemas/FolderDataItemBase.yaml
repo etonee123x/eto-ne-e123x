@@ -12,6 +12,9 @@ properties:
     required:
       - createdAt
       - updatedAt
+  path:
+    type: string
 required:
   - name
   - _meta
+  - path

@@ -1,0 +1,3 @@
+allOf:
+  - $ref: ./StoredFileUnknown.yaml
+  - $ref: ./FolderDataItemBase.yaml

@@ -31,6 +31,8 @@ export class FilesService {
   }
 
   async getStoredFile(parameters: { key: string }): Promise<StoredFile> {
+    console.log({ key: parameters.key });
+
     const storedFileBase = await this.filesStorage.getStoredFileBase(parameters);
 
     const buffer = await this.filesStorage.getBuffer(parameters);

@@ -85,7 +85,7 @@ const { t } = useI18n({
 });
 
 const resetableRefFilesAndAttachments = reactive(
-  useResetableRef<Array<NonNullable<Post['attachments'][number]> | File>>(() => {
+  useResetableRef<Array<components['schemas']['StoredFile'] | File>>(() => {
     return props.post.attachments.filter((attachment) => {
       return !isNil(attachment);
     });

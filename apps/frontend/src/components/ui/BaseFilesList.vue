@@ -29,7 +29,7 @@ import { extensionToFileType, FILE_TYPES } from '@/helpers/folderData';
 import type { components } from '@/types/openapi';
 import { checkExhaustive } from '@etonee123x/shared/utils/checkExhaustive';
 
-type FileOrFolderDataItemFile = File | components['schemas']['FolderDataItemFile'];
+type FileOrFolderDataItemFile = File | components['schemas']['StoredFile'];
 
 const LazyBaseIcon = defineAsyncComponent(() => {
   return import('@/components/ui/BaseIcon.vue');
