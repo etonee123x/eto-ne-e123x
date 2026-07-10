@@ -100,4 +100,6 @@ export const createRouter = () => {
   router.onError((...parameters) => {
     console.error(...parameters);
   });
+
+  return router;
 };
