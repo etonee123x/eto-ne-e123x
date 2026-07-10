@@ -20,7 +20,7 @@ export const ROUTE_NAME_TO_PATH = {
 } as const;
 
 export const createRouter = () => {
-  return _createRouter({
+  const router = _createRouter({
     routes: [
       {
         path: '/:language(ru|en)',
@@ -87,5 +87,17 @@ export const createRouter = () => {
       },
     ],
     history: isServer ? createMemoryHistory() : createWebHistory('/'),
+  });
+
+  router.beforeEach((...parameters) => {
+    console.log('beforeEach', ...parameters);
+  });
+
+  router.afterEach((...parameters) => {
+    console.log('afterEach', ...parameters);
+  });
+
+  router.onError((...parameters) => {
+    console.error(...parameters);
   });
 };
