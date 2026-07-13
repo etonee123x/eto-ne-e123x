@@ -1,32 +1,10 @@
-import { NextResponse, NextRequest } from "next/server";
-import { match } from '@formatjs/intl-localematcher'
-import Negotiator from 'negotiator'
- 
-export const DEFAULT_LOCALE = 'en'
-const LOCALES = [DEFAULT_LOCALE, 'ru']
+import createMiddleware from 'next-intl/middleware';
+import { routing } from './i18n/routing';
 
-function getLocale(request: NextRequest) { 
+export default createMiddleware(routing);
 
-const languages = new Negotiator({ headers: Object.fromEntries(request.headers.entries()) }).languages()
- 
-return match(languages, LOCALES, DEFAULT_LOCALE)
- }
- 
-export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  const pathnameHasLocale = LOCALES.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  )
- 
-  if (pathnameHasLocale) return
- 
-  const locale = getLocale(request)
-  request.nextUrl.pathname = `/${locale}${pathname}`
-  return NextResponse.redirect(request.nextUrl)
-}
- 
 export const config = {
-  matcher: [
-    '/((?!_next).*)',
-  ],
-}
+  // почему то со String.raw некорректно работает
+  // eslint-disable-next-line unicorn/prefer-string-raw
+  matcher: `/((?!api|trpc|_next|_vercel|.*\\..*).*)`,
+};

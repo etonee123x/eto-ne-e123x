@@ -1,7 +1,6 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import globals from 'globals';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -17,7 +16,6 @@ const eslintConfig = defineConfig([
     files: ['**/*.ts', '**/*.tsx'],
     extends: [
       pluginJs.configs.recommended,
-      pluginI18n.configs.recommended,
       tseslint.configs.strictTypeChecked,
       sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
@@ -32,12 +30,10 @@ const eslintConfig = defineConfig([
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      parser: vueEslintParser,
+      parser: tseslint.parser,
       parserOptions: {
         projectService: true,
-        parser: '@typescript-eslint/parser',
         tsconfigRootDir: import.meta.dirname,
-        extraFileExtensions: ['.tsx'],
       },
     },
     settings: {
@@ -139,6 +135,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "components/ui"
   ]),
 ]);
 

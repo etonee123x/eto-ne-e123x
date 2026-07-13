@@ -217,6 +217,21 @@
     @apply focus:on-focus border-border outline-ring/50;
   }
 
+  :root {
+    color-scheme: dark light;
+
+    --vw: 100dvw;
+    --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
+  }
+
+  #app {
+    @apply flex flex-col min-h-dvh;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
   body {
     font-family:
       -apple-system,
@@ -232,34 +247,6 @@
       Arial,
       /* Фолбек */
       sans-serif;
-
-    --color-background: var(--color-neutral-50);
-    --color-text: var(--color-neutral-950);
-
-    @media (prefers-color-scheme: dark) {
-      --color-background: var(--color-neutral-900);
-      --color-text: var(--color-neutral-50);
-    }
-
-    @apply has-[dialog[open]]:overflow-hidden bg-background text-foreground;
-  }
-
-  :root {
-    color-scheme: dark light;
-
-    --vw: 100dvw;
-    --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
-  }
-
-  #app {
-    @apply flex flex-col min-h-dvh;
-  }
-
-  button {
-    @apply cursor-pointer;
-  }
-  html {
-    @apply font-sans;
   }
 }
 
@@ -326,6 +313,8 @@
   }
 }
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -359,6 +348,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  --color-background: var(--color-neutral-50);
+  --color-text: var(--color-neutral-950);
 }
 
 .dark {
@@ -393,4 +385,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  --color-background: var(--color-neutral-900);
+  --color-text: var(--color-neutral-50);
 }

@@ -1,0 +1,15 @@
+{
+  "TheHeader": {
+    "blog": "Блог",
+    "content": "Контент"
+  },
+  "TheFooter": {
+    "telegramLogo": "Логотип Telegram"
+  },
+  "ThemeSwitcher": {
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Системная",
+    "toggleTheme": "Сменить тему"
+  }
+}
