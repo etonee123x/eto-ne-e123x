@@ -7,7 +7,8 @@ import TheHeader from '@/components/the-header';
 import TheFooter from '@/components/the-footer';
 import { ThemeProvider } from '@/components/theme-provider';
 
-import '../globals.css';
+import '@/app/globals.css';
+import themes from '@/app/themes.json';
 
 export default async function RootLayout({ children, params }: Readonly<LayoutProps<'/[locale]'>>) {
   const { locale } = await params;
@@ -16,20 +17,21 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
     notFound();
   }
 
+  // Так надо
+  // eslint-disable-next-line react-hooks/purity
+  const themeContent = themes.at(Date.now() % themes.length)?.content;
+
   return (
     <html className="h-full antialiased" suppressHydrationWarning>
-      <body>
+      <body className="flex flex-col min-h-dvh">
         <NextIntlClientProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <div id="app">
-              <div className="contents group/app">
-                <TheHeader className="fixed top-0 w-full z-1 h-header-height" />
-                <main className="pt-header-height relative flex flex-col flex-1">{children}</main>
-                <TheFooter />
-              </div>
-            </div>
+            <TheHeader className="fixed top-0 w-full z-1 h-header-height" />
+            <main className="pt-header-height relative flex flex-col flex-1">{children}</main>
+            <TheFooter />
           </ThemeProvider>
         </NextIntlClientProvider>
+        <style>{`:root { ${themeContent} }`}</style>
       </body>
     </html>
   );
