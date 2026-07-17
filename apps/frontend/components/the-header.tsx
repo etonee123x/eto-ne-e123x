@@ -15,6 +15,14 @@ import { LocaleSwitcher } from './locale-switcher';
 
 const NAVIGATION_MENU_ITEMS = [
   {
+    class: 'text-xl text-primary',
+    href: '/',
+    tKey: 'etonee123x',
+    isActive: (pathname: string): boolean => {
+      return pathname === '/';
+    },
+  },
+  {
     href: '/explorer',
     tKey: 'content',
     isActive: (pathname: string): boolean => {
@@ -28,7 +36,7 @@ const NAVIGATION_MENU_ITEMS = [
       return pathname.startsWith('/blog');
     },
   },
-] as const;
+];
 
 export default function TheHeader({ className }: Readonly<React.HTMLProps<HTMLDivElement>>) {
   const t = useTranslations('TheHeader');
@@ -44,7 +52,7 @@ export default function TheHeader({ className }: Readonly<React.HTMLProps<HTMLDi
                 <NavigationMenuLink
                   active={navigationMenuItem.isActive(pathname)}
                   render={<Link href={navigationMenuItem.href} />}
-                  className={navigationMenuTriggerStyle()}
+                  className={cn(navigationMenuTriggerStyle(), navigationMenuItem.class)}
                 >
                   {t(navigationMenuItem.tKey)}
                 </NavigationMenuLink>
