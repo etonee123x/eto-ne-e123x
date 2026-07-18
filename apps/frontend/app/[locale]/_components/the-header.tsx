@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import { Link, usePathname } from '@/i18n/navigation';
 import React from 'react';
-import { ThemeSwitcher } from '@/components/theme-switcher';
+import { ThemeSwitcher } from './theme-switcher';
 import { cn } from '@/lib/utils/cn';
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from './locale-switcher';

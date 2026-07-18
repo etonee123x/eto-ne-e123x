@@ -136,7 +136,7 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "components/ui",
-    "types/openapi.ts",
+    "lib/types/openapi.ts",
   ]),
 ]);
 

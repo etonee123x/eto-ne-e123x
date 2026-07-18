@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation';
 
 import { routing } from '@/i18n/routing';
 
-import TheHeader from '@/components/the-header';
-import TheFooter from '@/components/the-footer';
-import { ThemeProvider } from '@/components/theme-provider';
+import TheHeader from './_components/the-header';
+import TheFooter from './_components/the-footer';
+import { ThemeProvider } from './_components/theme-provider';
 
 import '@/app/globals.css';
 import themes from '@/app/themes.json';

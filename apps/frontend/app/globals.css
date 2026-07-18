@@ -211,10 +211,6 @@
     --container-padding: calc((var(--vw) - min(80rem, calc(var(--vw) * 11 / 12))) / 2);
   }
 
-  button {
-    @apply cursor-pointer;
-  }
-
   body {
     font-family:
       -apple-system,
@@ -243,6 +239,10 @@
 @layer components {
   .layout-container {
     @apply px-(--container-padding);
+  }
+
+  .h1 {
+    @apply text-3xl font-semibold;
   }
 
   /* .icon {

@@ -1,8 +1,13 @@
 'use client';
 
 import { usePathname, useRouter } from '@/i18n/navigation';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Button } from './ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
 import { routing } from '@/i18n/routing';
 import React, { useCallback } from 'react';
 import { useParams } from 'next/navigation';

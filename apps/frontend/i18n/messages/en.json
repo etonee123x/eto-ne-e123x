@@ -12,5 +12,8 @@
     "dark": "Dark",
     "system": "System",
     "toggleTheme": "Toggle theme"
+  },
+  "Blog": {
+    "blog": "Blog"
   }
 }
