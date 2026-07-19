@@ -14,6 +14,13 @@
     "toggleTheme": "Сменить тему"
   },
   "Blog": {
-    "blog": "Блог"
+    "blog": "Блог",
+    "send": "Отправить"
+  },
+  "PostAttachmentImage": {
+    "attachment": "Вложение {index}"
+  },
+  "FormPost": {
+    "message": "Сообщение..."
   }
 }

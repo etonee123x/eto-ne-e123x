@@ -14,6 +14,13 @@
     "toggleTheme": "Toggle theme"
   },
   "Blog": {
-    "blog": "Blog"
+    "blog": "Blog",
+    "send": "Send"
+  },
+  "PostAttachmentImage": {
+    "attachment": "Attachment {index}"
+  },
+  "FormPost": {
+    "message": "Message..."
   }
 }
