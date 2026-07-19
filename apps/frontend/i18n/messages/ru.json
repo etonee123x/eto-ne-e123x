@@ -22,5 +22,8 @@
   },
   "FormPost": {
     "message": "Сообщение..."
+  },
+  "Explorer": {
+    "content": "Контент"
   }
 }

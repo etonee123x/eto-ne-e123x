@@ -250,6 +250,19 @@
     @apply text-3xl font-semibold;
   }
 
+  /* .explorer-element {
+    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border border-primary-500 rounded-lg text-sm;
+
+    .explorer-element__title {
+      @apply w-2/3 overflow-x-auto overflow-y-hidden text-lg;
+    }
+
+    &.explorer-element_folder {
+      @apply bg-primary-500 border-primary-700 text-white dark:text-black;
+      @apply hover:bg-primary-600;
+    }
+  } */
+
   /* .icon {
     @apply size-[1em];
   }
@@ -264,19 +277,6 @@
 
     a {
       @apply underline;
-    }
-  }
-
-  .explorer-element {
-    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border border-primary-500 rounded-lg text-sm;
-
-    .explorer-element__title {
-      @apply w-2/3 overflow-x-auto overflow-y-hidden text-lg;
-    }
-
-    &.explorer-element_folder {
-      @apply bg-primary-500 border-primary-700 text-white dark:text-black;
-      @apply hover:bg-primary-600;
     }
   } */
 
@@ -311,8 +311,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0); */
+  /* --primary: oklch(0.205 0 0); */
+  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -346,8 +346,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  /* --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0); */
+  /* --primary: oklch(0.922 0 0); */
+  --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
