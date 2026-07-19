@@ -43,7 +43,7 @@ export default function TheHeader({ className }: Readonly<React.HTMLProps<HTMLDi
   const pathname = usePathname();
 
   return (
-    <header className={cn('layout-container flex items-center py-2 gap-4 bg-primary', className)}>
+    <header className={cn('layout-container flex items-center py-2 gap-4', className)}>
       <NavigationMenu className="-ms-2.5">
         <NavigationMenuList>
           {NAVIGATION_MENU_ITEMS.map((navigationMenuItem) => {

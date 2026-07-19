@@ -8,7 +8,7 @@ import TheFooter from './_components/the-footer';
 import { ThemeProvider } from './_components/theme-provider';
 
 import '@/app/globals.css';
-import themes from '@/app/themes.json';
+// import themes from '@/app/themes.json';
 
 export default async function RootLayout({ children, params }: Readonly<LayoutProps<'/[locale]'>>) {
   const { locale } = await params;
@@ -18,8 +18,8 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
   }
 
   // Так надо
-  // eslint-disable-next-line react-hooks/purity
-  const themeContent = themes.at(Date.now() % themes.length)?.content;
+
+  // const themeContent = themes.at(Date.now() % themes.length)?.content;
 
   return (
     <html className="h-full antialiased" suppressHydrationWarning>
@@ -31,7 +31,7 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
             <TheFooter />
           </ThemeProvider>
         </NextIntlClientProvider>
-        <style>{`:root { ${themeContent} }`}</style>
+        {/* <style>{`:root { ${themeContent} }`}</style> */}
       </body>
     </html>
   );

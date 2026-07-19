@@ -74,10 +74,10 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   const navigationItemUp = navigationItems.at(-2);
 
   return (
-    <section className="layout-container">
+    <section className="layout-container pb-4">
       <h1 className="h1 mb-2">{t('content')}</h1>
 
-      <Breadcrumb className="-mt-2 mb-2 sticky top-header-height">
+      <Breadcrumb className="mb-2 sticky top-header-height">
         <BreadcrumbList>
           {breadcrumbLinks.map((link, index) => {
             return (
