@@ -1,7 +1,37 @@
 import createMiddleware from 'next-intl/middleware';
-import { routing } from './i18n/routing';
+import { NextResponse, type NextRequest } from 'next/server';
+import { routing } from '@/i18n/routing';
+import { client } from '@/lib/api/client';
+import { isNil } from '@/lib/utils/is-nil';
 
-export default createMiddleware(routing);
+const handleI18nRouting = createMiddleware(routing);
+
+export default async function proxy(request: NextRequest) {
+  const jwt = request.nextUrl.searchParams.get('jwt');
+
+  if (isNil(jwt)) {
+    return handleI18nRouting(request);
+  }
+
+  const redirectUrl = request.nextUrl.clone();
+  redirectUrl.searchParams.delete('jwt');
+  const response = NextResponse.redirect(redirectUrl, 303);
+
+  try {
+    const authResponse = await client['/auth'].POST({ params: { query: { jwt } } });
+    if (authResponse.error) {
+      throw new Error('JWT authentication failed');
+    }
+
+    for (const cookie of authResponse.response.headers.getSetCookie()) {
+      response.headers.append('Set-Cookie', cookie);
+    }
+  } catch {
+    response.cookies.delete('jwt');
+  }
+
+  return response;
+}
 
 export const config = {
   // почему то со String.raw некорректно работает

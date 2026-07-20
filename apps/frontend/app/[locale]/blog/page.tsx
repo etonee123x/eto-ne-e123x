@@ -7,6 +7,7 @@ import PostAttachment from './_components/post-attachment';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { getIsAdmin } from '@/lib/auth/get-is-admin';
 
 const FormPost = dynamic(() => {
   return import('./_components/form-post').then((module) => {
@@ -17,6 +18,8 @@ const FormPost = dynamic(() => {
 export default async function Blog() {
   const { data: posts } = await client['/posts'].GET();
 
+  const isAdmin = await getIsAdmin();
+
   if (!posts) {
     return notFound();
   }
@@ -26,13 +29,15 @@ export default async function Blog() {
   return (
     <section className="layout-container">
       <h1 className="h1 mb-2">{t('blog')}</h1>
-      <>
-        <FormPost id="form-post" className="mb-4" />
-        <Button className="w-full" form="form-post">
-          {t('send')}
-        </Button>
-        <Separator className="my-4" />
-      </>
+      {isAdmin && (
+        <>
+          <FormPost id="form-post" className="mb-4" />
+          <Button className="w-full" form="form-post">
+            {t('send')}
+          </Button>
+          <Separator className="my-4" />
+        </>
+      )}
       <div className="flex flex-col gap-4">
         {posts.rows.map((post) => {
           return (
