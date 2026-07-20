@@ -25,5 +25,12 @@
   },
   "Explorer": {
     "content": "Content"
+  },
+  "ExplorerElementAudio": {
+    "duration": "Duration",
+    "artists": "Artist(-s)",
+    "album": "Album",
+    "year": "Release year",
+    "bpm": "BPM"
   }
 }

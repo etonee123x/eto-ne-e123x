@@ -50,10 +50,4 @@ export const ExplorerElementFile = ({
       throw checkExhaustive(element);
     }
   }
-
-  // return (
-  //   <Item variant="outline" render={<Link {...props} />}>
-  //     <ItemHeader>{element.name}</ItemHeader>
-  //   </Item>
-  // );
 };

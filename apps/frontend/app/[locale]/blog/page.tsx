@@ -1,4 +1,4 @@
-import { BaseHtml } from '@/components/ui/base-html';
+import { BaseHtml } from '@/components/base-html';
 import { Card, CardContent } from '@/components/ui/card';
 import { client } from '@/lib/api/client';
 import { getTranslations } from 'next-intl/server';

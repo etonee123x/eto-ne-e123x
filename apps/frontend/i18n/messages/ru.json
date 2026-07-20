@@ -25,5 +25,12 @@
   },
   "Explorer": {
     "content": "Контент"
+  },
+  "ExplorerElementAudio": {
+    "duration": "Длительность",
+    "artists": "Исполнитель(-и)",
+    "album": "Альбом",
+    "year": "Год выхода",
+    "bpm": "Темп"
   }
 }
