@@ -1,12 +1,11 @@
 'use client';
 
-import { useRouter } from "@/i18n/navigation";
+import { useRouter } from '@/i18n/navigation';
 
 export const BaseHtml = ({ html }: { html: string }) => {
   const router = useRouter();
 
   const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
-
     if (!(event.target instanceof HTMLAnchorElement)) {
       return;
     }
@@ -21,6 +20,5 @@ export const BaseHtml = ({ html }: { html: string }) => {
     router.push(event.target.href.replace(globalThis.origin, ''));
   };
 
-  return <div className="custom-html" onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />
-}
-
+  return <div className="custom-html" onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />;
+};
