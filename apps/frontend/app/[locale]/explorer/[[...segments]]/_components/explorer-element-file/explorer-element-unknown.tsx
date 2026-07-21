@@ -8,8 +8,8 @@ export const ExplorerElementUnknown = ({
   ...props
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemUnknown'] }) => {
   return (
-    <Item variant="outline" render={<Link {...props} />}>
-      <ItemHeader>{element.name}</ItemHeader>
+    <Item className="border-primary" variant="outline" render={<Link {...props} />}>
+      <ItemHeader className="text-lg">{element.name}</ItemHeader>
     </Item>
   );
 };

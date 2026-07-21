@@ -8,8 +8,8 @@ export const ExplorerElementFolder = ({
   ...props
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemFolder'] }) => {
   return (
-    <Item variant="muted" render={<Link {...props} />}>
-      <ItemHeader>{element.name}</ItemHeader>
+    <Item className="border-primary" variant="muted" render={<Link {...props} />}>
+      <ItemHeader className="text-lg">{element.name}</ItemHeader>
     </Item>
   );
 };

@@ -9,8 +9,8 @@ export const ExplorerElementImage = ({
   ...props
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemImage'] }) => {
   return (
-    <Item variant="outline" render={<Link {...props} />}>
-      <ItemHeader>{element.name}</ItemHeader>
+    <Item className="border-primary" variant="outline" render={<Link {...props} />}>
+      <ItemHeader className="text-xl">{element.name}</ItemHeader>
       <ItemMedia className="mx-auto max-w-full">
         <Image src={element.src} alt={element.name} width={element.metadata.width} height={element.metadata.height} />
       </ItemMedia>

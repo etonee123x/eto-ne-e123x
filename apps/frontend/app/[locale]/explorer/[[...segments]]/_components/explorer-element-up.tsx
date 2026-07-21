@@ -4,8 +4,8 @@ import { ComponentProps } from 'react';
 
 export const ExplorerElementUp = ({ ...props }: ComponentProps<typeof Link>) => {
   return (
-    <Item variant="muted" render={<Link {...props} />}>
-      <ItemHeader>...</ItemHeader>
+    <Item className="border-primary" variant="muted" render={<Link {...props} />}>
+      <ItemHeader className="text-lg">...</ItemHeader>
     </Item>
   );
 };

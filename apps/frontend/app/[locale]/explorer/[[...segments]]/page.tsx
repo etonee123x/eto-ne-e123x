@@ -87,7 +87,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
               </Fragment>
             );
           })}
-          <BreadcrumbPage>{breadcrumbPage?.text}</BreadcrumbPage>
+          <BreadcrumbPage className="text-primary">{breadcrumbPage?.text}</BreadcrumbPage>
         </BreadcrumbList>
       </Breadcrumb>
 

@@ -9,8 +9,8 @@ export const ExplorerElementVideo = ({
   ...props
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemVideo'] }) => {
   return (
-    <Item variant="outline" render={<Link {...props} />}>
-      <ItemHeader>{element.name}</ItemHeader>
+    <Item className="border-primary" variant="outline" render={<Link {...props} />}>
+      <ItemHeader className="text-lg">{element.name}</ItemHeader>
       <ItemContent>
         <ItemMedia>
           <BaseVideo src={element.src} width={element.metadata.width} height={element.metadata.height} />

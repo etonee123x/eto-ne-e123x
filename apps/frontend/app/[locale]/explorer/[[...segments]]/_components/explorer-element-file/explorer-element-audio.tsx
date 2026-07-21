@@ -1,4 +1,5 @@
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemHeader, ItemMedia } from '@/components/ui/item';
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemHeader, ItemMedia, ItemTitle } from '@/components/ui/item';
+import { Separator } from '@/components/ui/separator';
 import { Link } from '@/i18n/navigation';
 import { components } from '@/lib/types/openapi';
 import { millisecondsToHumanReadable } from '@/lib/utils/milliseconds-to-human-readable';
@@ -66,20 +67,22 @@ export const ExplorerElementAudio = ({
   ];
 
   return (
-    <Item variant="outline" render={<Link {...props} />}>
+    <Item className="border-primary" render={<Link {...props} />}>
       <ItemHeader className="text-lg">{element.name}</ItemHeader>
-      <ItemContent>
-        <ItemGroup className="flex-row">
+      <Separator className={'bg-primary'} />
+      <ItemContent className="w-full">
+        <ItemGroup className="flex-row overflow-x-auto">
           {metadataItems.map((metadataItem) => {
             return (
-              <Item variant="outline" size="xs" key={metadataItem.key}>
-                <ItemMedia className="self-center! pb-1">
-                  <metadataItem.Icon className="size-8" />
+              <Item size="xs" key={metadataItem.key}>
+                <ItemMedia className="self-center! pb-0.5">
+                  <metadataItem.Icon className="size-6" />
                 </ItemMedia>
                 <div>
-                  <ItemHeader className="text-muted-foreground">{metadataItem.title}</ItemHeader>
+                  {/* <ItemHeader className="text-muted-foreground">{metadataItem.title}</ItemHeader> */}
                   <ItemContent>
-                    <ItemDescription className="text-primary-foreground text-base!">
+                    <ItemTitle className="text-muted-foreground font-normal">{metadataItem.title}</ItemTitle>
+                    <ItemDescription className="text-secondary-foreground text-sm!">
                       {metadataItem.value}
                     </ItemDescription>
                   </ItemContent>
