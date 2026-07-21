@@ -69,7 +69,7 @@ export const ExplorerElementAudio = ({
   return (
     <Item className="border-primary" render={<Link {...props} />}>
       <ItemHeader className="text-lg">{element.name}</ItemHeader>
-      <Separator className={'bg-primary'} />
+      <Separator />
       <ItemContent className="w-full">
         <ItemGroup className="flex-row overflow-x-auto">
           {metadataItems.map((metadataItem) => {

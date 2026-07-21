@@ -16,6 +16,7 @@ export const cookieAuth: Express.RequestHandler = (request, response, next) => {
 
     response.cookie(KEY_COOKIE_JWT, jwt, {
       expires: typeof payload === 'object' && payload.exp ? new Date(payload.exp * 1000) : undefined,
+      sameSite: 'lax',
     });
     request.cookies[KEY_COOKIE_JWT] = jwt;
 

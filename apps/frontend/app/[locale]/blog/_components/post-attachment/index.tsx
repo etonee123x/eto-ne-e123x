@@ -1,6 +1,3 @@
-'use client';
-
-import * as React from 'react';
 import type { components } from '@/lib/types/openapi';
 import dynamic from 'next/dynamic';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';

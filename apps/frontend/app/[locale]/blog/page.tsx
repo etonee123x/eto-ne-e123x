@@ -28,7 +28,7 @@ export default async function Blog() {
 
   return (
     <section className="layout-container">
-      <h1 className="h1 mb-2">{t('blog')}</h1>
+      <h1 className="h1 mb-4">{t('blog')}</h1>
       {isAdmin && (
         <>
           <FormPost id="form-post" className="mb-4" />

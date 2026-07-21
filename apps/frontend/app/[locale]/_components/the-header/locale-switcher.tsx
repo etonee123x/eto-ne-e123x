@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { routing } from '@/i18n/routing';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useParams } from 'next/navigation';
 
 export const LocaleSwitcher = ({ className }: Readonly<React.ComponentProps<typeof Button>>) => {
