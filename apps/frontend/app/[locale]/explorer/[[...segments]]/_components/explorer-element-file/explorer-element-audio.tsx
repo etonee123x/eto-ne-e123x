@@ -74,19 +74,14 @@ export const ExplorerElementAudio = ({
         <ItemGroup className="flex-row overflow-x-auto">
           {metadataItems.map((metadataItem) => {
             return (
-              <Item size="xs" key={metadataItem.key}>
+              <Item size="xs" className="flex-nowrap" key={metadataItem.key}>
                 <ItemMedia className="self-center! pb-0.5">
                   <metadataItem.Icon className="size-6" />
                 </ItemMedia>
-                <div>
-                  {/* <ItemHeader className="text-muted-foreground">{metadataItem.title}</ItemHeader> */}
-                  <ItemContent>
-                    <ItemTitle className="text-muted-foreground font-normal">{metadataItem.title}</ItemTitle>
-                    <ItemDescription className="text-secondary-foreground text-sm!">
-                      {metadataItem.value}
-                    </ItemDescription>
-                  </ItemContent>
-                </div>
+                <ItemContent className="text-nowrap">
+                  <ItemTitle className="text-muted-foreground font-normal">{metadataItem.title}</ItemTitle>
+                  <ItemDescription className="text-secondary-foreground text-sm!">{metadataItem.value}</ItemDescription>
+                </ItemContent>
               </Item>
             );
           })}

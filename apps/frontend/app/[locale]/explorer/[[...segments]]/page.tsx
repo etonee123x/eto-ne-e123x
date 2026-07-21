@@ -75,9 +75,9 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
 
   return (
     <section className="layout-container pb-4">
-      <h1 className="h1 mb-2">{t('content')}</h1>
+      <h1 className="h1 mb-4">{t('content')}</h1>
 
-      <Breadcrumb className="mb-2 sticky top-header-height">
+      <Breadcrumb className="mb-4 sticky top-header-height">
         <BreadcrumbList>
           {breadcrumbLinks.map((link, index) => {
             return (
@@ -91,19 +91,17 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex flex-col gap-2">
-        <ItemGroup>
-          <nav className="contents">
-            {navigationItemUp && <ExplorerElementUp href={navigationItemUp.href} />}
-            {folderData.folders.map((folder) => {
-              return <ExplorerElementFolder key={folder.name} element={folder} href={folderDataItemToHref(folder)} />;
-            })}
-          </nav>
-          {folderData.files.map((file) => {
-            return <ExplorerElementFile key={file.name} element={file} href={folderDataItemToHref(file)} />;
+      <ItemGroup className="gap-4!">
+        <nav className="contents">
+          {navigationItemUp && <ExplorerElementUp href={navigationItemUp.href} />}
+          {folderData.folders.map((folder) => {
+            return <ExplorerElementFolder key={folder.name} element={folder} href={folderDataItemToHref(folder)} />;
           })}
-        </ItemGroup>
-      </div>
+        </nav>
+        {folderData.files.map((file) => {
+          return <ExplorerElementFile key={file.name} element={file} href={folderDataItemToHref(file)} />;
+        })}
+      </ItemGroup>
     </section>
   );
 }
