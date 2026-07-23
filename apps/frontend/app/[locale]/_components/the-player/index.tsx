@@ -1,6 +1,6 @@
 'use client';
 
-import { ComponentProps, useContext, useEffect, useRef, useState } from 'react';
+import { ComponentProps, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { PlayerContext } from './player-context';
 import { throwError } from '@/lib/utils/throw-error';
 import { Button } from '@/components/ui/button';
@@ -87,6 +87,14 @@ export const ThePlayer = () => {
     };
   }, [trackSource]);
 
+  const onClickPlay = () => {
+    audioRef.current?.play();
+  };
+
+  const onClickPause = () => {
+    audioRef.current?.pause();
+  };
+
   if (!track) {
     return null;
   }
@@ -142,14 +150,6 @@ export const ThePlayer = () => {
     setCurrentPlayingNumber((currentPlayingNumber - 1 + playerContext.playlist.length) % playerContext.playlist.length);
   };
 
-  const play = async () => {
-    await audioRef.current?.play();
-  };
-
-  const pause = () => {
-    audioRef.current?.pause();
-  };
-
   const onValueCommittedSeek: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
     const audio = audioRef.current;
     if (!audio) {
@@ -165,20 +165,24 @@ export const ThePlayer = () => {
   const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
   const durationFormats = millisecondsToTimeFormats(durationMilliseconds);
 
+  const onClickPrevious = () => {
+    loadPrevious();
+  };
+
+  const onClickNext = () => {
+    loadNext();
+  };
+
+  console.log('rerender!', new Date());
   return (
-    <BaseSwipable
-      className="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full sticky bottom-0"
-      onSwiped={() => {
-        playerContext.setTrack(null);
-      }}
-    >
+    <div className="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full sticky bottom-0">
       <section className="layout-container flex flex-col gap-2 justify-center">
         {shouldRenderButtonClose && (
           <Button
             className="text-xl absolute inset-e-2 top-2 hover-none:hidden"
             aria-label={t('closePlayer')}
             size="icon"
-            variant="destructive"
+            variant="secondary"
             onClick={() => {
               playerContext.setTrack(null);
             }}
@@ -190,17 +194,15 @@ export const ThePlayer = () => {
         <BaseAlwaysScrollable className="[--base-always-scrollable--content--margin:0_auto]">
           <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
             <h2 className="col-start-2">{track.name}</h2>
-            <Button
-              className="col-start-3"
+            <button
+              className="col-start-3 mt-0.5"
               aria-label={t('copyLink')}
-              size="icon"
-              variant={'ghost'}
               onClick={() => {
                 copyCurrentLocation();
               }}
             >
-              <Link />
-            </Button>
+              <Link className="size-4" />
+            </button>
           </header>
         </BaseAlwaysScrollable>
 
@@ -209,6 +211,7 @@ export const ThePlayer = () => {
           <Slider
             max={durationSeconds}
             min={0}
+            step={0.1}
             onValueChange={(value) => {
               const seconds = Number(value);
               setSeekPreview({ seconds, trackSrc: track.src });
@@ -234,28 +237,30 @@ export const ThePlayer = () => {
                 size="lg"
                 disabled={isShuffleModeEnabled && historyItems.length === 0}
                 aria-label={t('previousTrack')}
-                onClick={loadPrevious}
+                onClick={onClickPrevious}
               >
                 <SkipBack />
               </Button>
             </li>
             <li>
-              <Button
-                size="lg"
-                aria-label={isPaused ? t('playTrack') : t('pauseTrack')}
-                onClick={isPaused ? play : pause}
-              >
-                {isPaused ? <Play /> : <Pause />}
-              </Button>
+              {isPaused ? (
+                <Button size="lg" aria-label={t('playTrack')} onClick={onClickPlay}>
+                  <Play />
+                </Button>
+              ) : (
+                <Button size="lg" aria-label={t('pauseTrack')} onClick={onClickPause}>
+                  <Pause />
+                </Button>
+              )}
             </li>
             <li>
-              <Button size="lg" aria-label={t('nextTrack')} onClick={loadNext}>
+              <Button size="lg" aria-label={t('nextTrack')} onClick={onClickNext}>
                 <SkipForward />
               </Button>
             </li>
           </ul>
         </div>
       </section>
-    </BaseSwipable>
+    </div>
   );
 };
