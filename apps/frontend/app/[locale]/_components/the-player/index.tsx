@@ -1,17 +1,18 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { ComponentProps, useContext, useEffect, useRef, useState } from 'react';
 import { PlayerContext } from './player-context';
 import { throwError } from '@/lib/utils/throw-error';
 import { Button } from '@/components/ui/button';
-import { Link, Pause, Play, Shuffle, SkipBack, SkipForward } from 'lucide-react';
+import { Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { millisecondsToHumanReadable } from '@/lib/utils/milliseconds-to-human-readable';
 import { Slider } from '@/components/ui/slider';
 import { Temporal } from 'temporal-polyfill';
-import { isClient } from '@/lib/utils/target';
 import { Toggle } from '@/components/ui/toggle';
 import { useTranslations } from 'next-intl';
 import { getRandomExceptCurrentIndex } from '@/lib/utils/get-random-except-current-index';
+import { BaseSwipable } from '@/components/base-swipable';
+import { BaseAlwaysScrollable } from '@/components/base-always-scrollable';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -20,154 +21,241 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
   };
 };
 
+const copyCurrentLocation = () => {
+  return globalThis.navigator.clipboard.writeText(globalThis.location.href);
+};
+
 export const ThePlayer = () => {
   const playerContext = useContext(PlayerContext) ?? throwError();
+
   const [isShuffleModeEnabled, setIsShuffleModeEnabled] = useState(false);
   const [historyItems, setHistoryItems] = useState<Array<number>>([]);
+  const [currentTime, setCurrentTime] = useState({ seconds: 0, trackSrc: '' });
+  const [isPaused, setIsPaused] = useState(true);
+  const [seekPreview, setSeekPreview] = useState({ seconds: 0, trackSrc: '' });
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = useTranslations('ThePlayer');
+  const track = playerContext.track;
+  const trackSource = track?.src;
 
-  if (!playerContext.track) {
+  useEffect(() => {
+    if (!trackSource) {
+      return;
+    }
+
+    const audio = new Audio(trackSource);
+    audio.autoplay = true;
+    audioRef.current = audio;
+
+    const onEnded = () => {
+      setIsPaused(true);
+    };
+
+    const onPause = () => {
+      setIsPaused(true);
+    };
+
+    const onPlay = () => {
+      setIsPaused(false);
+    };
+
+    const onTimeUpdate = (event: Event) => {
+      if (!(event.currentTarget instanceof HTMLAudioElement)) {
+        return;
+      }
+
+      setCurrentTime({ seconds: event.currentTarget.currentTime, trackSrc: trackSource });
+    };
+
+    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('pause', onPause);
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('timeupdate', onTimeUpdate);
+
+    return () => {
+      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('pause', onPause);
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+
+      if (audioRef.current === audio) {
+        audioRef.current = null;
+      }
+    };
+  }, [trackSource]);
+
+  if (!track) {
     return null;
   }
 
-  const currentPlayingNumber = playerContext.playlist.findIndex((playlistItem) => {
-    return playlistItem.src === playerContext.track?.src;
-  });
+  const shouldRenderButtonClose = isPaused;
 
-  const setCurrentPlayingNumber = (currentPlayingNumber: number) => {
-    playerContext.setTrack(playerContext.playlist[currentPlayingNumber]);
-  };
-
-  let audio: null | HTMLAudioElement = null;
-  if (isClient) {
-    audio = new Audio(playerContext.track.src);
+  let sliderTimeSeconds = 0;
+  if (currentTime.trackSrc === track.src) {
+    sliderTimeSeconds = currentTime.seconds;
   }
+  if (seekPreview.trackSrc === track.src) {
+    sliderTimeSeconds = seekPreview.seconds;
+  }
+  const currentPlayingNumber = playerContext.playlist.findIndex((playlistItem) => {
+    return playlistItem.src === track.src;
+  });
+  const durationMilliseconds = track.metadata.duration ?? 0;
+  const durationSeconds = durationMilliseconds / 1000;
 
-  const currentTimeSeconds = audio?.currentTime ?? 0;
-  const duration = playerContext.track.metadata.duration ?? 0;
-  const isPaused = audio?.paused ?? true;
-
-  const load = {
-    next: () => {
-      historyItems.push(currentPlayingNumber);
-
-      setCurrentPlayingNumber(
-        isShuffleModeEnabled
-          ? getRandomExceptCurrentIndex(playerContext.playlist.length, currentPlayingNumber)
-          : (currentPlayingNumber + 1) % playerContext.playlist.length,
-      );
-    },
-    previous: () => {
-      setCurrentPlayingNumber(
-        historyItems.length > 0
-          ? (historyItems.pop() ?? 0)
-          : (currentPlayingNumber - 1 + playerContext.playlist.length) % playerContext.playlist.length,
-      );
-    },
+  const setCurrentPlayingNumber = (playingNumber: number) => {
+    playerContext.setTrack(playerContext.playlist[playingNumber]);
   };
 
-  const onClickTitle = () => {
-    //
+  const loadNext = () => {
+    if (currentPlayingNumber === -1 || playerContext.playlist.length === 0) {
+      return;
+    }
+
+    setHistoryItems((items) => {
+      return [...items, currentPlayingNumber];
+    });
+    setCurrentPlayingNumber(
+      isShuffleModeEnabled
+        ? getRandomExceptCurrentIndex(playerContext.playlist.length, currentPlayingNumber)
+        : (currentPlayingNumber + 1) % playerContext.playlist.length,
+    );
   };
 
-  const onEnded = () => {
-    //
+  const loadPrevious = () => {
+    if (currentPlayingNumber === -1 || playerContext.playlist.length === 0) {
+      return;
+    }
+
+    if (historyItems.length > 0) {
+      const previousPlayingNumber = historyItems.at(-1);
+      setHistoryItems((items) => {
+        return items.slice(0, -1);
+      });
+      setCurrentPlayingNumber(previousPlayingNumber ?? 0);
+      return;
+    }
+
+    setCurrentPlayingNumber((currentPlayingNumber - 1 + playerContext.playlist.length) % playerContext.playlist.length);
   };
 
-  const controlButtons = [
-    {
-      key: 'previous',
-      Icon: SkipBack,
-      onClick: () => {
-        load.previous();
-      },
-      disabled: isShuffleModeEnabled && historyItems.length === 0,
-      ariaLabel: t('previousTrack'),
-    },
-    isPaused
-      ? {
-          key: 'play',
-          Icon: Play,
-          onClick: () => {
-            audio?.play();
-          },
-          ariaLabel: t('playTrack'),
-        }
-      : {
-          key: 'pause',
-          Icon: Pause,
-          onClick: () => {
-            audio?.pause();
-          },
-          ariaLabel: t('pauseTrack'),
-        },
-    {
-      key: 'next',
-      Icon: SkipForward,
-      onClick: () => {
-        load.next();
-      },
-      ariaLabel: t('nextTrack'),
-    },
-  ];
+  const play = async () => {
+    await audioRef.current?.play();
+  };
 
-  const currentTimeFormats = millisecondsToTimeFormats(currentTimeSeconds);
-  const durationFormats = millisecondsToTimeFormats(duration);
+  const pause = () => {
+    audioRef.current?.pause();
+  };
+
+  const onValueCommittedSeek: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const seconds = Number(value);
+    audio.currentTime = seconds;
+    setCurrentTime({ seconds, trackSrc: track.src });
+    setSeekPreview({ seconds: 0, trackSrc: '' });
+  };
+
+  const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
+  const durationFormats = millisecondsToTimeFormats(durationMilliseconds);
 
   return (
-    <section className="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full">
-      <div className="layout-container flex flex-col gap-2 justify-center">
-        <header className="flex items-center gap-2 text-lg">
-          <h2>{playerContext.track.name}</h2>
-          <Button aria-label={t('copyLink')} className="p-1" onClick={onClickTitle}>
-            <Link />
+    <BaseSwipable
+      className="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full sticky bottom-0"
+      onSwiped={() => {
+        playerContext.setTrack(null);
+      }}
+    >
+      <section className="layout-container flex flex-col gap-2 justify-center">
+        {shouldRenderButtonClose && (
+          <Button
+            className="text-xl absolute inset-e-2 top-2 hover-none:hidden"
+            aria-label={t('closePlayer')}
+            size="icon"
+            variant="destructive"
+            onClick={() => {
+              playerContext.setTrack(null);
+            }}
+          >
+            <X />
           </Button>
-        </header>
-        <audio src={playerContext.track.src} autoPlay onEnded={onEnded} ref={null} />
+        )}
+
+        <BaseAlwaysScrollable className="[--base-always-scrollable--content--margin:0_auto]">
+          <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
+            <h2 className="col-start-2">{track.name}</h2>
+            <Button
+              className="col-start-3"
+              aria-label={t('copyLink')}
+              size="icon"
+              variant={'ghost'}
+              onClick={() => {
+                copyCurrentLocation();
+              }}
+            >
+              <Link />
+            </Button>
+          </header>
+        </BaseAlwaysScrollable>
+
         <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
           <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
-          {/* <PlayerSlider
-            multiplier={duration / 1000}
-            isLazy
-            value={currentTimeSeconds}
-            onKeyDownRight={onKeyDownRightTime}
-            onKeyDownLeft={onKeyDownLeftTime}
-          /> */}
-          <Slider />
+          <Slider
+            max={durationSeconds}
+            min={0}
+            onValueChange={(value) => {
+              const seconds = Number(value);
+              setSeekPreview({ seconds, trackSrc: track.src });
+            }}
+            onValueCommitted={onValueCommittedSeek}
+            value={sliderTimeSeconds}
+          />
           <time dateTime={durationFormats.iso}>{durationFormats.humanReadable}</time>
         </div>
-        <div className="grid grid-cols-[1fr_min-content_1fr] grid-areas-['left_center_right'] gap-x-4 items-center">
+
+        <div className="grid grid-cols-[1fr_min-content_1fr] gap-4 items-center">
           <Toggle
-            className="whitespace-nowrap min-w-6 justify-self-end"
+            className="justify-self-end"
             aria-label={isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')}
             pressed={isShuffleModeEnabled}
             onPressedChange={setIsShuffleModeEnabled}
           >
-            <Shuffle className="text-2xl" />
+            <Shuffle />
           </Toggle>
           <ul className="flex justify-center gap-2">
-            {controlButtons.map((controlButton) => {
-              return (
-                <li key={controlButton.key}>
-                  <Button
-                    disabled={controlButton.disabled}
-                    className="whitespace-nowrap h-full w-8"
-                    aria-label={controlButton.ariaLabel}
-                    onClick={controlButton.onClick}
-                  >
-                    <controlButton.Icon className="text-2xl" />
-                  </Button>
-                </li>
-              );
-            })}
+            <li>
+              <Button
+                size="lg"
+                disabled={isShuffleModeEnabled && historyItems.length === 0}
+                aria-label={t('previousTrack')}
+                onClick={loadPrevious}
+              >
+                <SkipBack />
+              </Button>
+            </li>
+            <li>
+              <Button
+                size="lg"
+                aria-label={isPaused ? t('playTrack') : t('pauseTrack')}
+                onClick={isPaused ? play : pause}
+              >
+                {isPaused ? <Play /> : <Pause />}
+              </Button>
+            </li>
+            <li>
+              <Button size="lg" aria-label={t('nextTrack')} onClick={loadNext}>
+                <SkipForward />
+              </Button>
+            </li>
           </ul>
-          {/* <ClientOnly v-if="!isMobile">
-          <div class="flex h-full w-5/6 max-w-20 items-center">
-            <PlayerSlider v-model="volume" @keydown.right="onKeyDownRightVolume" @keydown.left="onKeyDownLeftVolume" />
-          </div>
-        </ClientOnly> */}
         </div>
-      </div>
-    </section>
+      </section>
+    </BaseSwipable>
   );
 };
