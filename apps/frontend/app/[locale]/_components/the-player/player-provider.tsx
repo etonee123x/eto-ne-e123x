@@ -1,28 +1,20 @@
-'use client';
+import { ComponentProps } from 'react';
+import { PlayerContextProvider } from './player-context-provider';
+import { headers as _headers } from 'next/headers';
+import { getFolderData } from '../../explorer/[[...segments]]/_queries/get-folder-data';
+import { isNil } from '@/lib/utils/is-nil';
+import { throwError } from '@/lib/utils/throw-error';
 
-import { ContextType, PropsWithChildren, useState } from 'react';
-import { PlayerContext } from './player-context';
+export const PlayerProvider = async ({
+  children,
+}: Omit<ComponentProps<typeof PlayerContextProvider>, 'initialFolderData'>) => {
+  const headers = await _headers();
+  const xPathname = headers.get('x-pathname') ?? throwError();
 
-export const PlayerProvider = ({ children }: PropsWithChildren) => {
-  const [track, setTrack] = useState<NonNullable<ContextType<typeof PlayerContext>>['track']>(null);
-  const [playlist, setPlaylist] = useState<NonNullable<ContextType<typeof PlayerContext>>['playlist']>([]);
-  const [pathDirectory, setPathDirectory] =
-    useState<NonNullable<ContextType<typeof PlayerContext>>['pathDirectory']>(null);
+  const explorerPath = xPathname.startsWith('/explorer') ? xPathname.replace(/^\/explorer/, '') || '/' : null;
 
-  return (
-    <PlayerContext
-      value={{
-        track,
-        setTrack,
+  const response = isNil(explorerPath) ? null : await getFolderData(explorerPath || '/');
+  const initialFolderData = response?.data ?? null;
 
-        playlist,
-        setPlaylist,
-
-        pathDirectory,
-        setPathDirectory,
-      }}
-    >
-      {children}
-    </PlayerContext>
-  );
+  return <PlayerContextProvider initialFolderData={initialFolderData}>{children}</PlayerContextProvider>;
 };

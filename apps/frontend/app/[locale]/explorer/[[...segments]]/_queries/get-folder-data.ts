@@ -1,6 +1,7 @@
 import { client } from '@/lib/api/client';
+import { cache } from 'react';
 
-export const getFolderData = (path: string) => {
+export const getFolderData = cache((path: string) => {
   return client['/folder-data'].GET({
     params: {
       query: {
@@ -8,4 +9,4 @@ export const getFolderData = (path: string) => {
       },
     },
   });
-};
+});

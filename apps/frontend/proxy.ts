@@ -10,7 +10,12 @@ export default async function proxy(request: NextRequest) {
   const jwt = request.nextUrl.searchParams.get('jwt');
 
   if (isNil(jwt)) {
-    return handleI18nRouting(request);
+    const response = handleI18nRouting(request);
+
+    const locale = response.headers.get('x-middleware-request-x-next-intl-locale');
+    response.headers.set('x-pathname', request.nextUrl.pathname.replace(`/${locale}`, ''));
+
+    return response;
   }
 
   const redirectUrl = request.nextUrl.clone();
@@ -34,7 +39,10 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // почему то со String.raw некорректно работает
-  // eslint-disable-next-line unicorn/prefer-string-raw
-  matcher: `/((?!api|trpc|uploads|content|_next|_vercel|.*\\..*).*)`,
+  matcher: [
+    '/explorer/:path*',
+    '/:locale/explorer/:path*',
+    // eslint-disable-next-line unicorn/prefer-string-raw
+    `/((?!api|trpc|uploads|content|_next|_vercel|.*\\..*).*)`,
+  ],
 };
