@@ -35,8 +35,8 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
               <PlayerProvider>
                 <TheHeader className="fixed top-0 w-full z-1 h-header-height" />
                 <main className="pt-header-height relative flex flex-col flex-1">{children}</main>
-                <TheFooter />
                 <ThePlayer />
+                <TheFooter />
               </PlayerProvider>
             </ThemeProvider>
           </IsAdminContext>

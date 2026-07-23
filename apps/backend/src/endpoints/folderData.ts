@@ -34,7 +34,7 @@ const getFolderData: RequestHandlerTyped<'/folder-data', 'get'> = async (request
   const file = isFile
     ? {
         path,
-        src: ['/content', path].join('/'),
+        src: ['/content', path].join(''),
         ...(await parseFileByPath(systemPath)),
       }
     : null;
@@ -85,7 +85,7 @@ const getFolderData: RequestHandlerTyped<'/folder-data', 'get'> = async (request
               {
                 ...baseItem,
                 path: outerFilePath,
-                src: ['/content', outerFilePath].join('/'),
+                src: ['/content', outerFilePath].join(''),
                 ...(await parseFileByPath(systemPath)),
               },
             ],

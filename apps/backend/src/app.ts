@@ -8,10 +8,6 @@ import { isNodeEnvDevelopment } from '@/constants/nodeEnv';
 import { router } from '@/router';
 
 export const app = Express() //
-  .use((request, response, next)=>{
-    console.log(`Request: ${request.method} ${request.url}`);
-    next();
-  })
   .use(cookieParser())
   .use(Express.json());
 

@@ -43,7 +43,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   const { segments = [] } = await params;
   const t = await getTranslations('Explorer');
 
-  const { data: folderData } = await getFolderData(segments.join('/') || '/');
+  const { data: folderData } = await getFolderData('/' + segments.join('/'));
   if (!folderData) {
     return notFound();
   }
