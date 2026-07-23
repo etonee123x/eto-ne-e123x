@@ -8,7 +8,7 @@ import { NavigationMenuLink } from './navigation-menu-link';
 import { getIsAdmin } from '@/lib/auth/get-is-admin';
 import { getTranslations } from 'next-intl/server';
 
-export default async function TheHeader({ className }: Readonly<HTMLProps<HTMLDivElement>>) {
+export const TheHeader = async ({ className }: Readonly<HTMLProps<HTMLDivElement>>) => {
   const t = await getTranslations('TheHeader');
   const isAdmin = await getIsAdmin();
 
@@ -50,4 +50,4 @@ export default async function TheHeader({ className }: Readonly<HTMLProps<HTMLDi
       </div>
     </header>
   );
-}
+};

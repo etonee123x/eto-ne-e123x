@@ -4,7 +4,7 @@ import telegramLogoSource from './telegram-logo.svg';
 
 const ETO_NE_E123X = 'eto_ne_e123x';
 
-export default function TheFooter() {
+export const TheFooter = () => {
   const t = useTranslations('TheFooter');
 
   return (
@@ -17,4 +17,4 @@ export default function TheFooter() {
       </address>
     </footer>
   );
-}
+};

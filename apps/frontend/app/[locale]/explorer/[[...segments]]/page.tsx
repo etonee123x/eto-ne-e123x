@@ -6,7 +6,7 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Fragment } from 'react/jsx-runtime';
-import { getFolderData } from './_queries/getFolderData';
+import { getFolderData } from './_queries/get-folder-data';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
