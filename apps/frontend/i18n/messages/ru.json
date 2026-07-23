@@ -32,5 +32,16 @@
     "album": "Альбом",
     "year": "Год выхода",
     "bpm": "Темп"
+  },
+  "ThePlayer": {
+    "copied": "Скопировано!",
+    "copyLink": "Скопировать ссылку",
+    "previousTrack": "Предыдущий трек",
+    "pauseTrack": "Пауза трека",
+    "playTrack": "Воспроизвести трек",
+    "nextTrack": "Следующий трек",
+    "closePlayer": "Закрыть плеер",
+    "enableShuffleTracks": "Включить перемешивание треков",
+    "disableShuffleTracks": "Выключить перемешивание треков"
   }
 }

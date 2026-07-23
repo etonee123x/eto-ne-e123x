@@ -32,5 +32,16 @@
     "album": "Album",
     "year": "Release year",
     "bpm": "BPM"
+  },
+  "ThePlayer": {
+    "copied": "Copied!",
+    "copyLink": "Copy link",
+    "previousTrack": "Previous track",
+    "pauseTrack": "Pause track",
+    "playTrack": "Play track",
+    "nextTrack": "Next track",
+    "closePlayer": "Close player",
+    "enableShuffleTracks": "Enable shuffle tracks",
+    "disableShuffleTracks": "Disable shuffle tracks"
   }
 }
