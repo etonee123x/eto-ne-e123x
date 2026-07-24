@@ -12,6 +12,7 @@ import { Toggle } from '@/components/ui/toggle';
 import { useTranslations } from 'next-intl';
 import { getRandomExceptCurrentIndex } from '@/lib/utils/get-random-except-current-index';
 import { BaseAlwaysScrollable } from '@/components/base-always-scrollable';
+import { isClient } from '@/lib/utils/target';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -259,11 +260,9 @@ export const ThePlayer = () => {
 
   const { track } = usePlayerContext();
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
 
   useEffect(() => {
-    audioRef.current = new Audio();
-
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
