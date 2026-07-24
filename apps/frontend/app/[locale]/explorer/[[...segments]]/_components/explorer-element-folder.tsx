@@ -2,6 +2,7 @@ import { Item, ItemHeader } from '@/components/ui/item';
 import { Link } from '@/i18n/navigation';
 import { components } from '@/lib/types/openapi';
 import { ComponentProps } from 'react';
+import { ExplorerElementTime } from './explorer-element-file/explorer-element-time';
 
 export const ExplorerElementFolder = ({
   element,
@@ -9,7 +10,10 @@ export const ExplorerElementFolder = ({
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemFolder'] }) => {
   return (
     <Item className="border-primary" variant="muted" render={<Link {...props} />}>
-      <ItemHeader className="text-lg">{element.name}</ItemHeader>
+      <ItemHeader>
+        <header className="text-lg">{element.name}</header>
+        <ExplorerElementTime element={element} />
+      </ItemHeader>
     </Item>
   );
 };

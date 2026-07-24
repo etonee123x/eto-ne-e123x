@@ -5,27 +5,27 @@ import { checkExhaustive } from '@/lib/utils/check-exhaustive';
 import dynamic from 'next/dynamic';
 import { ComponentProps } from 'react';
 
-const ExplorerElementAudio = dynamic(() => {
-  return import('./explorer-element-audio').then((module) => {
-    return module.ExplorerElementAudio;
+const ExplorerElementFileAudio = dynamic(() => {
+  return import('./explorer-element-file-audio').then((module) => {
+    return module.ExplorerElementFileAudio;
   });
 });
 
-const ExplorerElementImage = dynamic(() => {
-  return import('./explorer-element-image').then((module) => {
-    return module.ExplorerElementImage;
+const ExplorerElementFileImage = dynamic(() => {
+  return import('./explorer-element-file-image').then((module) => {
+    return module.ExplorerElementFileImage;
   });
 });
 
-const ExplorerElementVideo = dynamic(() => {
-  return import('./explorer-element-video').then((module) => {
-    return module.ExplorerElementVideo;
+const ExplorerElementFileVideo = dynamic(() => {
+  return import('./explorer-element-file-video').then((module) => {
+    return module.ExplorerElementFileVideo;
   });
 });
 
-const ExplorerElementUnknown = dynamic(() => {
-  return import('./explorer-element-unknown').then((module) => {
-    return module.ExplorerElementUnknown;
+const ExplorerElementFileUnknown = dynamic(() => {
+  return import('./explorer-element-file-unknown').then((module) => {
+    return module.ExplorerElementFileUnknown;
   });
 });
 
@@ -35,16 +35,16 @@ export const ExplorerElementFile = ({
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemFile'] }) => {
   switch (element.fileType) {
     case FILE_TYPES.AUDIO: {
-      return <ExplorerElementAudio element={element} {...props} />;
+      return <ExplorerElementFileAudio element={element} {...props} />;
     }
     case FILE_TYPES.IMAGE: {
-      return <ExplorerElementImage element={element} {...props} />;
+      return <ExplorerElementFileImage element={element} {...props} />;
     }
     case FILE_TYPES.VIDEO: {
-      return <ExplorerElementVideo element={element} {...props} />;
+      return <ExplorerElementFileVideo element={element} {...props} />;
     }
     case FILE_TYPES.UNKNOWN: {
-      return <ExplorerElementUnknown element={element} {...props} />;
+      return <ExplorerElementFileUnknown element={element} {...props} />;
     }
     default: {
       throw checkExhaustive(element);
