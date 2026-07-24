@@ -176,6 +176,35 @@ const PlayerControls = ({ audioRef }: { audioRef: RefObject<HTMLAudioElement | n
     loadNext();
   };
 
+  const onPressedChangeIsShuffleModeEnabled: ComponentProps<typeof Toggle>['onPressedChange'] = (pressed) => {
+    setIsShuffleModeEnabled(pressed);
+  };
+
+  const buttons = [
+    {
+      disabled: isShuffleModeEnabled && historyItems.length === 0,
+      ariaLabel: t('previousTrack'),
+      onClick: onClickPrevious,
+      Icon: SkipBack,
+    },
+    isPlaying
+      ? {
+          ariaLabel: t('pauseTrack'),
+          onClick: onClickPause,
+          Icon: Pause,
+        }
+      : {
+          ariaLabel: t('playTrack'),
+          onClick: onClickPlay,
+          Icon: Play,
+        },
+    {
+      ariaLabel: t('nextTrack'),
+      onClick: onClickNext,
+      Icon: SkipForward,
+    },
+  ];
+
   if (!track) {
     return null;
   }
@@ -186,37 +215,22 @@ const PlayerControls = ({ audioRef }: { audioRef: RefObject<HTMLAudioElement | n
         className="justify-self-end"
         aria-label={isShuffleModeEnabled ? t('disableShuffleTracks') : t('enableShuffleTracks')}
         pressed={isShuffleModeEnabled}
-        onPressedChange={setIsShuffleModeEnabled}
+        onPressedChange={onPressedChangeIsShuffleModeEnabled}
       >
         <Shuffle />
       </Toggle>
       <ul className="flex justify-center gap-2">
-        <li>
-          <Button
-            size="lg"
-            disabled={isShuffleModeEnabled && historyItems.length === 0}
-            aria-label={t('previousTrack')}
-            onClick={onClickPrevious}
-          >
-            <SkipBack />
-          </Button>
-        </li>
-        <li>
-          {isPlaying ? (
-            <Button size="lg" aria-label={t('pauseTrack')} onClick={onClickPause}>
-              <Pause />
-            </Button>
-          ) : (
-            <Button size="lg" aria-label={t('playTrack')} onClick={onClickPlay}>
-              <Play />
-            </Button>
-          )}
-        </li>
-        <li>
-          <Button size="lg" aria-label={t('nextTrack')} onClick={onClickNext}>
-            <SkipForward />
-          </Button>
-        </li>
+        {/* FP */}
+        {/* eslint-disable-next-line react-hooks/refs */}
+        {buttons.map((button, index) => {
+          return (
+            <li key={index}>
+              <Button size="lg" disabled={button.disabled} aria-label={button.ariaLabel} onClick={button.onClick}>
+                <button.Icon />
+              </Button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
