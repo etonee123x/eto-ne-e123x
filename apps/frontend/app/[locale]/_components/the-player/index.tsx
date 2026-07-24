@@ -98,12 +98,13 @@ const PlayerSlider = ({ duration, audioRef }: { duration: number; audioRef: RefO
     <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
       <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
       <Slider
+        className="cursor-pointer"
         max={duration / 1000}
         min={0}
         step={0.1}
         onValueChange={onValueChange}
         onValueCommitted={onValueCommitted}
-        value={sliderTimeSeconds}
+        value={[sliderTimeSeconds]}
       />
       <time dateTime={durationFormats.iso}>{durationFormats.humanReadable}</time>
     </div>
@@ -308,7 +309,7 @@ export const ThePlayer = () => {
   }
 
   return (
-    <section className="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full sticky bottom-0">
+    <section className="bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
       <div className="layout-container flex flex-col gap-2 justify-center">
         <ButtonClose audioRef={audioRef} />
 
