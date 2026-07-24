@@ -1,6 +1,6 @@
 'use client';
 
-import { ComponentProps, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { ComponentProps, RefObject, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { PlayerContext } from './player-context';
 import { throwError } from '@/lib/utils/throw-error';
 import { Button } from '@/components/ui/button';
@@ -11,8 +11,8 @@ import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/components/ui/toggle';
 import { useTranslations } from 'next-intl';
 import { getRandomExceptCurrentIndex } from '@/lib/utils/get-random-except-current-index';
-import { BaseSwipable } from '@/components/base-swipable';
 import { BaseAlwaysScrollable } from '@/components/base-always-scrollable';
+import { isServer } from '@/lib/utils/target';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -25,14 +25,76 @@ const copyCurrentLocation = () => {
   return globalThis.navigator.clipboard.writeText(globalThis.location.href);
 };
 
+const PlayerSlider = ({
+  duration,
+  onCurrentTimeCommitted,
+  audioRef,
+}: {
+  duration: number;
+  onCurrentTimeCommitted: (currentTime: number) => void;
+  audioRef: RefObject<HTMLAudioElement | null>;
+}) => {
+  const [currentTime, setCurrentTime] = useState(0);
+  const [seekPreview, setSeekPreview] = useState<number | null>(null);
+
+  const sliderTimeSeconds = seekPreview ?? currentTime;
+
+  const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
+  const durationFormats = millisecondsToTimeFormats(duration);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+
+    const onTimeUpdate = (event: Event) => {
+      if (!(event.currentTarget instanceof HTMLAudioElement)) {
+        return;
+      }
+
+      setCurrentTime(event.currentTarget.currentTime);
+    };
+
+    audio?.addEventListener('timeupdate', onTimeUpdate);
+
+    return () => {
+      audio?.removeEventListener('timeupdate', onTimeUpdate);
+    };
+  }, [audioRef]);
+
+  const onValueCommitted: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
+    const seconds = Number(value);
+    onCurrentTimeCommitted(seconds);
+    setCurrentTime(seconds);
+    setSeekPreview(null);
+  };
+
+  const onValueChange: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
+    setSeekPreview(Number(value));
+  };
+
+  return (
+    <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
+      <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
+      <Slider
+        max={duration / 1000}
+        min={0}
+        step={0.1}
+        onValueChange={onValueChange}
+        onValueCommitted={onValueCommitted}
+        value={sliderTimeSeconds}
+      />
+      <time dateTime={durationFormats.iso}>{durationFormats.humanReadable}</time>
+    </div>
+  );
+};
+
+const PlayerControls = () => {};
+
 export const ThePlayer = () => {
   const playerContext = useContext(PlayerContext) ?? throwError();
 
   const [isShuffleModeEnabled, setIsShuffleModeEnabled] = useState(false);
   const [historyItems, setHistoryItems] = useState<Array<number>>([]);
-  const [currentTime, setCurrentTime] = useState({ seconds: 0, trackSrc: '' });
   const [isPaused, setIsPaused] = useState(true);
-  const [seekPreview, setSeekPreview] = useState({ seconds: 0, trackSrc: '' });
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const t = useTranslations('ThePlayer');
   const track = playerContext.track;
@@ -59,24 +121,14 @@ export const ThePlayer = () => {
       setIsPaused(false);
     };
 
-    const onTimeUpdate = (event: Event) => {
-      if (!(event.currentTarget instanceof HTMLAudioElement)) {
-        return;
-      }
-
-      setCurrentTime({ seconds: event.currentTarget.currentTime, trackSrc: trackSource });
-    };
-
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('pause', onPause);
     audio.addEventListener('play', onPlay);
-    audio.addEventListener('timeupdate', onTimeUpdate);
 
     return () => {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.pause();
       audio.removeAttribute('src');
       audio.load();
@@ -101,18 +153,9 @@ export const ThePlayer = () => {
 
   const shouldRenderButtonClose = isPaused;
 
-  let sliderTimeSeconds = 0;
-  if (currentTime.trackSrc === track.src) {
-    sliderTimeSeconds = currentTime.seconds;
-  }
-  if (seekPreview.trackSrc === track.src) {
-    sliderTimeSeconds = seekPreview.seconds;
-  }
   const currentPlayingNumber = playerContext.playlist.findIndex((playlistItem) => {
     return playlistItem.src === track.src;
   });
-  const durationMilliseconds = track.metadata.duration ?? 0;
-  const durationSeconds = durationMilliseconds / 1000;
 
   const setCurrentPlayingNumber = (playingNumber: number) => {
     playerContext.setTrack(playerContext.playlist[playingNumber]);
@@ -123,8 +166,8 @@ export const ThePlayer = () => {
       return;
     }
 
-    setHistoryItems((items) => {
-      return [...items, currentPlayingNumber];
+    setHistoryItems((historyItems) => {
+      return [...historyItems, currentPlayingNumber];
     });
     setCurrentPlayingNumber(
       isShuffleModeEnabled
@@ -138,32 +181,19 @@ export const ThePlayer = () => {
       return;
     }
 
-    if (historyItems.length > 0) {
-      const previousPlayingNumber = historyItems.at(-1);
-      setHistoryItems((items) => {
-        return items.slice(0, -1);
-      });
-      setCurrentPlayingNumber(previousPlayingNumber ?? 0);
+    if (historyItems.length === 0) {
+      setCurrentPlayingNumber(
+        (currentPlayingNumber - 1 + playerContext.playlist.length) % playerContext.playlist.length,
+      );
       return;
     }
 
-    setCurrentPlayingNumber((currentPlayingNumber - 1 + playerContext.playlist.length) % playerContext.playlist.length);
+    const previousPlayingNumber = historyItems.at(-1);
+    setHistoryItems((historyItems) => {
+      return historyItems.slice(0, -1);
+    });
+    setCurrentPlayingNumber(previousPlayingNumber ?? 0);
   };
-
-  const onValueCommittedSeek: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const seconds = Number(value);
-    audio.currentTime = seconds;
-    setCurrentTime({ seconds, trackSrc: track.src });
-    setSeekPreview({ seconds: 0, trackSrc: '' });
-  };
-
-  const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
-  const durationFormats = millisecondsToTimeFormats(durationMilliseconds);
 
   const onClickPrevious = () => {
     loadPrevious();
@@ -173,13 +203,22 @@ export const ThePlayer = () => {
     loadNext();
   };
 
+  const onCurrentTimeCommitted: ComponentProps<typeof PlayerSlider>['onCurrentTimeCommitted'] = (currentTime) => {
+    if (!audioRef.current) {
+      return;
+    }
+
+    audioRef.current.currentTime = currentTime;
+  };
+
   console.log('rerender!', new Date());
+
   return (
     <div className="bg-background z-player border-t border-primary-500 pt-2 pb-4 w-full sticky bottom-0">
       <section className="layout-container flex flex-col gap-2 justify-center">
         {shouldRenderButtonClose && (
           <Button
-            className="text-xl absolute inset-e-2 top-2 hover-none:hidden"
+            className="absolute inset-e-2 top-2 hover-none:hidden"
             aria-label={t('closePlayer')}
             size="icon"
             variant="secondary"
@@ -206,21 +245,11 @@ export const ThePlayer = () => {
           </header>
         </BaseAlwaysScrollable>
 
-        <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
-          <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
-          <Slider
-            max={durationSeconds}
-            min={0}
-            step={0.1}
-            onValueChange={(value) => {
-              const seconds = Number(value);
-              setSeekPreview({ seconds, trackSrc: track.src });
-            }}
-            onValueCommitted={onValueCommittedSeek}
-            value={sliderTimeSeconds}
-          />
-          <time dateTime={durationFormats.iso}>{durationFormats.humanReadable}</time>
-        </div>
+        <PlayerSlider
+          audioRef={audioRef}
+          duration={track.metadata.duration ?? 0}
+          onCurrentTimeCommitted={onCurrentTimeCommitted}
+        />
 
         <div className="grid grid-cols-[1fr_min-content_1fr] gap-4 items-center">
           <Toggle
