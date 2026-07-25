@@ -2,15 +2,24 @@
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useGalleryContext } from './gallery-context';
+import { ComponentProps } from 'react';
 
 export const TheGallery = () => {
-  const { media } = useGalleryContext();
-  console.log({ media });
+  const { media, onClose } = useGalleryContext();
+
+  const onOpenChange: ComponentProps<typeof Dialog>['onOpenChange'] = (isOpen) => {
+    if (isOpen) {
+      return;
+    }
+
+    onClose.current();
+  };
 
   return (
-    <Dialog open={true}>
-      <div>outside</div>
-      <DialogContent>inside?</DialogContent>
+    <Dialog open={Boolean(media)} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <pre>{JSON.stringify(media, null, 2)}</pre>
+      </DialogContent>
     </Dialog>
   );
 };
