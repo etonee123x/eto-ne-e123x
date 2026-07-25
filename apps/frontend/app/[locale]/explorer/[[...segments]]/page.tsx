@@ -6,7 +6,6 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Fragment } from 'react/jsx-runtime';
-import { getFolderData } from './_queries/get-folder-data';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -14,6 +13,8 @@ import dynamic from 'next/dynamic';
 import { components } from '@/lib/types/openapi';
 import { ItemGroup } from '@/components/ui/item';
 import { SendFolderDataToPlayer } from './_components/send-folder-data-to-player';
+import { SendFolderDataToGallery } from './_components/send-folder-data-to-gallery';
+import { getFolderData } from '@/lib/queries/get-folder-data';
 
 const ExplorerElementUp = dynamic(() => {
   return import('./_components/explorer-element-up').then((module) => {
@@ -77,6 +78,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   return (
     <section className="layout-container pb-4">
       <SendFolderDataToPlayer folderData={folderData} />
+      <SendFolderDataToGallery folderData={folderData} />
       <h1 className="h1 mb-4">{t('content')}</h1>
 
       <Breadcrumb className="mb-4 sticky top-header-height">
