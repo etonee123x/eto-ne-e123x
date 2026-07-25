@@ -1,29 +1,43 @@
 'use client';
 
 import { useGalleryContext } from '@/app/[locale]/_components/the-gallery/gallery-context';
+import { useRouter } from '@/i18n/navigation';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import { components } from '@/lib/types/openapi';
 import { useEffect } from 'react';
 
+const isImageOrVideo = (file: components['schemas']['FolderDataItemFile']) => {
+  return file.fileType === FILE_TYPES.IMAGE || file.fileType === FILE_TYPES.VIDEO;
+};
+
 export const SendFolderDataToGallery = ({
   folderData,
+  lastNavigationItem,
 }: {
   folderData: components['schemas']['FolderDataResponse'];
+  lastNavigationItem: { text: string; href: string };
 }) => {
-  const { setMedia, setGallery } = useGalleryContext();
+  const { setGallery, open } = useGalleryContext();
+  const router = useRouter();
 
   useEffect(() => {
-    setMedia(
-      folderData.file?.fileType === FILE_TYPES.IMAGE || folderData.file?.fileType === FILE_TYPES.VIDEO
-        ? folderData.file
-        : null,
-    );
+    const file = folderData.file;
+    if (!(file && isImageOrVideo(file))) {
+      return;
+    }
+
+    open(file, {
+      onClose: () => {
+        router.push(lastNavigationItem.href);
+      },
+    });
+
     setGallery(
       folderData.files.filter((file) => {
-        return file.fileType === FILE_TYPES.IMAGE || file.fileType === FILE_TYPES.VIDEO;
+        return isImageOrVideo(file);
       }),
     );
-  }, [folderData, setGallery, setMedia]);
+  }, [folderData, setGallery, open, router, lastNavigationItem]);
 
   return null;
 };

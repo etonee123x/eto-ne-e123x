@@ -2,7 +2,7 @@
 
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import { components } from '@/lib/types/openapi';
-import { ContextType, PropsWithChildren, useState } from 'react';
+import { ContextType, PropsWithChildren, useCallback, useRef, useState } from 'react';
 import { GalleryContext } from './gallery-context';
 
 export const GalleryContextProvider = ({
@@ -16,6 +16,7 @@ export const GalleryContextProvider = ({
       ? initialFolderData.file
       : null,
   );
+
   const [gallery, setGallery] = useState<NonNullable<ContextType<typeof GalleryContext>>['gallery']>(() => {
     return (
       initialFolderData?.files.filter((file) => {
@@ -23,6 +24,16 @@ export const GalleryContextProvider = ({
       }) ?? []
     );
   });
+
+  const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(() => {});
+
+  const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>((media, parameters) => {
+    setMedia(media);
+
+    if (parameters?.onClose) {
+      onClose.current = parameters.onClose;
+    }
+  }, []);
 
   return (
     <GalleryContext
@@ -32,6 +43,9 @@ export const GalleryContextProvider = ({
 
         gallery,
         setGallery,
+
+        onClose,
+        open,
       }}
     >
       {children}

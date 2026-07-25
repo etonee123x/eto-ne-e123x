@@ -15,6 +15,7 @@ import { ItemGroup } from '@/components/ui/item';
 import { SendFolderDataToPlayer } from './_components/send-folder-data-to-player';
 import { SendFolderDataToGallery } from './_components/send-folder-data-to-gallery';
 import { getFolderData } from '@/lib/queries/get-folder-data';
+import { throwError } from '@/lib/utils/throw-error';
 
 const ExplorerElementUp = dynamic(() => {
   return import('./_components/explorer-element-up').then((module) => {
@@ -70,7 +71,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
       ],
     );
 
-  const breadcrumbPage = navigationItems.at(-1);
+  const lastNavigationItem = navigationItems.at(-1) ?? throwError();
   const breadcrumbLinks = navigationItems.slice(0, -1);
 
   const navigationItemUp = navigationItems.at(-2);
@@ -78,7 +79,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   return (
     <section className="layout-container pb-4">
       <SendFolderDataToPlayer folderData={folderData} />
-      <SendFolderDataToGallery folderData={folderData} />
+      <SendFolderDataToGallery folderData={folderData} lastNavigationItem={lastNavigationItem} />
       <h1 className="h1 mb-4">{t('content')}</h1>
 
       <Breadcrumb className="mb-4 sticky top-header-height">
@@ -91,7 +92,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
               </Fragment>
             );
           })}
-          <BreadcrumbPage className="text-primary">{breadcrumbPage?.text}</BreadcrumbPage>
+          <BreadcrumbPage className="text-primary">{lastNavigationItem.text}</BreadcrumbPage>
         </BreadcrumbList>
       </Breadcrumb>
 
