@@ -6,7 +6,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils/cn"
 import { Button } from "@/components/ui/button"
-import { isClient } from "@/lib/utils/target"
+import { useHasMounted } from "@/lib/hooks/use-has-mounted"
 
 function Dialog({
   ...props
@@ -56,6 +56,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const hasMounted = useHasMounted()
   const content = (
     <>
       <DialogOverlay />
@@ -84,7 +85,7 @@ function DialogContent({
     </>
   )
 
-  if (isClient) {
+  if (hasMounted) {
     return <DialogPortal>{content}</DialogPortal>
   }
 
