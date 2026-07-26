@@ -26,12 +26,17 @@ export const GalleryContextProvider = ({
   });
 
   const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(() => {});
+  const onGalleryItemChange: NonNullable<ContextType<typeof GalleryContext>>['onGalleryItemChange'] = useRef(() => {});
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>((media, parameters) => {
     setMedia(media);
 
     if (parameters?.onClose) {
       onClose.current = parameters.onClose;
+    }
+
+    if (parameters?.onGalleryItemChange) {
+      onGalleryItemChange.current = parameters.onGalleryItemChange;
     }
   }, []);
 
@@ -45,6 +50,7 @@ export const GalleryContextProvider = ({
         setGallery,
 
         onClose,
+        onGalleryItemChange,
         open,
       }}
     >

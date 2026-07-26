@@ -6,7 +6,8 @@ import { createContext, Dispatch, RefObject, SetStateAction, useContext } from '
 
 type Media = components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'];
 
-type Callback = () => void;
+type CloseCallback = () => void;
+type GalleryItemChangeCallback = (media: Media) => void;
 
 export const GalleryContext = createContext<{
   media: Media | null;
@@ -14,8 +15,12 @@ export const GalleryContext = createContext<{
   gallery: Array<Media>;
   setGallery: Dispatch<SetStateAction<Array<Media>>>;
 
-  open: (media: Media, parameters?: Partial<{ onClose: Callback }>) => void;
-  onClose: RefObject<Callback>;
+  open: (
+    media: Media,
+    parameters?: Partial<{ onClose: CloseCallback; onGalleryItemChange: GalleryItemChangeCallback }>,
+  ) => void;
+  onClose: RefObject<CloseCallback>;
+  onGalleryItemChange: RefObject<GalleryItemChangeCallback>;
 } | null>(null);
 
 export const useGalleryContext = () => {

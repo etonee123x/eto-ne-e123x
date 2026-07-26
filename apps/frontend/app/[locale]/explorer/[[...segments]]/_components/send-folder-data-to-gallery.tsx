@@ -17,18 +17,23 @@ export const SendFolderDataToGallery = ({
   folderData: components['schemas']['FolderDataResponse'];
   lastNavigationItem: { text: string; href: string };
 }) => {
-  const { setGallery, open } = useGalleryContext();
+  const { setMedia, setGallery, open } = useGalleryContext();
   const router = useRouter();
 
   useEffect(() => {
     const file = folderData.file;
+
     if (!(file && isImageOrVideo(file))) {
+      setMedia(null);
       return;
     }
 
     open(file, {
       onClose: () => {
         router.push(lastNavigationItem.href);
+      },
+      onGalleryItemChange: (galleryItem) => {
+        router.replace('/explorer' + galleryItem.path);
       },
     });
 
@@ -37,7 +42,7 @@ export const SendFolderDataToGallery = ({
         return isImageOrVideo(file);
       }),
     );
-  }, [folderData, setGallery, open, router, lastNavigationItem]);
+  }, [folderData, setGallery, open, router, lastNavigationItem, setMedia]);
 
   return null;
 };
