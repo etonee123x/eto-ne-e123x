@@ -58,26 +58,22 @@ export const FormPostBase = ({
   };
 
   const onChangeInputFiles: ComponentProps<'input'>['onChange'] = (event) => {
-    const files = event.target.files;
+    const files = [...(event.currentTarget.files ?? [])];
 
-    if (!files) {
+    if (files.length === 0) {
       return;
     }
 
     setModelFilesAndAttachments((modelFilesAndAttachments) => {
       return [
         ...modelFilesAndAttachments,
-        ...[...files].map((file) => {
+        ...files.map((file) => {
           return fileToFileWithHashName(file);
         }),
       ];
     });
 
-    if (!inputRef.current) {
-      return;
-    }
-
-    inputRef.current.value = '';
+    event.currentTarget.value = '';
   };
 
   const _onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
