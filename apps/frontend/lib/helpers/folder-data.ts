@@ -17,7 +17,7 @@ export const ITEM_TYPES = Object.fromEntries(
 };
 
 export const extensionToFileType = (extension: string) => {
-  const EXTENSIONS_AUDIO = ['.mp3', '.ogg', '.wav'];
+  const EXTENSIONS_AUDIO = ['.mp3', '.mpeg', '.ogg', '.wav'];
   const EXTENSIONS_IMAGE = ['.jpg', '.jpeg', '.png'];
   const EXTENSIONS_VIDEO = ['.mp4', '.webm'];
 

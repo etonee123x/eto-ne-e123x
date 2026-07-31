@@ -14,14 +14,18 @@
     "toggleTheme": "Toggle theme"
   },
   "Blog": {
-    "blog": "Blog",
-    "send": "Send"
+    "blog": "Blog"
   },
   "PostAttachmentImage": {
     "attachment": "Attachment {index}"
   },
   "FormPost": {
-    "message": "Message..."
+    "message": "Message...",
+    "attachments": "Attachments",
+    "clearAll": "Clear all"
+  },
+  "FormPostCreate": {
+    "send": "Send"
   },
   "Explorer": {
     "content": "Content"

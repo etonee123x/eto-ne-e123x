@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getIsAdmin } from '@/lib/auth/get-is-admin';
 
-const FormPost = dynamic(() => {
-  return import('./_components/form-post').then((module) => {
-    return module.FormPost;
+const FormPostCreate = dynamic(() => {
+  return import('./_components/form-post/form-post-create').then((module) => {
+    return module.FormPostCreate;
   });
 });
 
@@ -31,10 +31,7 @@ export default async function Blog() {
       <h1 className="h1 mb-4">{t('blog')}</h1>
       {isAdmin && (
         <>
-          <FormPost id="form-post" className="mb-4" />
-          <Button className="w-full" form="form-post">
-            {t('send')}
-          </Button>
+          <FormPostCreate />
           <Separator className="my-4" />
         </>
       )}

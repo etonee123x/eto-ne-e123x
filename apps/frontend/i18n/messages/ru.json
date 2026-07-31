@@ -21,7 +21,12 @@
     "attachment": "Вложение {index}"
   },
   "FormPost": {
-    "message": "Сообщение..."
+    "message": "Сообщение...",
+    "attachments": "Вложения",
+    "clearAll": "Очистить все"
+  },
+  "FormPostCreate": {
+    "send": "Отправить"
   },
   "Explorer": {
     "content": "Контент"
