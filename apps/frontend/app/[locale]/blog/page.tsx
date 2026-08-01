@@ -5,7 +5,6 @@ import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import PostAttachment from './_components/post-attachment';
 import dynamic from 'next/dynamic';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getIsAdmin } from '@/lib/auth/get-is-admin';
 

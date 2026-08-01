@@ -3,7 +3,7 @@
 import { useGalleryContext } from '@/app/[locale]/_components/the-gallery/gallery-context';
 import { useRouter } from '@/i18n/navigation';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { useEffect } from 'react';
 
 const isImageOrVideo = (file: components['schemas']['FolderDataItemFile']) => {

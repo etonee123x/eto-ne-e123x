@@ -2,15 +2,16 @@
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { fileToFileWithHashName } from '@/lib/utils/file-to-file-with-hash-name';
 import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { ComponentProps, HTMLProps, useRef, useState } from 'react';
+import { type ComponentProps, type HTMLProps, useRef, useState } from 'react';
 import { FormAttachment } from './form-attachment';
 import { extensionToFileType, FILE_TYPES } from '@/lib/helpers/folder-data';
 import { nonNullable } from '@/lib/utils/non-nullable';
-import { useSortable } from '@dnd-kit/react/sortable';
+import { DragDropProvider } from '@dnd-kit/react';
+import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 
 type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 type Attachment = NonNullable<Post['attachments'][number]>;
@@ -47,11 +48,12 @@ const SortableFormAttachment = ({
   fileOrAttachment: FileOrAttachment;
   onClickRemoveByIndex: (index: number) => void;
 }) => {
-  const { ref } = useSortable({ id, index });
+  const { handleRef, ref } = useSortable({ id, index });
 
   return (
     <FormAttachment
       ref={ref}
+      handleRef={handleRef}
       src={fileOrAttachmentToSrc(fileOrAttachment)}
       type={fileOrAttachmentToType(fileOrAttachment)}
       name={fileOrAttachment.name}
@@ -131,6 +133,20 @@ export const FormPostBase = ({
     });
   };
 
+  const onDragEnd: ComponentProps<typeof DragDropProvider>['onDragEnd'] = (event) => {
+    const { source } = event.operation;
+
+    if (event.canceled || !isSortable(source) || source.initialIndex === source.index) {
+      return;
+    }
+
+    setModelFilesAndAttachments((modelFilesAndAttachments) => {
+      const fileOrAttachment = modelFilesAndAttachments[source.initialIndex];
+
+      return modelFilesAndAttachments.toSpliced(source.initialIndex, 1).toSpliced(source.index, 0, fileOrAttachment);
+    });
+  };
+
   return (
     <form {...props} className="flex flex-col gap-4" onSubmit={_onSubmit}>
       <div className="flex gap-2">
@@ -151,19 +167,21 @@ export const FormPostBase = ({
       </div>
       {modelFilesAndAttachments.length > 0 && (
         <div className="flex flex-col gap-2">
-          <div className="flex gap-4 flex-col">
-            {modelFilesAndAttachments.map((fileOrAttachment, index) => {
-              return (
-                <SortableFormAttachment
-                  id={fileOrAttachmentToKey(fileOrAttachment)}
-                  index={index}
-                  key={fileOrAttachmentToKey(fileOrAttachment)}
-                  fileOrAttachment={fileOrAttachment}
-                  onClickRemoveByIndex={onClickRemoveByIndex}
-                />
-              );
-            })}
-          </div>
+          <DragDropProvider onDragEnd={onDragEnd}>
+            <div className="flex gap-4 flex-col">
+              {modelFilesAndAttachments.map((fileOrAttachment, index) => {
+                return (
+                  <SortableFormAttachment
+                    id={fileOrAttachmentToKey(fileOrAttachment)}
+                    index={index}
+                    key={fileOrAttachmentToKey(fileOrAttachment)}
+                    fileOrAttachment={fileOrAttachment}
+                    onClickRemoveByIndex={onClickRemoveByIndex}
+                  />
+                );
+              })}
+            </div>
+          </DragDropProvider>
           <Button className="self-end" size="sm" variant="ghost" onClick={onClickDeleteFiles}>
             {t('clearAll')}
             <X />

@@ -2,17 +2,17 @@
 
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useGalleryContext } from './gallery-context';
-import { ComponentProps, useCallback, useEffect, useState } from 'react';
+import { type ComponentProps, useCallback, useEffect, useState } from 'react';
 import {
   Carousel,
-  CarouselApi,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import Image from 'next/image';
 
@@ -108,8 +108,8 @@ export const TheGallery = () => {
                 );
               })}
             </CarouselContent>
-            <CarouselPrevious size={'lg'} className="inset-s-0!" />
-            <CarouselNext size={'lg'} className="inset-e-0!" />
+            <CarouselPrevious size="lg" className="inset-s-0!" />
+            <CarouselNext size="lg" className="inset-e-0!" />
           </Carousel>
         </DialogContent>
       )}

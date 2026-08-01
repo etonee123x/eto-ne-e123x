@@ -7,15 +7,17 @@ import {
   AttachmentTitle,
 } from '@/components/ui/attachment';
 import { X, FileQuestionMark, Grip } from 'lucide-react';
-import { ComponentProps } from 'react';
+import { type ComponentProps } from 'react';
 
 export const FormAttachmentUnknown = ({
   name,
   onClickRemove,
+  handleRef,
   ...props
 }: {
   name: ComponentProps<typeof AttachmentTitle>['children'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
+  handleRef: ComponentProps<typeof AttachmentAction>['ref'];
 } & ComponentProps<typeof Attachment>) => {
   return (
     <Attachment {...props}>
@@ -26,7 +28,7 @@ export const FormAttachmentUnknown = ({
         <AttachmentTitle>{name}</AttachmentTitle>
       </AttachmentContent>
       <AttachmentActions>
-        <AttachmentAction>
+        <AttachmentAction ref={handleRef}>
           <Grip />
         </AttachmentAction>
         <AttachmentAction onClick={onClickRemove}>

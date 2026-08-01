@@ -1,6 +1,6 @@
 'use client';
 
-import { ComponentProps, RefObject, useContext, useEffect, useRef, useState } from 'react';
+import { type ComponentProps, type RefObject, useContext, useEffect, useRef, useState } from 'react';
 import { PlayerContext, usePlayerContext } from './player-context';
 import { throwError } from '@/lib/utils/throw-error';
 import { Button } from '@/components/ui/button';

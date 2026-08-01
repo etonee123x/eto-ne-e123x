@@ -2,8 +2,8 @@ import { BaseVideo } from '@/components/base-video';
 import { Item, ItemContent, ItemHeader, ItemMedia } from '@/components/ui/item';
 import { Separator } from '@/components/ui/separator';
 import { Link } from '@/i18n/navigation';
-import { components } from '@/lib/types/openapi';
-import { ComponentProps } from 'react';
+import { type components } from '@/lib/types/openapi';
+import { type ComponentProps } from 'react';
 import { ExplorerElementTime } from './explorer-element-time';
 
 export const ExplorerElementFileVideo = ({

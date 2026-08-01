@@ -1,8 +1,8 @@
 'use client';
 
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { throwError } from '@/lib/utils/throw-error';
-import { createContext, Dispatch, RefObject, SetStateAction, useContext } from 'react';
+import { createContext, type Dispatch, type RefObject, type SetStateAction, useContext } from 'react';
 
 type Media = components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'];
 

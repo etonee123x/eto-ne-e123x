@@ -1,8 +1,8 @@
 'use client';
 
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { throwError } from '@/lib/utils/throw-error';
-import { createContext, Dispatch, SetStateAction, useContext } from 'react';
+import { createContext, type Dispatch, type SetStateAction, useContext } from 'react';
 
 type Track = components['schemas']['FolderDataItemAudio'];
 

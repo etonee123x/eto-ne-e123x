@@ -1,4 +1,4 @@
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { useFormatter, useNow } from 'next-intl';
 
 export const ExplorerElementTime = ({

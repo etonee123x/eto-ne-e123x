@@ -2,7 +2,7 @@ import type { Attachment, AttachmentAction, AttachmentTitle } from '@/components
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import { checkExhaustive } from '@/lib/utils/check-exhaustive';
 import dynamic from 'next/dynamic';
-import { ComponentProps } from 'react';
+import { type ComponentProps } from 'react';
 
 const FormAttachmentAudio = dynamic(() => {
   return import('./form-attachment-audio').then((module) => {
@@ -38,6 +38,7 @@ export const FormAttachment = ({
   className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
   ref: ComponentProps<typeof Attachment>['ref'];
+  handleRef: ComponentProps<typeof AttachmentAction>['ref'];
 }) => {
   switch (type) {
     case FILE_TYPES.AUDIO: {

@@ -1,8 +1,8 @@
 'use client';
 
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
-import { components } from '@/lib/types/openapi';
-import { ContextType, PropsWithChildren, useState } from 'react';
+import { type components } from '@/lib/types/openapi';
+import { type ContextType, type PropsWithChildren, useState } from 'react';
 import { PlayerContext } from './player-context';
 
 export const PlayerContextProvider = ({

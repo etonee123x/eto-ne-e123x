@@ -1,5 +1,5 @@
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/components/ui/navigation-menu';
-import { HTMLProps } from 'react';
+import { type HTMLProps } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { ThemeSwitcher } from './theme-switcher';
 import { LocaleSwitcher } from './locale-switcher';

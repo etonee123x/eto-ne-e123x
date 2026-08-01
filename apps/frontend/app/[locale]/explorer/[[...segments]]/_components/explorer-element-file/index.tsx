@@ -1,9 +1,9 @@
-import { Link } from '@/i18n/navigation';
+import { type Link } from '@/i18n/navigation';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { checkExhaustive } from '@/lib/utils/check-exhaustive';
 import dynamic from 'next/dynamic';
-import { ComponentProps } from 'react';
+import { type ComponentProps } from 'react';
 
 const ExplorerElementFileAudio = dynamic(() => {
   return import('./explorer-element-file-audio').then((module) => {

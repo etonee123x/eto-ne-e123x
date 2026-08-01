@@ -1,11 +1,11 @@
 import { Item, ItemContent, ItemDescription, ItemGroup, ItemHeader, ItemMedia, ItemTitle } from '@/components/ui/item';
 import { Separator } from '@/components/ui/separator';
 import { Link } from '@/i18n/navigation';
-import { components } from '@/lib/types/openapi';
+import { type components } from '@/lib/types/openapi';
 import { millisecondsToHumanReadable } from '@/lib/utils/milliseconds-to-human-readable';
 import { Calendar, Clock, Disc3, Metronome, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { ComponentProps } from 'react';
+import { type ComponentProps } from 'react';
 import { ExplorerElementTime } from './explorer-element-time';
 
 export const ExplorerElementFileAudio = ({

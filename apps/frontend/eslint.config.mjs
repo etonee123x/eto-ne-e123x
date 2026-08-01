@@ -1,6 +1,6 @@
-import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import nextTs from "eslint-config-next/typescript";
+import { defineConfig, globalIgnores } from 'eslint/config';
+import nextVitals from 'eslint-config-next/core-web-vitals';
+import nextTs from 'eslint-config-next/typescript';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -12,8 +12,8 @@ import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescrip
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-    {
-    files: ['**/*.ts', '**/*.tsx'],
+  {
+    files: ['**/*.ts', '**/*.tsx', 'eslint.config.mjs'],
     extends: [
       pluginJs.configs.recommended,
       tseslint.configs.strictTypeChecked,
@@ -91,17 +91,25 @@ const eslintConfig = defineConfig([
           argsIgnorePattern: '^$',
         },
       ],
+
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        {
+          prefer: 'type-imports',
+          fixStyle: 'inline-type-imports',
+        },
+      ],
       '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-invalid-void-type': 'off',
+      // '@typescript-eslint/no-invalid-void-type': 'off',
 
       // https://github.com/typescript-eslint/typescript-eslint/issues/2865
       // TODO: пофиксить правила ниже vue типами
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-redundant-type-constituents': 'off',
+      // '@typescript-eslint/no-unsafe-call': 'off',
+      // '@typescript-eslint/no-unsafe-return': 'off',
+      // '@typescript-eslint/no-unsafe-assignment': 'off',
+      // '@typescript-eslint/no-unsafe-member-access': 'off',
+      // '@typescript-eslint/no-unsafe-argument': 'off',
+      // '@typescript-eslint/no-redundant-type-constituents': 'off',
 
       'sonarjs/todo-tag': 'warn',
 
@@ -118,6 +126,14 @@ const eslintConfig = defineConfig([
       'unicorn/no-array-reduce': 'off',
       'unicorn/filename-case': 'off',
 
+      'react/jsx-curly-brace-presence': [
+        'error',
+        {
+          props: 'never',
+          children: 'never',
+        },
+      ],
+
       'prettier/prettier': [
         'error',
         {
@@ -131,12 +147,12 @@ const eslintConfig = defineConfig([
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
-    ".next/**",
-    "out/**",
-    "build/**",
-    "next-env.d.ts",
-    "components/ui",
-    "lib/types/openapi.ts",
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    'components/ui',
+    'lib/types/openapi.ts',
   ]),
 ]);
 

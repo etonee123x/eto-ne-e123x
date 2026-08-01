@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react';
+import { type ComponentProps } from 'react';
 import { GalleryContextProvider } from './gallery-context-provider';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/lib/utils/is-nil';
