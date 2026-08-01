@@ -29,10 +29,10 @@ export const FormAttachmentImage = ({
         <AttachmentTitle>{name}</AttachmentTitle>
       </AttachmentContent>
       <AttachmentActions>
-        <AttachmentAction ref={handleRef}>
+        <AttachmentAction className="cursor-grab" size="lg" ref={handleRef}>
           <Grip />
         </AttachmentAction>
-        <AttachmentAction onClick={onClickRemove}>
+        <AttachmentAction className="ms-2" variant="destructive" onClick={onClickRemove}>
           <X />
         </AttachmentAction>
       </AttachmentActions>
