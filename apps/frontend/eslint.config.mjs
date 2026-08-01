@@ -100,6 +100,12 @@ const eslintConfig = defineConfig([
         },
       ],
       '@typescript-eslint/no-floating-promises': 'off',
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        {
+          checksVoidReturn: false,
+        },
+      ],
       // '@typescript-eslint/no-invalid-void-type': 'off',
 
       // https://github.com/typescript-eslint/typescript-eslint/issues/2865

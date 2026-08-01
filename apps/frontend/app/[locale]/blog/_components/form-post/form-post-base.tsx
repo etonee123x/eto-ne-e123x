@@ -6,7 +6,7 @@ import { type components } from '@/lib/types/openapi';
 import { fileToFileWithHashName } from '@/lib/utils/file-to-file-with-hash-name';
 import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { type ComponentProps, type HTMLProps, useRef, useState } from 'react';
+import { type ComponentProps, type ComponentRef, type HTMLProps, useRef, useState } from 'react';
 import { FormAttachment } from './form-attachment';
 import { extensionToFileType, FILE_TYPES } from '@/lib/helpers/folder-data';
 import { nonNullable } from '@/lib/utils/non-nullable';
@@ -65,6 +65,11 @@ const SortableFormAttachment = ({
   );
 };
 
+const INITIAL_STATE = {
+  text: '',
+  filesAndAttachments: [] as Array<Attachment>,
+};
+
 export const FormPostBase = ({
   onSubmit,
   ...props
@@ -73,13 +78,14 @@ export const FormPostBase = ({
   HTMLProps<HTMLFormElement>,
   'onSubmit'
 > & {
-  onSubmit: (event: SubmitEvent, post: Post, files: Array<File>) => void;
+  onSubmit: (event: SubmitEvent, post: Post, files: Array<File>) => void | Promise<void>;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const [modelText, setModelText] = useState('');
-
-  const [modelFilesAndAttachments, setModelFilesAndAttachments] = useState<Array<FileOrAttachment>>([]);
+  const textareaRef = useRef<ComponentRef<typeof Textarea>>(null);
+  const [modelText, setModelText] = useState(INITIAL_STATE.text);
+  const [modelFilesAndAttachments, setModelFilesAndAttachments] = useState<Array<FileOrAttachment>>(
+    INITIAL_STATE.filesAndAttachments,
+  );
 
   const t = useTranslations('FormPost');
 
@@ -106,10 +112,10 @@ export const FormPostBase = ({
     event.currentTarget.value = '';
   };
 
-  const _onSubmit: ComponentProps<'form'>['onSubmit'] = (event) => {
+  const _onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
     event.preventDefault();
 
-    onSubmit(
+    await onSubmit(
       event.nativeEvent,
       {
         text: modelText,
@@ -121,10 +127,14 @@ export const FormPostBase = ({
         return fileOrAttachment instanceof File;
       }),
     );
+
+    setModelText(INITIAL_STATE.text);
+    setModelFilesAndAttachments(INITIAL_STATE.filesAndAttachments);
+    textareaRef.current?.focus();
   };
 
   const onClickDeleteFiles = () => {
-    setModelFilesAndAttachments([]);
+    setModelFilesAndAttachments(INITIAL_STATE.filesAndAttachments);
   };
 
   const onClickRemoveByIndex = (index: number) => {
@@ -151,6 +161,7 @@ export const FormPostBase = ({
     <form {...props} className="flex flex-col gap-4" onSubmit={_onSubmit}>
       <div className="flex gap-2">
         <Textarea
+          ref={textareaRef}
           aria-label={t('message')}
           placeholder={t('message')}
           value={modelText}
@@ -168,7 +179,7 @@ export const FormPostBase = ({
       {modelFilesAndAttachments.length > 0 && (
         <div className="flex flex-col gap-2">
           <DragDropProvider onDragEnd={onDragEnd}>
-            <div className="flex gap-4 flex-col">
+            <div className="flex gap-4 flex-col group/form-post-base-attachments">
               {modelFilesAndAttachments.map((fileOrAttachment, index) => {
                 return (
                   <SortableFormAttachment
