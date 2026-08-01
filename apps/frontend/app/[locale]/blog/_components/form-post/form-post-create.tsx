@@ -4,13 +4,14 @@ import { Button } from '@/components/ui/button';
 import { FormPostBase } from './form-post-base';
 
 import { useTranslations } from 'next-intl';
-import { type ComponentProps } from 'react';
+import { type ComponentProps, useState } from 'react';
 import { client } from '@/lib/api/client';
 import { useRouter } from '@/i18n/navigation';
 
 export const FormPostCreate = () => {
   const t = useTranslations('FormPostCreate');
   const router = useRouter();
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const onSubmit: ComponentProps<typeof FormPostBase>['onSubmit'] = async (...[, post, files]) => {
     await client['/posts'].POST({
@@ -34,13 +35,19 @@ export const FormPostCreate = () => {
     router.refresh();
   };
 
+  const onValidityChange: ComponentProps<typeof FormPostBase>['onValidityChange'] = (isValid) => {
+    setIsFormValid(isValid);
+  };
+
   return (
     <>
-      <FormPostBase id="form-create-post" onSubmit={onSubmit} />
+      <FormPostBase id="form-create-post" {...{ onValidityChange, onSubmit }} />
 
-      <Button size="lg" className="w-full mt-2" type="submit" form="form-create-post">
-        {t('send')}
-      </Button>
+      {isFormValid && (
+        <Button size="lg" className="w-full mt-2" type="submit" form="form-create-post">
+          {t('send')}
+        </Button>
+      )}
     </>
   );
 };

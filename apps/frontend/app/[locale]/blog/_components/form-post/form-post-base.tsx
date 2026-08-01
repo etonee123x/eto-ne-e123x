@@ -6,7 +6,7 @@ import { type components } from '@/lib/types/openapi';
 import { fileToFileWithHashName } from '@/lib/utils/file-to-file-with-hash-name';
 import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { type ComponentProps, type ComponentRef, type HTMLProps, useRef, useState } from 'react';
+import { type ComponentProps, type ComponentRef, type HTMLProps, useEffect, useRef, useState } from 'react';
 import { FormAttachment } from './form-attachment';
 import { extensionToFileType, FILE_TYPES } from '@/lib/helpers/folder-data';
 import { nonNullable } from '@/lib/utils/non-nullable';
@@ -16,6 +16,19 @@ import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 type Attachment = NonNullable<Post['attachments'][number]>;
 type FileOrAttachment = File | Attachment;
+
+const onKeyDownTextarea: ComponentProps<typeof Textarea>['onKeyDown'] = (event) => {
+  if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) {
+    return;
+  }
+
+  if (navigator.maxTouchPoints !== 0) {
+    return;
+  }
+
+  event.preventDefault();
+  event.currentTarget.form?.requestSubmit();
+};
 
 const fileOrAttachmentToKey = (fileOrAttachment: FileOrAttachment) => {
   return fileOrAttachment instanceof File
@@ -72,6 +85,7 @@ const INITIAL_STATE = {
 
 export const FormPostBase = ({
   onSubmit,
+  onValidityChange,
   ...props
 }: Omit<
   //
@@ -79,15 +93,23 @@ export const FormPostBase = ({
   'onSubmit'
 > & {
   onSubmit: (event: SubmitEvent, post: Post, files: Array<File>) => void | Promise<void>;
+  onValidityChange?: (isValid: boolean) => void;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<ComponentRef<typeof Textarea>>(null);
+
   const [modelText, setModelText] = useState(INITIAL_STATE.text);
   const [modelFilesAndAttachments, setModelFilesAndAttachments] = useState<Array<FileOrAttachment>>(
     INITIAL_STATE.filesAndAttachments,
   );
 
+  const isValid = modelText.length > 0 || modelFilesAndAttachments.length > 0;
+
   const t = useTranslations('FormPost');
+
+  useEffect(() => {
+    onValidityChange?.(isValid);
+  }, [isValid, onValidityChange]);
 
   const onClickButtonAddAttachment = () => {
     inputRef.current?.click();
@@ -114,6 +136,10 @@ export const FormPostBase = ({
 
   const _onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
     event.preventDefault();
+
+    if (!isValid) {
+      return;
+    }
 
     await onSubmit(
       event.nativeEvent,
@@ -168,6 +194,7 @@ export const FormPostBase = ({
           onChange={(event) => {
             setModelText(event.target.value);
           }}
+          onKeyDown={onKeyDownTextarea}
         />
         <div className="sticky top-[calc(var(--spacing-header-height)+var(--spacing)*2)] flex flex-col gap-2 h-min">
           <Button className="h-auto p-2" onClick={onClickButtonAddAttachment}>
