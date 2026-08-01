@@ -11,7 +11,9 @@ export const TheFooter = () => {
     <footer className="border-t border-primary">
       <address className="layout-container py-4 flex gap-2 items-center italic">
         <a rel="noopener noreferrer" target="_blank" href={`https://t.me/${ETO_NE_E123X}`} className="flex gap-2">
-          <Image width="24" height="24" src={String(telegramLogoSource)} alt={t('telegramLogo')} />
+          {/* См. коммент у переменной */}
+          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
+          <Image width="24" height="24" src={telegramLogoSource} alt={t('telegramLogo')} />
           {ETO_NE_E123X}
         </a>
       </address>

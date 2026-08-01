@@ -51,7 +51,7 @@ export const ExplorerElementFileAudio = ({
             key: 'year',
             title: t('year'),
             Icon: Calendar,
-            value: String(element.metadata.year),
+            value: element.metadata.year,
           },
         ]
       : []),
@@ -61,7 +61,7 @@ export const ExplorerElementFileAudio = ({
             key: 'bpm',
             title: t('bpm'),
             Icon: Metronome,
-            value: String(element.metadata.bpm),
+            value: element.metadata.bpm,
           },
         ]
       : []),
