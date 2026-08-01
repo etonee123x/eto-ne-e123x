@@ -10,6 +10,7 @@ import { ComponentProps, HTMLProps, useRef, useState } from 'react';
 import { FormAttachment } from './form-attachment';
 import { extensionToFileType, FILE_TYPES } from '@/lib/helpers/folder-data';
 import { nonNullable } from '@/lib/utils/non-nullable';
+import { useSortable } from '@dnd-kit/react/sortable';
 
 type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 type Attachment = NonNullable<Post['attachments'][number]>;
@@ -33,6 +34,33 @@ const fileOrAttachmentToType = (fileOrAttachment: FileOrAttachment) => {
 // eslint-disable-next-line unicorn/prevent-abbreviations
 const fileOrAttachmentToSrc = (fileOrAttachment: FileOrAttachment) => {
   return fileOrAttachment instanceof File ? URL.createObjectURL(fileOrAttachment) : fileOrAttachment.src;
+};
+
+const SortableFormAttachment = ({
+  id,
+  index,
+  fileOrAttachment,
+  onClickRemoveByIndex,
+}: {
+  id: string;
+  index: number;
+  fileOrAttachment: FileOrAttachment;
+  onClickRemoveByIndex: (index: number) => void;
+}) => {
+  const { ref } = useSortable({ id, index });
+
+  return (
+    <FormAttachment
+      ref={ref}
+      src={fileOrAttachmentToSrc(fileOrAttachment)}
+      type={fileOrAttachmentToType(fileOrAttachment)}
+      name={fileOrAttachment.name}
+      onClickRemove={() => {
+        onClickRemoveByIndex(index);
+      }}
+      className="w-full"
+    />
+  );
 };
 
 export const FormPostBase = ({
@@ -126,15 +154,12 @@ export const FormPostBase = ({
           <div className="flex gap-4 flex-col">
             {modelFilesAndAttachments.map((fileOrAttachment, index) => {
               return (
-                <FormAttachment
+                <SortableFormAttachment
+                  id={fileOrAttachmentToKey(fileOrAttachment)}
+                  index={index}
                   key={fileOrAttachmentToKey(fileOrAttachment)}
-                  src={fileOrAttachmentToSrc(fileOrAttachment)}
-                  type={fileOrAttachmentToType(fileOrAttachment)}
-                  name={fileOrAttachment.name}
-                  onClickRemove={() => {
-                    onClickRemoveByIndex(index);
-                  }}
-                  className="w-full"
+                  fileOrAttachment={fileOrAttachment}
+                  onClickRemoveByIndex={onClickRemoveByIndex}
                 />
               );
             })}

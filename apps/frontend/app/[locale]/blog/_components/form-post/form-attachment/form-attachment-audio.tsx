@@ -6,21 +6,20 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from '@/components/ui/attachment';
-import { Music, X } from 'lucide-react';
+import { Grip, Music, X } from 'lucide-react';
 import { ComponentProps } from 'react';
 
 export const FormAttachmentAudio = ({
   src,
   name,
-  className,
   onClickRemove,
+  ...props
 }: Pick<ComponentProps<'audio'>, 'src'> & {
   name: ComponentProps<typeof AttachmentTitle>['children'];
-  className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
-}) => {
+} & ComponentProps<typeof Attachment>) => {
   return (
-    <Attachment className={className}>
+    <Attachment {...props}>
       <AttachmentMedia>
         <Music />
       </AttachmentMedia>
@@ -28,11 +27,14 @@ export const FormAttachmentAudio = ({
         <AttachmentTitle>{name}</AttachmentTitle>
       </AttachmentContent>
       <AttachmentActions>
+        <AttachmentAction>
+          <Grip />
+        </AttachmentAction>
         <AttachmentAction onClick={onClickRemove}>
           <X />
         </AttachmentAction>
       </AttachmentActions>
-      <audio src={src} controls className={className} />
+      <audio src={src} controls className="w-full" />
     </Attachment>
   );
 };

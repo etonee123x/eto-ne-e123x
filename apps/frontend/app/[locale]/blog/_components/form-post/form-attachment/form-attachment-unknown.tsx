@@ -6,20 +6,19 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from '@/components/ui/attachment';
-import { X, FileQuestionMark } from 'lucide-react';
+import { X, FileQuestionMark, Grip } from 'lucide-react';
 import { ComponentProps } from 'react';
 
 export const FormAttachmentUnknown = ({
   name,
-  className,
   onClickRemove,
+  ...props
 }: {
   name: ComponentProps<typeof AttachmentTitle>['children'];
-  className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
-}) => {
+} & ComponentProps<typeof Attachment>) => {
   return (
-    <Attachment className={className}>
+    <Attachment {...props}>
       <AttachmentMedia>
         <FileQuestionMark className="size-6" />
       </AttachmentMedia>
@@ -27,6 +26,9 @@ export const FormAttachmentUnknown = ({
         <AttachmentTitle>{name}</AttachmentTitle>
       </AttachmentContent>
       <AttachmentActions>
+        <AttachmentAction>
+          <Grip />
+        </AttachmentAction>
         <AttachmentAction onClick={onClickRemove}>
           <X />
         </AttachmentAction>

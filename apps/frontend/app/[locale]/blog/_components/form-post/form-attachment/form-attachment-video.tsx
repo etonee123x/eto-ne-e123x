@@ -6,21 +6,20 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from '@/components/ui/attachment';
-import { X } from 'lucide-react';
+import { Grip, X } from 'lucide-react';
 import { ComponentProps } from 'react';
 
 export const FormAttachmentVideo = ({
   src,
   name,
-  className,
   onClickRemove,
+  ...props
 }: Pick<ComponentProps<'video'>, 'src'> & {
   name: ComponentProps<typeof AttachmentTitle>['children'];
-  className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
-}) => {
+} & ComponentProps<typeof Attachment>) => {
   return (
-    <Attachment className={className}>
+    <Attachment {...props}>
       <AttachmentMedia>
         <video src={src} />
       </AttachmentMedia>
@@ -28,6 +27,9 @@ export const FormAttachmentVideo = ({
         <AttachmentTitle>{name}</AttachmentTitle>
       </AttachmentContent>
       <AttachmentActions>
+        <AttachmentAction>
+          <Grip />
+        </AttachmentAction>
         <AttachmentAction onClick={onClickRemove}>
           <X />
         </AttachmentAction>

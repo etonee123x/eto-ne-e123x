@@ -6,21 +6,20 @@ import {
   AttachmentMedia,
   AttachmentTitle,
 } from '@/components/ui/attachment';
-import { X } from 'lucide-react';
+import { Grip, X } from 'lucide-react';
 import { ComponentProps } from 'react';
 
 export const FormAttachmentImage = ({
   src,
   name,
-  className,
   onClickRemove,
+  ...props
 }: Pick<ComponentProps<'img'>, 'src'> & {
   name: ComponentProps<typeof AttachmentTitle>['children'];
-  className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
-}) => {
+} & ComponentProps<typeof Attachment>) => {
   return (
-    <Attachment className={className}>
+    <Attachment {...props}>
       <AttachmentMedia>
         <img src={src} alt="" />
       </AttachmentMedia>
@@ -28,6 +27,9 @@ export const FormAttachmentImage = ({
         <AttachmentTitle>{name}</AttachmentTitle>
       </AttachmentContent>
       <AttachmentActions>
+        <AttachmentAction>
+          <Grip />
+        </AttachmentAction>
         <AttachmentAction onClick={onClickRemove}>
           <X />
         </AttachmentAction>

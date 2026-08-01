@@ -37,6 +37,7 @@ export const FormAttachment = ({
   name: ComponentProps<typeof AttachmentTitle>['children'];
   className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
+  ref: ComponentProps<typeof Attachment>['ref'];
 }) => {
   switch (type) {
     case FILE_TYPES.AUDIO: {
