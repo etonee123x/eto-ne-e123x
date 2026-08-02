@@ -2,7 +2,7 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 
 import { routing } from '@/i18n/routing';
-import { getIsAdmin } from '@/lib/auth/get-is-admin';
+import { getIsAdmin } from '@/shared/is-admin/get-is-admin';
 
 import { TheHeader } from '@/widgets/the-header';
 import { TheFooter } from '@/widgets/the-footer';
@@ -14,7 +14,7 @@ import { ThePlayer } from '@/widgets/the-player';
 import { GalleryProvider } from '@/widgets/the-gallery/gallery-provider';
 import { TheGallery } from '@/widgets/the-gallery';
 
-import { IsAdminContext } from '@/lib/auth/is-admin-context';
+import { IsAdminContext } from '@/shared/is-admin/is-admin-context';
 // import themes from '@/app/themes.json';
 
 import '@/app/globals.css';
