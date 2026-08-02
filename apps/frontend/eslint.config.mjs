@@ -158,7 +158,7 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     'src/shared/ui/ds',
-    'src/lib/types/openapi.ts',
+    'src/shared/api/openapi.ts',
   ]),
 ]);
 

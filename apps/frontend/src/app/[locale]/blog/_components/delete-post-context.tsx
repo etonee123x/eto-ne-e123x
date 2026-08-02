@@ -1,7 +1,7 @@
 'use client';
 
 import { client } from '@/shared/api/client';
-import type { components } from '@/lib/types/openapi';
+import type { components } from '@/shared/api/openapi';
 import { throwError } from '@/shared/utils/throw-error';
 import { createContext, type PropsWithChildren, useContext, useState } from 'react';
 

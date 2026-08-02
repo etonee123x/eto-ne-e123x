@@ -1,4 +1,4 @@
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { FileQuestionMark } from 'lucide-react';
 
 export const PostAttachmentUnknown = ({

@@ -1,4 +1,4 @@
-import type { components } from '@/lib/types/openapi';
+import type { components } from '@/shared/api/openapi';
 import dynamic from 'next/dynamic';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import { checkExhaustive } from '@/shared/utils/check-exhaustive';

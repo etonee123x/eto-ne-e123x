@@ -2,7 +2,7 @@
 
 import { Button } from '@/shared/ui/ds/button';
 import { Textarea } from '@/shared/ui/ds/textarea';
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { fileToFileWithHashName } from '@/shared/utils/file-to-file-with-hash-name';
 import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';

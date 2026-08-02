@@ -1,4 +1,4 @@
-import { fileTypeValues, itemTypeValues } from '@/lib/types/openapi';
+import { fileTypeValues, itemTypeValues } from '@/shared/api/openapi';
 
 export const FILE_TYPES = Object.fromEntries(
   fileTypeValues.map((fileType) => {

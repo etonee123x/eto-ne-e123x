@@ -1,7 +1,7 @@
 'use client';
 
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { type ContextType, type PropsWithChildren, useCallback, useRef, useState } from 'react';
 import { GalleryContext } from './gallery-context';
 

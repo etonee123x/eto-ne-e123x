@@ -10,7 +10,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { ItemGroup } from '@/shared/ui/ds/item';
 import { SendFolderDataToPlayer } from './_components/send-folder-data-to-player';
 import { SendFolderDataToGallery } from './_components/send-folder-data-to-gallery';

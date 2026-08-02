@@ -1,4 +1,4 @@
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 

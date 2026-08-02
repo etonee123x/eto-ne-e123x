@@ -1,6 +1,6 @@
 'use client';
 
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { throwError } from '@/shared/utils/throw-error';
 import { createContext, type Dispatch, type SetStateAction, useContext } from 'react';
 

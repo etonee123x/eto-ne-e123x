@@ -1,4 +1,4 @@
-import type { paths } from '@/lib/types/openapi';
+import type { paths } from '@/shared/api/openapi';
 import { createPathBasedClient } from 'openapi-fetch';
 import { isClient } from '@/shared/utils/target';
 import { throwError } from '@/shared/utils/throw-error';

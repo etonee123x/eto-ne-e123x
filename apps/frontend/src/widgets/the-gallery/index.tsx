@@ -12,7 +12,7 @@ import {
   CarouselPrevious,
 } from '@/shared/ui/ds/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import Image from 'next/image';
 

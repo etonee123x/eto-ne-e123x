@@ -2,7 +2,7 @@ import { BaseVideo } from '@/shared/ui/base-video';
 import { Item, ItemContent, ItemHeader, ItemMedia } from '@/shared/ui/ds/item';
 import { Separator } from '@/shared/ui/ds/separator';
 import { Link } from '@/i18n/navigation';
-import { type components } from '@/lib/types/openapi';
+import { type components } from '@/shared/api/openapi';
 import { type ComponentProps } from 'react';
 import { ExplorerElementTime } from './explorer-element-time';
 
