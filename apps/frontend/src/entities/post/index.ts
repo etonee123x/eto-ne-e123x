@@ -1,1 +1,1 @@
-export { default as PostAttachment } from './ui/post-attachment';
+export { PostAttachment } from './ui/post-attachment';

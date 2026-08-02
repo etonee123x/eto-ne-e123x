@@ -8,6 +8,7 @@ import sonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import { importX } from 'eslint-plugin-import-x';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
+import boundaries from 'eslint-plugin-boundaries';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -25,6 +26,7 @@ const eslintConfig = defineConfig([
 
     plugins: {
       'import-x': importX,
+      boundaries,
     },
 
     languageOptions: {
@@ -38,6 +40,18 @@ const eslintConfig = defineConfig([
     },
     settings: {
       'import-x/resolver-next': [createTypeScriptImportResolver()],
+      'import/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+        },
+      },
+      'boundaries/elements': [
+        { type: 'app', pattern: 'src/app/**' },
+        { type: 'widget', pattern: 'src/widgets/*/**', capture: ['slice'] },
+        { type: 'feature', pattern: 'src/features/*/*/**', capture: ['family', 'slice'] },
+        { type: 'entity', pattern: 'src/entities/*/**', capture: ['slice'] },
+        { type: 'shared', pattern: 'src/shared/**' },
+      ],
     },
 
     rules: {
@@ -146,6 +160,69 @@ const eslintConfig = defineConfig([
           printWidth: 120,
           singleQuote: true,
           endOfLine: 'auto',
+        },
+      ],
+
+      // FSD (Feature-Sliced Design) layer order: shared < entities < features < widgets < app.
+      // `default: 'allow'` keeps external packages untouched; only same-layer/upward local imports are blocked.
+      'boundaries/dependencies': [
+        'error',
+        {
+          default: 'allow',
+          // Same-slice imports (e.g. a slice's own index.ts barrel) are matched out via the
+          // `captured` template comparison below, so only imports crossing into a *different*
+          // element are restricted.
+          policies: [
+            {
+              from: { element: { type: 'shared' } },
+              disallow: { to: { element: { type: ['entity', 'feature', 'widget', 'app'] } } },
+            },
+            {
+              from: { element: { type: 'entity' } },
+              disallow: {
+                to: {
+                  element: { type: 'entity', captured: { slice: '!{{ from.element.captured.slice }}' } },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'entity' } },
+              disallow: { to: { element: { type: ['feature', 'widget', 'app'] } } },
+            },
+            {
+              from: { element: { type: 'feature' } },
+              disallow: {
+                to: [
+                  { element: { type: 'feature', captured: { family: '!{{ from.element.captured.family }}' } } },
+                  {
+                    element: {
+                      type: 'feature',
+                      captured: {
+                        family: '{{ from.element.captured.family }}',
+                        slice: '!{{ from.element.captured.slice }}',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              from: { element: { type: 'feature' } },
+              disallow: { to: { element: { type: ['widget', 'app'] } } },
+            },
+            {
+              from: { element: { type: 'widget' } },
+              disallow: {
+                to: {
+                  element: { type: 'widget', captured: { slice: '!{{ from.element.captured.slice }}' } },
+                },
+              },
+            },
+            {
+              from: { element: { type: 'widget' } },
+              disallow: { to: { element: { type: 'app' } } },
+            },
+          ],
         },
       ],
     },

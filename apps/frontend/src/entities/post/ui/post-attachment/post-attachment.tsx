@@ -27,13 +27,13 @@ const PostAttachmentUnknown = dynamic(() => {
   });
 });
 
-export default function PostAttachment({
+export const PostAttachment = ({
   attachment,
   index,
 }: Readonly<{
   attachment: components['schemas']['FolderDataItemFile'];
   index: number;
-}>) {
+}>) => {
   switch (attachment.fileType) {
     case FILE_TYPES.IMAGE: {
       return <PostAttachmentImage attachment={attachment} index={index} />;
@@ -51,4 +51,4 @@ export default function PostAttachment({
       throw checkExhaustive(attachment);
     }
   }
-}
+};

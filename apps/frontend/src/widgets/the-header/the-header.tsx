@@ -5,7 +5,7 @@ import { ThemeSwitcher } from '@/features/theme/switch-theme';
 import { LocaleSwitcher } from '@/features/locale/switch-locale';
 import { ButtonLogout } from '@/features/auth/logout';
 import { NavigationMenuLink } from './navigation-menu-link';
-import { getIsAdmin } from '@/shared/is-admin/get-is-admin';
+import { getIsAdmin } from '@/entities/session';
 import { getTranslations } from 'next-intl/server';
 
 export const TheHeader = async ({ className }: Readonly<HTMLProps<HTMLDivElement>>) => {

@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Separator } from '@/shared/ui/ds/separator';
-import { getIsAdmin } from '@/shared/is-admin/get-is-admin';
+import { getIsAdmin } from '@/entities/session';
 import { ButtonDeletePost, DeletePostProvider } from '@/features/post/delete';
 import { PostAttachment } from '@/entities/post';
 

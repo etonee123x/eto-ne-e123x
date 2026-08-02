@@ -2,19 +2,16 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 
 import { routing } from '@/i18n/routing';
-import { getIsAdmin } from '@/shared/is-admin/get-is-admin';
+import { getIsAdmin, IsAdminContext } from '@/entities/session';
 
 import { TheHeader } from '@/widgets/the-header';
 import { TheFooter } from '@/widgets/the-footer';
 import { ThemeProvider } from './_providers/theme-provider';
 
-import { PlayerProvider } from '@/widgets/the-player/player-provider';
-import { ThePlayer } from '@/widgets/the-player';
+import { PlayerProvider, ThePlayer } from '@/widgets/the-player';
 
-import { GalleryProvider } from '@/widgets/the-gallery/gallery-provider';
-import { TheGallery } from '@/widgets/the-gallery';
+import { GalleryProvider, TheGallery } from '@/widgets/the-gallery';
 
-import { IsAdminContext } from '@/shared/is-admin/is-admin-context';
 // import themes from '@/app/themes.json';
 
 import '@/app/globals.css';
