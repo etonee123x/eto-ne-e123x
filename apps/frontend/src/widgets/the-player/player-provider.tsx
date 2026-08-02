@@ -3,7 +3,7 @@ import { PlayerContextProvider } from './player-context-provider';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
 import { throwError } from '@/shared/utils/throw-error';
-import { getFolderData } from '@/lib/queries/get-folder-data';
+import { getFolderData } from '@/entities/folder';
 
 export const PlayerProvider = async ({
   children,

@@ -14,23 +14,23 @@ import { type components } from '@/shared/api/openapi';
 import { ItemGroup } from '@/shared/ui/ds/item';
 import { SendFolderDataToPlayer } from './_components/send-folder-data-to-player';
 import { SendFolderDataToGallery } from './_components/send-folder-data-to-gallery';
-import { getFolderData } from '@/lib/queries/get-folder-data';
+import { getFolderData } from '@/entities/folder';
 import { throwError } from '@/shared/utils/throw-error';
 
 const ExplorerElementUp = dynamic(() => {
-  return import('./_components/explorer-element-up').then((module) => {
+  return import('@/entities/folder').then((module) => {
     return module.ExplorerElementUp;
   });
 });
 
 const ExplorerElementFolder = dynamic(() => {
-  return import('./_components/explorer-element-folder').then((module) => {
+  return import('@/entities/folder').then((module) => {
     return module.ExplorerElementFolder;
   });
 });
 
 const ExplorerElementFile = dynamic(() => {
-  return import('./_components/explorer-element-file').then((module) => {
+  return import('@/entities/folder').then((module) => {
     return module.ExplorerElementFile;
   });
 });

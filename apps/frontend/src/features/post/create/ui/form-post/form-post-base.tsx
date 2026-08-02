@@ -8,7 +8,7 @@ import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentProps, type ComponentRef, type HTMLProps, useEffect, useRef, useState } from 'react';
 import { FormAttachment } from './form-attachment';
-import { extensionToFileType, FILE_TYPES } from '@/lib/helpers/folder-data';
+import { extensionToFileType, FILE_TYPES } from '@/shared/utils/file-types';
 import { nonNullable } from '@/shared/utils/non-nullable';
 import { DragDropProvider } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';

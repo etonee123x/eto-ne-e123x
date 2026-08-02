@@ -13,7 +13,7 @@ import {
 } from '@/shared/ui/ds/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
 import { type components } from '@/shared/api/openapi';
-import { FILE_TYPES } from '@/lib/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/utils/file-types';
 import Image from 'next/image';
 
 const Media = ({

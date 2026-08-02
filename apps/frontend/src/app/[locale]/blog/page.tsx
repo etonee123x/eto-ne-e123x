@@ -3,21 +3,20 @@ import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { client } from '@/shared/api/client';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import PostAttachment from './_components/post-attachment';
 import dynamic from 'next/dynamic';
 import { Separator } from '@/shared/ui/ds/separator';
 import { getIsAdmin } from '@/shared/is-admin/get-is-admin';
-import { ButtonDeletePost } from './_components/button-delete-post';
-import { DeletePostProvider } from './_components/delete-post-context';
+import { ButtonDeletePost, DeletePostProvider } from '@/features/post/delete';
+import { PostAttachment } from '@/entities/post';
 
 const FormPostCreate = dynamic(() => {
-  return import('./_components/form-post/form-post-create').then((module) => {
+  return import('@/features/post/create').then((module) => {
     return module.FormPostCreate;
   });
 });
 
 const DialogDeletePost = dynamic(() => {
-  return import('./_components/dialog-delete-post').then((module) => {
+  return import('@/features/post/delete').then((module) => {
     return module.DialogDeletePost;
   });
 });

@@ -1,9 +1,9 @@
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from '@/shared/ui/ds/navigation-menu';
 import { type HTMLProps } from 'react';
 import { cn } from '@/shared/utils/cn';
-import { ThemeSwitcher } from './theme-switcher';
-import { LocaleSwitcher } from './locale-switcher';
-import { ButtonLogout } from './button-logout';
+import { ThemeSwitcher } from '@/features/theme/switch-theme';
+import { LocaleSwitcher } from '@/features/locale/switch-locale';
+import { ButtonLogout } from '@/features/auth/logout';
 import { NavigationMenuLink } from './navigation-menu-link';
 import { getIsAdmin } from '@/shared/is-admin/get-is-admin';
 import { getTranslations } from 'next-intl/server';

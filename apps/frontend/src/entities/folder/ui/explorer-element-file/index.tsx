@@ -1,5 +1,5 @@
 import { type Link } from '@/i18n/navigation';
-import { FILE_TYPES } from '@/lib/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/utils/file-types';
 import { type components } from '@/shared/api/openapi';
 import { checkExhaustive } from '@/shared/utils/check-exhaustive';
 import dynamic from 'next/dynamic';

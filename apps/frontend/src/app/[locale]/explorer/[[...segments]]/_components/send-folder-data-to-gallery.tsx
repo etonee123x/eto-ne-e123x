@@ -2,7 +2,7 @@
 
 import { useGalleryContext } from '@/widgets/the-gallery/gallery-context';
 import { useRouter } from '@/i18n/navigation';
-import { FILE_TYPES } from '@/lib/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/utils/file-types';
 import { type components } from '@/shared/api/openapi';
 import { useEffect } from 'react';
 
