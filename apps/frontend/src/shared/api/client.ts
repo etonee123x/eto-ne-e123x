@@ -1,0 +1,16 @@
+import type { paths } from '@/lib/types/openapi';
+import { createPathBasedClient } from 'openapi-fetch';
+import { isClient } from '@/shared/utils/target';
+import { throwError } from '@/shared/utils/throw-error';
+
+const baseUrl = (() => {
+  if (isClient) {
+    return '/api';
+  }
+
+  return process.env.INTERNAL_API_URL ?? process.env.SERVER_ORIGIN ?? throwError('INTERNAL_API_URL is not defined');
+})();
+
+export const client = createPathBasedClient<paths>({
+  baseUrl,
+});

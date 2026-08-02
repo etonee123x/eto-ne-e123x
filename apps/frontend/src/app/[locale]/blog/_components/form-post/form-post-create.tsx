@@ -1,11 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/ds/button';
 import { FormPostBase } from './form-post-base';
 
 import { useTranslations } from 'next-intl';
 import { type ComponentProps, useState } from 'react';
-import { client } from '@/lib/api/client';
+import { client } from '@/shared/api/client';
 import { useRouter } from '@/i18n/navigation';
 
 export const FormPostCreate = () => {

@@ -1,4 +1,4 @@
-import { BaseVideo } from '@/components/base-video';
+import { BaseVideo } from '@/shared/ui/base-video';
 import { type components } from '@/lib/types/openapi';
 
 export const PostAttachmentVideo = ({ attachment }: { attachment: components['schemas']['FolderDataItemVideo'] }) => {

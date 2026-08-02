@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlayerContext } from '@/app/[locale]/_components/the-player/player-context';
+import { usePlayerContext } from '@/widgets/the-player/player-context';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
 import { type components } from '@/lib/types/openapi';
 import { useEffect } from 'react';

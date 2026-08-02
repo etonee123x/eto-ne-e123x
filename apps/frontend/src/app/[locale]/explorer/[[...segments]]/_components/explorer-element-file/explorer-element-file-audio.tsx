@@ -1,8 +1,8 @@
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemHeader, ItemMedia, ItemTitle } from '@/components/ui/item';
-import { Separator } from '@/components/ui/separator';
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemHeader, ItemMedia, ItemTitle } from '@/shared/ui/ds/item';
+import { Separator } from '@/shared/ui/ds/separator';
 import { Link } from '@/i18n/navigation';
 import { type components } from '@/lib/types/openapi';
-import { millisecondsToHumanReadable } from '@/lib/utils/milliseconds-to-human-readable';
+import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Calendar, Clock, Disc3, Metronome, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentProps } from 'react';

@@ -1,4 +1,4 @@
-import { client } from '@/lib/api/client';
+import { client } from '@/shared/api/client';
 import { cache } from 'react';
 
 export const getFolderData = cache((path: string) => {

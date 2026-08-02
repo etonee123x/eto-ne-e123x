@@ -1,6 +1,6 @@
-import type { Attachment, AttachmentAction, AttachmentTitle } from '@/components/ui/attachment';
+import type { Attachment, AttachmentAction, AttachmentTitle } from '@/shared/ui/ds/attachment';
 import { FILE_TYPES } from '@/lib/helpers/folder-data';
-import { checkExhaustive } from '@/lib/utils/check-exhaustive';
+import { checkExhaustive } from '@/shared/utils/check-exhaustive';
 import dynamic from 'next/dynamic';
 import { type ComponentProps } from 'react';
 

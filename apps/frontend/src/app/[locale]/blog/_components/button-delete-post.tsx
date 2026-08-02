@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/ds/button';
 import { Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useDeletePost } from './delete-post-context';

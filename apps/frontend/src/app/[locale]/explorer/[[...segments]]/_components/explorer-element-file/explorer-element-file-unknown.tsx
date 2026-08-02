@@ -1,4 +1,4 @@
-import { Item, ItemHeader } from '@/components/ui/item';
+import { Item, ItemHeader } from '@/shared/ui/ds/item';
 import { Link } from '@/i18n/navigation';
 import { type components } from '@/lib/types/openapi';
 import { type ComponentProps } from 'react';

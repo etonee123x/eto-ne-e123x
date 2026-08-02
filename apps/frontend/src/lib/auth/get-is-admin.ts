@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { isNil } from '@/lib/utils/is-nil';
+import { isNil } from '@/shared/utils/is-nil';
 
 const parseJwtPayload = (jwt: string): unknown => {
   const [, payload] = jwt.split('.', 2);

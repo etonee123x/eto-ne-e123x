@@ -5,7 +5,7 @@ import {
   AttachmentContent,
   AttachmentMedia,
   AttachmentTitle,
-} from '@/components/ui/attachment';
+} from '@/shared/ui/ds/attachment';
 import { Grip, X } from 'lucide-react';
 import { type ComponentProps } from 'react';
 

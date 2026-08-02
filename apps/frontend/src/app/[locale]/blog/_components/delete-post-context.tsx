@@ -1,8 +1,8 @@
 'use client';
 
-import { client } from '@/lib/api/client';
+import { client } from '@/shared/api/client';
 import type { components } from '@/lib/types/openapi';
-import { throwError } from '@/lib/utils/throw-error';
+import { throwError } from '@/shared/utils/throw-error';
 import { createContext, type PropsWithChildren, useContext, useState } from 'react';
 
 type PostId = components['schemas']['PostResponse']['_meta']['id'];

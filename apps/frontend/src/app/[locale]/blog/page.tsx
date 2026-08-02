@@ -1,11 +1,11 @@
-import { BaseHtml } from '@/components/base-html';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { client } from '@/lib/api/client';
+import { BaseHtml } from '@/shared/ui/base-html';
+import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
+import { client } from '@/shared/api/client';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import PostAttachment from './_components/post-attachment';
 import dynamic from 'next/dynamic';
-import { Separator } from '@/components/ui/separator';
+import { Separator } from '@/shared/ui/ds/separator';
 import { getIsAdmin } from '@/lib/auth/get-is-admin';
 import { ButtonDeletePost } from './_components/button-delete-post';
 import { DeletePostProvider } from './_components/delete-post-context';

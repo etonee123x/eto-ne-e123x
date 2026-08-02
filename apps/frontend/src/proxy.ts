@@ -1,8 +1,8 @@
 import createMiddleware from 'next-intl/middleware';
 import { NextResponse, type NextRequest } from 'next/server';
 import { routing } from '@/i18n/routing';
-import { client } from '@/lib/api/client';
-import { isNil } from '@/lib/utils/is-nil';
+import { client } from '@/shared/api/client';
+import { isNil } from '@/shared/utils/is-nil';
 
 const handleI18nRouting = createMiddleware(routing);
 

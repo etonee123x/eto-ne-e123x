@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/ds/button';
 import {
   Dialog,
   DialogContent,
@@ -8,11 +8,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/shared/ui/ds/dialog';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useDeletePost } from './delete-post-context';
-import { isNil } from '@/lib/utils/is-nil';
+import { isNil } from '@/shared/utils/is-nil';
 
 export const DialogDeletePost = () => {
   const { closeDeletePost, postId, deletePostById } = useDeletePost();
