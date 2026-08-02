@@ -192,14 +192,6 @@
       /* Фолбек */
       sans-serif;
 
-    --color-background: var(--color-neutral-50);
-    --color-text: var(--color-neutral-950);
-
-    @media (prefers-color-scheme: dark) {
-      --color-background: var(--color-neutral-900);
-      --color-text: var(--color-neutral-50);
-    }
-
     @apply has-[dialog[open]]:overflow-hidden bg-background text-text;
   }
 

@@ -19,6 +19,12 @@
   "PostAttachmentImage": {
     "attachment": "Attachment {index}"
   },
+  "PostDelete": {
+    "delete": "Delete",
+    "title": "Delete post?",
+    "description": "The post and all of its attachments will be permanently deleted.",
+    "cancel": "Cancel"
+  },
   "FormPost": {
     "message": "Message...",
     "attachments": "Attachments",

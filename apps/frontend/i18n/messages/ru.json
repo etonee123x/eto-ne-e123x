@@ -20,6 +20,12 @@
   "PostAttachmentImage": {
     "attachment": "Вложение {index}"
   },
+  "PostDelete": {
+    "delete": "Удалить",
+    "title": "Удалить пост?",
+    "description": "Пост и все его вложения будут удалены без возможности восстановления.",
+    "cancel": "Отмена"
+  },
   "FormPost": {
     "message": "Сообщение...",
     "attachments": "Вложения",
