@@ -1,3 +1,4 @@
 export { GalleryProvider } from './context/gallery-provider';
-export { useGalleryContext } from './context/gallery-context';
+export { SendFolderDataToGallery } from './context/send-folder-data-to-gallery';
+
 export { Gallery } from './ui/gallery';

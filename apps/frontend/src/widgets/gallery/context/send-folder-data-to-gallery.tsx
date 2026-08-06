@@ -1,6 +1,6 @@
 'use client';
 
-import { useGalleryContext } from '@/widgets/gallery';
+import { useGalleryContext } from './gallery-context';
 import { useRouter } from '@/i18n/navigation';
 import { FILE_TYPES } from '@/shared/utils/file-types';
 import { type components } from '@/shared/api/openapi';

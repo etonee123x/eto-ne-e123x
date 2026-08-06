@@ -1,12 +1,11 @@
 'use client';
 
-import { useContext, useEffect, useState, type ComponentProps } from 'react';
-import { PlayerContext, usePlayerContext } from '../context/player-context';
+import { useEffect, useState, type ComponentProps } from 'react';
+import { usePlayerContext } from '../context/player-context';
 import { Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 import { Button } from '@/shared/ui/ds/button';
-import { throwError } from '@/shared/utils/throw-error';
 import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
@@ -54,7 +53,7 @@ const useIsPlaying = () => {
 };
 
 const ButtonClose = () => {
-  const { setTrack, audioRef } = useContext(PlayerContext) ?? throwError();
+  const { setTrack, audioRef } = usePlayerContext();
   const t = useTranslations('ThePlayer');
 
   const isPlaying = useIsPlaying();
@@ -95,7 +94,7 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
   const durationFormats = millisecondsToTimeFormats(duration);
 
-  const { audioRef } = useContext(PlayerContext) ?? throwError();
+  const { audioRef } = usePlayerContext();
 
   useEffect(() => {
     const audio = audioRef.current;

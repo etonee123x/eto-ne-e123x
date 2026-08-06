@@ -12,10 +12,10 @@ import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { type components } from '@/shared/api/openapi';
 import { ItemGroup } from '@/shared/ui/ds/item';
-import { SendFolderDataToPlayer } from './_components/send-folder-data-to-player';
-import { SendFolderDataToGallery } from './_components/send-folder-data-to-gallery';
 import { getFolderData } from '@/entities/folder';
 import { throwError } from '@/shared/utils/throw-error';
+import { SendFolderDataToPlayer } from '@/widgets/player';
+import { SendFolderDataToGallery } from '@/widgets/gallery';
 
 const ExplorerElementUp = dynamic(() => {
   return import('@/entities/folder').then((module) => {

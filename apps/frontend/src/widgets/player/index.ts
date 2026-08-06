@@ -1,3 +1,3 @@
 export { PlayerProvider } from './context/player-provider';
-export { usePlayerContext } from './context/player-context';
 export { Player } from './ui/player';
+export { SendFolderDataToPlayer } from './context/send-folder-data-to-player';
