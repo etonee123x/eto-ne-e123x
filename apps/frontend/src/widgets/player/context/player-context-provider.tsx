@@ -2,8 +2,9 @@
 
 import { FILE_TYPES } from '@/shared/utils/file-types';
 import { type components } from '@/shared/api/openapi';
-import { type ContextType, type PropsWithChildren, useState } from 'react';
+import { type ContextType, type PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { PlayerContext } from './player-context';
+import { isClient } from '@/shared/utils/target';
 
 export const PlayerContextProvider = ({
   children,
@@ -25,6 +26,36 @@ export const PlayerContextProvider = ({
     initialFolderData?.pathDirectory ?? null,
   );
 
+  // TODO: перенести в контекст
+  const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    if (!track?.src) {
+      return;
+    }
+
+    audio.autoplay = true;
+    audio.src = track.src;
+
+    return () => {
+      audio.pause();
+      audio.removeAttribute('src');
+      audio.load();
+    };
+  }, [track]);
+
   return (
     <PlayerContext
       value={{
@@ -36,6 +67,8 @@ export const PlayerContextProvider = ({
 
         pathDirectory,
         setPathDirectory,
+
+        audioRef,
       }}
     >
       {children}

@@ -2,7 +2,7 @@
 
 import { type components } from '@/shared/api/openapi';
 import { throwError } from '@/shared/utils/throw-error';
-import { createContext, type Dispatch, type SetStateAction, useContext } from 'react';
+import { createContext, type Dispatch, type RefObject, type SetStateAction, useContext } from 'react';
 
 type Track = components['schemas']['FolderDataItemAudio'];
 
@@ -13,6 +13,8 @@ export const PlayerContext = createContext<{
   setPlaylist: Dispatch<SetStateAction<Array<Track>>>;
   pathDirectory: string | null;
   setPathDirectory: Dispatch<SetStateAction<string | null>>;
+
+  audioRef: RefObject<HTMLAudioElement | null>;
 } | null>(null);
 
 export const usePlayerContext = () => {
