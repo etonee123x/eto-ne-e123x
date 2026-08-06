@@ -8,7 +8,7 @@ import { NavigationMenuLink } from './navigation-menu-link';
 import { getIsAdmin } from '@/entities/session';
 import { getTranslations } from 'next-intl/server';
 
-export const TheHeader = async ({ className }: Readonly<HTMLProps<HTMLDivElement>>) => {
+export const Header = async ({ className }: Readonly<HTMLProps<HTMLDivElement>>) => {
   const t = await getTranslations('TheHeader');
   const isAdmin = await getIsAdmin();
 

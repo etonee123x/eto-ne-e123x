@@ -1,10 +1,12 @@
-import { type RefObject, useContext } from 'react';
-import { PlayerContext } from './player-context';
-import { useIsPlaying } from './use-is-playing';
+'use client';
+
+import { useContext, type RefObject } from 'react';
+import { PlayerContext } from '../context/player-context';
 import { throwError } from '@/shared/utils/throw-error';
+import { useTranslations } from 'next-intl';
+import { useIsPlaying } from '../hooks/use-is-playing';
 import { Button } from '@/shared/ui/ds/button';
 import { X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 
 export const ButtonClose = ({ audioRef }: { audioRef: RefObject<HTMLAudioElement | null> }) => {
   const { setTrack } = useContext(PlayerContext) ?? throwError();

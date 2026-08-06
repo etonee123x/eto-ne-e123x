@@ -1,7 +1,7 @@
 'use client';
 
 import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
-import { useGalleryContext } from './gallery-context';
+import { useGalleryContext } from '../context/gallery-context';
 import { type ComponentProps, useCallback, useEffect, useState } from 'react';
 import {
   Carousel,
@@ -16,7 +16,7 @@ import { Media } from './media';
 
 const CARD_HEADER_HEIGHT = '2.75rem';
 
-export const TheGallery = () => {
+export const Gallery = () => {
   const { media, setMedia, onClose, onGalleryItemChange, gallery } = useGalleryContext();
 
   const [api, setApi] = useState<NonNullable<CarouselApi> | null>(null);

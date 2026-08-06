@@ -4,17 +4,17 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { getIsAdmin, IsAdminContext } from '@/entities/session';
 
-import { TheHeader } from '@/widgets/the-header';
-import { TheFooter } from '@/widgets/the-footer';
-import { ThemeProvider } from './_providers/theme-provider';
+import { Header } from '@/widgets/header';
+import { Footer } from '@/widgets/footer';
 
-import { PlayerProvider, ThePlayer } from '@/widgets/the-player';
+import { PlayerProvider, Player } from '@/widgets/player';
 
-import { GalleryProvider, TheGallery } from '@/widgets/the-gallery';
+import { GalleryProvider, Gallery } from '@/widgets/gallery';
 
 // import themes from '@/app/themes.json';
 
 import '@/app/globals.css';
+import { ThemeProvider } from '@teispace/next-themes';
 
 export default async function RootLayout({ children, params }: Readonly<LayoutProps<'/[locale]'>>) {
   const { locale } = await params;
@@ -36,11 +36,11 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
               <PlayerProvider>
                 <GalleryProvider>
-                  <TheHeader className="fixed top-0 w-full z-1 h-header-height" />
+                  <Header className="fixed top-0 w-full z-1 h-header-height" />
                   <main className="pt-header-height relative flex flex-col flex-1">{children}</main>
-                  <ThePlayer />
-                  <TheFooter />
-                  <TheGallery />
+                  <Player />
+                  <Footer />
+                  <Gallery />
                 </GalleryProvider>
               </PlayerProvider>
             </ThemeProvider>

@@ -1,3 +1,5 @@
+'use client';
+
 import { type ComponentProps, type RefObject, useEffect, useState } from 'react';
 import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';

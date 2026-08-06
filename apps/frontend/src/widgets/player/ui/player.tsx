@@ -1,24 +1,23 @@
-'use client';
-
 import { useEffect, useRef } from 'react';
-import { usePlayerContext } from './player-context';
-import { ButtonClose } from './button-close';
+import { usePlayerContext } from '../context/player-context';
 import { PlayerSlider } from './player-slider';
-import { PlayerControls } from './player-controls';
 import { Link } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 import { isClient } from '@/shared/utils/target';
+import { PlayerControls } from './player-controls';
+import { ButtonClose } from './button-close';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
 };
 
-export const ThePlayer = () => {
+export const Player = () => {
   const t = useTranslations('ThePlayer');
 
   const { track } = usePlayerContext();
 
+  // TODO: перенести в контекст
   const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
 
   useEffect(() => {

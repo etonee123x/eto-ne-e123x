@@ -1,10 +1,10 @@
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import telegramLogoSource from './telegram-logo.svg';
+import telegramLogoSource from '../assets/telegram-logo.svg';
 
 const ETO_NE_E123X = 'eto_ne_e123x';
 
-export const TheFooter = () => {
+export const Footer = () => {
   const t = useTranslations('TheFooter');
 
   return (

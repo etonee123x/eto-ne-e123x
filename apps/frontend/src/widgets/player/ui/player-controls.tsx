@@ -1,6 +1,8 @@
+'use client';
+
 import { type ComponentProps, type RefObject, useState } from 'react';
-import { usePlayerContext } from './player-context';
-import { useIsPlaying } from './use-is-playing';
+import { usePlayerContext } from '../context/player-context';
+import { useIsPlaying } from '../hooks/use-is-playing';
 import { Button } from '@/shared/ui/ds/button';
 import { Pause, Play, Shuffle, SkipBack, SkipForward } from 'lucide-react';
 import { Toggle } from '@/shared/ui/ds/toggle';
