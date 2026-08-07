@@ -26,6 +26,12 @@
     "description": "Пост и все его вложения будут удалены без возможности восстановления.",
     "cancel": "Отмена"
   },
+  "ButtonEditPost": {
+    "edit": "Редактировать"
+  },
+  "ButtonDeletePost": {
+    "delete": "Удалить"
+  },
   "FormPost": {
     "message": "Сообщение...",
     "attachments": "Вложения",

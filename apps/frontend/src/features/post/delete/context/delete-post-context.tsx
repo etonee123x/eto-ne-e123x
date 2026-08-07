@@ -49,6 +49,6 @@ export const DeletePostProvider = ({ children }: PropsWithChildren) => {
   );
 };
 
-export const useDeletePost = () => {
+export const useDeletePostContext = () => {
   return useContext(DeletePostContext) ?? throwError();
 };

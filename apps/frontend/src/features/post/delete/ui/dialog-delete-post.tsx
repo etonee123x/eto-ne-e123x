@@ -11,11 +11,11 @@ import {
 } from '@/shared/ui/ds/dialog';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { useDeletePost } from './delete-post-context';
+import { useDeletePostContext } from '../context/delete-post-context';
 import { isNil } from '@/shared/utils/is-nil';
 
 export const DialogDeletePost = () => {
-  const { closeDeletePost, postId, deletePostById } = useDeletePost();
+  const { closeDeletePost, postId, deletePostById } = useDeletePostContext();
   const router = useRouter();
   const t = useTranslations('PostDelete');
 
