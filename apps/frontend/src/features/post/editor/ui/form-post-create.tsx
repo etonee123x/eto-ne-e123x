@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/shared/ui/ds/button';
-import { FormPostBase } from './form-post-base';
+import { FormPost } from './form-post';
 
 import { useTranslations } from 'next-intl';
 import { type ComponentProps, useState } from 'react';
@@ -13,7 +13,7 @@ export const FormPostCreate = () => {
   const router = useRouter();
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const onSubmit: ComponentProps<typeof FormPostBase>['onSubmit'] = async (...[, post, files]) => {
+  const onSubmit: ComponentProps<typeof FormPost>['onSubmit'] = async (...[, post, files]) => {
     await client['/posts'].POST({
       body: {
         files: [],
@@ -35,13 +35,13 @@ export const FormPostCreate = () => {
     router.refresh();
   };
 
-  const onValidityChange: ComponentProps<typeof FormPostBase>['onValidityChange'] = (isValid) => {
+  const onValidityChange: ComponentProps<typeof FormPost>['onValidityChange'] = (isValid) => {
     setIsFormValid(isValid);
   };
 
   return (
     <>
-      <FormPostBase id="form-create-post" {...{ onValidityChange, onSubmit }} />
+      <FormPost id="form-create-post" {...{ onValidityChange, onSubmit }} />
 
       {isFormValid && (
         <Button size="lg" className="w-full mt-2" type="submit" form="form-create-post">

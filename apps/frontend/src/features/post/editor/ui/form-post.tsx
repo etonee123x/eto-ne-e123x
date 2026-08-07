@@ -87,13 +87,14 @@ const SortableFormAttachment = ({
   );
 };
 
-export interface FormPostBaseRef {
+export interface FormPostRef {
   focusTextarea: () => void;
 }
 
-export const FormPostBase = ({
+export const FormPost = ({
   defaultValues = { text: '', attachments: [] },
   onSubmit,
+  onSubmitWithoutChanges,
   onValidityChange,
   ref,
   ...props
@@ -102,9 +103,10 @@ export const FormPostBase = ({
   HTMLProps<HTMLFormElement>,
   'onSubmit' | 'ref'
 > & {
-  ref?: Ref<FormPostBaseRef>;
+  ref?: Ref<FormPostRef>;
   defaultValues?: { text: string; attachments: Array<Attachment> };
   onSubmit: (event: SubmitEvent, post: Post, files: Array<File>) => void | Promise<void>;
+  onSubmitWithoutChanges?: (event: SubmitEvent) => void;
   onValidityChange?: (isValid: boolean) => void;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -176,7 +178,12 @@ export const FormPostBase = ({
   const _onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
     event.preventDefault();
 
-    if (!(isValid && isChanged)) {
+    if (!isValid) {
+      return;
+    }
+
+    if (!isChanged) {
+      onSubmitWithoutChanges?.(event.nativeEvent);
       return;
     }
 
@@ -245,7 +252,7 @@ export const FormPostBase = ({
       {modelFilesAndAttachments.length > 0 && (
         <div className="flex flex-col gap-2">
           <DragDropProvider onDragEnd={onDragEnd}>
-            <div className="flex gap-4 flex-col group/form-post-base-attachments">
+            <div className="flex gap-4 flex-col group/form-post-attachments">
               {modelFilesAndAttachments.map((fileOrAttachment, index) => {
                 return (
                   <SortableFormAttachment

@@ -3,16 +3,16 @@
 import { PostAttachment } from '@/entities/post';
 import { useIsAdmin } from '@/entities/session/client';
 import { useDeletePostContext } from '@/features/post/delete';
-import { FormPostUpdate, useEditPostContext } from '@/features/post/editor';
-import { Link } from '@/i18n/navigation';
+import { useEditPostContext, FormPost, type FormPostRef } from '@/features/post/editor';
+import { Link, useRouter } from '@/i18n/navigation';
 import type { components } from '@/shared/api/openapi';
 import { BaseHtml } from '@/shared/ui/base-html';
 import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
-import type { FormPostBaseRef } from '@/features/post/editor/ui/form-post-base';
+import { useEffect, useRef, useState, type ComponentProps } from 'react';
+import { client } from '@/shared/api/client';
 
 export const Post = ({
   post,
@@ -23,6 +23,8 @@ export const Post = ({
 }) => {
   const t = useTranslations('Post');
 
+  const router = useRouter();
+
   const { postId, enterEditPostById, exitEditPost } = useEditPostContext();
   const { requestDeletePostById } = useDeletePostContext();
 
@@ -30,9 +32,9 @@ export const Post = ({
 
   const { relativeTime } = useFormatter();
   const now = useNow();
-  const formPostUpdateRef = useRef<FormPostBaseRef>(null);
+  const formPostRef = useRef<FormPostRef>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-  const formPostUpdateId = `form-update-post-${post._meta.id}`;
+  const formPostId = `form-update-post-${post._meta.id}`;
 
   const isEditing = postId === post._meta.id;
 
@@ -41,18 +43,64 @@ export const Post = ({
       return;
     }
 
-    formPostUpdateRef.current?.focusTextarea();
+    formPostRef.current?.focusTextarea();
   }, [isEditing]);
 
+  const onSubmitWithoutChanges = () => {
+    exitEditPost();
+  };
+
+  const onValidityChange: ComponentProps<typeof FormPost>['onValidityChange'] = (isValid) => {
+    setIsEditFormValid(isValid);
+  };
+
+  const onSubmit: ComponentProps<typeof FormPost>['onSubmit'] = async (...[, _post, files]) => {
+    await client['/posts/{id}'].PATCH({
+      params: {
+        path: {
+          id: post._meta.id,
+        },
+      },
+      body: {
+        ..._post,
+        files: [],
+      },
+      bodySerializer: (body) => {
+        const formData = new FormData();
+
+        formData.append('text', body.text);
+        formData.append(`attachments`, JSON.stringify(body.attachments));
+
+        files.forEach((file) => {
+          formData.append('files', file);
+        });
+
+        return formData;
+      },
+    });
+
+    exitEditPost();
+
+    router.refresh();
+  };
+
   return (
-    <Card key={post._meta.id}>
+    <Card>
       <CardContent className="flex flex-col gap-2">
         {isEditing ? (
-          <FormPostUpdate
-            id={formPostUpdateId}
-            ref={formPostUpdateRef}
-            post={post}
-            onValidityChange={setIsEditFormValid}
+          <FormPost
+            id={formPostId}
+            ref={formPostRef}
+            defaultValues={{
+              text: post.text,
+              attachments: post.attachments,
+            }}
+            {...{
+              post,
+              onValidityChange,
+              onSubmitWithoutChanges,
+              onSubmit,
+            }}
           />
         ) : (
           <>
@@ -62,11 +110,11 @@ export const Post = ({
             })}
             <Link
               href={`/blog/${post._meta.id}`}
-              className="self-end hover:underline text-sm flex items-center gap-0.5 text-muted-foreground"
+              className="self-end hover:underline flex items-center gap-1 text-muted-foreground"
             >
               <time dateTime={new Date(post._meta.createdAt).toISOString()} className="contents">
                 {relativeTime(post._meta.createdAt, now)}
-                {post._meta.updatedAt !== post._meta.createdAt && <Edit2 />}
+                {post._meta.updatedAt !== post._meta.createdAt && <Edit2 className="size-3.5" />}
               </time>
             </Link>
           </>
@@ -77,15 +125,17 @@ export const Post = ({
           {isEditing ? (
             <>
               <Button
+                key="confirm"
                 aria-label={t('confirm')}
                 title={t('confirm')}
                 type="submit"
-                form={formPostUpdateId}
+                form={formPostId}
                 disabled={!isEditFormValid}
               >
                 <Check />
               </Button>
               <Button
+                key="cancel"
                 onClick={() => {
                   exitEditPost();
                 }}
@@ -99,6 +149,7 @@ export const Post = ({
           ) : (
             <>
               <Button
+                key="edit"
                 aria-label={t('edit')}
                 onClick={() => {
                   enterEditPostById(post._meta.id);
@@ -109,6 +160,7 @@ export const Post = ({
                 <Edit2 />
               </Button>
               <Button
+                key="delete"
                 aria-label={t('delete')}
                 onClick={() => {
                   requestDeletePostById(post._meta.id);

@@ -29,7 +29,7 @@ export const FormAttachmentUnknown = ({
       </AttachmentContent>
       <AttachmentActions>
         <AttachmentAction
-          className="cursor-grab group-not-has-[>:nth-child(2)]/form-post-base-attachments:hidden"
+          className="cursor-grab group-not-has-[>:nth-child(2)]/form-post-attachments:hidden"
           size="lg"
           ref={handleRef}
         >
