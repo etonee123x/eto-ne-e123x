@@ -2,7 +2,8 @@ import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
 
 import { routing } from '@/i18n/routing';
-import { getIsAdmin, IsAdminContext } from '@/entities/session';
+import { IsAdminContext } from '@/entities/session';
+import { getIsAdmin } from '@/entities/session/server';
 
 import { Header } from '@/widgets/header';
 import { Footer } from '@/widgets/footer';

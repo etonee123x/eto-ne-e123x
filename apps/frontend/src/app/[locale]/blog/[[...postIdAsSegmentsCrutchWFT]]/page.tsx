@@ -1,14 +1,12 @@
-import { BaseHtml } from '@/shared/ui/base-html';
-import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { client } from '@/shared/api/client';
 import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Separator } from '@/shared/ui/ds/separator';
-import { getIsAdmin } from '@/entities/session';
-import { ButtonDeletePost, DeletePostProvider } from '@/features/post/delete';
-import { PostAttachment } from '@/entities/post';
-import { ButtonEditPost, EditPostProvider } from '@/features/post/editor';
+import { getIsAdmin } from '@/entities/session/server';
+import { DeletePostProvider } from '@/features/post/delete';
+import { EditPostProvider } from '@/features/post/editor';
+import { Post } from '@/widgets/post';
 
 const FormPostCreate = dynamic(() => {
   return import('@/features/post/editor').then((module) => {
@@ -22,7 +20,15 @@ const DialogDeletePost = dynamic(() => {
   });
 });
 
-export default async function Blog() {
+export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blog/[[...postIdAsSegmentsCrutchWFT]]'>>) {
+  const { postIdAsSegmentsCrutchWFT } = await params;
+
+  if (postIdAsSegmentsCrutchWFT && postIdAsSegmentsCrutchWFT.length > 1) {
+    return notFound();
+  }
+
+  const postId = postIdAsSegmentsCrutchWFT?.[0];
+
   const { data: posts } = await client['/posts'].GET();
 
   const isAdmin = await getIsAdmin();
@@ -46,22 +52,7 @@ export default async function Blog() {
           )}
           <div className="flex flex-col gap-4">
             {posts.rows.map((post) => {
-              return (
-                <Card key={post._meta.id}>
-                  <CardContent>
-                    <BaseHtml html={post.text} />
-                    {post.attachments.map((attachment, index) => {
-                      return <PostAttachment key={index} attachment={attachment} index={index} />;
-                    })}
-                  </CardContent>
-                  {isAdmin && (
-                    <CardFooter className="justify-end gap-2">
-                      <ButtonEditPost postId={post._meta.id} />
-                      <ButtonDeletePost postId={post._meta.id} />
-                    </CardFooter>
-                  )}
-                </Card>
-              );
+              return <Post {...{ post }} key={post._meta.id} />;
             })}
           </div>
           {isAdmin && <DialogDeletePost />}
