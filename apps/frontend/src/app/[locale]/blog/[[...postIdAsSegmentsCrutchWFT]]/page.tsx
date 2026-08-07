@@ -52,7 +52,7 @@ export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blo
           )}
           <div className="flex flex-col gap-4">
             {posts.rows.map((post) => {
-              return <Post {...{ post }} key={post._meta.id} />;
+              return <Post selectedPostId={postId} {...{ post }} key={post._meta.id} />;
             })}
           </div>
           {isAdmin && <DialogDeletePost />}

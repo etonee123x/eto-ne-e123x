@@ -1,22 +1,23 @@
+'use client';
 import { useRouter } from '@/i18n/navigation';
 import { client } from '@/shared/api/client';
 import { useState, type ComponentProps } from 'react';
 import { FormPostBase } from './form-post-base';
 import type { components } from '@/shared/api/openapi';
 
-export const FormPostUpdate = ({ postId }: { postId: components['schemas']['PostResponse']['_meta']['id'] }) => {
+export const FormPostUpdate = ({ post }: { post: components['schemas']['PostResponse'] }) => {
   const router = useRouter();
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const onSubmit: ComponentProps<typeof FormPostBase>['onSubmit'] = async (...[, post, files]) => {
+  const onSubmit: ComponentProps<typeof FormPostBase>['onSubmit'] = async (...[, _post, files]) => {
     await client['/posts/{id}'].PATCH({
       params: {
         path: {
-          id: postId,
+          id: post._meta.id,
         },
       },
       body: {
-        ...post,
+        ..._post,
         files: [],
       },
       bodySerializer: (body) => {

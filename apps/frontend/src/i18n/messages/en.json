@@ -25,11 +25,11 @@
     "description": "The post and all of its attachments will be permanently deleted.",
     "cancel": "Cancel"
   },
-  "ButtonEditPost": {
-    "edit": "Edit"
-  },
-  "ButtonDeletePost": {
-    "delete": "Delete"
+  "Post": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "FormPost": {
     "message": "Message...",
