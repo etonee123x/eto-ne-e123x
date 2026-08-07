@@ -6,7 +6,16 @@ import { type components } from '@/shared/api/openapi';
 import { fileToFileWithHashName } from '@/shared/utils/file-to-file-with-hash-name';
 import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { type ComponentProps, type ComponentRef, type HTMLProps, useEffect, useRef, useState } from 'react';
+import {
+  type ComponentProps,
+  type ComponentRef,
+  type HTMLProps,
+  type Ref,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { extensionToFileType, FILE_TYPES } from '@/shared/utils/file-types';
 import { nonNullable } from '@/shared/utils/non-nullable';
 import { DragDropProvider } from '@dnd-kit/react';
@@ -78,38 +87,68 @@ const SortableFormAttachment = ({
   );
 };
 
-const INITIAL_STATE = {
-  text: '',
-  filesAndAttachments: [] as Array<Attachment>,
-};
+export interface FormPostBaseRef {
+  focusTextarea: () => void;
+}
 
 export const FormPostBase = ({
+  defaultValues = { text: '', attachments: [] },
   onSubmit,
   onValidityChange,
+  ref,
   ...props
 }: Omit<
   //
   HTMLProps<HTMLFormElement>,
-  'onSubmit'
+  'onSubmit' | 'ref'
 > & {
+  ref?: Ref<FormPostBaseRef>;
+  defaultValues?: { text: string; attachments: Array<Attachment> };
   onSubmit: (event: SubmitEvent, post: Post, files: Array<File>) => void | Promise<void>;
   onValidityChange?: (isValid: boolean) => void;
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<ComponentRef<typeof Textarea>>(null);
 
-  const [modelText, setModelText] = useState(INITIAL_STATE.text);
+  const [modelText, setModelText] = useState(defaultValues.text);
   const [modelFilesAndAttachments, setModelFilesAndAttachments] = useState<Array<FileOrAttachment>>(
-    INITIAL_STATE.filesAndAttachments,
+    defaultValues.attachments,
   );
 
   const isValid = modelText.length > 0 || modelFilesAndAttachments.length > 0;
+  const isChanged =
+    modelText !== defaultValues.text ||
+    modelFilesAndAttachments.length !== defaultValues.attachments.length ||
+    modelFilesAndAttachments.some((fileOrAttachment, index) => {
+      if (fileOrAttachment instanceof File) {
+        return true;
+      }
+
+      return fileOrAttachmentToKey(fileOrAttachment) !== fileOrAttachmentToKey(defaultValues.attachments[index]);
+    });
 
   const t = useTranslations('FormPost');
+
+  const focusTextareaAtEnd = () => {
+    if (textareaRef.current === null) {
+      return;
+    }
+
+    textareaRef.current.focus();
+    textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+  };
 
   useEffect(() => {
     onValidityChange?.(isValid);
   }, [isValid, onValidityChange]);
+
+  useImperativeHandle(ref, () => {
+    return {
+      focusTextarea: () => {
+        focusTextareaAtEnd();
+      },
+    };
+  }, []);
 
   const onClickButtonAddAttachment = () => {
     inputRef.current?.click();
@@ -137,7 +176,7 @@ export const FormPostBase = ({
   const _onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
     event.preventDefault();
 
-    if (!isValid) {
+    if (!(isValid && isChanged)) {
       return;
     }
 
@@ -154,13 +193,13 @@ export const FormPostBase = ({
       }),
     );
 
-    setModelText(INITIAL_STATE.text);
-    setModelFilesAndAttachments(INITIAL_STATE.filesAndAttachments);
-    textareaRef.current?.focus();
+    setModelText(defaultValues.text);
+    setModelFilesAndAttachments(defaultValues.attachments);
+    focusTextareaAtEnd();
   };
 
   const onClickDeleteFiles = () => {
-    setModelFilesAndAttachments(INITIAL_STATE.filesAndAttachments);
+    setModelFilesAndAttachments([]);
   };
 
   const onClickRemoveByIndex = (index: number) => {

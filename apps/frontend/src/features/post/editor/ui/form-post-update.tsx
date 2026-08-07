@@ -1,13 +1,18 @@
 'use client';
 import { useRouter } from '@/i18n/navigation';
 import { client } from '@/shared/api/client';
-import { useState, type ComponentProps } from 'react';
-import { FormPostBase } from './form-post-base';
+import { type ComponentProps, type Ref } from 'react';
+import { FormPostBase, type FormPostBaseRef } from './form-post-base';
 import type { components } from '@/shared/api/openapi';
 
-export const FormPostUpdate = ({ post }: { post: components['schemas']['PostResponse'] }) => {
+export const FormPostUpdate = ({
+  post,
+  ...props
+}: Omit<ComponentProps<typeof FormPostBase>, 'onSubmit'> & {
+  post: components['schemas']['PostResponse'];
+  ref?: Ref<FormPostBaseRef>;
+}) => {
   const router = useRouter();
-  const [isFormValid, setIsFormValid] = useState(false);
 
   const onSubmit: ComponentProps<typeof FormPostBase>['onSubmit'] = async (...[, _post, files]) => {
     await client['/posts/{id}'].PATCH({
@@ -37,9 +42,7 @@ export const FormPostUpdate = ({ post }: { post: components['schemas']['PostResp
     router.refresh();
   };
 
-  const onValidityChange: ComponentProps<typeof FormPostBase>['onValidityChange'] = (isValid) => {
-    setIsFormValid(isValid);
-  };
-
-  return <FormPostBase {...{ onValidityChange, onSubmit }} />;
+  return (
+    <FormPostBase defaultValues={{ text: post.text, attachments: post.attachments }} onSubmit={onSubmit} {...props} />
+  );
 };

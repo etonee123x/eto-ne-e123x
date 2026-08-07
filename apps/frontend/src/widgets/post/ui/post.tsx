@@ -11,6 +11,8 @@ import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
+import type { FormPostBaseRef } from '@/features/post/editor/ui/form-post-base';
 
 export const Post = ({
   post,
@@ -28,14 +30,30 @@ export const Post = ({
 
   const { relativeTime } = useFormatter();
   const now = useNow();
+  const formPostUpdateRef = useRef<FormPostBaseRef>(null);
+  const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const formPostUpdateId = `form-update-post-${post._meta.id}`;
 
   const isEditing = postId === post._meta.id;
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+
+    formPostUpdateRef.current?.focusTextarea();
+  }, [isEditing]);
 
   return (
     <Card key={post._meta.id}>
       <CardContent className="flex flex-col gap-2">
         {isEditing ? (
-          <FormPostUpdate post={post} />
+          <FormPostUpdate
+            id={formPostUpdateId}
+            ref={formPostUpdateRef}
+            post={post}
+            onValidityChange={setIsEditFormValid}
+          />
         ) : (
           <>
             <BaseHtml html={post.text} />
@@ -58,7 +76,13 @@ export const Post = ({
         <CardFooter className="justify-end gap-2">
           {isEditing ? (
             <>
-              <Button aria-label={t('confirm')} title={t('confirm')}>
+              <Button
+                aria-label={t('confirm')}
+                title={t('confirm')}
+                type="submit"
+                form={formPostUpdateId}
+                disabled={!isEditFormValid}
+              >
                 <Check />
               </Button>
               <Button
