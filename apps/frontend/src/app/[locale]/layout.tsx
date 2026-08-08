@@ -13,18 +13,22 @@ import { GalleryProvider, Gallery } from '@/widgets/gallery';
 
 // import themes from '@/app/themes.json';
 
-import '@/app/globals.css';
 import { ThemeProvider } from '@/features/theme';
+import { QueryClientProvider } from '@/shared/api/query';
+
+import '@/app/globals.css';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <NextIntlClientProvider>
       <IsAdminProvider>
-        <ThemeProvider>
-          <PlayerProvider>
-            <GalleryProvider>{children}</GalleryProvider>
-          </PlayerProvider>
-        </ThemeProvider>
+        <QueryClientProvider>
+          <ThemeProvider>
+            <PlayerProvider>
+              <GalleryProvider>{children}</GalleryProvider>
+            </PlayerProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
       </IsAdminProvider>
     </NextIntlClientProvider>
   );
