@@ -1,7 +1,7 @@
 'use client';
 
 import { PostAttachment } from '@/entities/post';
-import { useIsAdmin } from '@/entities/session/client';
+import { useIsAdminContext } from '@/entities/session/client';
 import { useDeletePostContext } from '@/features/post/delete';
 import { useEditPostContext, FormPost, type FormPostRef } from '@/features/post/editor';
 import { Link, useRouter } from '@/i18n/navigation';
@@ -28,7 +28,7 @@ export const Post = ({
   const { postId, enterEditPostById, exitEditPost } = useEditPostContext();
   const { requestDeletePostById } = useDeletePostContext();
 
-  const isAdmin = useIsAdmin();
+  const { isAdmin } = useIsAdminContext();
 
   const { relativeTime } = useFormatter();
   const now = useNow();

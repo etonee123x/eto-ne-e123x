@@ -1,1 +1,1 @@
-export { IsAdminContext } from './is-admin-context';
+export { IsAdminProvider } from './context/is-admin-provider';

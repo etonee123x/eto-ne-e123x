@@ -1,1 +1,1 @@
-export { useIsAdmin } from './use-is-admin';
+export { useIsAdminContext } from './context/use-is-admin-context';

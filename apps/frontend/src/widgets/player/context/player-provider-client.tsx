@@ -6,7 +6,7 @@ import { type ContextType, type PropsWithChildren, useEffect, useRef, useState }
 import { PlayerContext } from './player-context';
 import { isClient } from '@/shared/utils/target';
 
-export const PlayerContextProvider = ({
+export const PlayerProviderClient = ({
   children,
   initialFolderData,
 }: PropsWithChildren<{

@@ -9,6 +9,7 @@ import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import { importX } from 'eslint-plugin-import-x';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 import boundaries from 'eslint-plugin-boundaries';
+import pluginQuery from '@tanstack/eslint-plugin-query';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -21,6 +22,7 @@ const eslintConfig = defineConfig([
       sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
       eslintPluginPrettierRecommended,
+      pluginQuery.configs['flat/recommended-strict'],
       importX.configs['flat/recommended'],
     ],
 

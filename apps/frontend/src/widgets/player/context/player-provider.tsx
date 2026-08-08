@@ -1,5 +1,5 @@
 import { type ComponentProps } from 'react';
-import { PlayerContextProvider } from './player-context-provider';
+import { PlayerProviderClient } from './player-provider-client';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
 import { throwError } from '@/shared/utils/throw-error';
@@ -7,7 +7,7 @@ import { getFolderData } from '@/entities/folder';
 
 export const PlayerProvider = async ({
   children,
-}: Omit<ComponentProps<typeof PlayerContextProvider>, 'initialFolderData'>) => {
+}: Omit<ComponentProps<typeof PlayerProviderClient>, 'initialFolderData'>) => {
   const headers = await _headers();
   const xPathname = headers.get('x-pathname') ?? throwError();
 
@@ -16,5 +16,5 @@ export const PlayerProvider = async ({
   const response = isNil(explorerPath) ? null : await getFolderData(explorerPath || '/');
   const initialFolderData = response?.data ?? null;
 
-  return <PlayerContextProvider initialFolderData={initialFolderData}>{children}</PlayerContextProvider>;
+  return <PlayerProviderClient initialFolderData={initialFolderData}>{children}</PlayerProviderClient>;
 };
