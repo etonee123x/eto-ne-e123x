@@ -11,13 +11,12 @@ import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Marker, MarkerContent } from '@/shared/ui/ds/marker';
 import { Spinner } from '@/shared/ui/ds/spinner';
-import { isClient } from '@/shared/utils/target';
-import { MessageScroller } from '@shadcn/react/message-scroller';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState, type ComponentProps } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
 import { useInfiniteScroll } from '@reactuses/core';
+import { isNil } from '@/shared/utils/is-nil';
 
 const DialogDeletePost = dynamic(() => {
   return import('@/features/post/delete').then((module) => {
@@ -80,7 +79,7 @@ const Post = ({
   };
 
   return (
-    <Card>
+    <Card data-id={post._meta.id}>
       <CardContent className="flex flex-col gap-2">
         {isEditing ? (
           <FormPost
@@ -179,7 +178,6 @@ export const Posts = ({
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
 }) => {
   const t = useTranslations('Post');
-  // const { y } = useWindowScroll();
   const { isAdmin } = useIsAdminContext();
 
   const {
@@ -192,51 +190,36 @@ export const Posts = ({
     data: infiniteQueryGetPostsData,
   } = useInfiniteQueryGetPosts(selectedPostId);
 
-  const posts =
-    infiniteQueryGetPostsData?.pages.flatMap((page) => {
-      return page.rows;
-    }) ?? [];
+  const posts = useMemo(() => {
+    return (
+      infiniteQueryGetPostsData?.pages.flatMap((page) => {
+        return page.rows;
+      }) ?? []
+    );
+  }, [infiniteQueryGetPostsData]);
+
+  const restoreScrollRef = useRef<{
+    scrollTop: number;
+    scrollHeight: number;
+  } | null>(null);
 
   useInfiniteScroll(
-    () => {
-      return isClient ? document.scrollingElement : null;
-    },
-    async ([, , isScrolling]) => {
-      console.log('scrolling top', isScrolling);
-      if (isFetchingNextPage || !hasNextPage) {
-        return;
-      }
-
+    // @ts-expect-error globalThis is not typed correctly for useInfiniteScroll
+    globalThis,
+    async ([, , isScrolling, , direction]) => {
       if (!isScrolling) {
         return;
       }
 
-      try {
-        await fetchNextPage();
-      } catch {
-        // чтобы не спамить запросами при ошибке (когда нет интернета)
-        await new Promise((resolve) => {
-          return setTimeout(resolve, 1000);
-        });
-      }
-    },
-    {
-      distance: isClient ? globalThis.innerHeight / 2 : 0,
-      direction: 'top',
-    },
-  );
-
-  useInfiniteScroll(
-    () => {
-      return isClient ? document.scrollingElement : null;
-    },
-    async ([, , isScrolling]) => {
-      console.log('scrolling bottom', isScrolling);
-      if (isFetchingPreviousPage || !hasPreviousPage) {
+      if (!direction.top) {
         return;
       }
 
-      if (!isScrolling) {
+      if (isFetchingPreviousPage) {
+        return;
+      }
+
+      if (!hasPreviousPage) {
         return;
       }
 
@@ -246,38 +229,72 @@ export const Posts = ({
         return;
       }
 
-      const scrollTop = scrollingElement.scrollTop;
-      const scrollHeightBefore = scrollingElement.scrollHeight;
+      restoreScrollRef.current = {
+        scrollTop: scrollingElement.scrollTop,
+        scrollHeight: scrollingElement.scrollHeight,
+      };
 
-      try {
-        await fetchPreviousPage();
-        scrollingElement.scrollTop = scrollingElement.scrollHeight - scrollHeightBefore + scrollTop;
-      } catch {
-        await new Promise((resolve) => {
-          return setTimeout(resolve, 1000);
-        });
-      }
+      await fetchPreviousPage();
     },
     {
-      distance: isClient ? globalThis.innerHeight / 2 : 0,
       direction: 'top',
+      distance: globalThis.innerHeight / 2,
     },
   );
 
+  useInfiniteScroll(
+    // @ts-expect-error globalThis is not typed correctly for useInfiniteScroll
+    globalThis,
+    async ([, , isScrolling, , direction]) => {
+      if (!isScrolling) {
+        return;
+      }
+
+      if (!direction.bottom) {
+        return;
+      }
+
+      if (isFetchingNextPage) {
+        return;
+      }
+
+      if (!hasNextPage) {
+        return;
+      }
+
+      await fetchNextPage();
+    },
+    {
+      distance: globalThis.innerHeight / 2,
+    },
+  );
+
+  useLayoutEffect(() => {
+    const restore = restoreScrollRef.current;
+
+    if (!restore) {
+      return;
+    }
+
+    const scrollingElement = document.scrollingElement;
+
+    if (!scrollingElement) {
+      return;
+    }
+
+    const heightDelta = scrollingElement.scrollHeight - restore.scrollHeight;
+
+    scrollingElement.scrollTop = restore.scrollTop + heightDelta;
+
+    restoreScrollRef.current = null;
+  }, [posts]);
+
   useEffect(() => {
-    if (!selectedPostId) {
+    if (isNil(selectedPostId)) {
       return;
     }
 
-    const targetPostElement = globalThis.document.querySelector<HTMLElement>(
-      `[data-message-id="${CSS.escape(selectedPostId)}"]`,
-    );
-
-    if (!targetPostElement) {
-      return;
-    }
-
-    targetPostElement.scrollIntoView({
+    globalThis.document.querySelector(`[data-id="${CSS.escape(selectedPostId)}"]`)?.scrollIntoView({
       behavior: 'smooth',
       block: 'center',
     });
@@ -286,46 +303,21 @@ export const Posts = ({
   return (
     <DeletePostProvider>
       <EditPostProvider>
-        <MessageScroller.Provider defaultScrollPosition="start">
-          <MessageScroller.Root className="relative">
-            <MessageScroller.Viewport>
-              <MessageScroller.Content className="mb-6 flex flex-col gap-6">
-                {isFetchingPreviousPage && (
-                  <MessageScroller.Item className="flex justify-center">
-                    <Spinner />
-                  </MessageScroller.Item>
-                )}
+        <div className="mb-6 flex flex-col gap-6">
+          {isFetchingPreviousPage && <Spinner />}
 
-                {posts.map((post) => {
-                  return (
-                    <MessageScroller.Item
-                      key={post._meta.id}
-                      messageId={post._meta.id}
-                      scrollAnchor={selectedPostId === post._meta.id}
-                    >
-                      <Post {...{ post, selectedPostId }} />
-                    </MessageScroller.Item>
-                  );
-                })}
+          {posts.map((post) => {
+            return <Post key={post._meta.id} {...{ post, selectedPostId }} />;
+          })}
 
-                {isFetchingNextPage && (
-                  <MessageScroller.Item className="flex justify-center">
-                    <Spinner />
-                  </MessageScroller.Item>
-                )}
+          {isFetchingNextPage && <Spinner />}
 
-                {!hasNextPage && posts.length > 0 && (
-                  <MessageScroller.Item>
-                    <Marker variant="separator" className="text-xs">
-                      <MarkerContent>{t('thereAreNoMorePosts')}</MarkerContent>
-                    </Marker>
-                  </MessageScroller.Item>
-                )}
-              </MessageScroller.Content>
-            </MessageScroller.Viewport>
-          </MessageScroller.Root>
-        </MessageScroller.Provider>
-
+          {!hasNextPage && posts.length > 0 && (
+            <Marker variant="separator">
+              <MarkerContent>{t('thereAreNoMorePosts')}</MarkerContent>
+            </Marker>
+          )}
+        </div>
         {isAdmin && <DialogDeletePost />}
       </EditPostProvider>
     </DeletePostProvider>
