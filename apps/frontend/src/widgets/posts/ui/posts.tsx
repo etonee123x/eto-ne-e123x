@@ -14,6 +14,12 @@ import type { components } from '@/shared/api/openapi';
 import { BaseHtml } from '@/shared/ui/base-html';
 import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
+import {
+  MessageScrollerContent,
+  MessageScrollerProvider,
+  MessageScrollerViewport,
+  MessageScroller,
+} from '@/shared/ui/ds/message-scroller';
 import { Spinner } from '@/shared/ui/ds/spinner';
 import { isClient } from '@/shared/utils/target';
 import { useQueryClient } from '@tanstack/react-query';
@@ -215,21 +221,29 @@ export const Posts = ({
   return (
     <DeletePostProvider>
       <EditPostProvider>
-        <div className="flex flex-col gap-4">
-          {shouldRenderButtonToTheBeggining && (
-            <Button className="fixed z-10 inset-x-0 top-header-height" {...{ onClick }}>
-              TTB
-            </Button>
-          )}
+        <MessageScrollerProvider>
+          <MessageScroller>
+            <MessageScrollerViewport>
+              <MessageScrollerContent>
+                <div className="flex flex-col gap-4">
+                  {shouldRenderButtonToTheBeggining && (
+                    <Button className="fixed z-10 inset-x-0 top-header-height" {...{ onClick }}>
+                      TTB
+                    </Button>
+                  )}
 
-          {infiniteQueryGetPosts.isFetchingPreviousPage && <Spinner />}
+                  {infiniteQueryGetPosts.isFetchingPreviousPage && <Spinner />}
 
-          {posts.map((post) => {
-            return <Post key={post._meta.id} {...{ post, selectedPostId }} />;
-          })}
+                  {posts.map((post) => {
+                    return <Post key={post._meta.id} {...{ post, selectedPostId }} />;
+                  })}
 
-          {infiniteQueryGetPosts.isFetchingNextPage && <Spinner />}
-        </div>
+                  {infiniteQueryGetPosts.isFetchingNextPage && <Spinner />}
+                </div>
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+          </MessageScroller>
+        </MessageScrollerProvider>
 
         {isAdmin && <DialogDeletePost />}
       </EditPostProvider>
