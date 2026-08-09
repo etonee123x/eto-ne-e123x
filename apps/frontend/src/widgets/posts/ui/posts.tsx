@@ -1,11 +1,6 @@
 'use client';
 
-import {
-  infiniteQueryKeyGetPosts,
-  PostAttachment,
-  useInfiniteQueryGetPosts,
-  useMutationPatchPostById,
-} from '@/entities/post';
+import { PostAttachment, useInfiniteQueryGetPosts, useMutationPatchPostById } from '@/entities/post';
 import { useIsAdminContext } from '@/entities/session/client';
 import { DeletePostProvider, useDeletePostContext } from '@/features/post/delete';
 import { EditPostProvider, FormPost, useEditPostContext, type FormPostRef } from '@/features/post/editor';
@@ -14,15 +9,9 @@ import type { components } from '@/shared/api/openapi';
 import { BaseHtml } from '@/shared/ui/base-html';
 import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
-import {
-  MessageScrollerContent,
-  MessageScrollerProvider,
-  MessageScrollerViewport,
-  MessageScroller,
-} from '@/shared/ui/ds/message-scroller';
 import { Spinner } from '@/shared/ui/ds/spinner';
 import { isClient } from '@/shared/utils/target';
-import { useQueryClient } from '@tanstack/react-query';
+import { MessageScroller } from '@shadcn/react/message-scroller';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -189,61 +178,90 @@ export const Posts = ({
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
 }) => {
   const { y } = useWindowScroll();
-  const router = useRouter();
-
   const { isAdmin } = useIsAdminContext();
-
-  const queryClient = useQueryClient();
 
   const infiniteQueryGetPosts = useInfiniteQueryGetPosts(selectedPostId);
 
   const posts =
-    infiniteQueryGetPosts.data?.pages.flatMap((page) => {
-      return page.rows;
-    }) ?? [];
+    infiniteQueryGetPosts.data?.pages
+      .flatMap((page) => {
+        return page.rows;
+      })
+      .toSorted((leftPost, rightPost) => {
+        return new Date(rightPost._meta.createdAt).getTime() - new Date(leftPost._meta.createdAt).getTime();
+      }) ?? [];
 
-  const shouldRenderButtonToTheBeggining = isClient && y > globalThis.innerHeight / 2;
+  useEffect(() => {
+    if (!isClient) {
+      return;
+    }
 
-  const onClick = async () => {
-    queryClient.setQueryData(infiniteQueryKeyGetPosts, () => {
-      return {
-        pages: [],
-        pageParams: [],
-      };
-    });
+    const scrollTop = y;
+    const viewportHeight = globalThis.innerHeight;
+    const edgeThreshold = viewportHeight;
+    const fullHeight = document.documentElement.scrollHeight;
 
-    await queryClient.invalidateQueries({ queryKey: infiniteQueryKeyGetPosts });
-    router.push('/blog');
+    if (
+      scrollTop <= edgeThreshold &&
+      infiniteQueryGetPosts.hasPreviousPage &&
+      !infiniteQueryGetPosts.isFetchingPreviousPage
+    ) {
+      infiniteQueryGetPosts.fetchPreviousPage();
+      return;
+    }
 
-    globalThis.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    const distanceToBottom = fullHeight - (scrollTop + viewportHeight);
+
+    if (
+      distanceToBottom <= edgeThreshold &&
+      infiniteQueryGetPosts.hasNextPage &&
+      !infiniteQueryGetPosts.isFetchingNextPage
+    ) {
+      infiniteQueryGetPosts.fetchNextPage();
+    }
+  }, [
+    y,
+    infiniteQueryGetPosts,
+    infiniteQueryGetPosts.hasNextPage,
+    infiniteQueryGetPosts.hasPreviousPage,
+    infiniteQueryGetPosts.isFetchingNextPage,
+    infiniteQueryGetPosts.isFetchingPreviousPage,
+  ]);
 
   return (
     <DeletePostProvider>
       <EditPostProvider>
-        <MessageScrollerProvider>
-          <MessageScroller>
-            <MessageScrollerViewport>
-              <MessageScrollerContent>
-                <div className="flex flex-col gap-4">
-                  {shouldRenderButtonToTheBeggining && (
-                    <Button className="fixed z-10 inset-x-0 top-header-height" {...{ onClick }}>
-                      TTB
-                    </Button>
-                  )}
+        <MessageScroller.Provider defaultScrollPosition="start">
+          <MessageScroller.Root className="relative">
+            <MessageScroller.Viewport>
+              <MessageScroller.Content className="mb-6 flex flex-col gap-6">
+                {infiniteQueryGetPosts.isFetchingPreviousPage && (
+                  <MessageScroller.Item>
+                    <Spinner />
+                  </MessageScroller.Item>
+                )}
 
-                  {infiniteQueryGetPosts.isFetchingPreviousPage && <Spinner />}
+                {posts.map((post) => {
+                  return (
+                    <MessageScroller.Item
+                      key={post._meta.id}
+                      messageId={post._meta.id}
+                      scrollAnchor={selectedPostId === post._meta.id}
+                    >
+                      <Post {...{ post, selectedPostId }} />
+                    </MessageScroller.Item>
+                  );
+                })}
 
-                  {posts.map((post) => {
-                    return <Post key={post._meta.id} {...{ post, selectedPostId }} />;
-                  })}
-
-                  {infiniteQueryGetPosts.isFetchingNextPage && <Spinner />}
-                </div>
-              </MessageScrollerContent>
-            </MessageScrollerViewport>
-          </MessageScroller>
-        </MessageScrollerProvider>
+                {infiniteQueryGetPosts.isFetchingNextPage && (
+                  <MessageScroller.Item>
+                    <Spinner />
+                  </MessageScroller.Item>
+                )}
+              </MessageScroller.Content>
+            </MessageScroller.Viewport>
+          </MessageScroller.Root>
+        </MessageScroller.Provider>
 
         {isAdmin && <DialogDeletePost />}
       </EditPostProvider>
