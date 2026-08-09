@@ -16,7 +16,7 @@ import { MessageScroller } from '@shadcn/react/message-scroller';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState, type ComponentProps } from 'react';
+import { useEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
 import { useWindowScroll } from 'react-use';
 
 const DialogDeletePost = dynamic(() => {
@@ -181,20 +181,65 @@ export const Posts = ({
   const t = useTranslations('Post');
   const { y } = useWindowScroll();
   const { isAdmin } = useIsAdminContext();
+  const scrolledToPostIdRef = useRef<components['schemas']['PostResponse']['_meta']['id'] | null>(null);
+  const previousWindowYRef = useRef<number | null>(null);
 
   const infiniteQueryGetPosts = useInfiniteQueryGetPosts(selectedPostId);
 
-  const posts =
-    infiniteQueryGetPosts.data?.pages
-      .flatMap((page) => {
+  const posts = useMemo(() => {
+    return (
+      infiniteQueryGetPosts.data?.pages.flatMap((page) => {
         return page.rows;
-      })
-      .toSorted((leftPost, rightPost) => {
-        return new Date(rightPost._meta.createdAt).getTime() - new Date(leftPost._meta.createdAt).getTime();
-      }) ?? [];
+      }) ?? []
+    );
+  }, [infiniteQueryGetPosts.data?.pages]);
+
+  useEffect(() => {
+    scrolledToPostIdRef.current = null;
+  }, [selectedPostId]);
+
+  useEffect(() => {
+    if (!selectedPostId) {
+      return;
+    }
+
+    if (scrolledToPostIdRef.current === selectedPostId) {
+      return;
+    }
+
+    const targetPostElement = globalThis.document.querySelector<HTMLElement>(
+      `[data-message-id="${CSS.escape(selectedPostId)}"]`,
+    );
+
+    if (!targetPostElement) {
+      return;
+    }
+
+    globalThis.requestAnimationFrame(() => {
+      targetPostElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    });
+
+    scrolledToPostIdRef.current = selectedPostId;
+  }, [posts, selectedPostId]);
 
   useEffect(() => {
     if (!isClient) {
+      return;
+    }
+
+    const previousWindowY = previousWindowYRef.current;
+    previousWindowYRef.current = y;
+
+    if (previousWindowY === null) {
+      return;
+    }
+
+    const scrollDelta = y - previousWindowY;
+
+    if (scrollDelta === 0) {
       return;
     }
 
@@ -204,6 +249,7 @@ export const Posts = ({
     const fullHeight = document.documentElement.scrollHeight;
 
     if (
+      scrollDelta < 0 &&
       scrollTop <= edgeThreshold &&
       infiniteQueryGetPosts.hasPreviousPage &&
       !infiniteQueryGetPosts.isFetchingPreviousPage
@@ -215,6 +261,7 @@ export const Posts = ({
     const distanceToBottom = fullHeight - (scrollTop + viewportHeight);
 
     if (
+      scrollDelta > 0 &&
       distanceToBottom <= edgeThreshold &&
       infiniteQueryGetPosts.hasNextPage &&
       !infiniteQueryGetPosts.isFetchingNextPage
