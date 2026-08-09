@@ -34,6 +34,8 @@ export const DialogDeletePost = () => {
 
     await deletePostById(postId);
 
+    closeDeletePost();
+
     router.refresh();
   };
 
@@ -41,8 +43,8 @@ export const DialogDeletePost = () => {
     <Dialog open={!isNil(postId)} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-          <DialogDescription>{t('description')}</DialogDescription>
+          <DialogTitle>{t('deletePost')}</DialogTitle>
+          <DialogDescription>{t('thePostWillBePermanentlyDeleted')}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button onClick={closeDeletePost} variant="outline">

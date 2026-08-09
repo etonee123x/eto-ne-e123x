@@ -3,21 +3,14 @@ import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Separator } from '@/shared/ui/ds/separator';
 import { getIsAdmin } from '@/entities/session/server';
-import { DeletePostProvider } from '@/features/post/delete';
-import { EditPostProvider } from '@/features/post/editor';
-import { Post } from '@/widgets/post';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { postsQueryOptions } from '@/widgets/post/queries/use-query-posts';
+import { infiniteQueryOptionsGetPosts } from '@/entities/post';
+import { Posts } from '@/widgets/posts';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/shared/ui/ds/empty';
 
 const FormPostCreate = dynamic(() => {
   return import('@/features/post/editor').then((module) => {
     return module.FormPostCreate;
-  });
-});
-
-const DialogDeletePost = dynamic(() => {
-  return import('@/features/post/delete').then((module) => {
-    return module.DialogDeletePost;
   });
 });
 
@@ -28,10 +21,14 @@ export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blo
     return notFound();
   }
 
-  const postId = postIdAsSegmentsCrutchWFT?.[0];
+  const postId = postIdAsSegmentsCrutchWFT?.[0] ?? null;
 
   const queryClient = new QueryClient();
-  const posts = await queryClient.fetchQuery(postsQueryOptions());
+  const posts = await queryClient.fetchInfiniteQuery(infiniteQueryOptionsGetPosts(postId));
+
+  const hasPosts = posts.pages.some((page) => {
+    return page.rows.length > 0;
+  });
 
   const isAdmin = await getIsAdmin();
 
@@ -39,25 +36,25 @@ export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blo
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <DeletePostProvider>
-        <EditPostProvider>
-          <section className="layout-container">
-            <h1 className="h1 mb-4">{t('blog')}</h1>
-            {isAdmin && (
-              <>
-                <FormPostCreate />
-                <Separator className="my-4" />
-              </>
-            )}
-            <div className="flex flex-col gap-4">
-              {posts.rows.map((post) => {
-                return <Post selectedPostId={postId} {...{ post }} key={post._meta.id} />;
-              })}
-            </div>
-            {isAdmin && <DialogDeletePost />}
-          </section>
-        </EditPostProvider>
-      </DeletePostProvider>
+      <section className="layout-container">
+        <h1 className="h1 mb-4">{t('blog')}</h1>
+        {isAdmin && (
+          <>
+            <FormPostCreate />
+            <Separator className="my-4" />
+          </>
+        )}
+        {hasPosts ? (
+          <Posts selectedPostId={postId} />
+        ) : (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{t('noPosts')}</EmptyTitle>
+              <EmptyDescription>{t('noPostsFound')}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
+      </section>
     </HydrationBoundary>
   );
 }

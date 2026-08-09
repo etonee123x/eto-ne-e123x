@@ -14,15 +14,17 @@
     "toggleTheme": "Toggle theme"
   },
   "Blog": {
-    "blog": "Blog"
+    "blog": "Blog",
+    "noPosts": "No posts",
+    "noPostsFound": "No posts found"
   },
   "PostAttachmentImage": {
     "attachment": "Attachment {index}"
   },
   "PostDelete": {
     "delete": "Delete",
-    "title": "Delete post?",
-    "description": "The post and all of its attachments will be permanently deleted.",
+    "deletePost": "Delete post?",
+    "thePostWillBePermanentlyDeleted": "The post will be permanently deleted.",
     "cancel": "Cancel"
   },
   "Post": {

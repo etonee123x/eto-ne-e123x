@@ -1,6 +1,6 @@
 'use client';
 
-import { PostAttachment } from '@/entities/post';
+import { PostAttachment, useMutationPatchPostById } from '@/entities/post';
 import { useIsAdminContext } from '@/entities/session/client';
 import { useDeletePostContext } from '@/features/post/delete';
 import { useEditPostContext, FormPost, type FormPostRef } from '@/features/post/editor';
@@ -12,7 +12,6 @@ import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { useMutationPatchPostById } from '../mutations/use-mutation-patch-post-by-id';
 
 export const Post = ({
   post,

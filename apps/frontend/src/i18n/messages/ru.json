@@ -15,15 +15,16 @@
   },
   "Blog": {
     "blog": "Блог",
-    "send": "Отправить"
+    "noPosts": "Нет постов",
+    "noPostsFound": "Постов не найдено"
   },
   "PostAttachmentImage": {
     "attachment": "Вложение {index}"
   },
   "PostDelete": {
     "delete": "Удалить",
-    "title": "Удалить пост?",
-    "description": "Пост и все его вложения будут удалены без возможности восстановления.",
+    "deletePost": "Удалить пост?",
+    "thePostWillBePermanentlyDeleted": "Пост будет безвозвратно удалён.",
     "cancel": "Отмена"
   },
   "Post": {
