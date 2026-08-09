@@ -16,8 +16,8 @@ import { MessageScroller } from '@shadcn/react/message-scroller';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
-import { useEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
-import { useWindowScroll } from 'react-use';
+import { useEffect, useRef, useState, type ComponentProps } from 'react';
+import { useInfiniteScroll } from '@reactuses/core';
 
 const DialogDeletePost = dynamic(() => {
   return import('@/features/post/delete').then((module) => {
@@ -179,31 +179,93 @@ export const Posts = ({
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
 }) => {
   const t = useTranslations('Post');
-  const { y } = useWindowScroll();
+  // const { y } = useWindowScroll();
   const { isAdmin } = useIsAdminContext();
-  const scrolledToPostIdRef = useRef<components['schemas']['PostResponse']['_meta']['id'] | null>(null);
-  const previousWindowYRef = useRef<number | null>(null);
 
-  const infiniteQueryGetPosts = useInfiniteQueryGetPosts(selectedPostId);
+  const {
+    fetchNextPage,
+    fetchPreviousPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
+    data: infiniteQueryGetPostsData,
+  } = useInfiniteQueryGetPosts(selectedPostId);
 
-  const posts = useMemo(() => {
-    return (
-      infiniteQueryGetPosts.data?.pages.flatMap((page) => {
-        return page.rows;
-      }) ?? []
-    );
-  }, [infiniteQueryGetPosts.data?.pages]);
+  const posts =
+    infiniteQueryGetPostsData?.pages.flatMap((page) => {
+      return page.rows;
+    }) ?? [];
 
-  useEffect(() => {
-    scrolledToPostIdRef.current = null;
-  }, [selectedPostId]);
+  useInfiniteScroll(
+    () => {
+      return isClient ? document.scrollingElement : null;
+    },
+    async ([, , isScrolling]) => {
+      console.log('scrolling top', isScrolling);
+      if (isFetchingNextPage || !hasNextPage) {
+        return;
+      }
+
+      if (!isScrolling) {
+        return;
+      }
+
+      try {
+        await fetchNextPage();
+      } catch {
+        // чтобы не спамить запросами при ошибке (когда нет интернета)
+        await new Promise((resolve) => {
+          return setTimeout(resolve, 1000);
+        });
+      }
+    },
+    {
+      distance: isClient ? globalThis.innerHeight / 2 : 0,
+      direction: 'top',
+    },
+  );
+
+  useInfiniteScroll(
+    () => {
+      return isClient ? document.scrollingElement : null;
+    },
+    async ([, , isScrolling]) => {
+      console.log('scrolling bottom', isScrolling);
+      if (isFetchingPreviousPage || !hasPreviousPage) {
+        return;
+      }
+
+      if (!isScrolling) {
+        return;
+      }
+
+      const scrollingElement = globalThis.document.scrollingElement;
+
+      if (!scrollingElement) {
+        return;
+      }
+
+      const scrollTop = scrollingElement.scrollTop;
+      const scrollHeightBefore = scrollingElement.scrollHeight;
+
+      try {
+        await fetchPreviousPage();
+        scrollingElement.scrollTop = scrollingElement.scrollHeight - scrollHeightBefore + scrollTop;
+      } catch {
+        await new Promise((resolve) => {
+          return setTimeout(resolve, 1000);
+        });
+      }
+    },
+    {
+      distance: isClient ? globalThis.innerHeight / 2 : 0,
+      direction: 'top',
+    },
+  );
 
   useEffect(() => {
     if (!selectedPostId) {
-      return;
-    }
-
-    if (scrolledToPostIdRef.current === selectedPostId) {
       return;
     }
 
@@ -215,67 +277,11 @@ export const Posts = ({
       return;
     }
 
-    globalThis.requestAnimationFrame(() => {
-      targetPostElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
+    targetPostElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
     });
-
-    scrolledToPostIdRef.current = selectedPostId;
-  }, [posts, selectedPostId]);
-
-  useEffect(() => {
-    if (!isClient) {
-      return;
-    }
-
-    const previousWindowY = previousWindowYRef.current;
-    previousWindowYRef.current = y;
-
-    if (previousWindowY === null) {
-      return;
-    }
-
-    const scrollDelta = y - previousWindowY;
-
-    if (scrollDelta === 0) {
-      return;
-    }
-
-    const scrollTop = y;
-    const viewportHeight = globalThis.innerHeight;
-    const edgeThreshold = viewportHeight;
-    const fullHeight = document.documentElement.scrollHeight;
-
-    if (
-      scrollDelta < 0 &&
-      scrollTop <= edgeThreshold &&
-      infiniteQueryGetPosts.hasPreviousPage &&
-      !infiniteQueryGetPosts.isFetchingPreviousPage
-    ) {
-      infiniteQueryGetPosts.fetchPreviousPage();
-      return;
-    }
-
-    const distanceToBottom = fullHeight - (scrollTop + viewportHeight);
-
-    if (
-      scrollDelta > 0 &&
-      distanceToBottom <= edgeThreshold &&
-      infiniteQueryGetPosts.hasNextPage &&
-      !infiniteQueryGetPosts.isFetchingNextPage
-    ) {
-      infiniteQueryGetPosts.fetchNextPage();
-    }
-  }, [
-    y,
-    infiniteQueryGetPosts,
-    infiniteQueryGetPosts.hasNextPage,
-    infiniteQueryGetPosts.hasPreviousPage,
-    infiniteQueryGetPosts.isFetchingNextPage,
-    infiniteQueryGetPosts.isFetchingPreviousPage,
-  ]);
+  }, [selectedPostId]);
 
   return (
     <DeletePostProvider>
@@ -284,7 +290,7 @@ export const Posts = ({
           <MessageScroller.Root className="relative">
             <MessageScroller.Viewport>
               <MessageScroller.Content className="mb-6 flex flex-col gap-6">
-                {infiniteQueryGetPosts.isFetchingPreviousPage && (
+                {isFetchingPreviousPage && (
                   <MessageScroller.Item className="flex justify-center">
                     <Spinner />
                   </MessageScroller.Item>
@@ -302,13 +308,13 @@ export const Posts = ({
                   );
                 })}
 
-                {infiniteQueryGetPosts.isFetchingNextPage && (
+                {isFetchingNextPage && (
                   <MessageScroller.Item className="flex justify-center">
                     <Spinner />
                   </MessageScroller.Item>
                 )}
 
-                {!infiniteQueryGetPosts.hasNextPage && posts.length > 0 && (
+                {!hasNextPage && posts.length > 0 && (
                   <MessageScroller.Item>
                     <Marker variant="separator" className="text-xs">
                       <MarkerContent>{t('thereAreNoMorePosts')}</MarkerContent>
