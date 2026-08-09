@@ -1,13 +1,7 @@
 import { client } from '@/shared/api/client';
 
-export const getFolderData = async (path: string) => {
-  const response = await client['/folder-data'].GET({
-    params: {
-      query: {
-        path: decodeURIComponent(path),
-      },
-    },
-  });
+export const getPosts = async () => {
+  const response = await client['/posts'].GET();
 
   if (response.data) {
     return response.data;

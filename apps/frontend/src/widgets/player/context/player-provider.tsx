@@ -3,7 +3,8 @@ import { PlayerProviderClient } from './player-provider-client';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
 import { throwError } from '@/shared/utils/throw-error';
-import { getFolderData } from '@/entities/folder';
+import { getFolderDataQueryOptions } from '@/entities/folder';
+import { QueryClient } from '@tanstack/react-query';
 
 export const PlayerProvider = async ({
   children,
@@ -13,8 +14,9 @@ export const PlayerProvider = async ({
 
   const explorerPath = xPathname.startsWith('/explorer') ? xPathname.replace(/^\/explorer/, '') || '/' : null;
 
-  const response = isNil(explorerPath) ? null : await getFolderData(explorerPath || '/');
-  const initialFolderData = response?.data ?? null;
+  const initialFolderData = isNil(explorerPath)
+    ? null
+    : await new QueryClient().fetchQuery(getFolderDataQueryOptions(explorerPath || '/'));
 
   return <PlayerProviderClient initialFolderData={initialFolderData}>{children}</PlayerProviderClient>;
 };

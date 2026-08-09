@@ -1,9 +1,9 @@
 'use client';
 
-import { client } from '@/shared/api/client';
 import type { components } from '@/shared/api/openapi';
 import { throwError } from '@/shared/utils/throw-error';
 import { createContext, type PropsWithChildren, useContext, useState } from 'react';
+import { useMutationDeletePostById } from '../mutations/use-mutation-delete-post-by-id';
 
 type PostId = components['schemas']['PostResponse']['_meta']['id'];
 
@@ -18,6 +18,7 @@ export const DeletePostContext = createContext<DeletePostContextValue | null>(nu
 
 export const DeletePostProvider = ({ children }: PropsWithChildren) => {
   const [postId, setPostId] = useState<PostId | null>(null);
+  const mutationDeletePostById = useMutationDeletePostById();
 
   const requestDeletePostById = (id: PostId) => {
     setPostId(id);
@@ -28,11 +29,7 @@ export const DeletePostProvider = ({ children }: PropsWithChildren) => {
   };
 
   const deletePostById = async (id: PostId) => {
-    await client['/posts/{id}'].DELETE({
-      params: {
-        path: { id },
-      },
-    });
+    await mutationDeletePostById.mutateAsync(id);
   };
 
   return (

@@ -8,14 +8,14 @@ import {
 import { Fragment } from 'react/jsx-runtime';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { QueryClient } from '@tanstack/react-query';
 import { type components } from '@/shared/api/openapi';
 import { ItemGroup } from '@/shared/ui/ds/item';
-import { getFolderData } from '@/entities/folder';
 import { throwError } from '@/shared/utils/throw-error';
 import { SendFolderDataToPlayer } from '@/widgets/player';
 import { SendFolderDataToGallery } from '@/widgets/gallery';
+import { getFolderDataQueryOptions } from '@/entities/folder';
 
 const ExplorerElementUp = dynamic(() => {
   return import('@/entities/folder').then((module) => {
@@ -45,10 +45,8 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   const { segments = [] } = await params;
   const t = await getTranslations('Explorer');
 
-  const { data: folderData } = await getFolderData('/' + segments.join('/'));
-  if (!folderData) {
-    return notFound();
-  }
+  const queryClient = new QueryClient();
+  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
 
   const navigationItems = folderData.pathDirectory
     .split('/')

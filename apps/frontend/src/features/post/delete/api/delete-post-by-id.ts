@@ -1,11 +1,10 @@
 import { client } from '@/shared/api/client';
+import type { components } from '@/shared/api/openapi';
 
-export const getFolderData = async (path: string) => {
-  const response = await client['/folder-data'].GET({
+export const deletePostById = async (id: components['schemas']['PostResponse']['_meta']['id']) => {
+  const response = await client['/posts/{id}'].DELETE({
     params: {
-      query: {
-        path: decodeURIComponent(path),
-      },
+      path: { id },
     },
   });
 

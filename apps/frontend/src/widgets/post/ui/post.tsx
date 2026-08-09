@@ -12,7 +12,7 @@ import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { client } from '@/shared/api/client';
+import { useMutationPatchPostById } from '../mutations/use-mutation-patch-post-by-id';
 
 export const Post = ({
   post,
@@ -54,29 +54,13 @@ export const Post = ({
     setIsEditFormValid(isValid);
   };
 
+  const mutationPatchPostById = useMutationPatchPostById();
+
   const onSubmit: ComponentProps<typeof FormPost>['onSubmit'] = async (...[, _post, files]) => {
-    await client['/posts/{id}'].PATCH({
-      params: {
-        path: {
-          id: post._meta.id,
-        },
-      },
-      body: {
-        ..._post,
-        files: [],
-      },
-      bodySerializer: (body) => {
-        const formData = new FormData();
-
-        formData.append('text', body.text);
-        formData.append(`attachments`, JSON.stringify(body.attachments));
-
-        files.forEach((file) => {
-          formData.append('files', file);
-        });
-
-        return formData;
-      },
+    await mutationPatchPostById.mutateAsync({
+      id: post._meta.id,
+      data: _post,
+      files,
     });
 
     exitEditPost();
