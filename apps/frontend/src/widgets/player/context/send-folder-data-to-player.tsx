@@ -9,12 +9,17 @@ export const SendFolderDataToPlayer = ({ folderData }: { folderData: components[
   const { setTrack, setPlaylist, setPathDirectory } = usePlayerContext();
 
   useEffect(() => {
-    setTrack(folderData.file?.fileType === FILE_TYPES.AUDIO ? folderData.file : null);
+    const fileAudio = folderData.file?.fileType === FILE_TYPES.AUDIO ? folderData.file : null;
+    if (fileAudio) {
+      setTrack(fileAudio);
+    }
+
     setPlaylist(
       folderData.files.filter((file) => {
         return file.fileType === FILE_TYPES.AUDIO;
       }),
     );
+
     setPathDirectory(folderData.pathDirectory);
   }, [folderData, setPathDirectory, setPlaylist, setTrack]);
 

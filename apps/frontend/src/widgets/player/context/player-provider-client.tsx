@@ -54,7 +54,7 @@ export const PlayerProviderClient = ({
       audio.removeAttribute('src');
       audio.load();
     };
-  }, [track]);
+  }, [track?.src]);
 
   return (
     <PlayerContext
