@@ -31,7 +31,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "thereAreNoMorePosts": "There are no more posts"
   },
   "FormPost": {
     "message": "Message...",

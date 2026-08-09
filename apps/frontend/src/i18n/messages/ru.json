@@ -31,7 +31,8 @@
     "edit": "Редактировать",
     "delete": "Удалить",
     "confirm": "Подтвердить",
-    "cancel": "Отменить"
+    "cancel": "Отменить",
+    "thereAreNoMorePosts": "Больше постов нет"
   },
   "FormPost": {
     "message": "Сообщение...",

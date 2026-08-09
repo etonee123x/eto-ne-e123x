@@ -9,6 +9,7 @@ import type { components } from '@/shared/api/openapi';
 import { BaseHtml } from '@/shared/ui/base-html';
 import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
+import { Marker, MarkerContent } from '@/shared/ui/ds/marker';
 import { Spinner } from '@/shared/ui/ds/spinner';
 import { isClient } from '@/shared/utils/target';
 import { MessageScroller } from '@shadcn/react/message-scroller';
@@ -177,6 +178,7 @@ export const Posts = ({
 }: {
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
 }) => {
+  const t = useTranslations('Post');
   const { y } = useWindowScroll();
   const { isAdmin } = useIsAdminContext();
 
@@ -236,7 +238,7 @@ export const Posts = ({
             <MessageScroller.Viewport>
               <MessageScroller.Content className="mb-6 flex flex-col gap-6">
                 {infiniteQueryGetPosts.isFetchingPreviousPage && (
-                  <MessageScroller.Item>
+                  <MessageScroller.Item className="flex justify-center">
                     <Spinner />
                   </MessageScroller.Item>
                 )}
@@ -254,8 +256,16 @@ export const Posts = ({
                 })}
 
                 {infiniteQueryGetPosts.isFetchingNextPage && (
-                  <MessageScroller.Item>
+                  <MessageScroller.Item className="flex justify-center">
                     <Spinner />
+                  </MessageScroller.Item>
+                )}
+
+                {!infiniteQueryGetPosts.hasNextPage && posts.length > 0 && (
+                  <MessageScroller.Item>
+                    <Marker variant="separator" className="text-xs">
+                      <MarkerContent>{t('thereAreNoMorePosts')}</MarkerContent>
+                    </Marker>
                   </MessageScroller.Item>
                 )}
               </MessageScroller.Content>
