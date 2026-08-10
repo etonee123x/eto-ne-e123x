@@ -15,8 +15,9 @@ import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentProps } from 'react';
-import { useInfiniteScroll } from '@reactuses/core';
 import { isNil } from '@/shared/utils/is-nil';
+import { useWindowScrollPosition } from '@/shared/hooks/use-window-scroll-position';
+import { cn } from '@/shared/utils/cn';
 
 const DialogDeletePost = dynamic(() => {
   return import('@/features/post/delete').then((module) => {
@@ -26,7 +27,7 @@ const DialogDeletePost = dynamic(() => {
 
 const Post = ({
   post,
-  // selectedPostId,
+  selectedPostId,
 }: {
   post: components['schemas']['PostResponse'];
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
@@ -47,6 +48,7 @@ const Post = ({
   const formPostId = `form-update-post-${post._meta.id}`;
 
   const isEditing = postId === post._meta.id;
+  const isSelected = selectedPostId === post._meta.id;
 
   useEffect(() => {
     if (!isEditing) {
@@ -79,7 +81,13 @@ const Post = ({
   };
 
   return (
-    <Card data-id={post._meta.id}>
+    <Card
+      data-id={post._meta.id}
+      className={cn(
+        isSelected &&
+          "relative animate-post-highlight after:content-[''] after:absolute after:-inset-1.5 after:rounded-xl after:bg-primary/60 after:animate-post-fade after:-z-10",
+      )}
+    >
       <CardContent className="flex flex-col gap-2">
         {isEditing ? (
           <FormPost
@@ -180,6 +188,11 @@ export const Posts = ({
   const t = useTranslations('Post');
   const { isAdmin } = useIsAdminContext();
 
+  const scrollRestoreRef = useRef<{
+    scrollTop: number;
+    scrollHeight: number;
+  } | null>(null);
+
   const {
     fetchNextPage,
     fetchPreviousPage,
@@ -198,81 +211,10 @@ export const Posts = ({
     );
   }, [infiniteQueryGetPostsData]);
 
-  const restoreScrollRef = useRef<{
-    scrollTop: number;
-    scrollHeight: number;
-  } | null>(null);
-
-  useInfiniteScroll(
-    // @ts-expect-error globalThis is not typed correctly for useInfiniteScroll
-    globalThis,
-    async ([, , isScrolling, , direction]) => {
-      if (!isScrolling) {
-        return;
-      }
-
-      if (!direction.top) {
-        return;
-      }
-
-      if (isFetchingPreviousPage) {
-        return;
-      }
-
-      if (!hasPreviousPage) {
-        return;
-      }
-
-      const scrollingElement = globalThis.document.scrollingElement;
-
-      if (!scrollingElement) {
-        return;
-      }
-
-      restoreScrollRef.current = {
-        scrollTop: scrollingElement.scrollTop,
-        scrollHeight: scrollingElement.scrollHeight,
-      };
-
-      await fetchPreviousPage();
-    },
-    {
-      direction: 'top',
-      distance: globalThis.innerHeight / 2,
-    },
-  );
-
-  useInfiniteScroll(
-    // @ts-expect-error globalThis is not typed correctly for useInfiniteScroll
-    globalThis,
-    async ([, , isScrolling, , direction]) => {
-      if (!isScrolling) {
-        return;
-      }
-
-      if (!direction.bottom) {
-        return;
-      }
-
-      if (isFetchingNextPage) {
-        return;
-      }
-
-      if (!hasNextPage) {
-        return;
-      }
-
-      await fetchNextPage();
-    },
-    {
-      distance: globalThis.innerHeight / 2,
-    },
-  );
-
   useLayoutEffect(() => {
-    const restore = restoreScrollRef.current;
+    const scrollRestoreRefCurrent = scrollRestoreRef.current;
 
-    if (!restore) {
+    if (!scrollRestoreRefCurrent) {
       return;
     }
 
@@ -282,12 +224,30 @@ export const Posts = ({
       return;
     }
 
-    const heightDelta = scrollingElement.scrollHeight - restore.scrollHeight;
+    scrollingElement.scrollTop =
+      scrollRestoreRefCurrent.scrollTop + scrollingElement.scrollHeight - scrollRestoreRefCurrent.scrollHeight;
 
-    scrollingElement.scrollTop = restore.scrollTop + heightDelta;
+    scrollRestoreRef.current = null;
+  }, [posts.length]);
 
-    restoreScrollRef.current = null;
-  }, [posts]);
+  useWindowScrollPosition(
+    async (direction) => {
+      if (direction === 'top' && hasPreviousPage && !isFetchingPreviousPage) {
+        await fetchPreviousPage();
+        scrollRestoreRef.current = document.scrollingElement
+          ? {
+              scrollTop: document.scrollingElement.scrollTop,
+              scrollHeight: document.scrollingElement.scrollHeight,
+            }
+          : null;
+      } else if (direction === 'bottom' && hasNextPage && !isFetchingNextPage) {
+        await fetchNextPage();
+      }
+    },
+    {
+      offset: globalThis.innerHeight / 2,
+    },
+  );
 
   useEffect(() => {
     if (isNil(selectedPostId)) {
@@ -295,7 +255,6 @@ export const Posts = ({
     }
 
     globalThis.document.querySelector(`[data-id="${CSS.escape(selectedPostId)}"]`)?.scrollIntoView({
-      behavior: 'smooth',
       block: 'center',
     });
   }, [selectedPostId]);
