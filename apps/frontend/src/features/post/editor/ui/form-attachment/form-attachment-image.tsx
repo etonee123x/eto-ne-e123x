@@ -7,6 +7,7 @@ import {
   AttachmentTitle,
 } from '@/shared/ui/ds/attachment';
 import { Grip, X } from 'lucide-react';
+import Image from 'next/image';
 import { type ComponentProps } from 'react';
 
 export const FormAttachmentImage = ({
@@ -15,7 +16,7 @@ export const FormAttachmentImage = ({
   onClickRemove,
   handleRef,
   ...props
-}: Pick<ComponentProps<'img'>, 'src'> & {
+}: Pick<ComponentProps<typeof Image>, 'src'> & {
   name: ComponentProps<typeof AttachmentTitle>['children'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
   handleRef: ComponentProps<typeof AttachmentAction>['ref'];
@@ -23,7 +24,7 @@ export const FormAttachmentImage = ({
   return (
     <Attachment {...props}>
       <AttachmentMedia>
-        <img src={src} alt="" />
+        <Image src={src} alt="" />
       </AttachmentMedia>
       <AttachmentContent>
         <AttachmentTitle>{name}</AttachmentTitle>

@@ -15,9 +15,14 @@ import { ItemGroup } from '@/shared/ui/ds/item';
 import { throwError } from '@/shared/utils/throw-error';
 import { SendFolderDataToPlayer } from '@/widgets/player';
 import { SendFolderDataToGallery } from '@/widgets/gallery';
-import { getFolderDataQueryOptions, isFolderDataItemFileAudio } from '@/entities/folder-data';
+import {
+  getFolderDataQueryOptions,
+  isFolderDataItemFileAudio,
+  isFolderDataItemFileImage,
+} from '@/entities/folder-data';
 import type { Metadata } from 'next';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
+import { notFound } from 'next/navigation';
 
 const ExplorerElementUp = dynamic(() => {
   return import('@/entities/folder-data').then((module) => {
@@ -52,7 +57,12 @@ export const generateMetadata = async ({
   const intlListFormat = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' });
 
   const queryClient = new QueryClient();
-  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
+  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/'))).catch(() => {
+    return null;
+  });
+  if (!folderData) {
+    return notFound();
+  }
 
   const navigationItems = pathDirectoryToNaigationItems(folderData.pathDirectory);
   const folderName = navigationItems.at(-1)?.text;
@@ -73,17 +83,15 @@ export const generateMetadata = async ({
         album:
           folderData.file.metadata.album || folderName
             ? t('description.audio.album', {
-                album: folderData.file.metadata.album ?? folderName,
+                album: folderData.file.metadata.album ?? folderName ?? '',
               })
-            : undefined,
-        year: folderData.file.metadata.year
-          ? t('description.audio.year', { year: folderData.file.metadata.year })
-          : undefined,
+            : '',
+        year: folderData.file.metadata.year ? t('description.audio.year', { year: folderData.file.metadata.year }) : '',
         duration: folderData.file.metadata.duration
           ? t('description.audio.duration', {
               duration: millisecondsToHumanReadable(folderData.file.metadata.duration),
             })
-          : undefined,
+          : '',
       }),
     };
   }
@@ -91,15 +99,15 @@ export const generateMetadata = async ({
   return {
     ...defaults,
     description: t('description.common.soWhatWeHaveHere', {
-      folderName: folderName,
+      folderName: folderName ?? '',
       fileDescription: folderData.file
         ? t('description.common.watch', {
-            type: isFolderDataItemFileImage(folderData.file) //
+            type: isFolderDataItemFileImage(folderData.file)
               ? t('description.common.image')
               : t('description.common.video'),
             fileName: folderData.file.name,
           })
-        : undefined,
+        : '',
     }),
   };
 };

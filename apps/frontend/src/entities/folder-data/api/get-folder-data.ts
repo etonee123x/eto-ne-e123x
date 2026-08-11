@@ -13,9 +13,5 @@ export const getFolderData = async (path: string) => {
     return response.data;
   }
 
-  if (response.error instanceof Error) {
-    throw response.error;
-  }
-
-  throw new Error('Unknown error');
+  throw new Error(response.error.message);
 };

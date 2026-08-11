@@ -125,16 +125,7 @@ const eslintConfig = defineConfig([
           checksVoidReturn: false,
         },
       ],
-      // '@typescript-eslint/no-invalid-void-type': 'off',
-
-      // https://github.com/typescript-eslint/typescript-eslint/issues/2865
-      // TODO: пофиксить правила ниже vue типами
-      // '@typescript-eslint/no-unsafe-call': 'off',
-      // '@typescript-eslint/no-unsafe-return': 'off',
-      // '@typescript-eslint/no-unsafe-assignment': 'off',
-      // '@typescript-eslint/no-unsafe-member-access': 'off',
-      // '@typescript-eslint/no-unsafe-argument': 'off',
-      // '@typescript-eslint/no-redundant-type-constituents': 'off',
+      '@typescript-eslint/no-invalid-void-type': 'off',
 
       'sonarjs/todo-tag': 'warn',
 

@@ -10,9 +10,5 @@ export const getPosts = async (query: operations['getPosts']['parameters']['quer
     return response.data;
   }
 
-  if (response.error instanceof Error) {
-    throw response.error;
-  }
-
-  throw new Error('Unknown error');
+  throw new Error(response.error.message);
 };

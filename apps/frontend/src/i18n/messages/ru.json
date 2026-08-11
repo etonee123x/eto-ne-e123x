@@ -48,7 +48,24 @@
     "send": "Отправить"
   },
   "Explorer": {
-    "content": "Контент"
+    "content": "Контент",
+    "treeDots": "...",
+    "description": {
+      "common": {
+        "soWhatWeHaveHere": "Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками",
+        "watch": ", смотреть {type} {fileName}",
+        "image": "изображение",
+        "video": "видео"
+      },
+      "audio": {
+        "checkOutTrack": "Зацени трек \"{name}\" — {artists}{album}{year}{duration} и чо нибудь ещё",
+        "artists": " {artists}",
+        "album": " из \"{album}\"",
+        "year": " ({year})",
+        "duration": " длительностью {duration}",
+        "idkWho": "хз кто"
+      }
+    }
   },
   "ExplorerElementAudio": {
     "duration": "Длительность",

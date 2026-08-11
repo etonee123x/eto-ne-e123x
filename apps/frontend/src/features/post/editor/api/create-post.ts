@@ -27,9 +27,5 @@ export const createPost = async (
     return response.data;
   }
 
-  if (response.error instanceof Error) {
-    throw response.error;
-  }
-
-  throw new Error('Unknown error');
+  throw new Error(response.error.message);
 };

@@ -8,4 +8,5 @@ export {
   isFolderDataItemBase,
   isFolderDataItemFileAudio,
   isFolderDataItemFileVideo,
+  isFolderDataItemFileImage,
 } from './model/guards';

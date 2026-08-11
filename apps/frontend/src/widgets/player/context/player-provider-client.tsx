@@ -26,7 +26,6 @@ export const PlayerProviderClient = ({
     initialFolderData?.pathDirectory ?? null,
   );
 
-  // TODO: перенести в контекст
   const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
 
   useEffect(() => {

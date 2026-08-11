@@ -97,7 +97,12 @@ export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blo
   const postId = postIdAsSegmentsCrutchWFT?.[0] ?? null;
 
   const queryClient = new QueryClient();
-  const posts = await queryClient.fetchInfiniteQuery(infiniteQueryOptionsGetPosts(postId));
+  const posts = await queryClient.fetchInfiniteQuery(infiniteQueryOptionsGetPosts(postId)).catch(() => {
+    return undefined;
+  });
+  if (!posts) {
+    return notFound();
+  }
 
   const hasPosts = posts.pages.some((page) => {
     return page.rows.length > 0;

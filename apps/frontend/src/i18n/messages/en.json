@@ -48,7 +48,24 @@
     "send": "Send"
   },
   "Explorer": {
-    "content": "Content"
+    "content": "Content",
+    "treeDots": "...",
+    "description": {
+      "common": {
+        "soWhatWeHaveHere": "Hmm-m, what do we have here? Folder {folderName}{fileDescription} and other folders and files; with music, pictures, videos",
+        "watch": ", watch the {type} {fileName}",
+        "image": "image",
+        "video": "video"
+      },
+      "audio": {
+        "checkOutTrack": "Check out the track \"{name}\" — {artists}{album}{year}{duration} and something else",
+        "artists": " {artists}",
+        "album": " from \"{album}\"",
+        "year": " ({year})",
+        "duration": " with a duration of {duration}",
+        "idkWho": "idk who"
+      }
+    }
   },
   "ExplorerElementAudio": {
     "duration": "Duration",
