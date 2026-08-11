@@ -3,7 +3,7 @@ import { PlayerProviderClient } from './player-provider-client';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
 import { throwError } from '@/shared/utils/throw-error';
-import { getFolderDataQueryOptions } from '@/entities/folder';
+import { getFolderDataQueryOptions } from '@/entities/folder-data';
 import { QueryClient } from '@tanstack/react-query';
 
 export const PlayerProvider = async ({

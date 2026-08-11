@@ -51,6 +51,9 @@ const eslintConfig = defineConfig([
         { type: 'app', pattern: 'src/app/**' },
         { type: 'widget', pattern: 'src/widgets/*/**', capture: ['slice'] },
         { type: 'feature', pattern: 'src/features/*/*/**', capture: ['family', 'slice'] },
+        // FSD public API for cross-imports: `entities/<owner>/@x/<consumer>.ts`. Must come before the
+        // generic `entity` descriptor below (more specific pattern wins as the primary type).
+        { type: 'entity-x', pattern: 'src/entities/*/@x', capture: ['slice'] },
         { type: 'entity', pattern: 'src/entities/*/**', capture: ['slice'] },
         { type: 'shared', pattern: 'src/shared/**' },
       ],
@@ -184,6 +187,20 @@ const eslintConfig = defineConfig([
               disallow: {
                 to: {
                   element: { type: 'entity', captured: { slice: '!{{ from.element.captured.slice }}' } },
+                },
+              },
+            },
+            // FSD cross-imports: an entity may import another entity's `@x/<slice>.ts` public API only
+            // when `<slice>.ts` matches its own slice, i.e. `entities/order/@x/product.ts` is importable
+            // only from `entities/product`.
+            {
+              from: { element: { type: 'entity' } },
+              disallow: {
+                to: {
+                  element: {
+                    type: 'entity-x',
+                    fileInternalPath: '!{{ from.element.captured.slice }}.ts',
+                  },
                 },
               },
             },

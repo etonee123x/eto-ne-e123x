@@ -13,10 +13,15 @@
     "system": "System",
     "toggleTheme": "Toggle theme"
   },
+  "Index": {
+    "indexPage": "Index page"
+  },
   "Blog": {
     "blog": "Blog",
     "noPosts": "No posts",
-    "noPostsFound": "No posts found"
+    "noPostsFound": "No posts found",
+    "myBlog": "My blog, here you can check out my posts; I write about the complexities of life, about thoughts that concern me! So think with your head.",
+    "postInMyBlog": "A post in my blog"
   },
   "PostAttachmentImage": {
     "attachment": "Attachment {index}"

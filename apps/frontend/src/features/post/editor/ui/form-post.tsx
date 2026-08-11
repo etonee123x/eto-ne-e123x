@@ -16,7 +16,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { extensionToFileType, FILE_TYPES } from '@/shared/utils/file-types';
+import { extensionToFileType, FILE_TYPES } from '@/entities/file';
 import { nonNullable } from '@/shared/utils/non-nullable';
 import { DragDropProvider } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';

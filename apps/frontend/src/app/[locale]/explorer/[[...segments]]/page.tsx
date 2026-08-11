@@ -15,22 +15,24 @@ import { ItemGroup } from '@/shared/ui/ds/item';
 import { throwError } from '@/shared/utils/throw-error';
 import { SendFolderDataToPlayer } from '@/widgets/player';
 import { SendFolderDataToGallery } from '@/widgets/gallery';
-import { getFolderDataQueryOptions } from '@/entities/folder';
+import { getFolderDataQueryOptions, isFolderDataItemFileAudio } from '@/entities/folder-data';
+import type { Metadata } from 'next';
+import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 
 const ExplorerElementUp = dynamic(() => {
-  return import('@/entities/folder').then((module) => {
+  return import('@/entities/folder-data').then((module) => {
     return module.ExplorerElementUp;
   });
 });
 
 const ExplorerElementFolder = dynamic(() => {
-  return import('@/entities/folder').then((module) => {
+  return import('@/entities/folder-data').then((module) => {
     return module.ExplorerElementFolder;
   });
 });
 
 const ExplorerElementFile = dynamic(() => {
-  return import('@/entities/folder').then((module) => {
+  return import('@/entities/folder-data').then((module) => {
     return module.ExplorerElementFile;
   });
 });
@@ -41,14 +43,69 @@ const folderDataItemToHref = (
   return ['/explorer', folderDataItem.path].join('/');
 };
 
-export default async function Explorer({ params }: Readonly<PageProps<'/[locale]/explorer/[[...segments]]'>>) {
-  const { segments = [] } = await params;
+export const generateMetadata = async ({
+  params,
+}: Readonly<PageProps<'/[locale]/explorer/[[...segments]]'>>): Promise<Metadata> => {
+  const { segments = [], locale } = await params;
   const t = await getTranslations('Explorer');
+
+  const intlListFormat = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' });
 
   const queryClient = new QueryClient();
   const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
 
-  const navigationItems = folderData.pathDirectory
+  const navigationItems = pathDirectoryToNaigationItems(folderData.pathDirectory);
+  const folderName = navigationItems.at(-1)?.text;
+
+  const defaults = {
+    title: folderData.file?.name ?? folderName,
+  };
+
+  if (isFolderDataItemFileAudio(folderData.file)) {
+    return {
+      ...defaults,
+      description: t('description.audio.checkOutTrack', {
+        name: folderData.file.name,
+        artists:
+          folderData.file.metadata.artists.length > 0
+            ? intlListFormat.format(folderData.file.metadata.artists)
+            : t('description.audio.idkWho'),
+        album:
+          folderData.file.metadata.album || folderName
+            ? t('description.audio.album', {
+                album: folderData.file.metadata.album ?? folderName,
+              })
+            : undefined,
+        year: folderData.file.metadata.year
+          ? t('description.audio.year', { year: folderData.file.metadata.year })
+          : undefined,
+        duration: folderData.file.metadata.duration
+          ? t('description.audio.duration', {
+              duration: millisecondsToHumanReadable(folderData.file.metadata.duration),
+            })
+          : undefined,
+      }),
+    };
+  }
+
+  return {
+    ...defaults,
+    description: t('description.common.soWhatWeHaveHere', {
+      folderName: folderName,
+      fileDescription: folderData.file
+        ? t('description.common.watch', {
+            type: isFolderDataItemFileImage(folderData.file) //
+              ? t('description.common.image')
+              : t('description.common.video'),
+            fileName: folderData.file.name,
+          })
+        : undefined,
+    }),
+  };
+};
+
+const pathDirectoryToNaigationItems = (pathDirectory: components['schemas']['FolderDataResponse']['pathDirectory']) => {
+  return pathDirectory
     .split('/')
     .filter(Boolean)
     .reduce(
@@ -68,6 +125,16 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
         },
       ],
     );
+};
+
+export default async function Explorer({ params }: Readonly<PageProps<'/[locale]/explorer/[[...segments]]'>>) {
+  const { segments = [] } = await params;
+  const t = await getTranslations('Explorer');
+
+  const queryClient = new QueryClient();
+  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
+
+  const navigationItems = pathDirectoryToNaigationItems(folderData.pathDirectory);
 
   const lastNavigationItem = navigationItems.at(-1) ?? throwError();
   const breadcrumbLinks = navigationItems.slice(0, -1);

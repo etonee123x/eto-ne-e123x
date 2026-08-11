@@ -1,6 +1,6 @@
 import type { components } from '@/shared/api/openapi';
 import dynamic from 'next/dynamic';
-import { FILE_TYPES } from '@/shared/utils/file-types';
+import { FILE_TYPES } from '@/entities/file/@x/post';
 import { checkExhaustive } from '@/shared/utils/check-exhaustive';
 
 const PostAttachmentAudio = dynamic(() => {

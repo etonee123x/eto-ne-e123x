@@ -1,5 +1,5 @@
 import { type components } from '@/shared/api/openapi';
-import { FILE_TYPES } from '@/shared/utils/file-types';
+import { FILE_TYPES } from '@/entities/file';
 import Image from 'next/image';
 
 export const Media = ({

@@ -7,12 +7,85 @@ import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query
 import { infiniteQueryOptionsGetPosts } from '@/entities/post';
 import { Posts } from '@/widgets/posts';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/shared/ui/ds/empty';
+import type { Metadata } from 'next';
+import { isNil } from '@/shared/utils/is-nil';
 
 const FormPostCreate = dynamic(() => {
   return import('@/features/post/editor').then((module) => {
     return module.FormPostCreate;
   });
 });
+
+export const generateMetadata = async ({
+  params,
+}: Readonly<PageProps<'/[locale]/blog/[[...postIdAsSegmentsCrutchWFT]]'>>): Promise<Metadata> => {
+  const t = await getTranslations('Blog');
+
+  const defaults = {
+    title: t('blog'),
+  };
+
+  const { postIdAsSegmentsCrutchWFT } = await params;
+  if (postIdAsSegmentsCrutchWFT && postIdAsSegmentsCrutchWFT.length > 1) {
+    throw new Error('Invalid postIdAsSegmentsCrutchWFT length');
+  }
+
+  const postId = postIdAsSegmentsCrutchWFT?.[0] ?? null;
+
+  if (isNil(postId)) {
+    return {
+      ...defaults,
+      description: t('myBlog'),
+    };
+  }
+
+  const queryClient = new QueryClient();
+  const posts = await queryClient.fetchInfiniteQuery(infiniteQueryOptionsGetPosts(postId));
+
+  const post = posts.pages
+    .flatMap((page) => {
+      return page.rows;
+    })
+    .find((post) => {
+      return post._meta.id === postId;
+    });
+
+  if (!post) {
+    throw new Error('Post not found');
+  }
+
+  if (!post.text) {
+    return {
+      ...defaults,
+      description: t('postInMyBlog'),
+    };
+  }
+
+  const max = 140;
+  const text = post.text.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim();
+
+  if (text.length <= max) {
+    return {
+      ...defaults,
+      description: text,
+    };
+  }
+
+  const textSliced = text.slice(0, max);
+  const indexOfLastSpace = textSliced.lastIndexOf(' ');
+
+  if (indexOfLastSpace === -1) {
+    return {
+      ...defaults,
+      description: textSliced.slice(0, max - 1) + '…',
+    };
+  }
+
+  return {
+    ...defaults,
+    description: textSliced.slice(0, indexOfLastSpace) + '…',
+  };
+};
 
 export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blog/[[...postIdAsSegmentsCrutchWFT]]'>>) {
   const { postIdAsSegmentsCrutchWFT } = await params;

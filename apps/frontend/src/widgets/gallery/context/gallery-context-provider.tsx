@@ -1,6 +1,6 @@
 'use client';
 
-import { FILE_TYPES } from '@/shared/utils/file-types';
+import { FILE_TYPES } from '@/entities/file';
 import { type components } from '@/shared/api/openapi';
 import { type ContextType, type PropsWithChildren, useCallback, useRef, useState } from 'react';
 import { GalleryContext } from './gallery-context';

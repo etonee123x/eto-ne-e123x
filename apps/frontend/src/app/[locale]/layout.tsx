@@ -1,5 +1,6 @@
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 
 import { routing } from '@/i18n/routing';
 import { IsAdminProvider } from '@/entities/session';
@@ -17,6 +18,13 @@ import { ThemeProvider } from '@/features/theme';
 import { QueryClientProvider } from '@/shared/api/query';
 
 import '@/app/globals.css';
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | eto-ne-e123x',
+    default: 'eto-ne-e123x', // a default is required when creating a template
+  },
+};
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
