@@ -57,14 +57,9 @@ export const generateMetadata = async ({
   const intlListFormat = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' });
 
   const queryClient = new QueryClient();
-  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/'))).catch(() => {
-    return null;
-  });
-  if (!folderData) {
-    return notFound();
-  }
+  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
 
-  const navigationItems = pathDirectoryToNaigationItems(folderData.pathDirectory);
+  const navigationItems = pathDirectoryToNavigationItems(folderData.pathDirectory);
   const folderName = navigationItems.at(-1)?.text;
 
   const defaults = {
@@ -112,7 +107,9 @@ export const generateMetadata = async ({
   };
 };
 
-const pathDirectoryToNaigationItems = (pathDirectory: components['schemas']['FolderDataResponse']['pathDirectory']) => {
+const pathDirectoryToNavigationItems = (
+  pathDirectory: components['schemas']['FolderDataResponse']['pathDirectory'],
+) => {
   return pathDirectory
     .split('/')
     .filter(Boolean)
@@ -140,9 +137,14 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   const t = await getTranslations('Explorer');
 
   const queryClient = new QueryClient();
-  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
+  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/'))).catch(() => {
+    return null;
+  });
+  if (!folderData) {
+    return notFound();
+  }
 
-  const navigationItems = pathDirectoryToNaigationItems(folderData.pathDirectory);
+  const navigationItems = pathDirectoryToNavigationItems(folderData.pathDirectory);
 
   const lastNavigationItem = navigationItems.at(-1) ?? throwError();
   const breadcrumbLinks = navigationItems.slice(0, -1);

@@ -16,7 +16,9 @@ export const PlayerProvider = async ({
 
   const initialFolderData = isNil(explorerPath)
     ? null
-    : await new QueryClient().fetchQuery(getFolderDataQueryOptions(explorerPath || '/'));
+    : await new QueryClient().fetchQuery(getFolderDataQueryOptions(explorerPath || '/')).catch(() => {
+        return null;
+      });
 
   return <PlayerProviderClient initialFolderData={initialFolderData}>{children}</PlayerProviderClient>;
 };

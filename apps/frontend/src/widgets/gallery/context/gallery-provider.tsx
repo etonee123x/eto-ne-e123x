@@ -16,7 +16,9 @@ export const GalleryProvider = async ({
 
   const initialFolderData = isNil(explorerPath)
     ? null
-    : await new QueryClient().fetchQuery(getFolderDataQueryOptions(explorerPath || '/'));
+    : await new QueryClient().fetchQuery(getFolderDataQueryOptions(explorerPath || '/')).catch(() => {
+        return null;
+      });
 
   return <GalleryContextProvider initialFolderData={initialFolderData}>{children}</GalleryContextProvider>;
 };
