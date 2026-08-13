@@ -16,6 +16,11 @@
   "Index": {
     "indexPage": "Index page"
   },
+  "NotFound": {
+    "pageNotFound": "Page not found",
+    "pageNotFoundItMayHaveBeenRemoved": "Page not found. It may have been removed or the URL is incorrect.",
+    "toTheMainPage": "Go to the main page"
+  },
   "Blog": {
     "blog": "Blog",
     "noPosts": "No posts",

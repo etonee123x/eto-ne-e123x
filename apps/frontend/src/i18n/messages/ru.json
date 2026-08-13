@@ -16,6 +16,11 @@
   "Index": {
     "indexPage": "Начальная страница"
   },
+  "NotFound": {
+    "pageNotFound": "Страница не найдена",
+    "pageNotFoundItMayHaveBeenRemoved": "Страница не найдена. Возможно, она была удалена или URL некорректен.",
+    "toTheMainPage": "Перейти на главную страницу"
+  },
   "Blog": {
     "blog": "Блог",
     "noPosts": "Нет постов",
