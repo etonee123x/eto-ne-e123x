@@ -54,7 +54,7 @@ export const Gallery = () => {
   return (
     <Dialog open={Boolean(media)} onOpenChange={onOpenChange}>
       {media && (
-        <DialogContent className="border-primary border h-[calc(100dvh-2rem)] w-[calc(100dvw-2rem)]">
+        <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
           <Carousel
             className="h-full min-h-0 w-full *:data-[slot=carousel-content]:h-full"
             setApi={(api) => {

@@ -24,7 +24,7 @@ export const FormAttachmentImage = ({
   return (
     <Attachment {...props}>
       <AttachmentMedia>
-        <Image src={src} alt="" />
+        <Image width={40} height={40} className="h-full w-full object-contain" src={src} alt="" />
       </AttachmentMedia>
       <AttachmentContent>
         <AttachmentTitle>{name}</AttachmentTitle>
