@@ -11,6 +11,8 @@ import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Marker, MarkerContent } from '@/shared/ui/ds/marker';
 import { Spinner } from '@/shared/ui/ds/spinner';
+import { useGalleryContext } from '@/widgets/gallery/@x/posts';
+import { FILE_TYPES } from '@/entities/file';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
@@ -18,6 +20,12 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentPr
 import { isNil } from '@/shared/utils/is-nil';
 import { useWindowScrollPosition } from '@/shared/hooks/use-window-scroll-position';
 import { cn } from '@/shared/utils/cn';
+
+const isImageOrVideoAttachment = (
+  attachment: components['schemas']['FolderDataItemFile'],
+): attachment is components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'] => {
+  return attachment.fileType === FILE_TYPES.IMAGE || attachment.fileType === FILE_TYPES.VIDEO;
+};
 
 const DialogDeletePost = dynamic(() => {
   return import('@/features/post/delete').then((module) => {
@@ -40,6 +48,8 @@ const Post = ({
   const { requestDeletePostById } = useDeletePostContext();
 
   const { isAdmin } = useIsAdminContext();
+
+  const { open, setGallery } = useGalleryContext();
 
   const { relativeTime } = useFormatter();
   const now = useNow();
@@ -80,6 +90,11 @@ const Post = ({
     router.refresh();
   };
 
+  const onClickAttachment: NonNullable<ComponentProps<typeof PostAttachment>['onClick']> = (attachment) => {
+    setGallery(post.attachments.filter(isImageOrVideoAttachment));
+    open(attachment);
+  };
+
   return (
     <Card
       data-id={post._meta.id}
@@ -108,7 +123,7 @@ const Post = ({
           <>
             <BaseHtml html={post.text} />
             {post.attachments.map((attachment, index) => {
-              return <PostAttachment key={index} attachment={attachment} index={index} />;
+              return <PostAttachment key={index} attachment={attachment} index={index} onClick={onClickAttachment} />;
             })}
             <Link
               href={`/blog/${post._meta.id}`}
@@ -122,6 +137,7 @@ const Post = ({
           </>
         )}
       </CardContent>
+
       {isAdmin && (
         <CardFooter className="justify-end gap-2">
           {isEditing ? (
