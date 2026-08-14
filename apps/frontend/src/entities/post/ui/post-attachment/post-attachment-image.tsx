@@ -7,10 +7,12 @@ export const PostAttachmentImage = ({
   attachment,
   index,
   ...props
-}: {
-  attachment: components['schemas']['FolderDataItemImage'];
-  index: number;
-} & Omit<ComponentProps<typeof Image>, 'src' | 'alt' | 'width' | 'height' | 'className'>) => {
+}: Readonly<
+  {
+    attachment: components['schemas']['FolderDataItemImage'];
+    index: number;
+  } & Omit<ComponentProps<typeof Image>, 'src' | 'alt' | 'width' | 'height' | 'className'>
+>) => {
   const t = useTranslations('PostAttachmentImage');
 
   return (

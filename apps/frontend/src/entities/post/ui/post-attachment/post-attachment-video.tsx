@@ -5,9 +5,11 @@ import type { ComponentProps } from 'react';
 export const PostAttachmentVideo = ({
   attachment,
   ...props
-}: {
-  attachment: components['schemas']['FolderDataItemVideo'];
-} & Omit<ComponentProps<typeof BaseVideo>, 'src' | 'width' | 'height'>) => {
+}: Readonly<
+  {
+    attachment: components['schemas']['FolderDataItemVideo'];
+  } & Omit<ComponentProps<typeof BaseVideo>, 'src' | 'width' | 'height'>
+>) => {
   return (
     <BaseVideo src={attachment.src} width={attachment.metadata.width} height={attachment.metadata.height} {...props} />
   );

@@ -1,4 +1,3 @@
-import type { components } from '@/shared/api/openapi';
 import dynamic from 'next/dynamic';
 import { FILE_TYPES } from '@/entities/file/@x/post';
 import { checkExhaustive } from '@/shared/utils/check-exhaustive';
@@ -38,16 +37,16 @@ export const PostAttachment = ({
 >) => {
   switch (props.attachment.fileType) {
     case FILE_TYPES.IMAGE: {
-      return <PostAttachmentImage {...props} />;
+      return <PostAttachmentImage {...(props as ComponentProps<typeof PostAttachmentImage>)} />;
     }
     case FILE_TYPES.AUDIO: {
-      return <PostAttachmentAudio {...props} />;
+      return <PostAttachmentAudio {...(props as ComponentProps<typeof PostAttachmentAudio>)} />;
     }
     case FILE_TYPES.VIDEO: {
-      return <PostAttachmentVideo {...props} />;
+      return <PostAttachmentVideo {...(props as ComponentProps<typeof PostAttachmentVideo>)} />;
     }
     case FILE_TYPES.UNKNOWN: {
-      return <PostAttachmentUnknown {...props} />;
+      return <PostAttachmentUnknown {...(props as ComponentProps<typeof PostAttachmentUnknown>)} />;
     }
     default: {
       throw checkExhaustive(props.attachment);
