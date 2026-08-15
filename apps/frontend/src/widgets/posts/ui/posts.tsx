@@ -1,6 +1,6 @@
 'use client';
 
-import { PostAttachment, useInfiniteQueryGetPosts, useMutationPatchPostById } from '@/entities/post';
+import { useInfiniteQueryGetPosts, useMutationPatchPostById } from '@/entities/post';
 import { useIsAdminContext } from '@/entities/session/client';
 import { DeletePostProvider, useDeletePostContext } from '@/features/post/delete';
 import { EditPostProvider, FormPost, useEditPostContext, type FormPostRef } from '@/features/post/editor';
@@ -11,7 +11,7 @@ import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardFooter } from '@/shared/ui/ds/card';
 import { Marker, MarkerContent } from '@/shared/ui/ds/marker';
 import { Spinner } from '@/shared/ui/ds/spinner';
-import { useGalleryContext } from '@/widgets/gallery/@x/posts';
+import { useGalleryContext } from '@/shared/lib/gallery';
 import { FILE_TYPES } from '@/entities/file';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
@@ -20,11 +20,22 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentPr
 import { isNil } from '@/shared/utils/is-nil';
 import { useWindowScrollPosition } from '@/shared/hooks/use-window-scroll-position';
 import { cn } from '@/shared/utils/cn';
+import { PostAttachment } from './post-attachment/post-attachment';
 
-const isImageOrVideoAttachment = (
-  attachment: components['schemas']['FolderDataItemFile'],
-): attachment is components['schemas']['FolderDataItemImage'] | components['schemas']['FolderDataItemVideo'] => {
+const isAttachmentGalleryItem = (attachment: components['schemas']['PostResponse']['attachments'][number]) => {
   return attachment.fileType === FILE_TYPES.IMAGE || attachment.fileType === FILE_TYPES.VIDEO;
+};
+
+const attachmentGalleryItemToGalleryItem = (
+  attachment: components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'],
+) => {
+  return {
+    src: attachment.src,
+    width: attachment.metadata.width,
+    height: attachment.metadata.height,
+    name: attachment.name,
+    type: attachment.fileType === FILE_TYPES.IMAGE ? 'image' : 'video',
+  } as const;
 };
 
 const DialogDeletePost = dynamic(() => {
@@ -36,9 +47,11 @@ const DialogDeletePost = dynamic(() => {
 const Post = ({
   post,
   selectedPostId,
+  onClickAttachment,
 }: {
   post: components['schemas']['PostResponse'];
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
+  onClickAttachment: (attachment: components['schemas']['FolderDataItemFile']) => void;
 }) => {
   const t = useTranslations('Post');
 
@@ -48,8 +61,6 @@ const Post = ({
   const { requestDeletePostById } = useDeletePostContext();
 
   const { isAdmin } = useIsAdminContext();
-
-  const { open, setGallery } = useGalleryContext();
 
   const { relativeTime } = useFormatter();
   const now = useNow();
@@ -90,11 +101,6 @@ const Post = ({
     router.refresh();
   };
 
-  const onClickAttachment: NonNullable<ComponentProps<typeof PostAttachment>['onClick']> = (attachment) => {
-    setGallery(post.attachments.filter(isImageOrVideoAttachment));
-    open(attachment);
-  };
-
   return (
     <Card
       data-id={post._meta.id}
@@ -121,9 +127,18 @@ const Post = ({
           />
         ) : (
           <>
-            <BaseHtml html={post.text} />
+            {post.text && <BaseHtml html={post.text} />}
             {post.attachments.map((attachment, index) => {
-              return <PostAttachment key={index} attachment={attachment} index={index} onClick={onClickAttachment} />;
+              return (
+                <PostAttachment
+                  key={index}
+                  attachment={attachment}
+                  index={index}
+                  onClick={() => {
+                    onClickAttachment(attachment);
+                  }}
+                />
+              );
             })}
             <Link
               href={`/blog/${post._meta.id}`}
@@ -209,6 +224,8 @@ export const Posts = ({
     scrollHeight: number;
   } | null>(null);
 
+  const { open } = useGalleryContext();
+
   const {
     fetchNextPage,
     fetchPreviousPage,
@@ -275,6 +292,21 @@ export const Posts = ({
     });
   }, [selectedPostId]);
 
+  const onClickAttachment: ComponentProps<typeof Post>['onClickAttachment'] = (attachment) => {
+    if (!isAttachmentGalleryItem(attachment)) {
+      return;
+    }
+
+    open(
+      attachmentGalleryItemToGalleryItem(attachment),
+      posts.flatMap((post) => {
+        return post.attachments.flatMap((attachment) => {
+          return isAttachmentGalleryItem(attachment) ? [attachmentGalleryItemToGalleryItem(attachment)] : [];
+        });
+      }),
+    );
+  };
+
   return (
     <DeletePostProvider>
       <EditPostProvider>
@@ -282,7 +314,7 @@ export const Posts = ({
           {isFetchingPreviousPage && <Spinner />}
 
           {posts.map((post) => {
-            return <Post key={post._meta.id} {...{ post, selectedPostId }} />;
+            return <Post key={post._meta.id} {...{ post, selectedPostId, onClickAttachment }} />;
           })}
 
           {isFetchingNextPage && <Spinner />}

@@ -1,22 +1,20 @@
 'use client';
 
-import { type components } from '@/shared/api/openapi';
 import { throwError } from '@/shared/utils/throw-error';
 import { createContext, type Dispatch, type RefObject, type SetStateAction, useContext } from 'react';
-
-type Media = components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'];
+import type { GalleryItem } from '../types/gallery-item';
 
 type CloseCallback = () => void;
-type GalleryItemChangeCallback = (media: Media) => void;
+type GalleryItemChangeCallback = (galleryItem: GalleryItem) => void;
 
 export const GalleryContext = createContext<{
-  media: Media | null;
-  setMedia: Dispatch<SetStateAction<Media | null>>;
-  gallery: Array<Media>;
-  setGallery: Dispatch<SetStateAction<Array<Media>>>;
+  galleryItem: GalleryItem | null;
+  setGalleryItem: Dispatch<SetStateAction<GalleryItem | null>>;
+  galleryItems: Array<GalleryItem>;
 
   open: (
-    media: Media,
+    galleryItem: GalleryItem,
+    galleryItems: Array<GalleryItem>,
     parameters?: Partial<{ onClose: CloseCallback; onGalleryItemChange: GalleryItemChangeCallback }>,
   ) => void;
   onClose: RefObject<CloseCallback>;

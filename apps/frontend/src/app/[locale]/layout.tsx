@@ -10,7 +10,8 @@ import { Footer } from '@/widgets/footer';
 
 import { PlayerProvider, Player } from '@/widgets/player';
 
-import { GalleryProvider, Gallery } from '@/widgets/gallery';
+import { Gallery } from '@/shared/lib/gallery';
+import { GalleryProvider } from '@/widgets/gallery';
 
 // import themes from '@/app/themes.json';
 

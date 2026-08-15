@@ -1,7 +1,7 @@
 import dynamic from 'next/dynamic';
 import { FILE_TYPES } from '@/entities/file/@x/post';
 import { checkExhaustive } from '@/shared/utils/check-exhaustive';
-import type { ComponentProps } from 'react';
+import type { components } from '@/shared/api/openapi';
 
 const PostAttachmentAudio = dynamic(() => {
   return import('./post-attachment-audio').then((module) => {
@@ -28,28 +28,29 @@ const PostAttachmentUnknown = dynamic(() => {
 });
 
 export const PostAttachment = ({
-  ...props
-}: Readonly<
-  | ComponentProps<typeof PostAttachmentImage>
-  | ComponentProps<typeof PostAttachmentVideo>
-  | ComponentProps<typeof PostAttachmentAudio>
-  | ComponentProps<typeof PostAttachmentUnknown>
->) => {
-  switch (props.attachment.fileType) {
+  attachment,
+  index,
+  onClick,
+}: Readonly<{
+  attachment: components['schemas']['FolderDataItemFile'];
+  index: number;
+  onClick: () => void;
+}>) => {
+  switch (attachment.fileType) {
     case FILE_TYPES.IMAGE: {
-      return <PostAttachmentImage {...(props as ComponentProps<typeof PostAttachmentImage>)} />;
+      return <PostAttachmentImage {...{ attachment, onClick, index }} />;
     }
     case FILE_TYPES.AUDIO: {
-      return <PostAttachmentAudio {...(props as ComponentProps<typeof PostAttachmentAudio>)} />;
+      return <PostAttachmentAudio {...{ attachment }} />;
     }
     case FILE_TYPES.VIDEO: {
-      return <PostAttachmentVideo {...(props as ComponentProps<typeof PostAttachmentVideo>)} />;
+      return <PostAttachmentVideo {...{ attachment, onClick }} />;
     }
     case FILE_TYPES.UNKNOWN: {
-      return <PostAttachmentUnknown {...(props as ComponentProps<typeof PostAttachmentUnknown>)} />;
+      return <PostAttachmentUnknown {...{ attachment }} />;
     }
     default: {
-      throw checkExhaustive(props.attachment);
+      throw checkExhaustive(attachment);
     }
   }
 };

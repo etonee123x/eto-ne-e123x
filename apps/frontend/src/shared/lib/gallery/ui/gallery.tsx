@@ -1,7 +1,7 @@
 'use client';
 
 import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
-import { useGalleryContext } from '../context/gallery-context';
+import { useGalleryContext } from '@/shared/lib/gallery';
 import { type ComponentProps, useCallback, useEffect, useState } from 'react';
 import {
   Carousel,
@@ -12,12 +12,12 @@ import {
   CarouselPrevious,
 } from '@/shared/ui/ds/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
-import { Media } from './media';
+import { GalleryItem } from './gallery-item';
 
 const CARD_HEADER_HEIGHT = '2.75rem';
 
 export const Gallery = () => {
-  const { media, setMedia, onClose, onGalleryItemChange, gallery } = useGalleryContext();
+  const { galleryItem, setGalleryItem, onClose, onGalleryItemChange, galleryItems } = useGalleryContext();
 
   const [api, setApi] = useState<NonNullable<CarouselApi> | null>(null);
 
@@ -26,17 +26,17 @@ export const Gallery = () => {
       return;
     }
 
-    setMedia(null);
+    setGalleryItem(null);
     onClose.current();
   };
 
   const onSlideChange = useCallback(
     (carouselApi: NonNullable<CarouselApi>) => {
-      const galleryItem = gallery[carouselApi.selectedScrollSnap()];
+      const galleryItem = galleryItems[carouselApi.selectedScrollSnap()];
 
       onGalleryItemChange.current(galleryItem);
     },
-    [gallery, onGalleryItemChange],
+    [galleryItems, onGalleryItemChange],
   );
 
   useEffect(() => {
@@ -52,8 +52,8 @@ export const Gallery = () => {
   }, [api, onSlideChange]);
 
   return (
-    <Dialog open={Boolean(media)} onOpenChange={onOpenChange}>
-      {media && (
+    <Dialog open={Boolean(galleryItem)} onOpenChange={onOpenChange}>
+      {galleryItem && (
         <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
           <Carousel
             className="h-full min-h-0 w-full *:data-[slot=carousel-content]:h-full"
@@ -62,8 +62,8 @@ export const Gallery = () => {
             }}
           >
             <CarouselContent className="h-full p-px">
-              {gallery.map((galleryItem) => {
-                const aspectRatio = galleryItem.metadata.width / galleryItem.metadata.height;
+              {galleryItems.map((galleryItem) => {
+                const aspectRatio = galleryItem.width / galleryItem.height;
 
                 return (
                   <CarouselItem
@@ -80,7 +80,7 @@ export const Gallery = () => {
                         <CardTitle>{galleryItem.name}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <Media media={galleryItem} />
+                        <GalleryItem galleryItem={galleryItem} />
                       </CardContent>
                     </Card>
                   </CarouselItem>

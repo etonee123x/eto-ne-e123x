@@ -1,5 +1,3 @@
-export { PostAttachment } from './ui/post-attachment';
-
 export { getPosts } from './api/get-posts';
 export { patchPostById } from './api/patch-post-by-id';
 export {
