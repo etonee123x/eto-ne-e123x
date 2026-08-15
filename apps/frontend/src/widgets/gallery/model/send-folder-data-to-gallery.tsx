@@ -34,7 +34,7 @@ export const SendFolderDataToGallery = ({
       }),
       {
         onClose: () => {
-          router.push(lastNavigationItem.href);
+          router.push(lastNavigationItem.href, { scroll: false });
         },
         onGalleryItemChange: (galleryItem) => {
           const path = files.find((file) => {

@@ -10,11 +10,23 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  useCarousel,
 } from '@/shared/ui/ds/carousel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
 import { GalleryItem } from './gallery-item';
 
 const CARD_HEADER_HEIGHT = '2.75rem';
+
+const GalleryControls = () => {
+  const { canScrollNext, canScrollPrev } = useCarousel();
+
+  return (
+    <>
+      {canScrollPrev && <CarouselPrevious size="lg" className="inset-s-0!" />}
+      {canScrollNext && <CarouselNext size="lg" className="inset-e-0!" />}
+    </>
+  );
+};
 
 export const Gallery = () => {
   const { galleryItem, setGalleryItem, onClose, onGalleryItemChange, galleryItems } = useGalleryContext();
@@ -32,9 +44,7 @@ export const Gallery = () => {
 
   const onSlideChange = useCallback(
     (carouselApi: NonNullable<CarouselApi>) => {
-      const galleryItem = galleryItems[carouselApi.selectedScrollSnap()];
-
-      onGalleryItemChange.current(galleryItem);
+      onGalleryItemChange.current(galleryItems[carouselApi.selectedScrollSnap()]);
     },
     [galleryItems, onGalleryItemChange],
   );
@@ -57,6 +67,11 @@ export const Gallery = () => {
         <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
           <Carousel
             className="h-full min-h-0 w-full *:data-[slot=carousel-content]:h-full"
+            opts={{
+              startIndex: galleryItems.findIndex((_galleryItem) => {
+                return _galleryItem.src === galleryItem.src;
+              }),
+            }}
             setApi={(api) => {
               setApi(api ?? null);
             }}
@@ -87,8 +102,7 @@ export const Gallery = () => {
                 );
               })}
             </CarouselContent>
-            <CarouselPrevious size="lg" className="inset-s-0!" />
-            <CarouselNext size="lg" className="inset-e-0!" />
+            <GalleryControls />
           </Carousel>
         </DialogContent>
       )}

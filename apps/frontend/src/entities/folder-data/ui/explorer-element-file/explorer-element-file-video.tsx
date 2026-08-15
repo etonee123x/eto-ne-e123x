@@ -12,7 +12,7 @@ export const ExplorerElementFileVideo = ({
 }: ComponentProps<typeof Link> & { element: components['schemas']['FolderDataItemVideo'] }) => {
   return (
     <article className="contents">
-      <Item className="border-primary" variant="outline" render={<Link {...props} />}>
+      <Item className="border-primary" variant="outline" render={<Link {...props} scroll={false} />}>
         <ItemHeader>
           <header className="text-lg">{element.name}</header>
           <ExplorerElementTime element={element} />
