@@ -52,9 +52,11 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeButtonRender,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  closeButtonRender?: React.ReactElement
 }) {
   const hasMounted = useHasMounted()
   const content = (
@@ -75,6 +77,8 @@ function DialogContent({
               variant="ghost"
               className="absolute top-2 right-2"
               size="icon-sm"
+              render={closeButtonRender}
+              nativeButton={!closeButtonRender}
             >
               <XIcon />
               <span className="sr-only">Close</span>

@@ -1,11 +1,19 @@
 'use client';
 
 import { throwError } from '@/shared/utils/throw-error';
-import { createContext, type Dispatch, type RefObject, type SetStateAction, useContext } from 'react';
+import {
+  createContext,
+  type Dispatch,
+  type ReactElement,
+  type RefObject,
+  type SetStateAction,
+  useContext,
+} from 'react';
 import type { GalleryItem } from '../types/gallery-item';
 
 type CloseCallback = () => void;
-type GalleryItemChangeCallback = (galleryItem: GalleryItem) => void;
+type RenderCloseControl = () => ReactElement;
+type RenderCarouselControl = (galleryItem: GalleryItem) => ReactElement;
 
 export const GalleryContext = createContext<{
   galleryItem: GalleryItem | null;
@@ -15,10 +23,17 @@ export const GalleryContext = createContext<{
   open: (
     galleryItem: GalleryItem,
     galleryItems: Array<GalleryItem>,
-    parameters?: Partial<{ onClose: CloseCallback; onGalleryItemChange: GalleryItemChangeCallback }>,
+    parameters?: Partial<{
+      onClose: CloseCallback;
+      renderCloseControl: RenderCloseControl;
+      renderPreviousControl: RenderCarouselControl;
+      renderNextControl: RenderCarouselControl;
+    }>,
   ) => void;
   onClose: RefObject<CloseCallback>;
-  onGalleryItemChange: RefObject<GalleryItemChangeCallback>;
+  renderCloseControl: RefObject<RenderCloseControl | null>;
+  renderPreviousControl: RefObject<RenderCarouselControl | null>;
+  renderNextControl: RefObject<RenderCarouselControl | null>;
 } | null>(null);
 
 export const useGalleryContext = () => {

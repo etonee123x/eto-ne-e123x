@@ -21,7 +21,9 @@ export const GalleryContextProvider = ({
   );
 
   const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(() => {});
-  const onGalleryItemChange: NonNullable<ContextType<typeof GalleryContext>>['onGalleryItemChange'] = useRef(() => {});
+  const renderCloseControl: NonNullable<ContextType<typeof GalleryContext>>['renderCloseControl'] = useRef(null);
+  const renderPreviousControl: NonNullable<ContextType<typeof GalleryContext>>['renderPreviousControl'] = useRef(null);
+  const renderNextControl: NonNullable<ContextType<typeof GalleryContext>>['renderNextControl'] = useRef(null);
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>(
     (galleryItem, galleryItems, parameters) => {
@@ -32,9 +34,9 @@ export const GalleryContextProvider = ({
         onClose.current = parameters.onClose;
       }
 
-      if (parameters?.onGalleryItemChange) {
-        onGalleryItemChange.current = parameters.onGalleryItemChange;
-      }
+      renderCloseControl.current = parameters?.renderCloseControl ?? null;
+      renderPreviousControl.current = parameters?.renderPreviousControl ?? null;
+      renderNextControl.current = parameters?.renderNextControl ?? null;
     },
     [],
   );
@@ -48,7 +50,9 @@ export const GalleryContextProvider = ({
         galleryItems,
 
         onClose,
-        onGalleryItemChange,
+        renderCloseControl,
+        renderPreviousControl,
+        renderNextControl,
         open,
       }}
     >

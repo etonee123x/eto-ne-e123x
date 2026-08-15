@@ -2,36 +2,69 @@
 
 import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
 import { useGalleryContext } from '@/shared/lib/gallery';
-import { type ComponentProps, useCallback, useEffect, useState } from 'react';
-import {
-  Carousel,
-  type CarouselApi,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  useCarousel,
-} from '@/shared/ui/ds/carousel';
+import { type ComponentProps } from 'react';
+import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { GalleryItem } from './gallery-item';
 
-const CARD_HEADER_HEIGHT = '2.75rem';
+const CARD_VERTICAL_OVERHEAD = '6.5rem';
 
-const GalleryControls = () => {
-  const { canScrollNext, canScrollPrev } = useCarousel();
+const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
+  const { galleryItems, renderPreviousControl, renderNextControl, setGalleryItem } = useGalleryContext();
+
+  const previousGalleryItem = galleryItems[currentIndex - 1];
+  const nextGalleryItem = galleryItems[currentIndex + 1];
+
+  const previousControlRender = previousGalleryItem ? renderPreviousControl.current?.(previousGalleryItem) : undefined;
+  const nextControlRender = nextGalleryItem ? renderNextControl.current?.(nextGalleryItem) : undefined;
 
   return (
     <>
-      {canScrollPrev && <CarouselPrevious size="lg" className="inset-s-0!" />}
-      {canScrollNext && <CarouselNext size="lg" className="inset-e-0!" />}
+      {previousGalleryItem && (
+        <Button
+          size="lg"
+          variant="outline"
+          className="absolute inset-y-0 inset-s-0! my-auto rounded-full"
+          render={previousControlRender}
+          nativeButton={!previousControlRender}
+          onClick={() => {
+            if (previousControlRender) {
+              return;
+            }
+
+            setGalleryItem(previousGalleryItem);
+          }}
+        >
+          <ChevronLeftIcon />
+          <span className="sr-only">Previous slide</span>
+        </Button>
+      )}
+      {nextGalleryItem && (
+        <Button
+          size="lg"
+          variant="outline"
+          className="absolute inset-y-0 inset-e-0! my-auto rounded-full"
+          render={nextControlRender}
+          nativeButton={!nextControlRender}
+          onClick={() => {
+            if (nextControlRender) {
+              return;
+            }
+
+            setGalleryItem(nextGalleryItem);
+          }}
+        >
+          <ChevronRightIcon />
+          <span className="sr-only">Next slide</span>
+        </Button>
+      )}
     </>
   );
 };
 
 export const Gallery = () => {
-  const { galleryItem, setGalleryItem, onClose, onGalleryItemChange, galleryItems } = useGalleryContext();
-
-  const [api, setApi] = useState<NonNullable<CarouselApi> | null>(null);
+  const { galleryItem, setGalleryItem, onClose, renderCloseControl, galleryItems } = useGalleryContext();
 
   const onOpenChange: ComponentProps<typeof Dialog>['onOpenChange'] = (isOpen) => {
     if (isOpen) {
@@ -42,68 +75,36 @@ export const Gallery = () => {
     onClose.current();
   };
 
-  const onSlideChange = useCallback(
-    (carouselApi: NonNullable<CarouselApi>) => {
-      onGalleryItemChange.current(galleryItems[carouselApi.selectedScrollSnap()]);
-    },
-    [galleryItems, onGalleryItemChange],
-  );
-
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
-
-    api.on('select', onSlideChange);
-
-    return () => {
-      api.off('select', onSlideChange);
-    };
-  }, [api, onSlideChange]);
+  const currentIndex = galleryItem
+    ? galleryItems.findIndex((_galleryItem) => {
+        return _galleryItem.src === galleryItem.src;
+      })
+    : 0;
 
   return (
     <Dialog open={Boolean(galleryItem)} onOpenChange={onOpenChange}>
       {galleryItem && (
-        <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
-          <Carousel
-            className="h-full min-h-0 w-full *:data-[slot=carousel-content]:h-full"
-            opts={{
-              startIndex: galleryItems.findIndex((_galleryItem) => {
-                return _galleryItem.src === galleryItem.src;
-              }),
-            }}
-            setApi={(api) => {
-              setApi(api ?? null);
-            }}
-          >
-            <CarouselContent className="h-full p-px">
-              {galleryItems.map((galleryItem) => {
-                const aspectRatio = galleryItem.width / galleryItem.height;
-
-                return (
-                  <CarouselItem
-                    key={galleryItem.src}
-                    className="@container-size flex h-full items-center justify-center"
-                  >
-                    <Card
-                      style={{
-                        width: `min(100cqw, calc((100cqh - ${CARD_HEADER_HEIGHT}) * ${aspectRatio}))`,
-                        height: `min(100cqh, calc(100cqw / ${aspectRatio} + ${CARD_HEADER_HEIGHT}))`,
-                      }}
-                    >
-                      <CardHeader className="text-center">
-                        <CardTitle>{galleryItem.name}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <GalleryItem galleryItem={galleryItem} />
-                      </CardContent>
-                    </Card>
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-            <GalleryControls />
-          </Carousel>
+        <DialogContent
+          className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]"
+          closeButtonRender={renderCloseControl.current?.()}
+        >
+          <div className="relative flex h-full min-h-0 w-full min-w-0 items-center justify-center">
+            <Card
+              className="max-h-full max-w-full overflow-hidden"
+              style={{
+                width: `min(100cqw, calc((100cqh - ${CARD_VERTICAL_OVERHEAD}) * ${galleryItem.width / galleryItem.height}))`,
+                height: `min(100cqh, calc(100cqw / ${galleryItem.width / galleryItem.height} + ${CARD_VERTICAL_OVERHEAD}))`,
+              }}
+            >
+              <CardHeader className="text-center">
+                <CardTitle>{galleryItem.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="min-h-0 flex-1 overflow-hidden">
+                <GalleryItem galleryItem={galleryItem} />
+              </CardContent>
+            </Card>
+            <GalleryControls currentIndex={currentIndex} />
+          </div>
         </DialogContent>
       )}
     </Dialog>
