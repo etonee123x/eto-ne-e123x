@@ -20,7 +20,7 @@ export const FormPostCreate = () => {
       files,
     });
 
-    router.refresh();
+    router.push('/blog', { scroll: false });
   };
 
   const onValidityChange: ComponentProps<typeof FormPost>['onValidityChange'] = (isValid) => {

@@ -98,7 +98,7 @@ const Post = ({
 
     exitEditPost();
 
-    router.refresh();
+    router.push('/blog', { scroll: false });
   };
 
   return (
