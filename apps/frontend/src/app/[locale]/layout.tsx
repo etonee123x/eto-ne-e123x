@@ -13,7 +13,7 @@ import { PlayerProvider, Player } from '@/widgets/player';
 import { Gallery } from '@/shared/lib/gallery';
 import { GalleryProvider } from '@/widgets/gallery';
 
-// import themes from '@/app/themes.json';
+import { getRandomTheme } from '@/app/get-random-theme';
 
 import { ThemeProvider } from '@/features/theme';
 import { QueryClientProvider } from '@/shared/api/query';
@@ -50,8 +50,7 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
     notFound();
   }
 
-  // Так надо
-  // const themeContent = themes.at(Date.now() % themes.length)?.content;
+  const theme = getRandomTheme();
 
   return (
     <html className="h-full antialiased" suppressHydrationWarning>
@@ -63,7 +62,7 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
           <Footer />
           <Gallery />
         </Providers>
-        {/* <style>{`:root { ${themeContent} }`}</style> */}
+        <style>{`:root { ${theme.light} } .dark { ${theme.dark} }`}</style>
       </body>
     </html>
   );
