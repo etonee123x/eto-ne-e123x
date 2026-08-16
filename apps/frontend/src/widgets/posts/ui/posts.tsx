@@ -282,7 +282,7 @@ export const Posts = ({
     },
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (isNil(selectedPostId)) {
       return;
     }

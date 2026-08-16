@@ -2,6 +2,14 @@
 
 import { type ContextType, type PropsWithChildren, useCallback, useRef, useState } from 'react';
 import { GalleryContext } from './gallery-context';
+import { noop } from '@/shared/utils/noop';
+
+const INITIAL_VALUES = {
+  onClose: noop,
+  renderCloseControl: null,
+  renderPreviousControl: null,
+  renderNextControl: null,
+};
 
 export const GalleryContextProvider = ({
   children,
@@ -20,23 +28,26 @@ export const GalleryContextProvider = ({
     },
   );
 
-  const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(() => {});
-  const renderCloseControl: NonNullable<ContextType<typeof GalleryContext>>['renderCloseControl'] = useRef(null);
-  const renderPreviousControl: NonNullable<ContextType<typeof GalleryContext>>['renderPreviousControl'] = useRef(null);
-  const renderNextControl: NonNullable<ContextType<typeof GalleryContext>>['renderNextControl'] = useRef(null);
+  const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(INITIAL_VALUES.onClose);
+  const renderCloseControl: NonNullable<ContextType<typeof GalleryContext>>['renderCloseControl'] = useRef(
+    INITIAL_VALUES.renderCloseControl,
+  );
+  const renderPreviousControl: NonNullable<ContextType<typeof GalleryContext>>['renderPreviousControl'] = useRef(
+    INITIAL_VALUES.renderPreviousControl,
+  );
+  const renderNextControl: NonNullable<ContextType<typeof GalleryContext>>['renderNextControl'] = useRef(
+    INITIAL_VALUES.renderNextControl,
+  );
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>(
     (galleryItem, galleryItems, parameters) => {
       setGalleryItem(galleryItem);
       setGalleryItems(galleryItems);
 
-      if (parameters?.onClose) {
-        onClose.current = parameters.onClose;
-      }
-
-      renderCloseControl.current = parameters?.renderCloseControl ?? null;
-      renderPreviousControl.current = parameters?.renderPreviousControl ?? null;
-      renderNextControl.current = parameters?.renderNextControl ?? null;
+      onClose.current = parameters?.onClose ?? INITIAL_VALUES.onClose;
+      renderCloseControl.current = parameters?.renderCloseControl ?? INITIAL_VALUES.renderCloseControl;
+      renderPreviousControl.current = parameters?.renderPreviousControl ?? INITIAL_VALUES.renderPreviousControl;
+      renderNextControl.current = parameters?.renderNextControl ?? INITIAL_VALUES.renderNextControl;
     },
     [],
   );

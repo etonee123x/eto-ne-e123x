@@ -1,11 +1,10 @@
 import { useSyncExternalStore } from 'react';
-
-const subscribeReturn = () => {};
+import { noop } from '../utils/noop';
 
 export const useHasMounted = () => {
   return useSyncExternalStore(
     () => {
-      return subscribeReturn;
+      return noop;
     },
     () => {
       return true;

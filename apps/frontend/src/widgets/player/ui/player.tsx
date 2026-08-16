@@ -11,6 +11,7 @@ import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-huma
 import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
+import { throwError } from '@/shared/utils/throw-error';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -160,7 +161,7 @@ const PlayerControls = () => {
   });
 
   const setCurrentPlayingNumber = (playingNumber: number) => {
-    setTrack(playlist[playingNumber]);
+    setTrack(playlist[playingNumber] ?? throwError());
   };
 
   const loadNext = () => {

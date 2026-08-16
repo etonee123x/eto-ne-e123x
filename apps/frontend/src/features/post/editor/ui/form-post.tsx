@@ -21,6 +21,7 @@ import { nonNullable } from '@/shared/utils/non-nullable';
 import { DragDropProvider } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 import { FormAttachment } from './form-attachment';
+import { throwError } from '@/shared/utils/throw-error';
 
 type Post = Omit<components['schemas']['PostUpdateRequest'], 'files'>;
 type Attachment = NonNullable<Post['attachments'][number]>;
@@ -126,7 +127,10 @@ export const FormPost = ({
         return true;
       }
 
-      return fileOrAttachmentToKey(fileOrAttachment) !== fileOrAttachmentToKey(defaultValues.attachments[index]);
+      return (
+        fileOrAttachmentToKey(fileOrAttachment) !==
+        fileOrAttachmentToKey(defaultValues.attachments[index] ?? throwError())
+      );
     });
 
   const t = useTranslations('FormPost');
@@ -173,6 +177,30 @@ export const FormPost = ({
     });
 
     event.currentTarget.value = '';
+  };
+
+  const onPasteTextarea: ComponentProps<typeof Textarea>['onPaste'] = (event) => {
+    const files = [...event.clipboardData.items]
+      .map((item) => {
+        return item.getAsFile();
+      })
+      .filter((file): file is File => {
+        return file !== null;
+      });
+
+    if (files.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    setModelFilesAndAttachments((modelFilesAndAttachments) => {
+      return [
+        ...modelFilesAndAttachments,
+        ...files.map((file) => {
+          return fileToFileWithHashName(file);
+        }),
+      ];
+    });
   };
 
   const _onSubmit: ComponentProps<'form'>['onSubmit'] = async (event) => {
@@ -223,9 +251,9 @@ export const FormPost = ({
     }
 
     setModelFilesAndAttachments((modelFilesAndAttachments) => {
-      const fileOrAttachment = modelFilesAndAttachments[source.initialIndex];
-
-      return modelFilesAndAttachments.toSpliced(source.initialIndex, 1).toSpliced(source.index, 0, fileOrAttachment);
+      return modelFilesAndAttachments
+        .toSpliced(source.initialIndex, 1)
+        .toSpliced(source.index, 0, modelFilesAndAttachments[source.initialIndex] ?? throwError());
     });
   };
 
@@ -241,6 +269,7 @@ export const FormPost = ({
             setModelText(event.target.value);
           }}
           onKeyDown={onKeyDownTextarea}
+          onPaste={onPasteTextarea}
         />
         <div className="sticky top-[calc(var(--spacing-header-height)+var(--spacing)*2)] flex flex-col gap-2 h-min">
           <Button className="h-auto p-2" onClick={onClickButtonAddAttachment}>
