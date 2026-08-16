@@ -62,7 +62,14 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
           <Footer />
           <Gallery />
         </Providers>
-        <style>{`:root { ${theme.light} } .dark { ${theme.dark} }`}</style>
+        <style>{`
+          :root {
+            ${theme.light}
+          }
+          :root.dark {
+            ${theme.dark}
+          }
+        `}</style>
       </body>
     </html>
   );
