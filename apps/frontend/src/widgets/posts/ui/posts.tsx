@@ -145,7 +145,11 @@ const Post = ({
               className="self-end hover:underline flex items-center gap-1 text-muted-foreground"
               target="_blank"
             >
-              <time dateTime={new Date(post._meta.createdAt).toISOString()} className="contents">
+              <time
+                dateTime={new Date(post._meta.createdAt).toISOString()}
+                className="contents"
+                suppressHydrationWarning
+              >
                 {relativeTime(post._meta.createdAt, now)}
                 {post._meta.updatedAt !== post._meta.createdAt && <Edit2 className="size-3.5" />}
               </time>
