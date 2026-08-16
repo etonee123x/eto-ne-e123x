@@ -143,6 +143,7 @@ const Post = ({
             <Link
               href={`/blog/${post._meta.id}`}
               className="self-end hover:underline flex items-center gap-1 text-muted-foreground"
+              target="_blank"
             >
               <time dateTime={new Date(post._meta.createdAt).toISOString()} className="contents">
                 {relativeTime(post._meta.createdAt, now)}
