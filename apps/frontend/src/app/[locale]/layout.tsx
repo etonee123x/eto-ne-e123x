@@ -65,9 +65,10 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
         <style>{`
           :root {
             ${theme.light}
-          }
-          :root.dark {
-            ${theme.dark}
+
+            &.dark {
+              ${theme.dark}
+            }
           }
         `}</style>
       </body>
