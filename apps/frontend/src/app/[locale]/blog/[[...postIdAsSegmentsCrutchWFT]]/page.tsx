@@ -21,16 +21,19 @@ export const generateMetadata = async ({
 }: Readonly<PageProps<'/[locale]/blog/[[...postIdAsSegmentsCrutchWFT]]'>>): Promise<Metadata> => {
   const t = await getTranslations('Blog');
 
-  const defaults = {
-    title: t('blog'),
-  };
-
-  const { postIdAsSegmentsCrutchWFT } = await params;
+  const { postIdAsSegmentsCrutchWFT, locale } = await params;
   if (postIdAsSegmentsCrutchWFT && postIdAsSegmentsCrutchWFT.length > 1) {
     throw new Error('Invalid postIdAsSegmentsCrutchWFT length');
   }
 
   const postId = postIdAsSegmentsCrutchWFT?.[0] ?? null;
+
+  const defaults = {
+    title: t('blog'),
+    openGraph: {
+      url: postId ? `/${locale}/blog/${postId}` : `/${locale}/blog`,
+    },
+  };
 
   if (isNil(postId)) {
     return {

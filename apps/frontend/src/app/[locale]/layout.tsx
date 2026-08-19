@@ -13,18 +13,29 @@ import { PlayerProvider, Player } from '@/widgets/player';
 import { Gallery } from '@/shared/lib/gallery';
 import { GalleryProvider } from '@/widgets/gallery';
 
-import { getRandomTheme } from '@/app/get-random-theme';
-
-import { ThemeProvider } from '@/features/theme';
+import { ThemeProvider, getRandomTheme } from '@/features/theme';
 import { QueryClientProvider } from '@/shared/api/query';
 
 import '@/app/globals.css';
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | eto-ne-e123x',
-    default: 'eto-ne-e123x', // a default is required when creating a template
-  },
+export const generateMetadata = async ({ params }: Readonly<PageProps<'/[locale]'>>): Promise<Metadata> => {
+  const { locale } = await params;
+
+  return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+    title: {
+      template: '%s | eto-ne-e123x',
+      default: 'eto-ne-e123x',
+    },
+    openGraph: {
+      url: `/${locale}`,
+      type: 'website',
+      siteName: 'eto-ne-e123x',
+    },
+    twitter: {
+      card: 'summary_large_image',
+    },
+  };
 };
 
 const Providers = ({ children }: { children: React.ReactNode }) => {

@@ -64,6 +64,9 @@ export const generateMetadata = async ({
 
   const defaults = {
     title: folderData.file?.name ?? folderName,
+    openGraph: {
+      url: [`/${locale}/explorer`, segments.join('/')].join('/'),
+    },
   };
 
   if (isFolderDataItemFileAudio(folderData.file)) {
