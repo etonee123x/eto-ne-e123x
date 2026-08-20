@@ -1,52 +1,37 @@
 'use client';
 
-import { type CSSProperties, type PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { type ComponentProps, type CSSProperties, type PropsWithChildren, useRef } from 'react';
 import { cn } from '@/shared/utils/cn';
+import { useElementSize } from '@reactuses/core';
 
-type BaseAlwaysScrollableProps = PropsWithChildren<{
-  className?: string;
-  duration?: string;
-}>;
-
-export const BaseAlwaysScrollable = ({ children, className, duration = '5000ms' }: BaseAlwaysScrollableProps) => {
+export const BaseAlwaysScrollable = ({
+  children,
+  className,
+  duration = '10000ms',
+}: PropsWithChildren<
+  {
+    duration?: string;
+  } & Pick<ComponentProps<'div'>, 'className'>
+>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [scrollDifference, setScrollDifference] = useState(0);
 
-  useEffect(() => {
-    const container = containerRef.current;
-    const content = contentRef.current;
+  const [widthContainer] = useElementSize(containerRef, { box: 'border-box' });
+  const [widthContent] = useElementSize(contentRef, { box: 'border-box' });
 
-    if (!(container && content)) {
-      return;
-    }
-
-    const updateScrollDifference = () => {
-      setScrollDifference(content.offsetWidth - container.offsetWidth);
-    };
-    const observer = new ResizeObserver(updateScrollDifference);
-
-    observer.observe(container);
-    observer.observe(content);
-    updateScrollDifference();
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+  const diff = widthContent - widthContainer;
 
   const style = {
-    '--scroll-x-diff': `-${scrollDifference}px`,
+    '--scroll-x-diff': `-${diff}px`,
     '--scroll-x-duration': duration,
   } as CSSProperties;
 
   return (
-    <div className="relative inline-flex overflow-hidden" ref={containerRef}>
+    <div className={cn('relative inline-flex overflow-hidden', className)} ref={containerRef}>
       <div
         className={cn(
           'm-(--base-always-scrollable--content--margin) whitespace-nowrap',
-          scrollDifference > 0 && 'animate-scroll-x',
-          className,
+          diff > 0 && 'animate-scroll-x animation-duration-(--scroll-x-duration)',
         )}
         ref={contentRef}
         style={style}

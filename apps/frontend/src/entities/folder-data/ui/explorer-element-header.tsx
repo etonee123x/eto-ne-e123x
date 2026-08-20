@@ -1,6 +1,7 @@
 import { ItemHeader } from '@/shared/ui/ds/item';
 import { useFormatter, useNow } from 'next-intl';
 import type { components } from '@/shared/api/openapi';
+import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 
 type Element = components['schemas']['FolderDataItemFile'] | components['schemas']['FolderDataItemFolder'];
 
@@ -28,7 +29,9 @@ export const ExplorerElementHeader = ({
 }) => {
   return (
     <ItemHeader className="min-w-0">
-      <header className="truncate text-lg">{name}</header>
+      <BaseAlwaysScrollable>
+        <header className="text-lg">{name}</header>
+      </BaseAlwaysScrollable>
       <ExplorerElementTime createdAt={createdAt} />
     </ItemHeader>
   );
