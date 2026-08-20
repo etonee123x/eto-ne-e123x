@@ -19,10 +19,12 @@ import {
   getFolderDataQueryOptions,
   isFolderDataItemFileAudio,
   isFolderDataItemFileImage,
+  isFolderDataItemFileVideo,
 } from '@/entities/folder-data';
 import type { Metadata } from 'next';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { notFound } from 'next/navigation';
+import { getSiteImage } from '@/shared/lib/metadata/get-site-image';
 
 const ExplorerElementUp = dynamic(() => {
   return import('@/entities/folder-data').then((module) => {
@@ -62,10 +64,51 @@ export const generateMetadata = async ({
   const navigationItems = pathDirectoryToNavigationItems(folderData.pathDirectory);
   const folderName = navigationItems.at(-1)?.text;
 
-  const defaults = {
+  const image = isFolderDataItemFileImage(folderData.file)
+    ? folderData.file
+    : folderData.files.find((file) => {
+        return isFolderDataItemFileImage(file);
+      });
+
+  const images = image
+    ? [
+        {
+          url: image.src,
+          alt: image.name,
+          width: image.metadata.width,
+          height: image.metadata.height,
+        },
+      ]
+    : [await getSiteImage()];
+
+  const video = isFolderDataItemFileVideo(folderData.file)
+    ? folderData.file
+    : folderData.files.find((file) => {
+        return isFolderDataItemFileVideo(file);
+      });
+
+  const audio = isFolderDataItemFileAudio(folderData.file)
+    ? folderData.file
+    : folderData.files.find((file) => {
+        return isFolderDataItemFileAudio(file);
+      });
+
+  const defaults: Metadata = {
     title: folderData.file?.name ?? folderName,
     openGraph: {
       url: [`/${locale}/explorer`, segments.join('/')].join('/'),
+      images,
+      videos: video && {
+        url: video.src,
+        width: video.metadata.width,
+        height: video.metadata.height,
+      },
+      audio: audio && {
+        url: audio.src,
+      },
+    },
+    twitter: {
+      images,
     },
   };
 

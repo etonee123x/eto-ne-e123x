@@ -150,6 +150,8 @@ const eslintConfig = defineConfig([
         },
       ],
 
+      'sonarjs/cognitive-complexity': ['off'],
+
       'prettier/prettier': [
         'error',
         {

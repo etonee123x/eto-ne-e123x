@@ -9,6 +9,8 @@ import { Posts } from '@/widgets/posts';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/shared/ui/ds/empty';
 import type { Metadata } from 'next';
 import { isNil } from '@/shared/utils/is-nil';
+import { FILE_TYPES } from '@/entities/file';
+import { getSiteImage } from '@/shared/lib/metadata';
 
 const FormPostCreate = dynamic(() => {
   return import('@/features/post/editor').then((module) => {
@@ -57,36 +59,69 @@ export const generateMetadata = async ({
     throw new Error('Post not found');
   }
 
-  if (!post.text) {
-    return {
-      ...defaults,
-      description: t('postInMyBlog'),
-    };
-  }
+  const description = (() => {
+    if (!post.text) {
+      return t('postInMyBlog');
+    }
 
-  const max = 140;
-  const text = post.text.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim();
+    const max = 140;
+    const text = post.text.replaceAll(/\n+/g, ' ').replaceAll(/\s+/g, ' ').trim();
 
-  if (text.length <= max) {
-    return {
-      ...defaults,
-      description: text,
-    };
-  }
+    if (text.length <= max) {
+      return text;
+    }
 
-  const textSliced = text.slice(0, max);
-  const indexOfLastSpace = textSliced.lastIndexOf(' ');
+    const textSliced = text.slice(0, max);
+    const indexOfLastSpace = textSliced.lastIndexOf(' ');
 
-  if (indexOfLastSpace === -1) {
-    return {
-      ...defaults,
-      description: textSliced.slice(0, max - 1) + '…',
-    };
-  }
+    if (indexOfLastSpace === -1) {
+      return textSliced.slice(0, max - 1) + '…';
+    }
+
+    return textSliced.slice(0, indexOfLastSpace) + '…';
+  })();
+
+  const image = post.attachments.find((attachment) => {
+    return attachment.fileType === FILE_TYPES.IMAGE;
+  });
+
+  const images = image
+    ? [
+        {
+          url: image.src,
+          width: image.metadata.width,
+          height: image.metadata.height,
+          alt: t('postAttachmentImage'),
+        },
+      ]
+    : [await getSiteImage()];
+
+  const video = post.attachments.find((attachment) => {
+    return attachment.fileType === FILE_TYPES.VIDEO;
+  });
+
+  const audio = post.attachments.find((attachment) => {
+    return attachment.fileType === FILE_TYPES.AUDIO;
+  });
 
   return {
     ...defaults,
-    description: textSliced.slice(0, indexOfLastSpace) + '…',
+    description,
+    openGraph: {
+      ...defaults.openGraph,
+      images,
+      videos: video && {
+        url: video.src,
+        width: video.metadata.width,
+        height: video.metadata.height,
+      },
+      audio: audio && {
+        url: audio.src,
+      },
+    },
+    twitter: {
+      images,
+    },
   };
 };
 

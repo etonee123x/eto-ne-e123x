@@ -1,5 +1,4 @@
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -17,20 +16,13 @@ import { GalleryProvider } from '@/widgets/gallery';
 import { ThemeProvider, getRandomTheme } from '@/features/theme';
 import { QueryClientProvider } from '@/shared/api/query';
 
+import { getSiteImage } from '@/shared/lib/metadata';
+
 import '@/app/globals.css';
 
 export const generateMetadata = async ({ params }: Readonly<PageProps<'/[locale]'>>): Promise<Metadata> => {
   const { locale } = await params;
-  const t = await getTranslations('Metadata');
-
-  const images = [
-    {
-      url: '/etonee123x.jpg',
-      width: 1000,
-      height: 1000,
-      alt: t('etonee123xSiteLogo'),
-    },
-  ];
+  const images = [await getSiteImage()];
 
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),

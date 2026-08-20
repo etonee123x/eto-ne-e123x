@@ -29,7 +29,8 @@
     "noPosts": "No posts",
     "noPostsFound": "No posts found",
     "myBlog": "My blog, here you can check out my posts; I write about the complexities of life, about thoughts that concern me! So think with your head.",
-    "postInMyBlog": "A post in my blog"
+    "postInMyBlog": "A post in my blog",
+    "postAttachmentImage": "Post attachment, image"
   },
   "PostAttachmentImage": {
     "attachment": "Attachment {index}"
