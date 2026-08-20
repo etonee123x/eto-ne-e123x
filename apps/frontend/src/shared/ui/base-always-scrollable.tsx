@@ -7,10 +7,10 @@ import { useElementSize } from '@reactuses/core';
 export const BaseAlwaysScrollable = ({
   children,
   className,
-  duration = '10000ms',
+  pixelsPerSecond = 60,
 }: PropsWithChildren<
   {
-    duration?: string;
+    pixelsPerSecond?: number;
   } & Pick<ComponentProps<'div'>, 'className'>
 >) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -23,7 +23,7 @@ export const BaseAlwaysScrollable = ({
 
   const style = {
     '--scroll-x-diff': `-${diff}px`,
-    '--scroll-x-duration': duration,
+    '--scroll-x-duration': `${(diff * 2 * 1000) / pixelsPerSecond}ms`,
   } as CSSProperties;
 
   return (
