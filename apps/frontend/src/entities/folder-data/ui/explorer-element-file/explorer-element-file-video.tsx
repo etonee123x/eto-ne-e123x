@@ -1,10 +1,10 @@
 import { BaseVideo } from '@/shared/ui/base-video';
-import { Item, ItemContent, ItemHeader, ItemMedia } from '@/shared/ui/ds/item';
+import { Item, ItemContent, ItemMedia } from '@/shared/ui/ds/item';
 import { Separator } from '@/shared/ui/ds/separator';
 import { Link } from '@/i18n/navigation';
 import { type components } from '@/shared/api/openapi';
 import { type ComponentProps } from 'react';
-import { ExplorerElementTime } from './explorer-element-time';
+import { ExplorerElementHeader } from '../explorer-element-header';
 
 export const ExplorerElementFileVideo = ({
   element,
@@ -13,10 +13,7 @@ export const ExplorerElementFileVideo = ({
   return (
     <article className="contents">
       <Item className="border-primary" variant="outline" render={<Link {...props} scroll={false} />}>
-        <ItemHeader>
-          <header className="text-lg">{element.name}</header>
-          <ExplorerElementTime element={element} />
-        </ItemHeader>
+        <ExplorerElementHeader name={element.name} createdAt={element._meta.createdAt} />
         <Separator />
         <ItemContent>
           <ItemMedia>

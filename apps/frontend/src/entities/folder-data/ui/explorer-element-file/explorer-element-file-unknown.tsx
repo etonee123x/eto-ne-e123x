@@ -1,8 +1,8 @@
-import { Item, ItemHeader } from '@/shared/ui/ds/item';
+import { Item } from '@/shared/ui/ds/item';
 import { Link } from '@/i18n/navigation';
 import { type components } from '@/shared/api/openapi';
 import { type ComponentProps } from 'react';
-import { ExplorerElementTime } from './explorer-element-time';
+import { ExplorerElementHeader } from '../explorer-element-header';
 
 export const ExplorerElementFileUnknown = ({
   element,
@@ -11,10 +11,7 @@ export const ExplorerElementFileUnknown = ({
   return (
     <article className="contents">
       <Item className="border-primary" variant="outline" render={<Link {...props} />}>
-        <ItemHeader>
-          <header className="text-lg">{element.name}</header>
-          <ExplorerElementTime element={element} />
-        </ItemHeader>
+        <ExplorerElementHeader name={element.name} createdAt={element._meta.createdAt} />
       </Item>
     </article>
   );

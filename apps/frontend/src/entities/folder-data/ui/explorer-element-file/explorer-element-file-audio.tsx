@@ -1,4 +1,4 @@
-import { Item, ItemContent, ItemDescription, ItemGroup, ItemHeader, ItemMedia, ItemTitle } from '@/shared/ui/ds/item';
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from '@/shared/ui/ds/item';
 import { Separator } from '@/shared/ui/ds/separator';
 import { Link } from '@/i18n/navigation';
 import { type components } from '@/shared/api/openapi';
@@ -6,7 +6,7 @@ import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-huma
 import { Calendar, Clock, Disc3, Metronome, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentProps } from 'react';
-import { ExplorerElementTime } from './explorer-element-time';
+import { ExplorerElementHeader } from '../explorer-element-header';
 
 export const ExplorerElementFileAudio = ({
   element,
@@ -70,10 +70,7 @@ export const ExplorerElementFileAudio = ({
   return (
     <article className="contents">
       <Item className="border-primary" render={<Link {...props} />}>
-        <ItemHeader>
-          <header className="text-lg">{element.name}</header>
-          <ExplorerElementTime element={element} />
-        </ItemHeader>
+        <ExplorerElementHeader name={element.name} createdAt={element._meta.createdAt} />
         <Separator />
         <ItemContent className="w-full">
           <ItemGroup className="flex-row overflow-x-auto">
