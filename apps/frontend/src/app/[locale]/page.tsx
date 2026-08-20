@@ -5,7 +5,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
   const t = await getTranslations('Index');
 
   return {
-    title: `${t('indexPage')} | eto-ne-e123x`,
+    title: `${t('indexPage')} | etonee123x`,
   };
 };
 

@@ -1,4 +1,5 @@
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -20,20 +21,32 @@ import '@/app/globals.css';
 
 export const generateMetadata = async ({ params }: Readonly<PageProps<'/[locale]'>>): Promise<Metadata> => {
   const { locale } = await params;
+  const t = await getTranslations('Metadata');
+
+  const images = [
+    {
+      url: '/etonee123x.jpg',
+      width: 1000,
+      height: 1000,
+      alt: t('etonee123xSiteLogo'),
+    },
+  ];
 
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
     title: {
-      template: '%s | eto-ne-e123x',
-      default: 'eto-ne-e123x',
+      template: '%s | etonee123x',
+      default: 'etonee123x',
     },
     openGraph: {
       url: `/${locale}`,
       type: 'website',
-      siteName: 'eto-ne-e123x',
+      siteName: 'etonee123x',
+      images,
     },
     twitter: {
       card: 'summary_large_image',
+      images,
     },
   };
 };
