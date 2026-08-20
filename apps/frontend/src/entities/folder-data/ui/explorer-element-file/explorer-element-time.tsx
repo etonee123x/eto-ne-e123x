@@ -10,7 +10,11 @@ export const ExplorerElementTime = ({
   const now = useNow();
 
   return (
-    <time className="text-muted-foreground" dateTime={new Date(element._meta.createdAt).toISOString()}>
+    <time
+      className="text-muted-foreground"
+      suppressHydrationWarning
+      dateTime={new Date(element._meta.createdAt).toISOString()}
+    >
       {relativeTime(element._meta.createdAt, now)}
     </time>
   );
