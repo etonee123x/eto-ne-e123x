@@ -16,8 +16,8 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
   const previousGalleryItem = galleryItems[currentIndex - 1];
   const nextGalleryItem = galleryItems[currentIndex + 1];
 
-  const previousControlRender = renderers.current?.previousControl;
-  const nextControlRender = renderers.current?.nextControl;
+  const previousControlRender = renderers?.previousControl;
+  const nextControlRender = renderers?.nextControl;
 
   return (
     <>
@@ -86,7 +86,7 @@ export const Gallery = () => {
       {galleryItem && (
         <DialogContent
           className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]"
-          closeButtonRender={renderers.current?.closeControl}
+          closeButtonRender={renderers?.closeControl}
         >
           <div className="relative flex h-full min-h-0 w-full min-w-0 items-center justify-center">
             <Card
@@ -96,7 +96,7 @@ export const Gallery = () => {
                 height: `min(100cqh, calc(100cqw / ${galleryItem.width / galleryItem.height} + ${CARD_VERTICAL_OVERHEAD}))`,
               }}
             >
-              {renderers.current?.header}
+              {renderers?.header}
               <CardContent className="min-h-0 flex-1 overflow-hidden">
                 <GalleryItem galleryItem={galleryItem} />
               </CardContent>

@@ -17,7 +17,7 @@ export const GalleryContextProvider = ({
 }: PropsWithChildren<{
   initialGalleryItem?: NonNullable<ContextType<typeof GalleryContext>>['galleryItem'];
   initialGalleryItems?: NonNullable<ContextType<typeof GalleryContext>>['galleryItems'];
-  initialRenderers?: NonNullable<ContextType<typeof GalleryContext>>['renderers']['current'];
+  initialRenderers?: NonNullable<ContextType<typeof GalleryContext>>['renderers'];
 }>) => {
   const [galleryItem, setGalleryItem] =
     useState<NonNullable<ContextType<typeof GalleryContext>>['galleryItem']>(initialGalleryItem);
@@ -29,7 +29,7 @@ export const GalleryContextProvider = ({
   );
 
   const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(INITIAL_VALUES.onClose);
-  const renderers: NonNullable<ContextType<typeof GalleryContext>>['renderers'] = useRef(initialRenderers);
+  const [renderers, setRenderers] = useState(initialRenderers);
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>(
     (_galleryItem, galleryItems, parameters) => {
@@ -41,7 +41,7 @@ export const GalleryContextProvider = ({
       setGalleryItem(_galleryItem);
       setGalleryItems(galleryItems);
 
-      renderers.current = parameters?.renderers ?? INITIAL_VALUES.renderers;
+      setRenderers(parameters?.renderers ?? INITIAL_VALUES.renderers);
     },
     [galleryItem],
   );

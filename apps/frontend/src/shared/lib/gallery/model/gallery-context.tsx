@@ -37,7 +37,7 @@ export const GalleryContext = createContext<{
   onClose: RefObject<OnClose>;
   setOnClose: (onClose: OnClose) => void;
 
-  renderers: RefObject<GalleryRenderers>;
+  renderers: GalleryRenderers;
 } | null>(null);
 
 export const useGalleryContext = () => {
