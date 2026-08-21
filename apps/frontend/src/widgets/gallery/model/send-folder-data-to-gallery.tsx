@@ -1,12 +1,17 @@
 'use client';
 
-import { useGalleryContext, type GalleryItem } from '@/shared/lib/gallery';
-import { Link, useRouter } from '@/i18n/navigation';
+import { useGalleryContext } from '@/shared/lib/gallery';
+import { useRouter } from '@/i18n/navigation';
 import { type components } from '@/shared/api/openapi';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { isFolderDataItemFileGalleryItem } from './is-folder-data-item-file-gallery-item';
 import { folderDataItemGalleryItemToGalleryItem } from './folder-data-item-file-to-gallery-item';
-import { isNil } from '@/shared/utils/is-nil';
+import {
+  ExplorerGalleryCloseControl,
+  ExplorerGalleryHeader,
+  ExplorerGalleryNextControl,
+  ExplorerGalleryPreviousControl,
+} from '../ui/explorer-gallery-renderers';
 
 export const SendFolderDataToGallery = ({
   folderData,
@@ -15,62 +20,47 @@ export const SendFolderDataToGallery = ({
   folderData: components['schemas']['FolderDataResponse'];
   lastNavigationItem: { text: string; href: string };
 }) => {
-  const { setGalleryItem, open } = useGalleryContext();
+  const { setGalleryItem, open, galleryItem, onClose, setOnClose } = useGalleryContext();
   const router = useRouter();
-
-  const isClosingByLink = useRef(false);
 
   useEffect(() => {
     const file = folderData.file;
-    const files = folderData.files;
 
     if (!(file && isFolderDataItemFileGalleryItem(file))) {
       setGalleryItem(null);
       return;
     }
 
-    const getGalleryItemHref = (galleryItem: GalleryItem) => {
-      const path = files.find((file) => {
-        return file.src === galleryItem.src;
-      })?.path;
+    const fileAsGalleryItem = folderDataItemGalleryItemToGalleryItem(file);
 
-      return isNil(path) ? lastNavigationItem.href : '/explorer' + path;
+    const onCloseExplorerGallery = () => {
+      router.push(lastNavigationItem.href, { scroll: false });
     };
 
+    if (galleryItem?.src === fileAsGalleryItem.src) {
+      if (!onClose.current) {
+        setOnClose(onCloseExplorerGallery);
+      }
+
+      return;
+    }
+
     open(
-      folderDataItemGalleryItemToGalleryItem(file),
+      fileAsGalleryItem,
       folderData.files.flatMap((file) => {
         return isFolderDataItemFileGalleryItem(file) ? [folderDataItemGalleryItemToGalleryItem(file)] : [];
       }),
       {
-        onClose: () => {
-          if (isClosingByLink.current) {
-            isClosingByLink.current = false;
-            return;
-          }
-
-          router.push(lastNavigationItem.href, { scroll: false });
-        },
-        renderCloseControl: () => {
-          return (
-            <Link
-              href={lastNavigationItem.href}
-              scroll={false}
-              onClick={() => {
-                isClosingByLink.current = true;
-              }}
-            />
-          );
-        },
-        renderPreviousControl: (galleryItem) => {
-          return <Link href={getGalleryItemHref(galleryItem)} scroll={false} />;
-        },
-        renderNextControl: (galleryItem) => {
-          return <Link href={getGalleryItemHref(galleryItem)} scroll={false} />;
+        renderers: {
+          closeControl: <ExplorerGalleryCloseControl href={lastNavigationItem.href} />,
+          header: <ExplorerGalleryHeader />,
+          previousControl: <ExplorerGalleryPreviousControl files={folderData.files} />,
+          nextControl: <ExplorerGalleryNextControl files={folderData.files} />,
         },
       },
     );
-  }, [folderData, open, router, lastNavigationItem, setGalleryItem]);
+    setOnClose(onCloseExplorerGallery);
+  }, [folderData, galleryItem, open, router, lastNavigationItem, setGalleryItem, setOnClose, onClose]);
 
   return null;
 };

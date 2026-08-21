@@ -4,20 +4,20 @@ import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
 import { useGalleryContext } from '@/shared/lib/gallery';
 import { type ComponentProps } from 'react';
 import { Button } from '@/shared/ui/ds/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
+import { Card, CardContent } from '@/shared/ui/ds/card';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { GalleryItem } from './gallery-item';
 
 const CARD_VERTICAL_OVERHEAD = '6.5rem';
 
 const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
-  const { galleryItems, renderPreviousControl, renderNextControl, setGalleryItem } = useGalleryContext();
+  const { galleryItems, renderers, setGalleryItem } = useGalleryContext();
 
   const previousGalleryItem = galleryItems[currentIndex - 1];
   const nextGalleryItem = galleryItems[currentIndex + 1];
 
-  const previousControlRender = previousGalleryItem ? renderPreviousControl.current?.(previousGalleryItem) : undefined;
-  const nextControlRender = nextGalleryItem ? renderNextControl.current?.(nextGalleryItem) : undefined;
+  const previousControlRender = renderers.current?.previousControl;
+  const nextControlRender = renderers.current?.nextControl;
 
   return (
     <>
@@ -64,7 +64,7 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
 };
 
 export const Gallery = () => {
-  const { galleryItem, setGalleryItem, onClose, renderCloseControl, galleryItems } = useGalleryContext();
+  const { galleryItem, setGalleryItem, onClose, renderers, galleryItems } = useGalleryContext();
 
   const onOpenChange: ComponentProps<typeof Dialog>['onOpenChange'] = (isOpen) => {
     if (isOpen) {
@@ -72,7 +72,7 @@ export const Gallery = () => {
     }
 
     setGalleryItem(null);
-    onClose.current();
+    onClose.current?.();
   };
 
   const currentIndex = galleryItem
@@ -86,7 +86,7 @@ export const Gallery = () => {
       {galleryItem && (
         <DialogContent
           className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]"
-          closeButtonRender={renderCloseControl.current?.()}
+          closeButtonRender={renderers.current?.closeControl}
         >
           <div className="relative flex h-full min-h-0 w-full min-w-0 items-center justify-center">
             <Card
@@ -96,9 +96,7 @@ export const Gallery = () => {
                 height: `min(100cqh, calc(100cqw / ${galleryItem.width / galleryItem.height} + ${CARD_VERTICAL_OVERHEAD}))`,
               }}
             >
-              <CardHeader className="text-center">
-                <CardTitle>{galleryItem.name}</CardTitle>
-              </CardHeader>
+              {renderers.current?.header}
               <CardContent className="min-h-0 flex-1 overflow-hidden">
                 <GalleryItem galleryItem={galleryItem} />
               </CardContent>

@@ -6,18 +6,18 @@ import { noop } from '@/shared/utils/noop';
 
 const INITIAL_VALUES = {
   onClose: noop,
-  renderCloseControl: null,
-  renderPreviousControl: null,
-  renderNextControl: null,
+  renderers: null,
 };
 
 export const GalleryContextProvider = ({
   children,
   initialGalleryItem = null,
   initialGalleryItems = [],
+  initialRenderers = INITIAL_VALUES.renderers,
 }: PropsWithChildren<{
   initialGalleryItem?: NonNullable<ContextType<typeof GalleryContext>>['galleryItem'];
   initialGalleryItems?: NonNullable<ContextType<typeof GalleryContext>>['galleryItems'];
+  initialRenderers?: NonNullable<ContextType<typeof GalleryContext>>['renderers']['current'];
 }>) => {
   const [galleryItem, setGalleryItem] =
     useState<NonNullable<ContextType<typeof GalleryContext>>['galleryItem']>(initialGalleryItem);
@@ -29,28 +29,26 @@ export const GalleryContextProvider = ({
   );
 
   const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(INITIAL_VALUES.onClose);
-  const renderCloseControl: NonNullable<ContextType<typeof GalleryContext>>['renderCloseControl'] = useRef(
-    INITIAL_VALUES.renderCloseControl,
-  );
-  const renderPreviousControl: NonNullable<ContextType<typeof GalleryContext>>['renderPreviousControl'] = useRef(
-    INITIAL_VALUES.renderPreviousControl,
-  );
-  const renderNextControl: NonNullable<ContextType<typeof GalleryContext>>['renderNextControl'] = useRef(
-    INITIAL_VALUES.renderNextControl,
-  );
+  const renderers: NonNullable<ContextType<typeof GalleryContext>>['renderers'] = useRef(initialRenderers);
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>(
-    (galleryItem, galleryItems, parameters) => {
-      setGalleryItem(galleryItem);
+    (_galleryItem, galleryItems, parameters) => {
+      if (_galleryItem.src === galleryItem?.src) {
+        console.warn(`[Gallery] Already open for gallery item: ${_galleryItem.src}`);
+        return;
+      }
+
+      setGalleryItem(_galleryItem);
       setGalleryItems(galleryItems);
 
-      onClose.current = parameters?.onClose ?? INITIAL_VALUES.onClose;
-      renderCloseControl.current = parameters?.renderCloseControl ?? INITIAL_VALUES.renderCloseControl;
-      renderPreviousControl.current = parameters?.renderPreviousControl ?? INITIAL_VALUES.renderPreviousControl;
-      renderNextControl.current = parameters?.renderNextControl ?? INITIAL_VALUES.renderNextControl;
+      renderers.current = parameters?.renderers ?? INITIAL_VALUES.renderers;
     },
-    [],
+    [galleryItem],
   );
+
+  const setOnClose = useCallback<NonNullable<ContextType<typeof GalleryContext>>['setOnClose']>((_onClose) => {
+    onClose.current = _onClose;
+  }, []);
 
   return (
     <GalleryContext
@@ -61,9 +59,9 @@ export const GalleryContextProvider = ({
         galleryItems,
 
         onClose,
-        renderCloseControl,
-        renderPreviousControl,
-        renderNextControl,
+        setOnClose,
+
+        renderers,
         open,
       }}
     >
