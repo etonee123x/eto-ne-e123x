@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
 import { useGalleryContext } from '@/shared/lib/gallery';
-import { type ComponentProps } from 'react';
+import { Fragment, type ComponentProps } from 'react';
 import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent } from '@/shared/ui/ds/card';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
@@ -96,7 +96,7 @@ export const Gallery = () => {
                 height: `min(100cqh, calc(100cqw / ${galleryItem.width / galleryItem.height} + ${CARD_VERTICAL_OVERHEAD}))`,
               }}
             >
-              {renderers?.header}
+              {renderers?.header && <Fragment key="gallery-header">{renderers.header}</Fragment>}
               <CardContent className="min-h-0 flex-1 overflow-hidden">
                 <GalleryItem galleryItem={galleryItem} />
               </CardContent>
