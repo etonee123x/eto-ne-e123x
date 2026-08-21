@@ -4,9 +4,8 @@ import { useGalleryContext } from '@/shared/lib/gallery';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 import { CardTitle } from '@/shared/ui/ds/card';
 import { Link } from '@/i18n/navigation';
+import type { ComponentProps } from 'react';
 import type { components } from '@/shared/api/openapi';
-
-type ExplorerGalleryFile = Pick<components['schemas']['FolderDataItemFile'], 'src' | 'path'>;
 
 export const ExplorerGalleryHeader = () => {
   const { galleryItem } = useGalleryContext();
@@ -20,16 +19,22 @@ export const ExplorerGalleryHeader = () => {
   );
 };
 
-export const ExplorerGalleryCloseControl = ({ href }: { href: string }) => {
-  return <Link href={href} scroll={false} />;
+export const ExplorerGalleryCloseControl = ({ children, ...props }: Omit<ComponentProps<typeof Link>, 'scroll'>) => {
+  return (
+    <Link scroll={false} {...props}>
+      {children}
+    </Link>
+  );
 };
 
 const ExplorerGalleryCarouselControl = ({
+  children,
   direction,
   files,
-}: {
+  ...props
+}: Omit<ComponentProps<typeof Link>, 'href' | 'scroll'> & {
   direction: 'previous' | 'next';
-  files: Array<ExplorerGalleryFile>;
+  files: components['schemas']['FolderDataResponse']['files'];
 }) => {
   const { galleryItem, galleryItems } = useGalleryContext();
 
@@ -50,13 +55,21 @@ const ExplorerGalleryCarouselControl = ({
     return null;
   }
 
-  return <Link href={'/explorer' + targetFile.path} scroll={false} />;
+  return (
+    <Link href={'/explorer' + targetFile.path} scroll={false} {...props}>
+      {children}
+    </Link>
+  );
 };
 
-export const ExplorerGalleryPreviousControl = ({ files }: { files: Array<ExplorerGalleryFile> }) => {
-  return <ExplorerGalleryCarouselControl direction="previous" files={files} />;
+export const ExplorerGalleryPreviousControl = ({
+  ...props
+}: Omit<ComponentProps<typeof ExplorerGalleryCarouselControl>, 'direction'>) => {
+  return <ExplorerGalleryCarouselControl direction="previous" {...props} />;
 };
 
-export const ExplorerGalleryNextControl = ({ files }: { files: Array<ExplorerGalleryFile> }) => {
-  return <ExplorerGalleryCarouselControl direction="next" files={files} />;
+export const ExplorerGalleryNextControl = ({
+  ...props
+}: Omit<ComponentProps<typeof ExplorerGalleryCarouselControl>, 'direction'>) => {
+  return <ExplorerGalleryCarouselControl direction="next" {...props} />;
 };
