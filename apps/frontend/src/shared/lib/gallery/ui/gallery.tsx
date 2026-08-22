@@ -2,10 +2,11 @@
 
 import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
 import { useGalleryContext } from '@/shared/lib/gallery';
-import { Fragment, type ComponentProps, type CSSProperties } from 'react';
+import { useRef, type ComponentProps, type CSSProperties } from 'react';
 import { Button } from '@/shared/ui/ds/button';
 import { Card, CardContent } from '@/shared/ui/ds/card';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { useElementSize } from '@reactuses/core';
 import { GalleryItem } from './gallery-item';
 
 const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
@@ -64,6 +65,9 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
 export const Gallery = () => {
   const { galleryItem, setGalleryItem, onClose, renderers, galleryItems } = useGalleryContext();
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [, headerHeight] = useElementSize(headerRef, { box: 'border-box' });
+
   const onOpenChange: ComponentProps<typeof Dialog>['onOpenChange'] = (isOpen) => {
     if (isOpen) {
       return;
@@ -80,12 +84,12 @@ export const Gallery = () => {
     : 0;
   const mediaRatio = galleryItem ? galleryItem.width / galleryItem.height : 1;
 
+  // real header height (measured) + its flex gap, instead of a guessed constant
+  const headerSpace = renderers?.header ? `calc(${headerHeight}px + var(--card-spacing))` : '0px';
+
   const cardStyle = {
-    '--gallery-card-header-block-size': renderers?.header ? '1.375rem' : '0px',
-    '--gallery-card-row-gap': renderers?.header ? 'var(--card-spacing)' : '0px',
     '--gallery-media-max-inline-size': 'calc(100cqw - var(--card-spacing) * 2)',
-    '--gallery-media-max-block-size':
-      'max(0px, calc(100cqh - var(--card-spacing) * 2 - var(--gallery-card-header-block-size) - var(--gallery-card-row-gap)))',
+    '--gallery-media-max-block-size': `max(0px, calc(100cqh - var(--card-spacing) * 2 - ${headerSpace}))`,
   } as CSSProperties;
 
   const mediaStyle = {
@@ -99,7 +103,7 @@ export const Gallery = () => {
         <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
           <div className="@container-size relative flex h-full min-h-0 w-full min-w-0 items-center justify-center">
             <Card className="max-h-full max-w-full overflow-hidden" style={cardStyle}>
-              {renderers?.header && <Fragment key="gallery-header">{renderers.header}</Fragment>}
+              {renderers?.header && <div ref={headerRef}>{renderers.header}</div>}
               <CardContent className="overflow-hidden">
                 <div
                   className="max-h-(--gallery-media-max-block-size) max-w-(--gallery-media-max-inline-size)"
