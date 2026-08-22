@@ -2,7 +2,7 @@
 
 import { useGalleryContext } from '@/shared/lib/gallery';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
-import { CardTitle } from '@/shared/ui/ds/card';
+import { CardHeader, CardTitle } from '@/shared/ui/ds/card';
 import { Link } from '@/i18n/navigation';
 import type { ComponentProps } from 'react';
 import type { components } from '@/shared/api/openapi';
@@ -12,9 +12,11 @@ export const ExplorerGalleryHeader = () => {
 
   return (
     galleryItem && (
-      <CardTitle>
-        <BaseAlwaysScrollable>{galleryItem.name}</BaseAlwaysScrollable>
-      </CardTitle>
+      <CardHeader>
+        <CardTitle className="overflow-hidden">
+          <BaseAlwaysScrollable className="w-full">{galleryItem.name}</BaseAlwaysScrollable>
+        </CardTitle>
+      </CardHeader>
     )
   );
 };
