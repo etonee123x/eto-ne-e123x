@@ -27,7 +27,7 @@ export const BaseAlwaysScrollable = ({
   } as CSSProperties;
 
   return (
-    <div className={cn('relative inline-flex overflow-hidden', className)} ref={containerRef}>
+    <div className={cn('relative flex min-w-0 overflow-hidden', className)} ref={containerRef}>
       <div
         className={cn(
           'm-(--base-always-scrollable--content--margin) whitespace-nowrap',
