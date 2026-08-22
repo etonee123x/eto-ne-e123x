@@ -33,17 +33,12 @@ export const GalleryContextProvider = ({
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>(
     (_galleryItem, galleryItems, parameters) => {
-      if (_galleryItem.src === galleryItem?.src) {
-        console.warn(`[Gallery] Already open for gallery item: ${_galleryItem.src}`);
-        return;
-      }
-
       setGalleryItem(_galleryItem);
       setGalleryItems(galleryItems);
 
       setRenderers(parameters?.renderers ?? INITIAL_VALUES.renderers);
     },
-    [galleryItem],
+    [],
   );
 
   const setOnClose = useCallback<NonNullable<ContextType<typeof GalleryContext>>['setOnClose']>((_onClose) => {

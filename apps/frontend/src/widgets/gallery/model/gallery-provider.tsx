@@ -8,7 +8,6 @@ import { QueryClient } from '@tanstack/react-query';
 import { isFolderDataItemFileGalleryItem } from './is-folder-data-item-file-gallery-item';
 import { folderDataItemGalleryItemToGalleryItem } from './folder-data-item-file-to-gallery-item';
 import {
-  ExplorerGalleryCloseControl,
   ExplorerGalleryHeader,
   ExplorerGalleryNextControl,
   ExplorerGalleryPreviousControl,
@@ -39,16 +38,12 @@ export const GalleryProvider = async ({
       : [];
   });
 
-  const closePath = folderData?.pathDirectory.split('/').filter(Boolean).join('/');
-  const closeHref = folderData?.pathDirectory ? `/explorer/${closePath}` : '/explorer';
-
   return (
     <GalleryContextProvider
       initialGalleryItem={galleryItem}
       initialGalleryItems={galleryItems}
       initialRenderers={
         galleryItem && {
-          closeControl: <ExplorerGalleryCloseControl href={closeHref} />,
           header: <ExplorerGalleryHeader />,
           previousControl: <ExplorerGalleryPreviousControl files={folderData?.files ?? []} />,
           nextControl: <ExplorerGalleryNextControl files={folderData?.files ?? []} />,

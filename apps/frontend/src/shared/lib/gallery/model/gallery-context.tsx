@@ -12,7 +12,6 @@ import {
 import type { GalleryItem } from '../types/gallery-item';
 
 type GalleryRenderers = Partial<{
-  closeControl: ReactElement;
   header: ReactElement;
   previousControl: ReactElement;
   nextControl: ReactElement;

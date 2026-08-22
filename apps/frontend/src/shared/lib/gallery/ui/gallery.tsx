@@ -84,10 +84,7 @@ export const Gallery = () => {
   return (
     <Dialog open={Boolean(galleryItem)} onOpenChange={onOpenChange}>
       {galleryItem && (
-        <DialogContent
-          className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]"
-          closeButtonRender={renderers?.closeControl}
-        >
+        <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
           <div className="relative flex h-full min-h-0 w-full min-w-0 items-center justify-center">
             <Card
               className="max-h-full max-w-full overflow-hidden"

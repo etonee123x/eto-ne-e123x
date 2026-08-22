@@ -19,14 +19,6 @@ export const ExplorerGalleryHeader = () => {
   );
 };
 
-export const ExplorerGalleryCloseControl = ({ children, ...props }: Omit<ComponentProps<typeof Link>, 'scroll'>) => {
-  return (
-    <Link scroll={false} {...props}>
-      {children}
-    </Link>
-  );
-};
-
 const ExplorerGalleryCarouselControl = ({
   children,
   direction,
