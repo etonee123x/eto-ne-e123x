@@ -229,7 +229,7 @@ export const Posts = ({
     scrollHeight: number;
   } | null>(null);
 
-  const { open } = useGalleryContext();
+  const { open, setOnClose } = useGalleryContext();
 
   const {
     fetchNextPage,
@@ -301,6 +301,8 @@ export const Posts = ({
     if (!isAttachmentGalleryItem(attachment)) {
       return;
     }
+
+    setOnClose(null);
 
     open(
       attachmentGalleryItemToGalleryItem(attachment),
