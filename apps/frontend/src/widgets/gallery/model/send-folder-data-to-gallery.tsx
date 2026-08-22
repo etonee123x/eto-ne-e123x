@@ -19,7 +19,7 @@ export const SendFolderDataToGallery = ({
   folderData: components['schemas']['FolderDataResponse'];
   navigationItemUp: { text: string; href: string } | null;
 }) => {
-  const { setGalleryItem, open, setOnClose } = useGalleryContext();
+  const { setGalleryItem, open, galleryItem, setOnClose } = useGalleryContext();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -42,6 +42,10 @@ export const SendFolderDataToGallery = ({
     const fileAsGalleryItem = folderDataItemGalleryItemToGalleryItem(file);
 
     setOnClose(onCloseExplorerGallery);
+
+    if (galleryItem?.src === fileAsGalleryItem.src) {
+      return;
+    }
 
     open(
       fileAsGalleryItem,

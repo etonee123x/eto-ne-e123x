@@ -6,7 +6,6 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/utils/cn"
 import { Button } from "@/shared/ui/ds/button"
-import { useHasMounted } from "@/shared/hooks/use-has-mounted"
 
 function Dialog({
   ...props
@@ -56,8 +55,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
-  const hasMounted = useHasMounted()
-  const content = (
+  return (
     <>
       <DialogOverlay />
       <DialogPrimitive.Content
@@ -84,12 +82,6 @@ function DialogContent({
       </DialogPrimitive.Content>
     </>
   )
-
-  if (hasMounted) {
-    return <DialogPortal>{content}</DialogPortal>
-  }
-
-  return content
 }
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
