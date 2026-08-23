@@ -1,1 +1,1 @@
-export { getSiteImage } from './get-site-image';
+export { getSiteImage } from './model/get-site-image';

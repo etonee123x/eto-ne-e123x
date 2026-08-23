@@ -13,12 +13,13 @@ import { PlayerProvider, Player } from '@/widgets/player';
 import { Gallery } from '@/shared/lib/gallery';
 import { GalleryProvider } from '@/widgets/gallery';
 
-import { ThemeProvider, getRandomTheme } from '@/features/theme';
+import { ThemeProvider } from '@/features/theme';
 import { QueryClientProvider } from '@/shared/api/query';
 
 import { getSiteImage } from '@/shared/lib/metadata';
 
 import '@/app/globals.css';
+import { getRandomColorTheme } from '@/shared/lib/color-theme';
 
 export const generateMetadata = async ({ params }: Readonly<PageProps<'/[locale]'>>): Promise<Metadata> => {
   const { locale } = await params;
@@ -66,7 +67,7 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
     notFound();
   }
 
-  const theme = getRandomTheme();
+  const colorTheme = getRandomColorTheme();
 
   return (
     <html className="h-full antialiased" suppressHydrationWarning>
@@ -80,10 +81,10 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
         </Providers>
         <style>{`
           :root {
-            ${theme.light}
+            ${colorTheme.light}
 
             &.dark {
-              ${theme.dark}
+              ${colorTheme.dark}
             }
           }
         `}</style>
