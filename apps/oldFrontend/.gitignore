@@ -1,7 +1,0 @@
-node_modules
-dist
-dist-ssr
-.env
-.DS_Store
-
-public/settings.json
