@@ -24,7 +24,7 @@ import {
 import type { Metadata } from 'next';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { notFound } from 'next/navigation';
-import { getSiteImage } from '@/shared/lib/metadata/get-site-image';
+import { getSiteImage } from '@/shared/lib/metadata';
 
 const ExplorerElementUp = dynamic(() => {
   return import('@/entities/folder-data').then((module) => {
