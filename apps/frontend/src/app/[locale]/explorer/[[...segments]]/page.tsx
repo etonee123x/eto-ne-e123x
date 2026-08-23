@@ -7,7 +7,6 @@ import {
 } from '@/shared/ui/ds/breadcrumb';
 import { Fragment } from 'react/jsx-runtime';
 import { getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { QueryClient } from '@tanstack/react-query';
 import { type components } from '@/shared/api/openapi';
@@ -25,6 +24,7 @@ import type { Metadata } from 'next';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { notFound } from 'next/navigation';
 import { getSiteImage } from '@/shared/lib/metadata';
+import { Link } from '@/i18n/navigation';
 
 const ExplorerElementUp = dynamic(() => {
   return import('@/entities/folder-data').then((module) => {
