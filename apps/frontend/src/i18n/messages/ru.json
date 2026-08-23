@@ -1,0 +1,97 @@
+{
+  "Metadata": {
+    "etonee123xSiteLogo": "Логотип сайта etonee123x"
+  },
+  "TheHeader": {
+    "etonee123x": "etonee123x",
+    "blog": "Блог",
+    "content": "Контент"
+  },
+  "TheFooter": {
+    "telegramLogo": "Логотип Telegram"
+  },
+  "ThemeSwitcher": {
+    "light": "Светлая",
+    "dark": "Тёмная",
+    "system": "Системная",
+    "toggleTheme": "Сменить тему"
+  },
+  "Index": {
+    "indexPage": "Начальная страница"
+  },
+  "NotFound": {
+    "pageNotFound": "Страница не найдена",
+    "pageNotFoundItMayHaveBeenRemoved": "Страница не найдена. Возможно, она была удалена или URL некорректен.",
+    "toTheMainPage": "Перейти на главную страницу"
+  },
+  "Blog": {
+    "blog": "Блог",
+    "noPosts": "Нет постов",
+    "noPostsFound": "Постов не найдено",
+    "myBlog": "Мой блог, тут можно заценить мои посты; пишу о жизни непростой, о мыслях, что меня волнуют! Вот и думай головой.",
+    "postInMyBlog": "Пост в моём блоге",
+    "postAttachmentImage": "Вложение поста, изображение"
+  },
+  "PostAttachmentImage": {
+    "attachment": "Вложение {index}"
+  },
+  "PostDelete": {
+    "delete": "Удалить",
+    "deletePost": "Удалить пост?",
+    "thePostWillBePermanentlyDeleted": "Пост будет безвозвратно удалён.",
+    "cancel": "Отмена"
+  },
+  "Post": {
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "confirm": "Подтвердить",
+    "cancel": "Отменить",
+    "thereAreNoMorePosts": "Больше постов нет"
+  },
+  "FormPost": {
+    "message": "Сообщение...",
+    "attachments": "Вложения",
+    "clearAll": "Очистить все"
+  },
+  "FormPostCreate": {
+    "send": "Отправить"
+  },
+  "Explorer": {
+    "content": "Контент",
+    "treeDots": "...",
+    "description": {
+      "common": {
+        "soWhatWeHaveHere": "Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками",
+        "watch": ", смотреть {type} {fileName}",
+        "image": "изображение",
+        "video": "видео"
+      },
+      "audio": {
+        "checkOutTrack": "Зацени трек \"{name}\" — {artists}{album}{year}{duration} и чо нибудь ещё",
+        "artists": " {artists}",
+        "album": " из \"{album}\"",
+        "year": " ({year})",
+        "duration": " длительностью {duration}",
+        "idkWho": "хз кто"
+      }
+    }
+  },
+  "ExplorerElementAudio": {
+    "duration": "Длительность",
+    "artists": "Исполнитель(-и)",
+    "album": "Альбом",
+    "year": "Год выхода",
+    "bpm": "Темп"
+  },
+  "ThePlayer": {
+    "copied": "Скопировано!",
+    "copyLink": "Скопировать ссылку",
+    "previousTrack": "Предыдущий трек",
+    "pauseTrack": "Пауза трека",
+    "playTrack": "Воспроизвести трек",
+    "nextTrack": "Следующий трек",
+    "closePlayer": "Закрыть плеер",
+    "enableShuffleTracks": "Включить перемешивание треков",
+    "disableShuffleTracks": "Выключить перемешивание треков"
+  }
+}

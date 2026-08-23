@@ -4,7 +4,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import { KEY_COOKIE_JWT } from '@/constants/keyCookieJwt';
 
 (() => {
-  const url = new URL('/ru/blog', 'http://127.0.0.1:5173');
+  const url = new URL('/en/blog', 'http://localhost:3000');
 
   url.searchParams.set(
     KEY_COOKIE_JWT,
