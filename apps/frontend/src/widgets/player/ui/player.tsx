@@ -24,35 +24,6 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
   };
 };
 
-const useIsPlaying = () => {
-  const { audioRef } = usePlayerContext();
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const onPlay = () => {
-      setIsPlaying(true);
-    };
-    const onPause = () => {
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-
-    return () => {
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-    };
-  }, [audioRef]);
-
-  return isPlaying;
-};
-
 const PlayerSlider = ({ duration }: { duration: number }) => {
   const t = useTranslations('ThePlayer');
 
@@ -99,7 +70,7 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   };
 
   return (
-    <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
+    <div className="tabular-nums w-full mx-auto flex justify-between items-center gap-2">
       <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
       <Slider
         aria-label={t('trackProgress')}
@@ -116,17 +87,68 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   );
 };
 
+const PlayerControlsVolume = () => {
+  const { audioRef } = usePlayerContext();
+  const t = useTranslations('ThePlayer');
+  const [volumeLocalStorage, setVolumeLocalStorage] = useLocalStorage('player:volume', 1);
+
+  const [volume, setVolume] = useState(isTouchOnly() ? 1 : (volumeLocalStorage ?? 1));
+
+  const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
+    const volume = Number(value);
+    setVolume(volume);
+    setVolumeLocalStorage(volume);
+    if (!audioRef.current) {
+      return;
+    }
+
+    audioRef.current.volume = volume;
+  };
+
+  return (
+    !isTouchOnly() && (
+      <Slider
+        aria-label={t('volume')}
+        className="cursor-pointer w-5/6 max-w-20"
+        max={1}
+        min={0}
+        step={0.01}
+        onValueChange={onValueChangeVolume}
+        value={[volume]}
+      />
+    )
+  );
+};
+
 const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
   const { next, previous, audioRef, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } =
     usePlayerContext();
 
-  const [volumeLocalStorage, setVolumeLocalStorage] = useLocalStorage('player:volume', 1);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const [volume, setVolume] = useState(isTouchOnly() ? 1 : (volumeLocalStorage ?? 1));
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
 
-  const isPlaying = useIsPlaying();
+    const onPlay = () => {
+      setIsPlaying(true);
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+
+    return () => {
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+    };
+  }, [audioRef]);
 
   const onClickPlay = () => {
     audioRef.current?.play();
@@ -173,17 +195,6 @@ const PlayerControls = () => {
     },
   ];
 
-  const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
-    const volume = Number(value);
-    setVolume(volume);
-    setVolumeLocalStorage(volume);
-    if (!audioRef.current) {
-      return;
-    }
-
-    audioRef.current.volume = volume;
-  };
-
   return (
     <div className="grid grid-cols-[1fr_min-content_1fr] gap-4 items-center">
       <Toggle
@@ -207,17 +218,7 @@ const PlayerControls = () => {
           );
         })}
       </ul>
-      {!isTouchOnly() && (
-        <Slider
-          aria-label={t('volume')}
-          className="cursor-pointer w-5/6 max-w-20"
-          max={1}
-          min={0}
-          step={0.1}
-          onValueChange={onValueChangeVolume}
-          value={[volume]}
-        />
-      )}
+      <PlayerControlsVolume />
     </div>
   );
 };
