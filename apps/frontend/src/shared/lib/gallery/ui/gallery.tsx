@@ -4,9 +4,9 @@ import { Dialog, DialogContent } from '@/shared/ui/ds/dialog';
 import { useGalleryContext } from '@/shared/lib/gallery';
 import { useRef, type ComponentProps, type CSSProperties } from 'react';
 import { Button } from '@/shared/ui/ds/button';
-import { Card, CardContent } from '@/shared/ui/ds/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/ds/card';
+import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import { useElementSize } from '@reactuses/core';
 import { GalleryItem } from './gallery-item';
 import { useTranslations } from 'next-intl';
 
@@ -66,10 +66,9 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
 };
 
 export const Gallery = () => {
-  const { galleryItem, setGalleryItem, onClose, renderers, galleryItems } = useGalleryContext();
+  const { galleryItem, setGalleryItem, onClose, shouldShowName, galleryItems } = useGalleryContext();
 
   const headerRef = useRef<HTMLDivElement>(null);
-  const [, headerHeight] = useElementSize(headerRef, { box: 'border-box' });
 
   const onOpenChange: ComponentProps<typeof Dialog>['onOpenChange'] = (isOpen) => {
     if (isOpen) {
@@ -88,7 +87,7 @@ export const Gallery = () => {
   const mediaRatio = galleryItem ? galleryItem.width / galleryItem.height : 1;
 
   // real header height (measured) + its flex gap, instead of a guessed constant
-  const headerSpace = renderers?.header ? `calc(${headerHeight}px + var(--card-spacing))` : '0px';
+  const headerSpace = shouldShowName ? `calc(1rem * 1.375 + var(--card-spacing))` : '0px';
 
   const cardStyle = {
     '--gallery-media-max-inline-size': 'calc(100cqw - var(--card-spacing) * 2)',
@@ -106,7 +105,15 @@ export const Gallery = () => {
         <DialogContent className="border-primary border h-[calc(100dvh-2rem)] sm:max-w-none w-[calc(100dvw-2rem)]">
           <div className="@container-size relative flex h-full min-h-0 w-full min-w-0 items-center justify-center">
             <Card className="max-h-full max-w-full overflow-hidden" style={cardStyle}>
-              {renderers?.header && <div ref={headerRef}>{renderers.header}</div>}
+              {shouldShowName && (
+                <div ref={headerRef}>
+                  <CardHeader>
+                    <CardTitle className="overflow-hidden">
+                      <BaseAlwaysScrollable className="w-full">{galleryItem.name}</BaseAlwaysScrollable>
+                    </CardTitle>
+                  </CardHeader>
+                </div>
+              )}
               <CardContent className="overflow-hidden">
                 <div
                   className="max-h-(--gallery-media-max-block-size) max-w-(--gallery-media-max-inline-size)"

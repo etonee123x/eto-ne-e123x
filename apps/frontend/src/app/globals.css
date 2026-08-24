@@ -185,49 +185,6 @@
   .h1 {
     @apply text-3xl font-semibold;
   }
-
-  /* .explorer-element {
-    @apply bg-primary-50 hover:bg-primary-100 dark:bg-neutral-800 dark:hover:bg-primary-950 border border-primary-500 rounded-lg text-sm;
-
-    .explorer-element__title {
-      @apply w-2/3 overflow-x-auto overflow-y-hidden text-lg;
-    }
-
-    &.explorer-element_folder {
-      @apply bg-primary-500 border-primary-700 text-white dark:text-black;
-      @apply hover:bg-primary-600;
-    }
-  } */
-
-  /* .icon {
-    @apply size-[1em];
-  }
-
-  .button {
-    @apply bg-primary-500 dark:text-white border border-solid border-primary-700 text-black rounded-sm p-1 text-center cursor-pointer select-none flex justify-center relative items-center hover:bg-primary-600;
-    @apply disabled:pointer-events-none disabled:opacity-50;
-  }
-
-  .custom-html {
-    @apply whitespace-break-spaces wrap-break-word;
-
-    a {
-      @apply underline;
-    }
-  } */
-
-  /* .dialog {
-    @apply fixed inset-0 m-auto p-0 z-modal rounded-lg border border-primary-500 max-w-11/12 max-h-11/12 w-fit overflow-hidden;
-
-    .dialog__content {
-      scrollbar-gutter: stable_both-edges;
-      @apply p-4 flex flex-col w-full bg-background;
-    }
-
-    .dialog__backdrop {
-      @apply fixed inset-0 bg-primary-900 opacity-50 -z-1;
-    }
-  } */
 }
 
 @custom-variant dark (&:where(.dark, .dark *));

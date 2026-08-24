@@ -12,7 +12,6 @@ import {
 import type { GalleryItem } from '../types/gallery-item';
 
 type GalleryRenderers = Partial<{
-  header: ReactElement;
   previousControl: ReactElement;
   nextControl: ReactElement;
 }> | null;
@@ -29,6 +28,7 @@ export const GalleryContext = createContext<{
     galleryItem: GalleryItem,
     galleryItems: Array<GalleryItem>,
     parameters?: Partial<{
+      shouldShowName: boolean;
       renderers: GalleryRenderers;
     }>,
   ) => void;
@@ -36,6 +36,7 @@ export const GalleryContext = createContext<{
   onClose: RefObject<OnClose>;
   setOnClose: (onClose: OnClose) => void;
 
+  shouldShowName: boolean;
   renderers: GalleryRenderers;
 } | null>(null);
 

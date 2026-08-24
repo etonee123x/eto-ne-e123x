@@ -6,11 +6,7 @@ import { getFolderDataQueryOptions } from '@/entities/folder-data';
 import { QueryClient } from '@tanstack/react-query';
 import { isFolderDataItemFileGalleryItem } from './is-folder-data-item-file-gallery-item';
 import { folderDataItemGalleryItemToGalleryItem } from './folder-data-item-file-to-gallery-item';
-import {
-  ExplorerGalleryHeader,
-  ExplorerGalleryNextControl,
-  ExplorerGalleryPreviousControl,
-} from '../ui/explorer-gallery-renderers';
+import { ExplorerGalleryNextControl, ExplorerGalleryPreviousControl } from '../ui/explorer-gallery-renderers';
 
 export const GalleryProvider = async ({
   children,
@@ -42,9 +38,9 @@ export const GalleryProvider = async ({
     <GalleryContextProvider
       initialGalleryItem={galleryItem}
       initialGalleryItems={galleryItems}
+      initialShouldShowName={Boolean(galleryItem)}
       initialRenderers={
         galleryItem && {
-          header: <ExplorerGalleryHeader />,
           previousControl: <ExplorerGalleryPreviousControl files={folderData?.files ?? []} />,
           nextControl: <ExplorerGalleryNextControl files={folderData?.files ?? []} />,
         }
