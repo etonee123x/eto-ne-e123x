@@ -94,15 +94,18 @@ const PlayerControlsVolume = () => {
 
   const [volume, setVolume] = useState(isTouchOnly() ? 1 : (volumeLocalStorage ?? 1));
 
-  const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
-    const volume = Number(value);
-    setVolume(volume);
-    setVolumeLocalStorage(volume);
+  useEffect(() => {
     if (!audioRef.current) {
       return;
     }
 
     audioRef.current.volume = volume;
+  }, [volume, audioRef]);
+
+  const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
+    const volume = Number(value);
+    setVolume(volume);
+    setVolumeLocalStorage(volume);
   };
 
   return (
