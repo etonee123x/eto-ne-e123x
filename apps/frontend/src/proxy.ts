@@ -13,7 +13,7 @@ export default async function proxy(request: NextRequest) {
     const response = handleI18nRouting(request);
 
     const locale = response.headers.get('x-middleware-request-x-next-intl-locale');
-    response.headers.set('x-pathname', request.nextUrl.pathname.replace(`/${locale}`, '') || '/');
+    response.headers.set('x-pathname', request.nextUrl.pathname.replace(`/${locale}`, ''));
 
     return response;
   }

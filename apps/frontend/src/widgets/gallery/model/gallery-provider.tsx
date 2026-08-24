@@ -2,7 +2,6 @@ import { type ComponentProps } from 'react';
 import { GalleryContextProvider } from '@/shared/lib/gallery';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
-import { throwError } from '@/shared/utils/throw-error';
 import { getFolderDataQueryOptions } from '@/entities/folder-data';
 import { QueryClient } from '@tanstack/react-query';
 import { isFolderDataItemFileGalleryItem } from './is-folder-data-item-file-gallery-item';
@@ -17,7 +16,8 @@ export const GalleryProvider = async ({
   children,
 }: Omit<ComponentProps<typeof GalleryContextProvider>, 'initialFolderData'>) => {
   const headers = await _headers();
-  const xPathname = headers.get('x-pathname') ?? throwError();
+  // middleware may skip some paths (e.g. containing a dot), so x-pathname can be absent
+  const xPathname = headers.get('x-pathname') ?? '/';
 
   const explorerPath = xPathname.startsWith('/explorer') ? xPathname.replace(/^\/explorer/, '') || '/' : null;
 
