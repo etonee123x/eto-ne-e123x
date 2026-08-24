@@ -9,6 +9,13 @@ export const generateMetadata = async (): Promise<Metadata> => {
   };
 };
 
-export default function Home() {
-  return <div>Index</div>;
+export default async function Home() {
+  const t = await getTranslations('Index');
+
+  return (
+    <section className="layout-container">
+      <h1 className="h1 mb-4">{t('indexPage')}</h1>
+      <p className="text-[4px]">{t('yesThereIsNothingHere')}</p>
+    </section>
+  );
 }

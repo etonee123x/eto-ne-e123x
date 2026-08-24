@@ -1,4 +1,49 @@
 {
+  "Index": {
+    "indexPage": "Начальная страница",
+    "yesThereIsNothingHere": "Да, тут ничего нет :("
+  },
+  "Blog": {
+    "blog": "Блог",
+    "noPosts": "Нет постов",
+    "noPostsFound": "Постов не найдено",
+    "myBlog": "Мой блог, тут можно заценить мои посты; пишу о жизни непростой, о мыслях, что меня волнуют! Вот и думай головой.",
+    "postInMyBlog": "Пост в моём блоге",
+    "postAttachmentImage": "Вложение поста, изображение"
+  },
+  "Explorer": {
+    "content": "Контент",
+    "treeDots": "...",
+    "description": {
+      "common": {
+        "soWhatWeHaveHere": "Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками",
+        "watch": ", смотреть {type} {fileName}",
+        "image": "изображение",
+        "video": "видео"
+      },
+      "audio": {
+        "checkOutTrack": "Зацени трек \"{name}\" — {artists}{album}{year}{duration} и чо нибудь ещё",
+        "artists": " {artists}",
+        "album": " из \"{album}\"",
+        "year": " ({year})",
+        "duration": " длительностью {duration}",
+        "idkWho": "хз кто"
+      }
+    }
+  },
+  "NotFound": {
+    "pageNotFound": "Страница не найдена",
+    "pageNotFoundItMayHaveBeenRemoved": "Страница не найдена. Возможно, она была удалена или URL некорректен.",
+    "toTheMainPage": "Перейти на главную страницу"
+  },
+  "ShadcnA11yCrutches": {
+    "close": "Закрыть",
+    "more": "Ещё"
+  },
+  "Gallery": {
+    "previousSlide": "Предыдущий слайд",
+    "nextSlide": "Следующий слайд"
+  },
   "Metadata": {
     "etonee123xSiteLogo": "Логотип сайта etonee123x"
   },
@@ -15,22 +60,6 @@
     "dark": "Тёмная",
     "system": "Системная",
     "toggleTheme": "Сменить тему"
-  },
-  "Index": {
-    "indexPage": "Начальная страница"
-  },
-  "NotFound": {
-    "pageNotFound": "Страница не найдена",
-    "pageNotFoundItMayHaveBeenRemoved": "Страница не найдена. Возможно, она была удалена или URL некорректен.",
-    "toTheMainPage": "Перейти на главную страницу"
-  },
-  "Blog": {
-    "blog": "Блог",
-    "noPosts": "Нет постов",
-    "noPostsFound": "Постов не найдено",
-    "myBlog": "Мой блог, тут можно заценить мои посты; пишу о жизни непростой, о мыслях, что меня волнуют! Вот и думай головой.",
-    "postInMyBlog": "Пост в моём блоге",
-    "postAttachmentImage": "Вложение поста, изображение"
   },
   "PostAttachmentImage": {
     "attachment": "Вложение {index}"
@@ -55,26 +84,6 @@
   },
   "FormPostCreate": {
     "send": "Отправить"
-  },
-  "Explorer": {
-    "content": "Контент",
-    "treeDots": "...",
-    "description": {
-      "common": {
-        "soWhatWeHaveHere": "Оппа, что тут у нас? Папка {folderName}{fileDescription} и другие папки и файлы; с музыкой, картинками, видосиками",
-        "watch": ", смотреть {type} {fileName}",
-        "image": "изображение",
-        "video": "видео"
-      },
-      "audio": {
-        "checkOutTrack": "Зацени трек \"{name}\" — {artists}{album}{year}{duration} и чо нибудь ещё",
-        "artists": " {artists}",
-        "album": " из \"{album}\"",
-        "year": " ({year})",
-        "duration": " длительностью {duration}",
-        "idkWho": "хз кто"
-      }
-    }
   },
   "ExplorerElementAudio": {
     "duration": "Длительность",

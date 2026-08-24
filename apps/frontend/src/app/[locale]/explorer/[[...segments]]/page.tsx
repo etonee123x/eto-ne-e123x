@@ -198,7 +198,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   const navigationItemUp = navigationItems.at(-2);
 
   return (
-    <section className="layout-container pb-4">
+    <section className="layout-container">
       <SendFolderDataToPlayer folderData={folderData} />
       <SendFolderDataToGallery folderData={folderData} navigationItemUp={navigationItemUp ?? null} />
       <h1 className="h1 mb-4">{t('content')}</h1>
@@ -217,7 +217,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
         </BreadcrumbList>
       </Breadcrumb>
 
-      <ItemGroup className="gap-4!">
+      <ItemGroup className="gap-4! mb-4">
         <nav className="contents">
           {navigationItemUp && <ExplorerElementUp href={navigationItemUp.href} />}
           {folderData.folders.map((folder) => {

@@ -14,6 +14,7 @@ const ExplorerElementTime = ({ createdAt }: { createdAt: Element['_meta']['creat
       className="text-muted-foreground shrink-0"
       suppressHydrationWarning
       dateTime={new Date(createdAt).toISOString()}
+      title={new Date(createdAt).toISOString()}
     >
       {relativeTime(createdAt, now)}
     </time>
