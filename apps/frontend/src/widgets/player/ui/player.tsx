@@ -10,8 +10,9 @@ import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
-import { isTouchOnly } from '@/shared/utils/is-touch-only';
-import { useLocalStorage } from '@reactuses/core';
+import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
+import { useHasMounted } from '@/shared/hooks/use-has-mounted';
+import { isNil } from '@/shared/utils/is-nil';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -87,12 +88,46 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   );
 };
 
+const DEFAULT_VOLUME = 1;
+
+const localStorageVolume = (() => {
+  const LOCAL_STORAGE_KEY = 'player:volume';
+
+  return {
+    get: () => {
+      if (!('localStorage' in globalThis)) {
+        return null;
+      }
+
+      const value = globalThis.localStorage.getItem(LOCAL_STORAGE_KEY);
+
+      if (isNil(value) || Number.isNaN(Number(value))) {
+        globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(DEFAULT_VOLUME));
+
+        return DEFAULT_VOLUME;
+      }
+
+      return Number(value);
+    },
+    set: (volume: number) => {
+      if (!('localStorage' in globalThis)) {
+        return;
+      }
+
+      globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(volume));
+    },
+  };
+})();
+
 const PlayerControlsVolume = () => {
   const { audioRef } = usePlayerContext();
   const t = useTranslations('ThePlayer');
-  const [volumeLocalStorage, setVolumeLocalStorage] = useLocalStorage('player:volume', 1);
 
-  const [volume, setVolume] = useState(isTouchOnly() ? 1 : (volumeLocalStorage ?? 1));
+  const hasMounted = useHasMounted();
+
+  const isTouchOnly = useIsTouchOnly();
+
+  const [volume, setVolume] = useState(isTouchOnly ? DEFAULT_VOLUME : (localStorageVolume.get() ?? DEFAULT_VOLUME));
 
   useEffect(() => {
     if (!audioRef.current) {
@@ -105,11 +140,12 @@ const PlayerControlsVolume = () => {
   const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
     const volume = Number(value);
     setVolume(volume);
-    setVolumeLocalStorage(volume);
+    localStorageVolume.set(volume);
   };
 
   return (
-    !isTouchOnly() && (
+    hasMounted &&
+    !isTouchOnly && (
       <Slider
         aria-label={t('volume')}
         className="cursor-pointer w-5/6 max-w-20"
