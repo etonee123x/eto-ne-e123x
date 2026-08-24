@@ -147,6 +147,7 @@ const Post = ({
             >
               <time
                 dateTime={new Date(post._meta.createdAt).toISOString()}
+                title={new Date(post._meta.createdAt).toISOString()}
                 className="contents"
                 suppressHydrationWarning
               >

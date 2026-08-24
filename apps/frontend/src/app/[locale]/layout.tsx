@@ -70,7 +70,7 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
   const colorTheme = getRandomColorTheme();
 
   return (
-    <html className="h-full antialiased" suppressHydrationWarning>
+    <html lang={locale} className="h-full antialiased" suppressHydrationWarning>
       <body className="flex flex-col min-h-dvh">
         <Providers>
           <Header className="fixed top-0 w-full z-1 h-header-height" />

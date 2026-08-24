@@ -1,4 +1,49 @@
 {
+  "Index": {
+    "indexPage": "Index page",
+    "yesThereIsNothingHere": "Yes, there is nothing here :("
+  },
+  "Blog": {
+    "blog": "Blog",
+    "noPosts": "No posts",
+    "noPostsFound": "No posts found",
+    "myBlog": "My blog, here you can check out my posts; I write about the complexities of life, about thoughts that concern me! So think with your head.",
+    "postInMyBlog": "A post in my blog",
+    "postAttachmentImage": "Post attachment, image"
+  },
+  "Explorer": {
+    "content": "Content",
+    "treeDots": "...",
+    "description": {
+      "common": {
+        "soWhatWeHaveHere": "Hmm-m, what do we have here? Folder {folderName}{fileDescription} and other folders and files; with music, pictures, videos",
+        "watch": ", watch the {type} {fileName}",
+        "image": "image",
+        "video": "video"
+      },
+      "audio": {
+        "checkOutTrack": "Check out the track \"{name}\" — {artists}{album}{year}{duration} and something else",
+        "artists": " {artists}",
+        "album": " from \"{album}\"",
+        "year": " ({year})",
+        "duration": " with a duration of {duration}",
+        "idkWho": "idk who"
+      }
+    }
+  },
+  "NotFound": {
+    "pageNotFound": "Page not found",
+    "pageNotFoundItMayHaveBeenRemoved": "Page not found. It may have been removed or the URL is incorrect.",
+    "toTheMainPage": "Go to the main page"
+  },
+  "ShadcnA11yCrutches": {
+    "close": "Close",
+    "more": "More"
+  },
+  "Gallery": {
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide"
+  },
   "Metadata": {
     "etonee123xSiteLogo": "etonee123x site logo"
   },
@@ -15,22 +60,6 @@
     "dark": "Dark",
     "system": "System",
     "toggleTheme": "Toggle theme"
-  },
-  "Index": {
-    "indexPage": "Index page"
-  },
-  "NotFound": {
-    "pageNotFound": "Page not found",
-    "pageNotFoundItMayHaveBeenRemoved": "Page not found. It may have been removed or the URL is incorrect.",
-    "toTheMainPage": "Go to the main page"
-  },
-  "Blog": {
-    "blog": "Blog",
-    "noPosts": "No posts",
-    "noPostsFound": "No posts found",
-    "myBlog": "My blog, here you can check out my posts; I write about the complexities of life, about thoughts that concern me! So think with your head.",
-    "postInMyBlog": "A post in my blog",
-    "postAttachmentImage": "Post attachment, image"
   },
   "PostAttachmentImage": {
     "attachment": "Attachment {index}"
@@ -55,26 +84,6 @@
   },
   "FormPostCreate": {
     "send": "Send"
-  },
-  "Explorer": {
-    "content": "Content",
-    "treeDots": "...",
-    "description": {
-      "common": {
-        "soWhatWeHaveHere": "Hmm-m, what do we have here? Folder {folderName}{fileDescription} and other folders and files; with music, pictures, videos",
-        "watch": ", watch the {type} {fileName}",
-        "image": "image",
-        "video": "video"
-      },
-      "audio": {
-        "checkOutTrack": "Check out the track \"{name}\" — {artists}{album}{year}{duration} and something else",
-        "artists": " {artists}",
-        "album": " from \"{album}\"",
-        "year": " ({year})",
-        "duration": " with a duration of {duration}",
-        "idkWho": "idk who"
-      }
-    }
   },
   "ExplorerElementAudio": {
     "duration": "Duration",

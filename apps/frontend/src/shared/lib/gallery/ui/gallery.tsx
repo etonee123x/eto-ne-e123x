@@ -8,8 +8,11 @@ import { Card, CardContent } from '@/shared/ui/ds/card';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useElementSize } from '@reactuses/core';
 import { GalleryItem } from './gallery-item';
+import { useTranslations } from 'next-intl';
 
 const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
+  const t = useTranslations('Gallery');
+
   const { galleryItems, renderers, setGalleryItem } = useGalleryContext();
 
   const previousGalleryItem = galleryItems[currentIndex - 1];
@@ -27,6 +30,7 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
           className="absolute inset-y-0 inset-s-0! my-auto rounded-full"
           render={previousControlRender}
           nativeButton={!previousControlRender}
+          aria-label={t('previousSlide')}
           onClick={() => {
             if (previousControlRender) {
               return;
@@ -36,7 +40,6 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
           }}
         >
           <ChevronLeftIcon />
-          <span className="sr-only">Previous slide</span>
         </Button>
       )}
       {nextGalleryItem && (
@@ -46,6 +49,7 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
           className="absolute inset-y-0 inset-e-0! my-auto rounded-full"
           render={nextControlRender}
           nativeButton={!nextControlRender}
+          aria-label={t('nextSlide')}
           onClick={() => {
             if (nextControlRender) {
               return;
@@ -55,7 +59,6 @@ const GalleryControls = ({ currentIndex }: { currentIndex: number }) => {
           }}
         >
           <ChevronRightIcon />
-          <span className="sr-only">Next slide</span>
         </Button>
       )}
     </>

@@ -6,6 +6,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/utils/cn"
 import { Button } from "@/shared/ui/ds/button"
+import { useTranslations } from "next-intl"
 
 function Dialog({
   ...props
@@ -55,6 +56,8 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  const t = useTranslations("ShadcnA11yCrutches");
+
   return (
     <>
       <DialogOverlay />
@@ -73,9 +76,9 @@ function DialogContent({
               variant="ghost"
               className="absolute top-2 right-2"
               size="icon-sm"
+              aria-label={t("close")}
             >
               <XIcon />
-              <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>
         )}
