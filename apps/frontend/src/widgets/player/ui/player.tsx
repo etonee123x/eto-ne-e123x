@@ -10,6 +10,8 @@ import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
+import { isTouchOnly } from '@/shared/utils/is-touch-only';
+import { useLocalStorage } from '@reactuses/core';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -112,10 +114,14 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
 };
 
 const PlayerControls = () => {
+  const t = useTranslations('ThePlayer');
+
   const { next, previous, audioRef, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } =
     usePlayerContext();
 
-  const t = useTranslations('ThePlayer');
+  const [volumeLocalStorage, setVolumeLocalStorage] = useLocalStorage('player:volume', 1);
+
+  const [volume, setVolume] = useState(isTouchOnly() ? 1 : (volumeLocalStorage ?? 1));
 
   const isPlaying = useIsPlaying();
 
@@ -164,6 +170,17 @@ const PlayerControls = () => {
     },
   ];
 
+  const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
+    const volume = Number(value);
+    setVolume(volume);
+    setVolumeLocalStorage(volume);
+    if (!audioRef.current) {
+      return;
+    }
+
+    audioRef.current.volume = volume;
+  };
+
   return (
     <div className="grid grid-cols-[1fr_min-content_1fr] gap-4 items-center">
       <Toggle
@@ -187,6 +204,16 @@ const PlayerControls = () => {
           );
         })}
       </ul>
+      {!isTouchOnly() && (
+        <Slider
+          className="cursor-pointer w-5/6 max-w-20"
+          max={1}
+          min={0}
+          step={0.1}
+          onValueChange={onValueChangeVolume}
+          value={[volume]}
+        />
+      )}
     </div>
   );
 };
