@@ -53,7 +53,8 @@
     "content": "Content"
   },
   "TheFooter": {
-    "telegramLogo": "Telegram logo"
+    "telegram": "Telegram",
+    "gitHub": "GitHub"
   },
   "ThemeSwitcher": {
     "light": "Light",

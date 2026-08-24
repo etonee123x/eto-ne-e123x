@@ -53,7 +53,8 @@
     "content": "Контент"
   },
   "TheFooter": {
-    "telegramLogo": "Логотип Telegram"
+    "telegram": "Telegram",
+    "gitHub": "GitHub"
   },
   "ThemeSwitcher": {
     "light": "Светлая",
