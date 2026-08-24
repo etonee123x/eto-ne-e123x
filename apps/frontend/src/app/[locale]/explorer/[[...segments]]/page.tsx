@@ -200,7 +200,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   return (
     <section className="layout-container">
       <SendFolderDataToPlayer folderData={folderData} />
-      <SendFolderDataToGallery folderData={folderData} navigationItemUp={navigationItemUp ?? null} />
+      <SendFolderDataToGallery folderData={folderData} lastNavigationItemHref={lastNavigationItem.href} />
       <h1 className="h1 mb-4">{t('content')}</h1>
 
       <Breadcrumb className="mb-4 sticky top-header-height">

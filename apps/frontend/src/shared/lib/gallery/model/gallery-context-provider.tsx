@@ -6,18 +6,21 @@ import { noop } from '@/shared/utils/noop';
 
 const INITIAL_VALUES = {
   onClose: noop,
+  shouldShowName: false,
   renderers: null,
 };
 
 export const GalleryContextProvider = ({
   children,
-  initialGalleryItem = null,
-  initialGalleryItems = [],
-  initialRenderers = INITIAL_VALUES.renderers,
+  initialGalleryItem,
+  initialGalleryItems,
+  initialShouldShowName,
+  initialRenderers,
 }: PropsWithChildren<{
-  initialGalleryItem?: NonNullable<ContextType<typeof GalleryContext>>['galleryItem'];
-  initialGalleryItems?: NonNullable<ContextType<typeof GalleryContext>>['galleryItems'];
-  initialRenderers?: NonNullable<ContextType<typeof GalleryContext>>['renderers'];
+  initialGalleryItem: NonNullable<ContextType<typeof GalleryContext>>['galleryItem'];
+  initialGalleryItems: NonNullable<ContextType<typeof GalleryContext>>['galleryItems'];
+  initialShouldShowName: NonNullable<ContextType<typeof GalleryContext>>['shouldShowName'];
+  initialRenderers: NonNullable<ContextType<typeof GalleryContext>>['renderers'];
 }>) => {
   const [galleryItem, setGalleryItem] =
     useState<NonNullable<ContextType<typeof GalleryContext>>['galleryItem']>(initialGalleryItem);
@@ -29,6 +32,7 @@ export const GalleryContextProvider = ({
   );
 
   const onClose: NonNullable<ContextType<typeof GalleryContext>>['onClose'] = useRef(INITIAL_VALUES.onClose);
+  const [shouldShowName, setShouldShowName] = useState(initialShouldShowName);
   const [renderers, setRenderers] = useState(initialRenderers);
 
   const open = useCallback<NonNullable<ContextType<typeof GalleryContext>>['open']>(
@@ -36,6 +40,7 @@ export const GalleryContextProvider = ({
       setGalleryItem(_galleryItem);
       setGalleryItems(galleryItems);
 
+      setShouldShowName(parameters?.shouldShowName ?? INITIAL_VALUES.shouldShowName);
       setRenderers(parameters?.renderers ?? INITIAL_VALUES.renderers);
     },
     [],
@@ -56,6 +61,7 @@ export const GalleryContextProvider = ({
         onClose,
         setOnClose,
 
+        shouldShowName,
         renderers,
         open,
       }}

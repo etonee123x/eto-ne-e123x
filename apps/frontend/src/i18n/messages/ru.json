@@ -53,7 +53,8 @@
     "content": "Контент"
   },
   "TheFooter": {
-    "telegramLogo": "Логотип Telegram"
+    "telegram": "Telegram",
+    "gitHub": "GitHub"
   },
   "ThemeSwitcher": {
     "light": "Светлая",
@@ -95,6 +96,8 @@
   "ThePlayer": {
     "copied": "Скопировано!",
     "copyLink": "Скопировать ссылку",
+    "trackProgress": "Прогресс трека",
+    "volume": "Громкость",
     "previousTrack": "Предыдущий трек",
     "pauseTrack": "Пауза трека",
     "playTrack": "Воспроизвести трек",

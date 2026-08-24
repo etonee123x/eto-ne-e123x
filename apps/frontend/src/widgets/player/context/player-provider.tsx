@@ -2,15 +2,18 @@ import { type ComponentProps } from 'react';
 import { PlayerProviderClient } from './player-provider-client';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
-import { throwError } from '@/shared/utils/throw-error';
 import { getFolderDataQueryOptions } from '@/entities/folder-data';
 import { QueryClient } from '@tanstack/react-query';
 
 export const PlayerProvider = async ({
   children,
-}: Omit<ComponentProps<typeof PlayerProviderClient>, 'initialFolderData'>) => {
+}: Omit<
+  ComponentProps<typeof PlayerProviderClient>,
+  'initialTrack' | 'initialPlaylist' | 'initialTrackPathDirectory'
+>) => {
   const headers = await _headers();
-  const xPathname = headers.get('x-pathname') ?? throwError();
+  // middleware may skip some paths (e.g. containing a dot), so x-pathname can be absent
+  const xPathname = headers.get('x-pathname') ?? '/';
 
   const explorerPath = xPathname.startsWith('/explorer') ? xPathname.replace(/^\/explorer/, '') || '/' : null;
 
@@ -20,5 +23,17 @@ export const PlayerProvider = async ({
         return null;
       });
 
-  return <PlayerProviderClient initialFolderData={initialFolderData}>{children}</PlayerProviderClient>;
+  const track = initialFolderData?.file?.fileType === 'AUDIO' ? initialFolderData.file : null;
+  const playlist =
+    initialFolderData?.files.filter((file) => {
+      return file.fileType === 'AUDIO';
+    }) ?? [];
+
+  const pathDirectory = initialFolderData?.pathDirectory ?? null;
+
+  return (
+    <PlayerProviderClient initialTrack={track} initialPlaylist={playlist} initialTrackPathDirectory={pathDirectory}>
+      {children}
+    </PlayerProviderClient>
+  );
 };

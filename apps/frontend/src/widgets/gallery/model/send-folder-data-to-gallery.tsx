@@ -6,31 +6,24 @@ import { type components } from '@/shared/api/openapi';
 import { useEffect, useEffectEvent } from 'react';
 import { isFolderDataItemFileGalleryItem } from './is-folder-data-item-file-gallery-item';
 import { folderDataItemGalleryItemToGalleryItem } from './folder-data-item-file-to-gallery-item';
-import {
-  ExplorerGalleryHeader,
-  ExplorerGalleryNextControl,
-  ExplorerGalleryPreviousControl,
-} from '../ui/explorer-gallery-renderers';
+import { ExplorerGalleryNextControl, ExplorerGalleryPreviousControl } from '../ui/explorer-gallery-renderers';
 
 export const SendFolderDataToGallery = ({
   folderData,
-  navigationItemUp,
+  lastNavigationItemHref,
 }: {
   folderData: components['schemas']['FolderDataResponse'];
-  navigationItemUp: { text: string; href: string } | null;
+  lastNavigationItemHref: string;
 }) => {
   const { setGalleryItem, open, galleryItem, setOnClose } = useGalleryContext();
   const router = useRouter();
   const pathname = usePathname();
 
   const onCloseExplorerGallery = () => {
-    if (!navigationItemUp) {
-      return;
-    }
-
-    router.push(navigationItemUp.href, { scroll: false });
+    router.push(lastNavigationItemHref, { scroll: false });
   };
 
+  // TODO refactor me!
   const syncGalleryWithFolderData = useEffectEvent(() => {
     const file = folderData.file;
 
@@ -53,8 +46,8 @@ export const SendFolderDataToGallery = ({
         return isFolderDataItemFileGalleryItem(file) ? [folderDataItemGalleryItemToGalleryItem(file)] : [];
       }),
       {
+        shouldShowName: true,
         renderers: {
-          header: <ExplorerGalleryHeader />,
           previousControl: <ExplorerGalleryPreviousControl files={folderData.files} />,
           nextControl: <ExplorerGalleryNextControl files={folderData.files} />,
         },

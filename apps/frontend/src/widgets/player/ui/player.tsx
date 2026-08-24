@@ -10,8 +10,9 @@ import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
-import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
-import { throwError } from '@/shared/utils/throw-error';
+import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
+import { useHasMounted } from '@/shared/hooks/use-has-mounted';
+import { isNil } from '@/shared/utils/is-nil';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -24,69 +25,9 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
   };
 };
 
-const useIsPlaying = () => {
-  const { audioRef } = usePlayerContext();
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const onPlay = () => {
-      setIsPlaying(true);
-    };
-    const onPause = () => {
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-
-    return () => {
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-    };
-  }, [audioRef]);
-
-  return isPlaying;
-};
-
-const ButtonClose = () => {
-  const { setTrack, audioRef } = usePlayerContext();
+const PlayerSlider = ({ duration }: { duration: number }) => {
   const t = useTranslations('ThePlayer');
 
-  const isPlaying = useIsPlaying();
-
-  const onClick = () => {
-    setTrack(null);
-    if (!audioRef.current) {
-      return;
-    }
-
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-  };
-
-  if (isPlaying) {
-    return null;
-  }
-
-  return (
-    <Button
-      className="absolute inset-e-2 top-2 hover-none:hidden"
-      aria-label={t('closePlayer')}
-      size="icon"
-      variant="secondary"
-      onClick={onClick}
-    >
-      <X />
-    </Button>
-  );
-};
-
-const PlayerSlider = ({ duration }: { duration: number }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
 
@@ -130,9 +71,10 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   };
 
   return (
-    <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
+    <div className="tabular-nums w-full mx-auto flex justify-between items-center gap-2">
       <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
       <Slider
+        aria-label={t('trackProgress')}
         className="cursor-pointer"
         max={duration / 1000}
         min={0}
@@ -146,55 +88,106 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   );
 };
 
-const PlayerControls = () => {
-  const { track, setTrack, playlist, audioRef } = usePlayerContext();
+const DEFAULT_VOLUME = 1;
 
+const localStorageVolume = (() => {
+  const LOCAL_STORAGE_KEY = 'player:volume';
+
+  return {
+    get: () => {
+      if (!('localStorage' in globalThis)) {
+        return null;
+      }
+
+      const value = globalThis.localStorage.getItem(LOCAL_STORAGE_KEY);
+
+      if (isNil(value) || Number.isNaN(Number(value))) {
+        globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(DEFAULT_VOLUME));
+
+        return DEFAULT_VOLUME;
+      }
+
+      return Number(value);
+    },
+    set: (volume: number) => {
+      if (!('localStorage' in globalThis)) {
+        return;
+      }
+
+      globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(volume));
+    },
+  };
+})();
+
+const PlayerControlsVolume = () => {
+  const { audioRef } = usePlayerContext();
   const t = useTranslations('ThePlayer');
 
-  const [isShuffleModeEnabled, setIsShuffleModeEnabled] = useState(false);
-  const [historyItems, setHistoryItems] = useState<Array<number>>([]);
+  const hasMounted = useHasMounted();
 
-  const isPlaying = useIsPlaying();
+  const isTouchOnly = useIsTouchOnly();
 
-  const currentPlayingNumber = playlist.findIndex((playlistItem) => {
-    return playlistItem.src === track?.src;
-  });
+  const [volume, setVolume] = useState(isTouchOnly ? DEFAULT_VOLUME : (localStorageVolume.get() ?? DEFAULT_VOLUME));
 
-  const setCurrentPlayingNumber = (playingNumber: number) => {
-    setTrack(playlist[playingNumber] ?? throwError());
-  };
-
-  const loadNext = () => {
-    if (currentPlayingNumber === -1 || playlist.length === 0) {
+  useEffect(() => {
+    if (!audioRef.current) {
       return;
     }
 
-    setHistoryItems((historyItems) => {
-      return [...historyItems, currentPlayingNumber];
-    });
-    setCurrentPlayingNumber(
-      isShuffleModeEnabled
-        ? getRandomExceptCurrentIndex(playlist.length, currentPlayingNumber)
-        : (currentPlayingNumber + 1) % playlist.length,
-    );
+    audioRef.current.volume = volume;
+  }, [volume, audioRef]);
+
+  const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
+    const volume = Number(value);
+    setVolume(volume);
+    localStorageVolume.set(volume);
   };
 
-  const loadPrevious = () => {
-    if (currentPlayingNumber === -1 || playlist.length === 0) {
+  return (
+    hasMounted &&
+    !isTouchOnly && (
+      <Slider
+        aria-label={t('volume')}
+        className="cursor-pointer w-5/6 max-w-20"
+        max={1}
+        min={0}
+        step={0.01}
+        onValueChange={onValueChangeVolume}
+        value={[volume]}
+      />
+    )
+  );
+};
+
+const PlayerControls = () => {
+  const t = useTranslations('ThePlayer');
+
+  const { next, previous, audioRef, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } =
+    usePlayerContext();
+
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
       return;
     }
 
-    if (historyItems.length === 0) {
-      setCurrentPlayingNumber((currentPlayingNumber - 1 + playlist.length) % playlist.length);
-      return;
-    }
+    const onPlay = () => {
+      setIsPlaying(true);
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+    };
 
-    const previousPlayingNumber = historyItems.at(-1);
-    setHistoryItems((historyItems) => {
-      return historyItems.slice(0, -1);
-    });
-    setCurrentPlayingNumber(previousPlayingNumber ?? 0);
-  };
+    audio.addEventListener('play', onPlay);
+    audio.addEventListener('pause', onPause);
+
+    return () => {
+      audio.removeEventListener('play', onPlay);
+      audio.removeEventListener('pause', onPause);
+    };
+  }, [audioRef]);
 
   const onClickPlay = () => {
     audioRef.current?.play();
@@ -205,11 +198,11 @@ const PlayerControls = () => {
   };
 
   const onClickPrevious = () => {
-    loadPrevious();
+    previous();
   };
 
   const onClickNext = () => {
-    loadNext();
+    next();
   };
 
   const onPressedChangeIsShuffleModeEnabled: ComponentProps<typeof Toggle>['onPressedChange'] = (pressed) => {
@@ -218,7 +211,7 @@ const PlayerControls = () => {
 
   const buttons = [
     {
-      disabled: isShuffleModeEnabled && historyItems.length === 0,
+      disabled: isShuffleModeEnabled && !hasHistoryItems,
       ariaLabel: t('previousTrack'),
       onClick: onClickPrevious,
       Icon: SkipBack,
@@ -264,6 +257,7 @@ const PlayerControls = () => {
           );
         })}
       </ul>
+      <PlayerControlsVolume />
     </div>
   );
 };
@@ -271,7 +265,11 @@ const PlayerControls = () => {
 export const Player = () => {
   const t = useTranslations('ThePlayer');
 
-  const { track } = usePlayerContext();
+  const { track, close } = usePlayerContext();
+
+  const onClickClose = () => {
+    close();
+  };
 
   if (!track) {
     return null;
@@ -280,16 +278,24 @@ export const Player = () => {
   return (
     <section className="bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
       <div className="layout-container flex flex-col gap-2 justify-center">
-        <ButtonClose />
+        <Button
+          className="absolute inset-e-2 border-primary top-0 -translate-y-1/2!"
+          aria-label={t('closePlayer')}
+          size="icon"
+          variant="secondary"
+          onClick={onClickClose}
+        >
+          <X />
+        </Button>
 
-        <BaseAlwaysScrollable className="[--base-always-scrollable--content--margin:0_auto]">
-          <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
-            <h2 className="col-start-2">{track.name}</h2>
-            <button className="col-start-3 mt-0.5" aria-label={t('copyLink')} onClick={onClickCopyLink}>
-              <Link className="size-4" />
-            </button>
-          </header>
-        </BaseAlwaysScrollable>
+        <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
+          <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
+            <h2>{track.name}</h2>
+          </BaseAlwaysScrollable>
+          <button className="col-start-3 mt-0.5" aria-label={t('copyLink')} onClick={onClickCopyLink}>
+            <Link className="size-4" />
+          </button>
+        </header>
 
         <PlayerSlider duration={track.metadata.duration ?? 0} />
 
