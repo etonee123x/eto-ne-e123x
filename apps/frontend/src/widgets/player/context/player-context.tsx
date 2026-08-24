@@ -8,14 +8,20 @@ type Track = components['schemas']['FolderDataItemAudio'];
 
 export const PlayerContext = createContext<{
   track: Track | null;
-  playlist: Array<Track>;
 
   open: (track: Track, playlist: Array<Track>, pathDirectory: string) => void;
+  next: () => void;
+  previous: () => void;
   close: () => void;
+
+  isShuffleModeEnabled: boolean;
+  setIsShuffleModeEnabled: (isShuffleModeEnabled: boolean) => void;
 
   setCurrentPlayingNumber: (playingNumber: number) => void;
 
   setPathDirectory: (pathDirectory: string | null) => void;
+
+  hasHistoryItems: boolean;
 
   audioRef: RefObject<HTMLAudioElement | null>;
 } | null>(null);

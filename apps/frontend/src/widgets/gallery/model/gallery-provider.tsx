@@ -10,7 +10,10 @@ import { ExplorerGalleryNextControl, ExplorerGalleryPreviousControl } from '../u
 
 export const GalleryProvider = async ({
   children,
-}: Omit<ComponentProps<typeof GalleryContextProvider>, 'initialFolderData'>) => {
+}: Omit<
+  ComponentProps<typeof GalleryContextProvider>,
+  'initialGalleryItem' | 'initialGalleryItems' | 'initialShouldShowName' | 'initialRenderers'
+>) => {
   const headers = await _headers();
   // middleware may skip some paths (e.g. containing a dot), so x-pathname can be absent
   const xPathname = headers.get('x-pathname') ?? '/';

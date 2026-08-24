@@ -10,7 +10,6 @@ import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
-import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -50,27 +49,6 @@ const useIsPlaying = () => {
   }, [audioRef]);
 
   return isPlaying;
-};
-
-const ButtonClose = () => {
-  const { close } = usePlayerContext();
-  const t = useTranslations('ThePlayer');
-
-  const onClick = () => {
-    close();
-  };
-
-  return (
-    <Button
-      className="absolute inset-e-2 top-2 hover-none:hidden"
-      aria-label={t('closePlayer')}
-      size="icon"
-      variant="secondary"
-      onClick={onClick}
-    >
-      <X />
-    </Button>
-  );
 };
 
 const PlayerSlider = ({ duration }: { duration: number }) => {
@@ -134,50 +112,12 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
 };
 
 const PlayerControls = () => {
-  const { track, setCurrentPlayingNumber, playlist, audioRef } = usePlayerContext();
+  const { next, previous, audioRef, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } =
+    usePlayerContext();
 
   const t = useTranslations('ThePlayer');
 
-  const [isShuffleModeEnabled, setIsShuffleModeEnabled] = useState(false);
-  const [historyItems, setHistoryItems] = useState<Array<number>>([]);
-
   const isPlaying = useIsPlaying();
-
-  const currentPlayingNumber = playlist.findIndex((playlistItem) => {
-    return playlistItem.src === track?.src;
-  });
-
-  const loadNext = () => {
-    if (currentPlayingNumber === -1 || playlist.length === 0) {
-      return;
-    }
-
-    setHistoryItems((historyItems) => {
-      return [...historyItems, currentPlayingNumber];
-    });
-    setCurrentPlayingNumber(
-      isShuffleModeEnabled
-        ? getRandomExceptCurrentIndex(playlist.length, currentPlayingNumber)
-        : (currentPlayingNumber + 1) % playlist.length,
-    );
-  };
-
-  const loadPrevious = () => {
-    if (currentPlayingNumber === -1 || playlist.length === 0) {
-      return;
-    }
-
-    if (historyItems.length === 0) {
-      setCurrentPlayingNumber((currentPlayingNumber - 1 + playlist.length) % playlist.length);
-      return;
-    }
-
-    const previousPlayingNumber = historyItems.at(-1);
-    setHistoryItems((historyItems) => {
-      return historyItems.slice(0, -1);
-    });
-    setCurrentPlayingNumber(previousPlayingNumber ?? 0);
-  };
 
   const onClickPlay = () => {
     audioRef.current?.play();
@@ -188,11 +128,11 @@ const PlayerControls = () => {
   };
 
   const onClickPrevious = () => {
-    loadPrevious();
+    previous();
   };
 
   const onClickNext = () => {
-    loadNext();
+    next();
   };
 
   const onPressedChangeIsShuffleModeEnabled: ComponentProps<typeof Toggle>['onPressedChange'] = (pressed) => {
@@ -201,7 +141,7 @@ const PlayerControls = () => {
 
   const buttons = [
     {
-      disabled: isShuffleModeEnabled && historyItems.length === 0,
+      disabled: isShuffleModeEnabled && !hasHistoryItems,
       ariaLabel: t('previousTrack'),
       onClick: onClickPrevious,
       Icon: SkipBack,
@@ -254,7 +194,11 @@ const PlayerControls = () => {
 export const Player = () => {
   const t = useTranslations('ThePlayer');
 
-  const { track } = usePlayerContext();
+  const { track, close } = usePlayerContext();
+
+  const onClickClose = () => {
+    close();
+  };
 
   if (!track) {
     return null;
@@ -263,16 +207,24 @@ export const Player = () => {
   return (
     <section className="bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
       <div className="layout-container flex flex-col gap-2 justify-center">
-        <ButtonClose />
+        <Button
+          className="absolute inset-e-2 border-primary top-0 -translate-y-1/2!"
+          aria-label={t('closePlayer')}
+          size="icon"
+          variant="secondary"
+          onClick={onClickClose}
+        >
+          <X />
+        </Button>
 
-        <BaseAlwaysScrollable className="[--base-always-scrollable--content--margin:0_auto]">
-          <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
-            <h2 className="col-start-2">{track.name}</h2>
-            <button className="col-start-3 mt-0.5" aria-label={t('copyLink')} onClick={onClickCopyLink}>
-              <Link className="size-4" />
-            </button>
-          </header>
-        </BaseAlwaysScrollable>
+        <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
+          <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
+            <h2>{track.name}</h2>
+          </BaseAlwaysScrollable>
+          <button className="col-start-3 mt-0.5" aria-label={t('copyLink')} onClick={onClickCopyLink}>
+            <Link className="size-4" />
+          </button>
+        </header>
 
         <PlayerSlider duration={track.metadata.duration ?? 0} />
 
