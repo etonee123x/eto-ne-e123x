@@ -6,22 +6,30 @@ import { type components } from '@/shared/api/openapi';
 import { useEffect } from 'react';
 
 export const SendFolderDataToPlayer = ({ folderData }: { folderData: components['schemas']['FolderDataResponse'] }) => {
-  const { setTrack, setPlaylist, setPathDirectory } = usePlayerContext();
+  const { open, setPathDirectory } = usePlayerContext();
 
   useEffect(() => {
     const fileAudio = folderData.file?.fileType === FILE_TYPES.AUDIO ? folderData.file : null;
-    if (fileAudio) {
-      setTrack(fileAudio);
+    if (!fileAudio) {
+      return;
     }
 
-    setPlaylist(
+    open(
+      fileAudio,
       folderData.files.filter((file) => {
         return file.fileType === FILE_TYPES.AUDIO;
       }),
+      folderData.pathDirectory,
     );
+  }, [folderData, open]);
 
+  useEffect(() => {
     setPathDirectory(folderData.pathDirectory);
-  }, [folderData, setPathDirectory, setPlaylist, setTrack]);
+
+    return () => {
+      setPathDirectory(null);
+    };
+  }, [folderData, setPathDirectory]);
 
   return null;
 };

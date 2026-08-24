@@ -12,15 +12,15 @@ const INITIAL_VALUES = {
 
 export const GalleryContextProvider = ({
   children,
-  initialGalleryItem = null,
-  initialGalleryItems = [],
-  initialShouldShowName = INITIAL_VALUES.shouldShowName,
-  initialRenderers = INITIAL_VALUES.renderers,
+  initialGalleryItem,
+  initialGalleryItems,
+  initialShouldShowName,
+  initialRenderers,
 }: PropsWithChildren<{
-  initialGalleryItem?: NonNullable<ContextType<typeof GalleryContext>>['galleryItem'];
-  initialGalleryItems?: NonNullable<ContextType<typeof GalleryContext>>['galleryItems'];
-  initialShouldShowName?: NonNullable<ContextType<typeof GalleryContext>>['shouldShowName'];
-  initialRenderers?: NonNullable<ContextType<typeof GalleryContext>>['renderers'];
+  initialGalleryItem: NonNullable<ContextType<typeof GalleryContext>>['galleryItem'];
+  initialGalleryItems: NonNullable<ContextType<typeof GalleryContext>>['galleryItems'];
+  initialShouldShowName: NonNullable<ContextType<typeof GalleryContext>>['shouldShowName'];
+  initialRenderers: NonNullable<ContextType<typeof GalleryContext>>['renderers'];
 }>) => {
   const [galleryItem, setGalleryItem] =
     useState<NonNullable<ContextType<typeof GalleryContext>>['galleryItem']>(initialGalleryItem);

@@ -11,7 +11,6 @@ import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-huma
 import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
-import { throwError } from '@/shared/utils/throw-error';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -54,24 +53,12 @@ const useIsPlaying = () => {
 };
 
 const ButtonClose = () => {
-  const { setTrack, audioRef } = usePlayerContext();
+  const { close } = usePlayerContext();
   const t = useTranslations('ThePlayer');
 
-  const isPlaying = useIsPlaying();
-
   const onClick = () => {
-    setTrack(null);
-    if (!audioRef.current) {
-      return;
-    }
-
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
+    close();
   };
-
-  if (isPlaying) {
-    return null;
-  }
 
   return (
     <Button
@@ -147,7 +134,7 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
 };
 
 const PlayerControls = () => {
-  const { track, setTrack, playlist, audioRef } = usePlayerContext();
+  const { track, setCurrentPlayingNumber, playlist, audioRef } = usePlayerContext();
 
   const t = useTranslations('ThePlayer');
 
@@ -159,10 +146,6 @@ const PlayerControls = () => {
   const currentPlayingNumber = playlist.findIndex((playlistItem) => {
     return playlistItem.src === track?.src;
   });
-
-  const setCurrentPlayingNumber = (playingNumber: number) => {
-    setTrack(playlist[playingNumber] ?? throwError());
-  };
 
   const loadNext = () => {
     if (currentPlayingNumber === -1 || playlist.length === 0) {

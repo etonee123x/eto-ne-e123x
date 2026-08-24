@@ -1,30 +1,30 @@
 'use client';
 
-import { FILE_TYPES } from '@/entities/file';
-import { type components } from '@/shared/api/openapi';
-import { type ContextType, type PropsWithChildren, useEffect, useRef, useState } from 'react';
+import { type ContextType, type PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
 import { PlayerContext } from './player-context';
 import { isClient } from '@/shared/utils/target';
+import { throwError } from '@/shared/utils/throw-error';
+import { useRouter } from '@/i18n/navigation';
+
+type Track = NonNullable<NonNullable<ContextType<typeof PlayerContext>>['track']>;
 
 export const PlayerProviderClient = ({
   children,
-  initialFolderData,
+  initialTrack,
+  initialPlaylist,
+  initialTrackPathDirectory,
 }: PropsWithChildren<{
-  initialFolderData: components['schemas']['FolderDataResponse'] | null;
+  initialTrack: Track | null;
+  initialPlaylist: Array<Track>;
+  initialTrackPathDirectory: string | null;
 }>) => {
-  const [track, setTrack] = useState<NonNullable<ContextType<typeof PlayerContext>>['track']>(
-    initialFolderData?.file?.fileType === FILE_TYPES.AUDIO ? initialFolderData.file : null,
-  );
-  const [playlist, setPlaylist] = useState<NonNullable<ContextType<typeof PlayerContext>>['playlist']>(() => {
-    return (
-      initialFolderData?.files.filter((file) => {
-        return file.fileType === FILE_TYPES.AUDIO;
-      }) ?? []
-    );
-  });
-  const [pathDirectory, setPathDirectory] = useState<NonNullable<ContextType<typeof PlayerContext>>['pathDirectory']>(
-    initialFolderData?.pathDirectory ?? null,
-  );
+  const router = useRouter();
+
+  const [track, setTrack] = useState<Track | null>(initialTrack);
+  const [playlist, setPlaylist] = useState<Array<Track>>(initialPlaylist);
+  const [trackPathDirectory, setTrackPathDirectory] = useState<string | null>(initialTrackPathDirectory);
+
+  const pathDirectory = useRef<string | null>(initialTrackPathDirectory);
 
   const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
 
@@ -55,16 +55,58 @@ export const PlayerProviderClient = ({
     };
   }, [track?.src]);
 
+  const close = useCallback(() => {
+    setTrack(null);
+
+    if (!audioRef.current) {
+      return;
+    }
+
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+
+    if (trackPathDirectory !== pathDirectory.current) {
+      return;
+    }
+
+    router.push('/explorer' + (pathDirectory.current ?? ''), { scroll: false });
+  }, [setTrack, trackPathDirectory, pathDirectory, router]);
+
+  const open: NonNullable<ContextType<typeof PlayerContext>>['open'] = useCallback(
+    (track, playlist, pathDirectory) => {
+      setTrack(track);
+      setPlaylist(playlist);
+      setTrackPathDirectory(pathDirectory);
+    },
+    [setTrack, setPlaylist, setTrackPathDirectory],
+  );
+
+  const setCurrentPlayingNumber: NonNullable<ContextType<typeof PlayerContext>>['setCurrentPlayingNumber'] =
+    useCallback(
+      (playingNumber) => {
+        setTrack(playlist[playingNumber] ?? throwError());
+      },
+      [playlist],
+    );
+
+  const setPathDirectory: NonNullable<ContextType<typeof PlayerContext>>['setPathDirectory'] = useCallback(
+    (_pathDirectory) => {
+      pathDirectory.current = _pathDirectory;
+    },
+    [],
+  );
+
   return (
     <PlayerContext
       value={{
         track,
-        setTrack,
-
         playlist,
-        setPlaylist,
 
-        pathDirectory,
+        open,
+        close,
+
+        setCurrentPlayingNumber,
+
         setPathDirectory,
 
         audioRef,

@@ -28,11 +28,12 @@ export const GalleryProvider = async ({
       ? folderDataItemGalleryItemToGalleryItem(folderData.file)
       : null;
 
-  const galleryItems = folderData?.files.flatMap((folderDataFile) => {
-    return isFolderDataItemFileGalleryItem(folderDataFile)
-      ? [folderDataItemGalleryItemToGalleryItem(folderDataFile)]
-      : [];
-  });
+  const galleryItems =
+    folderData?.files.flatMap((folderDataFile) => {
+      return isFolderDataItemFileGalleryItem(folderDataFile)
+        ? [folderDataItemGalleryItemToGalleryItem(folderDataFile)]
+        : [];
+    }) ?? [];
 
   return (
     <GalleryContextProvider
