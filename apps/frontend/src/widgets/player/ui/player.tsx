@@ -54,6 +54,8 @@ const useIsPlaying = () => {
 };
 
 const PlayerSlider = ({ duration }: { duration: number }) => {
+  const t = useTranslations('ThePlayer');
+
   const [currentTime, setCurrentTime] = useState(0);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
 
@@ -100,6 +102,7 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
     <div className="h-5 w-full mx-auto flex justify-between items-center gap-2">
       <time dateTime={currentTimeFormats.iso}>{currentTimeFormats.humanReadable}</time>
       <Slider
+        aria-label={t('trackProgress')}
         className="cursor-pointer"
         max={duration / 1000}
         min={0}
@@ -206,6 +209,7 @@ const PlayerControls = () => {
       </ul>
       {!isTouchOnly() && (
         <Slider
+          aria-label={t('volume')}
           className="cursor-pointer w-5/6 max-w-20"
           max={1}
           min={0}

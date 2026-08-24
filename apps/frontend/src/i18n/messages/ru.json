@@ -95,6 +95,8 @@
   "ThePlayer": {
     "copied": "Скопировано!",
     "copyLink": "Скопировать ссылку",
+    "trackProgress": "Прогресс трека",
+    "volume": "Громкость",
     "previousTrack": "Предыдущий трек",
     "pauseTrack": "Пауза трека",
     "playTrack": "Воспроизвести трек",

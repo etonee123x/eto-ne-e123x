@@ -95,6 +95,8 @@
   "ThePlayer": {
     "copied": "Copied!",
     "copyLink": "Copy link",
+    "trackProgress": "Track progress",
+    "volume": "Volume",
     "previousTrack": "Previous track",
     "pauseTrack": "Pause track",
     "playTrack": "Play track",
