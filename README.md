@@ -274,8 +274,6 @@ npm run dev
 
 - `AGENTS.md` содержит общие правила проекта и version-matched инструкции Next.js.
 - `CLAUDE.md` ссылается на `AGENTS.md`, поэтому Claude получает тот же контекст.
-- `.agents/skills/api-contract/SKILL.md` описывает workflow изменений API и OpenAPI.
-- `.agents/skills/i18n-sync/SKILL.md` проверяет синхронные изменения `en` и `ru`.
 - `apps/frontend/.agents/skills/next-dev-loop/SKILL.md` описывает runtime-проверку Next.js через MCP и browser.
 - Не устанавливай skills вслепую: сначала просмотри `SKILL.md` и оцени команды, которые он запускает.
 - Не клади в Git секреты, `.env` с реальными значениями, runtime uploads и generated build output.

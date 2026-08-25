@@ -27,8 +27,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Before editing, read only the `SKILL.md` files matching the task. If several match, use all of them:
 
-- API, auth, validation, request/response, OpenAPI: `.agents/skills/api-contract/SKILL.md`
-- Frontend text or translation keys: `.agents/skills/i18n-sync/SKILL.md`
 - FSD layers, slices, imports, public API, `@x`: `apps/frontend/.agents/skills/feature-sliced-design/SKILL.md`
 - Frontend runtime with `next dev`: `apps/frontend/.agents/skills/next-dev-loop/SKILL.md`
 
