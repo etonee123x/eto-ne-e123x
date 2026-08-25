@@ -2,11 +2,19 @@ type: object
 properties:
   name:
     type: string
+  _meta:
+    type: object
+    properties:
+      createdAt:
+        type: number
+      updatedAt:
+        type: number
+    required:
+      - createdAt
+      - updatedAt
   path:
     type: string
-  _meta:
-    $ref: ./FolderDataItemMeta.yaml
 required:
   - name
-  - path
   - _meta
+  - path

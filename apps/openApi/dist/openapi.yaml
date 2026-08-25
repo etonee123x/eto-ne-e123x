@@ -247,7 +247,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Path inside folder-data (e.g. path/to/folder)
+          description: Path inside folder-data (e.g. /path/to/folder)
       responses:
         '200':
           description: OK
@@ -275,49 +275,43 @@ components:
           type: string
       required:
         - message
-    FolderDataItemMeta:
-      type: object
-      properties:
-        createdAt:
-          type: number
-        updatedAt:
-          type: number
-      required:
-        - createdAt
-        - updatedAt
-    FolderDataItemBase:
-      type: object
-      properties:
-        name:
-          type: string
-        path:
-          type: string
-        _meta:
-          $ref: '#/components/schemas/FolderDataItemMeta'
-      required:
-        - name
-        - path
-        - _meta
     ItemType:
       type: string
       enum:
         - FOLDER
         - FILE
-    FolderDataItemFileBase:
-      allOf:
-        - $ref: '#/components/schemas/FolderDataItemBase'
-        - type: object
+    StoredFileBase:
+      type: object
+      properties:
+        name:
+          type: string
+        _meta:
+          type: object
           properties:
-            itemType:
-              allOf:
-                - $ref: '#/components/schemas/ItemType'
-                - enum:
-                    - FILE
-            src:
-              type: string
+            createdAt:
+              type: number
+            updatedAt:
+              type: number
           required:
-            - itemType
-            - src
+            - createdAt
+            - updatedAt
+        itemType:
+          allOf:
+            - $ref: '#/components/schemas/ItemType'
+            - enum:
+                - FILE
+        src:
+          type: string
+        extension:
+          type:
+            - string
+            - 'null'
+      required:
+        - name
+        - _meta
+        - itemType
+        - src
+        - extension
     FileType:
       type: string
       enum:
@@ -325,9 +319,9 @@ components:
         - VIDEO
         - AUDIO
         - UNKNOWN
-    FolderDataItemAudio:
+    StoredFileAudio:
       allOf:
-        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - $ref: '#/components/schemas/StoredFileBase'
         - type: object
           properties:
             fileType:
@@ -356,7 +350,6 @@ components:
                   nullable: true
                 duration:
                   type: number
-                  nullable: true
               required:
                 - bitrate
                 - duration
@@ -367,19 +360,9 @@ components:
           required:
             - metadata
             - fileType
-    FolderDataSize:
-      type: object
-      properties:
-        width:
-          type: number
-        height:
-          type: number
-      required:
-        - width
-        - height
-    FolderDataItemImage:
+    StoredFileImage:
       allOf:
-        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - $ref: '#/components/schemas/StoredFileBase'
         - type: object
           properties:
             fileType:
@@ -388,13 +371,21 @@ components:
                 - enum:
                     - IMAGE
             metadata:
-              $ref: '#/components/schemas/FolderDataSize'
+              type: object
+              properties:
+                width:
+                  type: number
+                height:
+                  type: number
+              required:
+                - width
+                - height
           required:
             - metadata
             - fileType
-    FolderDataItemVideo:
+    StoredFileVideo:
       allOf:
-        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - $ref: '#/components/schemas/StoredFileBase'
         - type: object
           properties:
             fileType:
@@ -403,13 +394,21 @@ components:
                 - enum:
                     - VIDEO
             metadata:
-              $ref: '#/components/schemas/FolderDataSize'
+              type: object
+              properties:
+                width:
+                  type: number
+                height:
+                  type: number
+              required:
+                - width
+                - height
           required:
             - metadata
             - fileType
-    FolderDataItemUnknown:
+    StoredFileUnknown:
       allOf:
-        - $ref: '#/components/schemas/FolderDataItemFileBase'
+        - $ref: '#/components/schemas/StoredFileBase'
         - type: object
           properties:
             fileType:
@@ -419,12 +418,12 @@ components:
                     - UNKNOWN
           required:
             - fileType
-    FolderDataItemFile:
+    StoredFile:
       oneOf:
-        - $ref: '#/components/schemas/FolderDataItemAudio'
-        - $ref: '#/components/schemas/FolderDataItemImage'
-        - $ref: '#/components/schemas/FolderDataItemVideo'
-        - $ref: '#/components/schemas/FolderDataItemUnknown'
+        - $ref: '#/components/schemas/StoredFileAudio'
+        - $ref: '#/components/schemas/StoredFileImage'
+        - $ref: '#/components/schemas/StoredFileVideo'
+        - $ref: '#/components/schemas/StoredFileUnknown'
     PostResponse:
       type: object
       properties:
@@ -446,7 +445,7 @@ components:
         attachments:
           type: array
           items:
-            $ref: '#/components/schemas/FolderDataItemFile'
+            $ref: '#/components/schemas/StoredFile'
       required:
         - _meta
         - text
@@ -509,7 +508,7 @@ components:
           type: array
           items:
             oneOf:
-              - $ref: '#/components/schemas/FolderDataItemFile'
+              - $ref: '#/components/schemas/StoredFile'
               - type: 'null'
         files:
           type: array
@@ -520,6 +519,27 @@ components:
         - text
         - attachments
         - files
+    FolderDataItemBase:
+      type: object
+      properties:
+        name:
+          type: string
+        _meta:
+          type: object
+          properties:
+            createdAt:
+              type: number
+            updatedAt:
+              type: number
+          required:
+            - createdAt
+            - updatedAt
+        path:
+          type: string
+      required:
+        - name
+        - _meta
+        - path
     FolderDataItemFolder:
       allOf:
         - $ref: '#/components/schemas/FolderDataItemBase'
@@ -532,6 +552,28 @@ components:
                     - FOLDER
           required:
             - itemType
+    FolderDataItemAudio:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileAudio'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemImage:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileImage'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemVideo:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileVideo'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemUnknown:
+      allOf:
+        - $ref: '#/components/schemas/StoredFileUnknown'
+        - $ref: '#/components/schemas/FolderDataItemBase'
+    FolderDataItemFile:
+      oneOf:
+        - $ref: '#/components/schemas/FolderDataItemAudio'
+        - $ref: '#/components/schemas/FolderDataItemImage'
+        - $ref: '#/components/schemas/FolderDataItemVideo'
+        - $ref: '#/components/schemas/FolderDataItemUnknown'
     FolderDataResponse:
       type: object
       properties:

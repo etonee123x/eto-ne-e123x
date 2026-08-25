@@ -11,5 +11,6 @@ import { KEY_COOKIE_JWT } from '@/constants/keyCookieJwt';
     jsonwebtoken.sign({ isAdmin: true }, process.env.SECRET_KEY ?? throwError('SECRET_KEY is not defined')),
   );
 
-  console.info(url.toString());
+  // eslint-disable-next-line no-console
+  console.log(url.href);
 })();

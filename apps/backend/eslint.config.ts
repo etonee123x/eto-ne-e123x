@@ -1,26 +1,26 @@
 import { defineConfig } from 'eslint/config';
 
 import globals from 'globals';
-import importPlugin from 'eslint-plugin-import';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import sonarjs from 'eslint-plugin-sonarjs';
 import eslintPluginUnicorn from 'eslint-plugin-unicorn';
+import { importX } from 'eslint-plugin-import-x';
+import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 
-export default defineConfig(
+export default defineConfig([
   {
     ignores: ['dist/', 'node_modules/', 'src/types/openapi.ts'],
   },
   {
     files: ['**/*.ts'],
     extends: [
-      importPlugin.flatConfigs.recommended,
       pluginJs.configs.recommended,
       tseslint.configs.strictTypeChecked,
-      sonarjs.configs.recommended,
       eslintPluginUnicorn.configs.recommended,
       eslintPluginPrettierRecommended,
+      importX.configs['flat/recommended'],
     ],
 
     languageOptions: {
@@ -33,17 +33,18 @@ export default defineConfig(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    plugins: {
+      'import-x': importX,
+      sonarjs,
+    },
     settings: {
       'import/resolver': {
         typescript: true,
       },
+      'import-x/resolver-next': [createTypeScriptImportResolver()],
     },
     rules: {
-      'import/no-empty-named-blocks': 'error',
-      'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-      'import/no-duplicates': 'error',
-
-      'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
+      'no-console': ['error'],
       'no-unexpected-multiline': 'error',
       'no-var': 'error',
       'no-unsafe-optional-chaining': 'error',
@@ -101,7 +102,7 @@ export default defineConfig(
 
       'sonarjs/todo-tag': 'warn',
 
-      'unicorn/prevent-abbreviations': [
+      'unicorn/name-replacements': [
         'error',
         { allowList: { props: true, Props: true, ref: true, Ref: true, env: true, Env: true } },
       ],
@@ -112,8 +113,7 @@ export default defineConfig(
       'unicorn/no-unreadable-array-destructuring': 'off',
       'unicorn/no-useless-undefined': 'off',
       'unicorn/no-array-reduce': 'off',
-      'unicorn/filename-case': ['error', { case: 'camelCase' }],
-      'sonarjs/cognitive-complexity': ['off'],
+      'unicorn/filename-case': 'off',
 
       'prettier/prettier': [
         'error',
@@ -123,6 +123,6 @@ export default defineConfig(
           endOfLine: 'auto',
         },
       ],
-    }
-  }
-);
+    },
+  },
+]);
