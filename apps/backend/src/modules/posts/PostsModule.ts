@@ -9,10 +9,10 @@ import { AudioFileInspector } from '@/infrastructure/files/inspectors/AudioFileI
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/VideoFileInspector';
 import { ImageFileInspector } from '@/infrastructure/files/inspectors/ImageFileInspector';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/UnknownFileInspector';
-import { throwError } from '@etonee123x/shared/utils/throwError';
 import { FilesLocation } from '@/infrastructure/files/locations/FilesLocation';
 import { FsDatabaseFile } from '@/infrastructure/FsDatabaseFile';
 import type { Post } from './entities/Post';
+import { throwError } from '@/utils/throwError';
 
 export class PostsModule extends Module {
   constructor() {

@@ -8,8 +8,8 @@ import { AudioFileInspector } from '@/infrastructure/files/inspectors/AudioFileI
 import { ImageFileInspector } from '@/infrastructure/files/inspectors/ImageFileInspector';
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/VideoFileInspector';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/UnknownFileInspector';
-import { throwError } from '@etonee123x/shared';
 import { FilesLocation } from '@/infrastructure/files/locations/FilesLocation';
+import { throwError } from '@/utils/throwError';
 
 export class FolderDataModule extends Module {
   constructor() {

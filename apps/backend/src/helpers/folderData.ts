@@ -1,5 +1,5 @@
 import { fileTypeValues, itemTypeValues } from '@/types/openapi';
-import { isNil } from '@etonee123x/shared';
+import { isNil } from '@/utils/isNil';
 
 export const FILE_TYPES = Object.fromEntries(
   fileTypeValues.map((fileType) => {

@@ -1,10 +1,9 @@
-import { throwError } from '@etonee123x/shared/utils/throwError';
-import { jsonParse } from '@etonee123x/shared/utils/jsonParse';
 import nodeFsPromises from 'node:fs/promises';
 import nodePath from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { isNil } from '@etonee123x/shared/utils/isNil';
 import { AppError } from '@/shared/errors/AppError';
+import { isNil } from '@/utils/isNil';
+import { throwError } from '@/utils/throwError';
 
 export interface Meta {
   id: string;
@@ -54,7 +53,7 @@ export class FsDatabaseFile<
 
     const file = await nodeFsPromises.readFile(this.pathToFile, { encoding: 'utf8' });
 
-    return jsonParse.unsafe<Array<Row>>(file);
+    return JSON.parse(file) as Array<Row>;
   }
 
   async readRowById(parameters: { id: string }): Promise<Row> {
