@@ -49,14 +49,14 @@ cd ../backend && npm install
 cd ../openApi && npm install
 ```
 
-Skills хранятся локально и исключены из Git. Установи их из `skills-lock.json` командой из frontend:
+Skills хранятся локально и исключены из Git. Установи их из корневого `skills-lock.json` командой из корня репозитория:
 
 ```sh
-cd apps/frontend
+# из корня репозитория
 npx skills experimental_install
 ```
 
-Команда восстановит skills в `apps/frontend/.agents/skills`. При запросе `npx` разреши установку пакета `skills`.
+Команда восстановит skills в `.agents/skills`. При запросе `npx` разреши установку пакета `skills`.
 
 Проверить установленные skills можно так:
 
@@ -242,7 +242,7 @@ cd apps/backend && npm run typecheck
 cd apps/openApi && npm run lint
 ```
 
-Для frontend-изменений проверяй не только типы: при доступном `next dev` используй skill `apps/frontend/.agents/skills/next-dev-loop`, чтобы проверить compilation, server/browser errors, DOM и пользовательское взаимодействие.
+Для frontend-изменений проверяй не только типы: при доступном `next dev` используй skill `.agents/skills/next-dev-loop`, чтобы проверить compilation, server/browser errors, DOM и пользовательское взаимодействие.
 
 ## Runtime-проверки в браузере
 
@@ -274,7 +274,7 @@ npm run dev
 
 - `AGENTS.md` содержит общие правила проекта и version-matched инструкции Next.js.
 - `CLAUDE.md` ссылается на `AGENTS.md`, поэтому Claude получает тот же контекст.
-- `apps/frontend/.agents/skills/next-dev-loop/SKILL.md` описывает runtime-проверку Next.js через MCP и browser.
+- `.agents/skills/next-dev-loop/SKILL.md` описывает runtime-проверку Next.js через MCP и browser.
 - Не устанавливай skills вслепую: сначала просмотри `SKILL.md` и оцени команды, которые он запускает.
 - Не клади в Git секреты, `.env` с реальными значениями, runtime uploads и generated build output.
 

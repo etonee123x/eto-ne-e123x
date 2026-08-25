@@ -23,12 +23,34 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Never commit secrets, real `.env` files, generated build output, or runtime uploads.
 - Read version-matched Next.js docs from `apps/frontend/node_modules/next/dist/docs/` before changing Next.js code.
 
-## Skill routing
+## Skills
 
-Before editing, read only the `SKILL.md` files matching the task. If several match, use all of them:
+All repository skills live under `.agents/skills/` at the repository root. `skills-lock.json` also lives at the root.
 
-- FSD layers, slices, imports, public API, `@x`: `apps/frontend/.agents/skills/feature-sliced-design/SKILL.md`
-- Frontend runtime with `next dev`: `apps/frontend/.agents/skills/next-dev-loop/SKILL.md`
+### Required for every session
+
+Read `.agents/skills/caveman/SKILL.md` before the first response. Apply its communication rules throughout the session. Default level: `ultra`.
+
+Exceptions defined by the skill still apply: code, comments, commits, documentation, and messages intended for third parties use normal prose unless the user explicitly asks to compress them.
+
+### Load only when task matches
+
+Before editing, read every skill listed below whose trigger matches the task. Do not load unrelated skills.
+
+- `.agents/skills/feature-sliced-design/SKILL.md`: frontend FSD layers, slices, imports, public APIs, or `@x` cross-imports.
+- `.agents/skills/next-dev-loop/SKILL.md`: frontend runtime work, `next dev`, browser checks, or interaction validation.
+
+If several triggers match, load all matching skills. Read each selected `SKILL.md` completely, then follow its workflow and validation requirements. Skills supplement these repository rules; when instructions conflict, use the more specific task instruction.
+
+### Installation and paths
+
+Install all skills from the repository root, not from `apps/frontend`:
+
+```sh
+npx skills experimental_install
+```
+
+The command reads the root `skills-lock.json` and restores skills to `.agents/skills/`. Run skill commands from the working directory stated by that skill or its documentation. For example, run frontend `agent-browser` commands from `apps/frontend`.
 
 ## Frontend constraints
 
