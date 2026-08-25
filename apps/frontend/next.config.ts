@@ -3,6 +3,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const nextConfig: NextConfig = {
   reactStrictMode: false,
+  logging: {
+    browserToTerminal: true,
+  },
   images: {
     unoptimized: true,
   },
