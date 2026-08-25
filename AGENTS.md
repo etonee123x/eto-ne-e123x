@@ -29,7 +29,7 @@ All repository skills live under `.agents/skills/` at the repository root. `skil
 
 ### Required for every session
 
-Read `.agents/skills/caveman/SKILL.md` before the first response. Apply its communication rules throughout the session. Default level: `ultra`.
+Read `.agents/skills/caveman/SKILL.md` before the first response. Apply its communication rules throughout the session. Use level `ultra`.
 
 Exceptions defined by the skill still apply: code, comments, commits, documentation, and messages intended for third parties use normal prose unless the user explicitly asks to compress them.
 
@@ -39,6 +39,7 @@ Before editing, read every skill listed below whose trigger matches the task. Do
 
 - `.agents/skills/feature-sliced-design/SKILL.md`: frontend FSD layers, slices, imports, public APIs, or `@x` cross-imports.
 - `.agents/skills/next-dev-loop/SKILL.md`: frontend runtime work, `next dev`, browser checks, or interaction validation.
+- `.agents/skills/vercel-react-best-practices/SKILL.md`: writing, reviewing, or refactoring React/Next.js code, data fetching, bundle optimization, or performance improvements.
 
 If several triggers match, load all matching skills. Read each selected `SKILL.md` completely, then follow its workflow and validation requirements. Skills supplement these repository rules; when instructions conflict, use the more specific task instruction.
 
