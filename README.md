@@ -274,9 +274,27 @@ npm run dev
 
 - `AGENTS.md` содержит общие правила проекта и version-matched инструкции Next.js.
 - `CLAUDE.md` ссылается на `AGENTS.md`, поэтому Claude получает тот же контекст.
-- `.agents/skills/next-dev-loop/SKILL.md` описывает runtime-проверку Next.js через MCP и browser.
 - Не устанавливай skills вслепую: сначала просмотри `SKILL.md` и оцени команды, которые он запускает.
 - Не клади в Git секреты, `.env` с реальными значениями, runtime uploads и generated build output.
+
+### Установка Skills
+
+Устанавливай skills из корня репозитория, не из `apps/frontend`:
+
+```sh
+npx skills experimental_install
+```
+
+Команда читает `skills-lock.json` в корне и восстанавливает skills в `.agents/skills/`. Команды skill выполняй из рабочей директории, указанной в его документации. Например, `agent-browser` команды — из `apps/frontend`.
+
+Действующие skills:
+
+- **caveman** — сжатая коммуникация (ultra по умолчанию для этого проекта).
+- **feature-sliced-design** — ФСД v2.1, структура, слои, импорты.
+- **vercel-react-best-practices** — оптимизация React/Next.js.
+- **vercel-composition-patterns** — архитектура компонентов, composition API.
+- **next-dev-loop** — runtime-проверка Next.js (требует `next dev` и `agent-browser`).
+- **web-design-guidelines** — audit дизайна и доступности UI.
 
 ## Лицензия
 
