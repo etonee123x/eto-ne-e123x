@@ -47,7 +47,7 @@ const ExplorerElementFile = dynamic(() => {
 const folderDataItemToHref = (
   folderDataItem: components['schemas']['FolderDataItemFolder'] | components['schemas']['FolderDataItemFile'],
 ) => {
-  return ['/explorer', folderDataItem.path].join('/');
+  return ['/explorer', folderDataItem.path].join('');
 };
 
 export const generateMetadata = async ({
