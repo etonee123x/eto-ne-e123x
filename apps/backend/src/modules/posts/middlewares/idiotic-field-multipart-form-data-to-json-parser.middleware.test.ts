@@ -21,7 +21,7 @@ describe('idioticFieldMultipartFormDataToJsonParser', () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
-  it('sets field undefined when json parsing fails', () => {
+  it('throws AppError 400 when json parsing fails', () => {
     const middleware = idioticFieldMultipartFormDataToJsonParser(['attachments']);
 
     const request = {
@@ -32,10 +32,10 @@ describe('idioticFieldMultipartFormDataToJsonParser', () => {
 
     const next = vi.fn();
 
-    middleware(request, {} as Express.Response, next);
-
-    expect(request.body.attachments).toBeUndefined();
-    expect(next).toHaveBeenCalledOnce();
+    expect(() => {
+      middleware(request, {} as Express.Response, next);
+    }).toThrow("Invalid JSON in field 'attachments'");
+    expect(next).not.toHaveBeenCalled();
   });
 
   it('leaves non-string values untouched', () => {

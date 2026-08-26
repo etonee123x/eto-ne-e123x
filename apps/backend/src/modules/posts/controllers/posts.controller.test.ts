@@ -189,4 +189,58 @@ describe('PostsController', () => {
 
     expect(response.body).toMatchObject({ statusCode: 404 });
   });
+
+  it('accepts empty text when creating a post', async () => {
+    const createPost = vi.fn(async () => {
+      return { ok: true };
+    });
+    const jwt = signJwt();
+
+    const app = buildApp({
+      getPosts: vi.fn(),
+      createPost,
+      updatePostById: vi.fn(),
+      deletePostById: vi.fn(),
+    });
+
+    await request(app)
+      .post('/posts')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .field('text', '')
+      .expect(200);
+
+    expect(createPost).toHaveBeenCalledWith({
+      text: '',
+      files: [],
+    });
+  });
+
+  it('rejects invalid pageSize query parameter with 400', async () => {
+    const app = buildApp({
+      getPosts: vi.fn(),
+      createPost: vi.fn(),
+      updatePostById: vi.fn(),
+      deletePostById: vi.fn(),
+    });
+
+    await request(app).get('/posts?pageSize=999').expect(400);
+    await request(app).get('/posts?pageSize=invalid').expect(400);
+  });
+
+  it('rejects malformed attachments json in updatePostById with 400', async () => {
+    const jwt = signJwt();
+    const app = buildApp({
+      getPosts: vi.fn(),
+      createPost: vi.fn(),
+      updatePostById: vi.fn(),
+      deletePostById: vi.fn(),
+    });
+
+    await request(app)
+      .patch('/posts/post-1')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .field('text', 'updated')
+      .field('attachments', '{broken-json')
+      .expect(400);
+  });
 });

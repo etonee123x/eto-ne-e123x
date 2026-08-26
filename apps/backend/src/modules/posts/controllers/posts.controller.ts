@@ -1,12 +1,33 @@
+import { query, body, param } from 'express-validator';
 import { nonNullable } from '@/utils/non-nullable';
 import { requestToUrl } from '@/utils/request-to-url';
 import type { components } from '@/types/openapi';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
 import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
+import { validateRequest } from '@/middlewares/validate-request.middleware';
 import { PostsService } from '../services/posts.service';
 import { idioticFieldMultipartFormDataToJsonParser } from '../middlewares/idiotic-field-multipart-form-data-to-json-parser.middleware';
 import { parseFiles } from '../middlewares/parse-files.middleware';
 import { Controller } from '@/shared/controller';
+
+const postsGetValidationRules = [
+  query('pageSize').optional().isInt({ min: 1, max: 100 }).withMessage('pageSize must be an integer between 1 and 100'),
+  query('filters[cursorPrevious]').optional().isString().withMessage('cursorPrevious must be a string'),
+  query('filters[cursorNext]').optional().isString().withMessage('cursorNext must be a string'),
+  query('filters[postId]').optional().isString().withMessage('postId must be a string'),
+  validateRequest,
+];
+
+const postCreateValidationRules = [body('text').isString().withMessage('text must be a string'), validateRequest];
+
+const postUpdateValidationRules = [
+  param('id').isString().notEmpty().withMessage('id is required'),
+  body('text').isString().withMessage('text must be a string'),
+  body('attachments').isArray().withMessage('attachments must be an array'),
+  validateRequest,
+];
+
+const postDeleteValidationRules = [param('id').isString().notEmpty().withMessage('id is required'), validateRequest];
 
 export class PostsController extends Controller {
   private getPosts: RequestHandlerTyped<'/posts', 'get'> = async (request, response) => {
@@ -62,15 +83,16 @@ export class PostsController extends Controller {
   constructor(private readonly postsService: PostsService) {
     super();
 
-    this.router.get('/posts', this.getPosts);
-    this.router.post('/posts', cookieAuth, parseFiles, this.createPost);
+    this.router.get('/posts', ...postsGetValidationRules, this.getPosts);
+    this.router.post('/posts', cookieAuth, parseFiles, ...postCreateValidationRules, this.createPost);
     this.router.patch(
       '/posts/:id',
       cookieAuth,
       parseFiles,
       idioticFieldMultipartFormDataToJsonParser(['attachments']),
+      ...postUpdateValidationRules,
       this.updatePostById,
     );
-    this.router.delete('/posts/:id', cookieAuth, this.deletePostById);
+    this.router.delete('/posts/:id', cookieAuth, ...postDeleteValidationRules, this.deletePostById);
   }
 }

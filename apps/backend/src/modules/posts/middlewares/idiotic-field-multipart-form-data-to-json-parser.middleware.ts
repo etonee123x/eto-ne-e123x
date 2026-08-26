@@ -1,4 +1,5 @@
 import type Express from 'express';
+import { AppError } from '@/shared/errors/app.error';
 
 export const idioticFieldMultipartFormDataToJsonParser = (fields: Array<string>): Express.RequestHandler => {
   return (...[request, , next]) => {
@@ -7,7 +8,7 @@ export const idioticFieldMultipartFormDataToJsonParser = (fields: Array<string>)
         try {
           request.body[field] = JSON.parse(request.body[field]);
         } catch {
-          request.body[field] = undefined;
+          throw new AppError(400, `Invalid JSON in field '${field}'`);
         }
       }
     }
