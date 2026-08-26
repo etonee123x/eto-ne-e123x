@@ -32,7 +32,7 @@ export const PostAttachment = ({
   index,
   onClick,
 }: Readonly<{
-  attachment: components['schemas']['FolderDataItemFile'];
+  attachment: components['schemas']['StoredFile'];
   index: number;
   onClick: () => void;
 }>) => {

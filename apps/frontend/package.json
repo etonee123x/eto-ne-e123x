@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "generate:openapi": "openapi-typescript ../openApi/openapi/openapi.yaml --output ./types/openapi.ts --enum-values"
+    "generate:openapi": "openapi-typescript ../openApi/openapi/openapi.yaml --output ./src/shared/api/openapi.ts --enum-values"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

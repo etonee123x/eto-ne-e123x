@@ -297,7 +297,7 @@ export const Player = () => {
           </button>
         </header>
 
-        <PlayerSlider duration={track.metadata.duration ?? 0} />
+        <PlayerSlider duration={track.metadata.duration} />
 
         <PlayerControls />
       </div>
