@@ -10,11 +10,12 @@ import { isNodeEnvDevelopment } from '@/constants/node-env';
 import { PostsModule } from '@/modules/posts/posts.module';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { FolderDataModule } from '@/modules/folder-data/folder-data.module';
+import { HealthModule } from '@/modules/health/health.module';
 
 export const createApp = () => {
   const router = Express.Router();
 
-  for (const module of [new PostsModule(), new AuthModule(), new FolderDataModule()]) {
+  for (const module of [new PostsModule(), new AuthModule(), new FolderDataModule(), new HealthModule()]) {
     module.init(router);
   }
 
