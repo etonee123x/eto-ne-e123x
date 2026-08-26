@@ -31,8 +31,22 @@ describe('errorHandler', () => {
 
     const response = await request(app).get('/posts').expect(404);
 
-    expect(loggerError).toHaveBeenCalledWith('/posts Error: Not found');
+    expect(loggerError).toHaveBeenCalledWith('/posts Not found');
     expect(response.body).toMatchObject({ statusCode: 404 });
+  });
+
+  it('redacts sensitive query params in error logs', async () => {
+    const app = Express();
+
+    app.get('/posts', () => {
+      throw new AppError(401, 'Unauthorized');
+    });
+
+    app.use(errorHandler);
+
+    await request(app).get('/posts?jwt=secret123').expect(401);
+
+    expect(loggerError).toHaveBeenCalledWith('/posts?jwt=%5BREDACTED%5D Unauthorized');
   });
 
   it('returns 500 generic payload for unknown error', async () => {

@@ -12,8 +12,8 @@ const buildApp = () => {
 
   app.use(cookieParser());
 
-  app.get('/protected', cookieAuth, (request_, response) => {
-    response.status(200).json({ jwt: request_.cookies[KEY_COOKIE_JWT] ?? null });
+  app.get('/protected', cookieAuth, (...[, response]) => {
+    response.status(200).json({ ok: true });
   });
 
   app.use(errorHandler);
@@ -54,7 +54,7 @@ describe('cookieAuth', () => {
       .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
       .expect(200);
 
-    expect(response.body).toEqual({ jwt });
+    expect(response.body).toEqual({ ok: true });
     expect(response.headers['set-cookie']).toBeDefined();
   });
 
@@ -65,15 +65,6 @@ describe('cookieAuth', () => {
     const response = await request(app).get(`/protected?jwt=${jwt}`).expect(401);
 
     expect(response.body).toMatchObject({ statusCode: 401 });
-  });
-
-  it('accepts jwt from Authorization Bearer header', async () => {
-    const app = buildApp();
-    const jwt = signJwt();
-
-    const response = await request(app).get('/protected').set('Authorization', `Bearer ${jwt}`).expect(200);
-
-    expect(response.body).toEqual({ jwt });
   });
 
   it('returns 500 when SECRET_KEY is missing', async () => {
