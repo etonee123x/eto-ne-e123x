@@ -32,8 +32,8 @@ const buildService = () => {
   };
 
   const filesService: MockedFilesService = {
-    upload: vi.fn(),
-    delete: vi.fn(),
+    upload: vi.fn().mockResolvedValue({ src: '/test', name: 'test' }),
+    delete: vi.fn().mockResolvedValue(undefined),
   };
 
   const service = new PostsService({
@@ -149,7 +149,7 @@ describe('PostsService', () => {
     ).rejects.toBeInstanceOf(AppError);
   });
 
-  it('createPost uploads every file then calls repo.createPost', async () => {
+  it('createPost uploads every file then calls repo.createPost with generated uuid keys', async () => {
     const { service, postsRepo, filesService } = buildService();
 
     const files = [buildFile('a.mp3', 'A'), buildFile('b.mp3', 'B')];
@@ -157,8 +157,8 @@ describe('PostsService', () => {
     if (!fileA || !fileB) {
       throw new Error('Expected test files to exist');
     }
-    const attachmentA = { src: '/uploads/a.mp3', name: 'a.mp3' };
-    const attachmentB = { src: '/uploads/b.mp3', name: 'b.mp3' };
+    const attachmentA = { src: '/uploads/a.mp3', name: 'uuid1.mp3' };
+    const attachmentB = { src: '/uploads/b.mp3', name: 'uuid2.mp3' };
 
     filesService.upload.mockResolvedValueOnce(attachmentA).mockResolvedValueOnce(attachmentB);
 
@@ -167,11 +167,11 @@ describe('PostsService', () => {
     await service.createPost({ text: 'post', files });
 
     expect(filesService.upload).toHaveBeenNthCalledWith(1, {
-      key: 'a.mp3',
+      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/),
       buffer: fileA.buffer,
     });
     expect(filesService.upload).toHaveBeenNthCalledWith(2, {
-      key: 'b.mp3',
+      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/),
       buffer: fileB.buffer,
     });
     expect(postsRepo.createPost).toHaveBeenCalledWith({
@@ -203,7 +203,7 @@ describe('PostsService', () => {
     });
 
     expect(filesService.upload).toHaveBeenCalledWith({
-      key: 'new.mp3',
+      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/),
       buffer: Buffer.from('N'),
     });
     expect(filesService.delete).toHaveBeenCalledWith({ key: 'drop.mp3' });
@@ -212,6 +212,40 @@ describe('PostsService', () => {
       text: 'updated text',
       attachments: [oldKeep, newAttachment],
     });
+  });
+
+  it('createPost cleans up uploaded files if repo creation fails', async () => {
+    const { service, postsRepo, filesService } = buildService();
+
+    const files = [buildFile('a.mp3', 'A')];
+    const uploadedAttachment = { src: '/uploads/a.mp3', name: 'uploaded-a.mp3' };
+
+    filesService.upload.mockResolvedValue(uploadedAttachment);
+    postsRepo.createPost.mockRejectedValue(new Error('db write error'));
+
+    await expect(service.createPost({ text: 'post', files })).rejects.toThrow('db write error');
+
+    expect(filesService.delete).toHaveBeenCalledWith({ key: 'uploaded-a.mp3' });
+  });
+
+  it('updatePostById cleans up newly uploaded files if repo update fails', async () => {
+    const { service, postsRepo, filesService } = buildService();
+
+    postsRepo.findPostById.mockResolvedValue({ attachments: [] });
+    const newAttachment = { src: '/uploads/new.mp3', name: 'uploaded-new.mp3' };
+    filesService.upload.mockResolvedValue(newAttachment);
+    postsRepo.updatePostById.mockRejectedValue(new Error('db update error'));
+
+    await expect(
+      service.updatePostById({
+        id: 'post-1',
+        text: 'updated text',
+        attachments: [null],
+        files: [buildFile('new.mp3', 'N')],
+      }),
+    ).rejects.toThrow('db update error');
+
+    expect(filesService.delete).toHaveBeenCalledWith({ key: 'uploaded-new.mp3' });
   });
 
   it('deletePostById deletes all attached files and returns deleted post', async () => {

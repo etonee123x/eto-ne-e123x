@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+import nodePath from 'node:path';
 import { nonNullable } from '@/utils/non-nullable';
 import type { PostsRepo } from '../repos/posts.repo';
 import type { CursorPage } from '@/shared/types/cursor-page';
@@ -16,7 +18,8 @@ export class PostsService {
   }
 
   private getKeyByFile(file: Express.Multer.File) {
-    return file.originalname;
+    const extension = nodePath.extname(file.originalname);
+    return `${randomUUID()}${extension}`;
   }
 
   async getPosts(parameters: {
@@ -65,14 +68,34 @@ export class PostsService {
   }
 
   async createPost(parameters: { text: string; files: Array<globalThis.Express.Multer.File> }): Promise<Post> {
-    return this.postsRepo.createPost({
-      attachments: await Promise.all(
-        parameters.files.map((file) => {
-          return this.filesService.upload({ buffer: file.buffer, key: this.getKeyByFile(file) });
+    const uploadedAttachments: Array<StoredFile> = [];
+
+    try {
+      for (const file of parameters.files) {
+        const uploaded = await this.filesService.upload({
+          buffer: file.buffer,
+          key: this.getKeyByFile(file),
+        });
+        uploadedAttachments.push(uploaded);
+      }
+
+      return await this.postsRepo.createPost({
+        attachments: uploadedAttachments,
+        text: parameters.text,
+      });
+    } catch (error) {
+      await Promise.all(
+        uploadedAttachments.map(async (attachment) => {
+          try {
+            await this.filesService.delete({ key: attachment.name });
+          } catch {
+            // ignore cleanup errors
+          }
         }),
-      ),
-      text: parameters.text,
-    });
+      );
+
+      throw error;
+    }
   }
 
   async updatePostById(parameters: {
@@ -81,61 +104,88 @@ export class PostsService {
     attachments: Array<StoredFile | null>;
     text: string;
   }): Promise<Post> {
-    let index = 0;
-
     const postOld = await this.postsRepo.findPostById({ id: parameters.id });
 
-    const attachments = await Promise.all([
-      ...parameters.attachments.flatMap((attachment) => {
-        if (attachment) {
-          return [Promise.resolve(attachment)];
-        }
+    const newlyUploaded: Array<StoredFile> = [];
+    let fileIndex = 0;
 
-        if (index >= parameters.files.length) {
-          return [];
-        }
+    try {
+      const attachments: Array<StoredFile> = [];
 
-        const file = nonNullable(parameters.files[index++]);
-
-        return [
-          this.filesService.upload({
+      for (const attachmentInput of parameters.attachments) {
+        if (attachmentInput) {
+          attachments.push(attachmentInput);
+        } else if (fileIndex < parameters.files.length) {
+          const file = nonNullable(parameters.files[fileIndex++]);
+          const uploaded = await this.filesService.upload({
             buffer: file.buffer,
             key: this.getKeyByFile(file),
-          }),
-        ];
-      }),
-      ...parameters.files.slice(index).map((file) => {
-        return this.filesService.upload({ buffer: file.buffer, key: this.getKeyByFile(file) });
-      }),
-    ]);
-
-    for (const attachmentInOldPost of postOld.attachments) {
-      if (
-        attachments.some((attachmentInNewPost) => {
-          return attachmentInNewPost.src === attachmentInOldPost.src;
-        })
-      ) {
-        continue;
+          });
+          newlyUploaded.push(uploaded);
+          attachments.push(uploaded);
+        }
       }
 
-      this.filesService.delete({ key: attachmentInOldPost.name });
+      while (fileIndex < parameters.files.length) {
+        const file = nonNullable(parameters.files[fileIndex++]);
+        const uploaded = await this.filesService.upload({
+          buffer: file.buffer,
+          key: this.getKeyByFile(file),
+        });
+        newlyUploaded.push(uploaded);
+        attachments.push(uploaded);
+      }
+
+      const post = await this.postsRepo.updatePostById({
+        id: parameters.id,
+        text: parameters.text,
+        attachments,
+      });
+
+      const attachmentsToDelete = postOld.attachments.filter((attachmentInOldPost) => {
+        return attachments.every((attachmentInNewPost) => {
+          return attachmentInNewPost.src !== attachmentInOldPost.src;
+        });
+      });
+
+      await Promise.all(
+        attachmentsToDelete.map(async (attachment) => {
+          try {
+            await this.filesService.delete({ key: attachment.name });
+          } catch {
+            // ignore cleanup errors
+          }
+        }),
+      );
+
+      return post;
+    } catch (error) {
+      await Promise.all(
+        newlyUploaded.map(async (attachment) => {
+          try {
+            await this.filesService.delete({ key: attachment.name });
+          } catch {
+            // ignore cleanup errors
+          }
+        }),
+      );
+
+      throw error;
     }
-
-    const post = await this.postsRepo.updatePostById({
-      id: parameters.id,
-      text: parameters.text,
-      attachments,
-    });
-
-    return post;
   }
 
   async deletePostById(parameters: { id: string }): Promise<Post> {
     const post = await this.postsRepo.deletePostById({ id: parameters.id });
 
-    for (const attachment of post.attachments) {
-      this.filesService.delete({ key: attachment.name });
-    }
+    await Promise.all(
+      post.attachments.map(async (attachment) => {
+        try {
+          await this.filesService.delete({ key: attachment.name });
+        } catch {
+          // ignore cleanup errors
+        }
+      }),
+    );
 
     return post;
   }
