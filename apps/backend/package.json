@@ -7,6 +7,9 @@
     "dev": "cross-env NODE_ENV=development tsx watch src",
     "dev:generateAuthUrl": "tsx src/scripts/generateAuthUrl",
     "start": "cross-env NODE_ENV=production tsx src",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -34,6 +37,7 @@
     "@types/multer": "^2.2.0",
     "@types/node": "^24.12.0",
     "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
     "@typescript-eslint/eslint-plugin": "^8.68.0",
     "@typescript-eslint/parser": "^8.68.0",
     "cross-env": "^10.1.0",
@@ -47,8 +51,11 @@
     "globals": "^17.11.0",
     "jiti": "^2.7.0",
     "openapi-typescript": "^7.13.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.23.12",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.68.0"
+    "typescript-eslint": "^8.68.0",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.11"
   }
 }
