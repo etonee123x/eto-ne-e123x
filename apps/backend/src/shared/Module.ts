@@ -1,5 +1,5 @@
 import Express from 'express';
-import type { Controller } from '@/shared/Controller';
+import type { Controller } from '@/shared/controller';
 
 export class Module {
   private readonly controller: Controller;

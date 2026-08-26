@@ -1,14 +1,14 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
 
-import { errorHandler } from '@/middlewares/errorHandler';
+import { errorHandler } from '@/middlewares/error-handler';
 import { send404 } from '@/middlewares/send404';
-import { nonNullable } from '@/utils/nonNullable';
-import { isNodeEnvDevelopment } from '@/constants/nodeEnv';
+import { nonNullable } from '@/utils/non-nullable';
+import { isNodeEnvDevelopment } from '@/constants/node-env';
 
-import { PostsModule } from '@/modules/posts/PostsModule';
-import { AuthModule } from '@/modules/auth/AuthModule';
-import { FolderDataModule } from '@/modules/folderData/FolderDataModule';
+import { PostsModule } from '@/modules/posts/posts.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { FolderDataModule } from '@/modules/folder-data/folder-data.module';
 
 export const createApp = () => {
   const router = Express.Router();
