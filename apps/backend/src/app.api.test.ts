@@ -28,6 +28,15 @@ describe('API smoke', () => {
     expect(response.headers['x-powered-by']).toBeUndefined();
   });
 
+  it('sets CORS headers for allowed origin', async () => {
+    const app = createApp();
+
+    const response = await request(app).get('/health/live').set('Origin', 'http://localhost:3000').expect(200);
+
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+    expect(response.headers['access-control-allow-credentials']).toBe('true');
+  });
+
   it('rejects JSON payloads exceeding size limit', async () => {
     const previousLimit = process.env.JSON_BODY_LIMIT;
     process.env.JSON_BODY_LIMIT = '100b';

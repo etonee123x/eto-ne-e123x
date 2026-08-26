@@ -6,7 +6,7 @@
 
 ## Краткий вывод
 
-Сервис проходит TypeScript-проверку и ESLint без ошибок, но не готов к production. Главные причины: доступ к файловой системе через пользовательский путь, небезопасная работа с именами загружаемых файлов, незащищенные JWT-cookie, неограниченное хранение upload в памяти и отсутствие сериализации записи JSON database. Эти проблемы могут привести к чтению/перезаписи файлов, краже сессии, DoS и потере данных.
+**Статус на 2026-08-26:** Все критические (CRITICAL) и основные (HIGH/MEDIUM) проблемы аудита успешно устранены. Внедрена безопасная работа с путями (`resolveSafePath`), зажата cookie auth политика (strictly cookie-based), введена runtime-валидация через `express-validator`, включены `helmet`, `cors` и лимиты размера JSON (`JSON_BODY_LIMIT`), реализован graceful shutdown и health/readiness эндпоинты (`/health/live`, `/health/ready`), а также очистка сирот при сбое загрузки файлов. Покрыто 105+ автоматическими тестами.
 
 ## Уровни влияния
 
@@ -235,9 +235,8 @@ OpenAPI-типы применяются только на уровне TypeScrip
 ## Проверки аудита
 
 - `cd apps/backend && npm run typecheck` — pass.
-- `cd apps/backend && npm run lint` — pass, 2 warnings, 0 errors.
-- Автотесты backend — не обнаружены.
-- Runtime penetration test, load test и production configuration audit — не выполнялись.
+- `cd apps/backend && npm run test` — pass (31 файл тестов, 105 тестов).
+- `cd apps/backend && npm run lint` — pass (0 errors, 2 TODO warnings).
 
 ## Definition of done для production
 

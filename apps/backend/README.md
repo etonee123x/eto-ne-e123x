@@ -101,6 +101,7 @@ multipart upload
 - `CONTENT_PATH` — каталог с медиа-контентом
 - `UPLOADS_PATH` — каталог загруженных пользователем файлов
 - `JSON_BODY_LIMIT` — лимит размера JSON тела запроса (по умолчанию `1mb`)
+- `CORS_ORIGIN` — разрешенные origin для CORS (список через запятую, по умолчанию `http://localhost:3000`)
 
 Файл шаблона: `.env.example`.
 

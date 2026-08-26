@@ -1,5 +1,6 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import helmet from 'helmet';
 
 import { errorHandler } from '@/middlewares/error-handler.middleware';
@@ -20,9 +21,20 @@ export const createApp = () => {
   }
 
   const jsonLimit = process.env.JSON_BODY_LIMIT ?? '1mb';
+  const corsOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((origin) => {
+        return origin.trim();
+      })
+    : ['http://localhost:3000'];
 
   const app = Express() //
     .use(helmet())
+    .use(
+      cors({
+        origin: corsOrigins,
+        credentials: true,
+      }),
+    )
     .use(cookieParser())
     .use(Express.json({ limit: jsonLimit }));
 
