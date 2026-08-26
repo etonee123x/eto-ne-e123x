@@ -6,7 +6,7 @@ import type { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 export abstract class FileInspector {
   abstract canInspect(parameters: { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }): boolean;
 
-  protected async inspect(parameters: {
+  async inspect(parameters: {
     fileSource: FileSource;
     key: string;
     filesStorage: FilesStorage;

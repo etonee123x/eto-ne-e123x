@@ -8,7 +8,7 @@ vi.mock('music-metadata', () => {
 
 import { parseBuffer } from 'music-metadata';
 import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio-file-inspector';
+import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio.file-inspector';
 
 describe('AudioFileInspector', () => {
   it('maps metadata from music-metadata response', async () => {

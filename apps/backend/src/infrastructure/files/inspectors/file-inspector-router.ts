@@ -1,11 +1,10 @@
 import { fileTypeFromBuffer } from 'file-type';
-import type { AudioFileInspector } from './audio-file-inspector';
-import type { ImageFileInspector } from './image-file-inspector';
-import type { VideoFileInspector } from './video-file-inspector';
+import type { AudioFileInspector } from './audio.file-inspector';
+import type { ImageFileInspector } from './image.file-inspector';
+import type { VideoFileInspector } from './video.file-inspector';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import type { StoredFile } from '@/shared/domain/stored-file';
 import { extensionToFileType } from '../lib/extension-to-file-type.lib';
-import type { UnknownFileInspector } from './unknown-file-inspector';
+import type { UnknownFileInspector } from './unknown.file-inspector';
 import type { FileSource } from '../types/file-source';
 import type { FilesStorage } from '../storages/files-storage';
 import { FileInspector } from './file-inspector';
@@ -32,7 +31,7 @@ export class FileInspectorRouter {
     ];
   }
 
-  async inspect(parameters: { key: string }): Promise<StoredFile> {
+  async inspect(parameters: { key: string }) {
     const buffer = await this.filesStorage.getBuffer({ key: parameters.key });
 
     const fileSource: FileSource = {

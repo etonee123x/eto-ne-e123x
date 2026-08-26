@@ -8,7 +8,7 @@ vi.mock('sharp', () => {
 
 import sharp from 'sharp';
 import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import { ImageFileInspector } from '@/infrastructure/files/inspectors/image-file-inspector';
+import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file-inspector';
 
 describe('ImageFileInspector', () => {
   it('returns width and height from sharp metadata', async () => {

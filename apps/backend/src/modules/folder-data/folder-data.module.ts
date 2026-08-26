@@ -4,10 +4,10 @@ import { FolderDataService } from './services/folder-data.service';
 import { FilesService } from '@/infrastructure/files/services/files-service';
 import { FsFilesStorage } from '@/infrastructure/files/storages/fs-files-storage';
 import { FileInspectorRouter } from '@/infrastructure/files/inspectors/file-inspector-router';
-import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio-file-inspector';
-import { ImageFileInspector } from '@/infrastructure/files/inspectors/image-file-inspector';
-import { VideoFileInspector } from '@/infrastructure/files/inspectors/video-file-inspector';
-import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown-file-inspector';
+import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio.file-inspector';
+import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file-inspector';
+import { VideoFileInspector } from '@/infrastructure/files/inspectors/video.file-inspector';
+import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown.file-inspector';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
 import { throwError } from '@/utils/throw.error';
 
