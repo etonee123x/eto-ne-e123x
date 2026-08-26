@@ -6,7 +6,7 @@ import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { UnknownFileInspector } from './unknown.file-inspector';
 import type { FileSource } from '../types/file-source';
 import type { FilesStorage } from '../storages/files-storage';
-import type { StoredFile } from '@/shared/domain/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 
 const EXTENSIONS_AUDIO = new Set(['mp3', 'ogg', 'wav']);
 const EXTENSIONS_IMAGE = new Set(['jpg', 'jpeg', 'png']);

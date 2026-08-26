@@ -1,4 +1,4 @@
-import type { StoredFile } from '@/shared/domain/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 
 export interface Post {
   _meta: {

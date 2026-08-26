@@ -4,7 +4,7 @@ import type { CursorPage } from '@/shared/types/cursor-page';
 import type { Post } from '../entities/post.entity';
 import type { FilesService } from '@/infrastructure/files/services/files.service';
 import { AppError } from '@/shared/errors/app.error';
-import type { StoredFile } from '@/shared/domain/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 
 export class PostsService {
   private readonly postsRepo: PostsRepo;

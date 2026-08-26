@@ -1,5 +1,5 @@
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import type { StoredFileUnknown } from '@/shared/domain/stored-file';
+import type { StoredFileUnknown } from '@/shared/domain/stored-file/unknown.stored-file';
 import { FileInspectorBase } from './base.file-inspector';
 import type { FileSource } from '../types/file-source';
 

@@ -2,7 +2,7 @@ import { FsDatabaseRepo } from '@/shared/repos/fs-database.repo';
 import type { PostsRepo } from './posts.repo';
 import type { CursorPage } from '@/shared/types/cursor-page';
 import type { Post } from '../entities/post.entity';
-import type { StoredFile } from '@/shared/domain/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 
 export class PostsFsDatabaseRepo extends FsDatabaseRepo<Omit<Post, '_meta'>, Post> implements PostsRepo {
   async findFirstPosts(parameters: { pageSize: number }): Promise<CursorPage<Post>> {

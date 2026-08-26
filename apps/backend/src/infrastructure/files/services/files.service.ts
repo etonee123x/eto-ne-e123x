@@ -1,4 +1,4 @@
-import type { StoredFile } from '@/shared/domain/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 import type { FileInspector } from '../inspectors/file-inspector';
 import type { FilesStorage } from '../storages/files-storage';
 

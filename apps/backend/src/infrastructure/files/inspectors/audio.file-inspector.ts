@@ -1,6 +1,6 @@
 import { parseBuffer } from 'music-metadata';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import type { StoredFileAudio } from '@/shared/domain/stored-file';
+import type { StoredFileAudio } from '@/shared/domain/stored-file/audio.stored-file';
 import { FileInspectorBase } from './base.file-inspector';
 import type { FileSource } from '../types/file-source';
 

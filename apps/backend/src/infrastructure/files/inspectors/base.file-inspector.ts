@@ -1,4 +1,4 @@
-import type { StoredFileBase } from '@/shared/domain/stored-file';
+import type { StoredFileBase } from '@/shared/domain/stored-file/base.stored-file';
 import type { FilesStorage } from '../storages/files-storage';
 import type { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { FileSource } from '../types/file-source';
