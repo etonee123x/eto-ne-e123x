@@ -8,9 +8,9 @@ vi.mock('file-type', () => {
 
 import { fileTypeFromBuffer } from 'file-type';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import { FileInspectorRouter } from '@/infrastructure/files/inspectors/file-inspector-router';
+import { FileInspector } from '@/infrastructure/files/inspectors/file-inspector';
 
-describe('FileInspectorRouter', () => {
+describe('FileInspector', () => {
   it('routes to audio inspector when extension maps to audio', async () => {
     const mockedFileTypeFromBuffer = vi.mocked(fileTypeFromBuffer);
     mockedFileTypeFromBuffer.mockResolvedValue({ ext: 'mp3', mime: 'audio/mpeg' });
@@ -36,11 +36,13 @@ describe('FileInspectorRouter', () => {
       getBuffer: vi.fn().mockResolvedValue(Buffer.from('audio')),
     };
 
-    const router = new FileInspectorRouter({
-      audioFileInspector: audioFileInspector,
-      imageFileInspector: imageFileInspector,
-      videoFileInspector: videoFileInspector,
-      unknownFileInspector: unknownFileInspector,
+    const router = new FileInspector({
+      fileInspectors: {
+        audioFileInspector: audioFileInspector,
+        imageFileInspector: imageFileInspector,
+        videoFileInspector: videoFileInspector,
+        unknownFileInspector: unknownFileInspector,
+      },
       filesStorage: filesStorage as never,
     });
 
@@ -78,11 +80,14 @@ describe('FileInspectorRouter', () => {
       getBuffer: vi.fn().mockResolvedValue(Buffer.from('unknown')),
     };
 
-    const router = new FileInspectorRouter({
-      audioFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
-      imageFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
-      videoFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
-      unknownFileInspector: unknownFileInspector,
+    const router = new FileInspector({
+      fileInspectors: {
+        audioFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
+        imageFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
+        videoFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
+        unknownFileInspector: unknownFileInspector,
+      },
+
       filesStorage: filesStorage as never,
     });
 

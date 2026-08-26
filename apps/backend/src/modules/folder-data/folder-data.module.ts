@@ -3,7 +3,7 @@ import { FolderDataController } from './controllers/folder-data.controller';
 import { FolderDataService } from './services/folder-data.service';
 import { FilesService } from '@/infrastructure/files/services/files-service';
 import { FsFilesStorage } from '@/infrastructure/files/storages/fs-files-storage';
-import { FileInspectorRouter } from '@/infrastructure/files/inspectors/file-inspector-router';
+import { FileInspector } from '@/infrastructure/files/inspectors/file-inspector';
 import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio.file-inspector';
 import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file-inspector';
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video.file-inspector';
@@ -24,15 +24,17 @@ export class FolderDataModule extends Module {
     const videoFileInspector = new VideoFileInspector();
     const unknownFileInspector = new UnknownFileInspector();
 
-    const fileInspectorRouter = new FileInspectorRouter({
-      audioFileInspector,
-      imageFileInspector,
-      videoFileInspector,
-      unknownFileInspector,
+    const fileInspector = new FileInspector({
+      fileInspectors: {
+        audioFileInspector,
+        imageFileInspector,
+        videoFileInspector,
+        unknownFileInspector,
+      },
       filesStorage,
     });
 
-    const filesService = new FilesService({ filesStorage, fileInspectorRouter });
+    const filesService = new FilesService({ filesStorage, fileInspector });
 
     const folderDataService = new FolderDataService({ filesService, filesLocation });
 

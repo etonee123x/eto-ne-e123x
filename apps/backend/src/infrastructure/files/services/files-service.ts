@@ -1,14 +1,14 @@
 import type { StoredFile } from '@/shared/domain/stored-file';
-import type { FileInspectorRouter } from '../inspectors/file-inspector-router';
+import type { FileInspector } from '../inspectors/file-inspector';
 import type { FilesStorage } from '../storages/files-storage';
 
 export class FilesService {
   private readonly filesStorage: FilesStorage;
-  private readonly fileInspectorRouter: FileInspectorRouter;
+  private readonly fileInspector: FileInspector;
 
-  constructor(parameters: { filesStorage: FilesStorage; fileInspectorRouter: FileInspectorRouter }) {
+  constructor(parameters: { filesStorage: FilesStorage; fileInspector: FileInspector }) {
     this.filesStorage = parameters.filesStorage;
-    this.fileInspectorRouter = parameters.fileInspectorRouter;
+    this.fileInspector = parameters.fileInspector;
   }
 
   async upload(parameters: { buffer: Buffer; key: string }): Promise<StoredFile> {
@@ -32,6 +32,6 @@ export class FilesService {
   }
 
   async getStoredFile(parameters: { key: string }): Promise<StoredFile> {
-    return this.fileInspectorRouter.inspect(parameters);
+    return this.fileInspector.inspect(parameters);
   }
 }

@@ -1,11 +1,11 @@
 import { parseBuffer } from 'music-metadata';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { StoredFileAudio } from '@/shared/domain/stored-file';
-import { FileInspector } from './file-inspector';
+import { FileInspectorBase } from './base.file-inspector';
 import type { FileSource } from '../types/file-source';
 import type { FilesStorage } from '../storages/files-storage';
 
-export class AudioFileInspector extends FileInspector {
+export class AudioFileInspector extends FileInspectorBase {
   canInspect(parameters: { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }) {
     return parameters.fileType === FILE_TYPES.AUDIO;
   }
@@ -20,7 +20,6 @@ export class AudioFileInspector extends FileInspector {
     const audioMetadata = await parseBuffer(buffer);
 
     const specific = {
-      fileType: FILE_TYPES.AUDIO,
       metadata: {
         duration: (audioMetadata.format.duration ?? 0) * 1000,
         bitrate: audioMetadata.format.bitrate ? audioMetadata.format.bitrate / 1000 : null,
@@ -34,6 +33,7 @@ export class AudioFileInspector extends FileInspector {
     return {
       ...base,
       ...specific,
+      fileType: FILE_TYPES.AUDIO,
     };
   }
 }

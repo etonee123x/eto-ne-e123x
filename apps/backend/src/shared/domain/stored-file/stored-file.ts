@@ -1,12 +1,6 @@
-import { ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import type { StoredFileAudio } from './audio.stored-file';
+import type { StoredFileImage } from './image.stored-file';
+import type { StoredFileUnknown } from './unknown.stored-file';
+import type { StoredFileVideo } from './video.stored-file';
 
-export interface StoredFile {
-  name: string;
-  extension: string | null;
-  itemType: (typeof ITEM_TYPES)['FILE'];
-  _meta: {
-    createdAt: number;
-    updatedAt: number;
-  };
-  src: string;
-}
+export type StoredFile = StoredFileAudio | StoredFileImage | StoredFileVideo | StoredFileUnknown;

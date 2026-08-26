@@ -1,5 +1,5 @@
 import type { Readable } from 'node:stream';
-import type { StoredFile as StoredFileBase } from '@/shared/domain/stored-file/stored-file';
+import type { StoredFileBase } from '@/shared/domain/stored-file';
 
 export interface FilesStorage {
   put(parameters: { buffer: Buffer; key: string }): Promise<unknown>;

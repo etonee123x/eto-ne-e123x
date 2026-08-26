@@ -24,19 +24,19 @@ describe('FilesService', () => {
       getStream: vi.fn(),
     };
 
-    const fileInspectorRouter = {
+    const fileInspector = {
       inspect: vi.fn().mockResolvedValue(storedFile),
     };
 
     const filesService = new FilesService({
       filesStorage: filesStorage,
-      fileInspectorRouter: fileInspectorRouter as never,
+      fileInspector: fileInspector as never,
     });
 
     const result = await filesService.upload({ key: 'a.bin', buffer });
 
     expect(filesStorage.put).toHaveBeenCalledWith({ key: 'a.bin', buffer });
-    expect(fileInspectorRouter.inspect).toHaveBeenCalledWith({ key: 'a.bin' });
+    expect(fileInspector.inspect).toHaveBeenCalledWith({ key: 'a.bin' });
     expect(result).toEqual(storedFile);
   });
 
@@ -50,7 +50,7 @@ describe('FilesService', () => {
       getStream: vi.fn(),
     };
 
-    const fileInspectorRouter = {
+    const fileInspector = {
       inspect: vi.fn().mockResolvedValue({
         name: 'a.bin',
         extension: 'bin',
@@ -63,13 +63,13 @@ describe('FilesService', () => {
 
     const filesService = new FilesService({
       filesStorage: filesStorage,
-      fileInspectorRouter: fileInspectorRouter as never,
+      fileInspector: fileInspector as never,
     });
 
     const storedFile = await filesService.delete({ key: 'a.bin' });
 
     expect(filesStorage.delete).toHaveBeenCalledWith({ key: 'a.bin' });
-    expect(fileInspectorRouter.inspect).toHaveBeenCalledWith({ key: 'a.bin' });
+    expect(fileInspector.inspect).toHaveBeenCalledWith({ key: 'a.bin' });
     expect(storedFile.fileType).toBe(FILE_TYPES.UNKNOWN);
   });
 
@@ -83,13 +83,13 @@ describe('FilesService', () => {
       getStream: vi.fn(),
     };
 
-    const fileInspectorRouter = {
+    const fileInspector = {
       inspect: vi.fn(),
     };
 
     const filesService = new FilesService({
       filesStorage: filesStorage,
-      fileInspectorRouter: fileInspectorRouter as never,
+      fileInspector: fileInspector as never,
     });
 
     await expect(filesService.exists({ key: 'missing.bin' })).resolves.toBe(false);

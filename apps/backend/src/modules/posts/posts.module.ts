@@ -4,7 +4,7 @@ import { PostsService } from './services/posts.service';
 import { PostsFsDatabaseRepo } from './repos/posts-fs-database.repo';
 import { FilesService } from '@/infrastructure/files/services/files-service';
 import { FsFilesStorage } from '@/infrastructure/files/storages/fs-files-storage';
-import { FileInspectorRouter } from '@/infrastructure/files/inspectors/file-inspector-router';
+import { FileInspector } from '@/infrastructure/files/inspectors/file-inspector';
 import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio.file-inspector';
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video.file-inspector';
 import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file-inspector';
@@ -31,15 +31,17 @@ export class PostsModule extends Module {
     const imageFileInspector = new ImageFileInspector();
     const unknownFileInspector = new UnknownFileInspector();
 
-    const fileInspectorRouter = new FileInspectorRouter({
-      audioFileInspector,
-      videoFileInspector,
-      imageFileInspector,
-      unknownFileInspector,
+    const fileInspector = new FileInspector({
+      fileInspectors: {
+        audioFileInspector,
+        videoFileInspector,
+        imageFileInspector,
+        unknownFileInspector,
+      },
       filesStorage,
     });
 
-    const filesService = new FilesService({ filesStorage, fileInspectorRouter });
+    const filesService = new FilesService({ filesStorage, fileInspector });
 
     const postsService = new PostsService({ postsRepo, filesService });
 
