@@ -1,6 +1,6 @@
 import type { CursorPage } from '@/shared/types/cursor-page';
 import type { Post } from '../entities/post.entity';
-import type { StoredFile } from '@/infrastructure/files/entities/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file';
 
 export interface PostsRepo {
   findFirstPosts: (parameters: { pageSize: number }) => Promise<CursorPage<Post>>;

@@ -1,22 +1,35 @@
-import type { FileInspector } from './file-inspector';
 import sharp from 'sharp';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import type { StoredFileImage } from '@/shared/domain/stored-file';
+import { FileInspector } from './file-inspector';
 import type { FileSource } from '../types/file-source';
-import type { StoredFileImage } from '../entities/stored-file-image';
-import type { StoredFileBase } from '../types/stored-file-base';
+import type { FilesStorage } from '../storages/files-storage';
 
-export class ImageFileInspector implements FileInspector<Omit<StoredFileImage, keyof StoredFileBase>> {
-  async inspect(parameters: { fileSource: FileSource }) {
+export class ImageFileInspector extends FileInspector {
+  canInspect(parameters: { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }) {
+    return parameters.fileType === FILE_TYPES.IMAGE;
+  }
+
+  async inspect(parameters: {
+    fileSource: FileSource;
+    key: string;
+    filesStorage: FilesStorage;
+  }): Promise<StoredFileImage> {
+    const base = await super.inspect(parameters);
     const buffer = await parameters.fileSource.getBuffer();
-
     const metadata = await sharp(buffer).metadata();
 
-    return {
+    const specific = {
       fileType: FILE_TYPES.IMAGE,
       metadata: {
         width: metadata.width,
         height: metadata.height,
       },
+    };
+
+    return {
+      ...base,
+      ...specific,
     };
   }
 }

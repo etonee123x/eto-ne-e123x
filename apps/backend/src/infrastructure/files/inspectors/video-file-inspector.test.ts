@@ -13,7 +13,7 @@ vi.mock('ffprobe-static', () => {
 });
 
 import { execFile } from 'node:child_process';
-import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video-file-inspector';
 
 describe('VideoFileInspector', () => {
@@ -26,8 +26,19 @@ describe('VideoFileInspector', () => {
     });
 
     const inspector = new VideoFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'video.mp4',
+        extension: 'mp4',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/video.mp4',
+      }),
+    };
 
     const result = await inspector.inspect({
+      key: '/tmp/video.mp4',
+      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('video');
@@ -39,6 +50,11 @@ describe('VideoFileInspector', () => {
     });
 
     expect(result).toEqual({
+      name: 'video.mp4',
+      extension: 'mp4',
+      itemType: ITEM_TYPES.FILE,
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/content/video.mp4',
       fileType: FILE_TYPES.VIDEO,
       metadata: {
         width: 1920,
@@ -56,9 +72,20 @@ describe('VideoFileInspector', () => {
     });
 
     const inspector = new VideoFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'video.mp4',
+        extension: 'mp4',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/video.mp4',
+      }),
+    };
 
     await expect(
       inspector.inspect({
+        key: '/tmp/video.mp4',
+        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
@@ -80,9 +107,20 @@ describe('VideoFileInspector', () => {
     });
 
     const inspector = new VideoFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'video.mp4',
+        extension: 'mp4',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/video.mp4',
+      }),
+    };
 
     await expect(
       inspector.inspect({
+        key: '/tmp/video.mp4',
+        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
@@ -104,9 +142,20 @@ describe('VideoFileInspector', () => {
     });
 
     const inspector = new VideoFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'video.mp4',
+        extension: 'mp4',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/video.mp4',
+      }),
+    };
 
     await expect(
       inspector.inspect({
+        key: '/tmp/video.mp4',
+        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('video');

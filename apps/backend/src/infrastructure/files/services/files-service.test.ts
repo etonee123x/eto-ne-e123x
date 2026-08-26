@@ -6,26 +6,26 @@ import { FilesService } from '@/infrastructure/files/services/files-service';
 describe('FilesService', () => {
   it('upload writes file and returns inspected metadata', async () => {
     const buffer = Buffer.from('abc');
+    const storedFile = {
+      name: 'a.bin',
+      extension: 'bin',
+      itemType: ITEM_TYPES.FILE,
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/uploads/a.bin',
+      fileType: FILE_TYPES.UNKNOWN,
+    };
 
     const filesStorage = {
       put: vi.fn().mockResolvedValue(undefined),
       delete: vi.fn().mockResolvedValue(undefined),
       exists: vi.fn().mockResolvedValue(true),
-      getStoredFileBase: vi.fn().mockResolvedValue({
-        name: 'a.bin',
-        extension: 'bin',
-        itemType: ITEM_TYPES.FILE,
-        _meta: { createdAt: 1, updatedAt: 2 },
-        src: '/uploads/a.bin',
-      }),
-      getBuffer: vi.fn().mockResolvedValue(buffer),
+      getStoredFileBase: vi.fn(),
+      getBuffer: vi.fn(),
       getStream: vi.fn(),
     };
 
     const fileInspectorRouter = {
-      inspect: vi.fn().mockResolvedValue({
-        fileType: FILE_TYPES.UNKNOWN,
-      }),
+      inspect: vi.fn().mockResolvedValue(storedFile),
     };
 
     const filesService = new FilesService({
@@ -33,20 +33,11 @@ describe('FilesService', () => {
       fileInspectorRouter: fileInspectorRouter as never,
     });
 
-    const storedFile = await filesService.upload({ key: 'a.bin', buffer });
+    const result = await filesService.upload({ key: 'a.bin', buffer });
 
     expect(filesStorage.put).toHaveBeenCalledWith({ key: 'a.bin', buffer });
-    expect(filesStorage.getStoredFileBase).toHaveBeenCalledWith(expect.objectContaining({ key: 'a.bin' }));
-    expect(filesStorage.getBuffer).toHaveBeenCalledWith(expect.objectContaining({ key: 'a.bin' }));
-    expect(fileInspectorRouter.inspect).toHaveBeenCalledOnce();
-    expect(storedFile).toEqual({
-      name: 'a.bin',
-      extension: 'bin',
-      itemType: ITEM_TYPES.FILE,
-      _meta: { createdAt: 1, updatedAt: 2 },
-      src: '/uploads/a.bin',
-      fileType: FILE_TYPES.UNKNOWN,
-    });
+    expect(fileInspectorRouter.inspect).toHaveBeenCalledWith({ key: 'a.bin' });
+    expect(result).toEqual(storedFile);
   });
 
   it('delete returns stored file and delegates delete call', async () => {
@@ -54,19 +45,20 @@ describe('FilesService', () => {
       put: vi.fn(),
       delete: vi.fn().mockResolvedValue(undefined),
       exists: vi.fn().mockResolvedValue(true),
-      getStoredFileBase: vi.fn().mockResolvedValue({
+      getStoredFileBase: vi.fn(),
+      getBuffer: vi.fn(),
+      getStream: vi.fn(),
+    };
+
+    const fileInspectorRouter = {
+      inspect: vi.fn().mockResolvedValue({
         name: 'a.bin',
         extension: 'bin',
         itemType: ITEM_TYPES.FILE,
         _meta: { createdAt: 1, updatedAt: 2 },
         src: '/uploads/a.bin',
+        fileType: FILE_TYPES.UNKNOWN,
       }),
-      getBuffer: vi.fn().mockResolvedValue(Buffer.from('abc')),
-      getStream: vi.fn(),
-    };
-
-    const fileInspectorRouter = {
-      inspect: vi.fn().mockResolvedValue({ fileType: FILE_TYPES.UNKNOWN }),
     };
 
     const filesService = new FilesService({
@@ -77,6 +69,7 @@ describe('FilesService', () => {
     const storedFile = await filesService.delete({ key: 'a.bin' });
 
     expect(filesStorage.delete).toHaveBeenCalledWith({ key: 'a.bin' });
+    expect(fileInspectorRouter.inspect).toHaveBeenCalledWith({ key: 'a.bin' });
     expect(storedFile.fileType).toBe(FILE_TYPES.UNKNOWN);
   });
 

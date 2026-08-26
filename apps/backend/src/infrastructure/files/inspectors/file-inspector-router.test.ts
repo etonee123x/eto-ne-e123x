@@ -15,29 +15,48 @@ describe('FileInspectorRouter', () => {
     const mockedFileTypeFromBuffer = vi.mocked(fileTypeFromBuffer);
     mockedFileTypeFromBuffer.mockResolvedValue({ ext: 'mp3', mime: 'audio/mpeg' });
 
-    const audioFileInspector = {
-      inspect: vi.fn().mockResolvedValue({ fileType: FILE_TYPES.AUDIO, metadata: { duration: 1 } }),
+    const storedFile = {
+      name: 'a.mp3',
+      extension: 'mp3',
+      itemType: 'FILE' as const,
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/content/a.mp3',
+      fileType: FILE_TYPES.AUDIO,
+      metadata: { duration: 1 },
     };
-    const imageFileInspector = { inspect: vi.fn() };
-    const videoFileInspector = { inspect: vi.fn() };
-    const unknownFileInspector = { inspect: vi.fn() };
+
+    const audioFileInspector = {
+      canInspect: vi.fn().mockReturnValue(true),
+      inspect: vi.fn().mockResolvedValue(storedFile),
+    };
+    const imageFileInspector = { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() };
+    const videoFileInspector = { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() };
+    const unknownFileInspector = { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() };
+    const filesStorage = {
+      getBuffer: vi.fn().mockResolvedValue(Buffer.from('audio')),
+    };
 
     const router = new FileInspectorRouter({
       audioFileInspector: audioFileInspector,
       imageFileInspector: imageFileInspector,
       videoFileInspector: videoFileInspector,
       unknownFileInspector: unknownFileInspector,
+      filesStorage: filesStorage as never,
     });
 
-    const fileSource = {
-      getBuffer: vi.fn().mockResolvedValue(Buffer.from('audio')),
-      getPath: vi.fn().mockResolvedValue('/tmp/a.mp3'),
-    };
+    const result = await router.inspect({ key: '/tmp/a.mp3' });
 
-    const result = await router.inspect({ fileSource });
-
-    expect(audioFileInspector.inspect).toHaveBeenCalledWith({ fileSource });
-    expect(result).toEqual({ fileType: FILE_TYPES.AUDIO, metadata: { duration: 1 } });
+    expect(filesStorage.getBuffer).toHaveBeenCalledWith({ key: '/tmp/a.mp3' });
+    expect(audioFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.AUDIO });
+    expect(audioFileInspector.inspect).toHaveBeenCalledWith({
+      key: '/tmp/a.mp3',
+      filesStorage: filesStorage,
+      fileSource: expect.objectContaining({
+        getBuffer: expect.any(Function),
+        getPath: expect.any(Function),
+      }),
+    });
+    expect(result).toEqual(storedFile);
   });
 
   it('routes to unknown inspector when file type is not detected', async () => {
@@ -45,24 +64,46 @@ describe('FileInspectorRouter', () => {
     mockedFileTypeFromBuffer.mockResolvedValue(undefined);
 
     const unknownFileInspector = {
-      inspect: vi.fn().mockResolvedValue({ fileType: FILE_TYPES.UNKNOWN }),
+      canInspect: vi.fn().mockReturnValue(true),
+      inspect: vi.fn().mockResolvedValue({
+        name: 'a.bin',
+        extension: 'bin',
+        itemType: 'FILE' as const,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/a.bin',
+        fileType: FILE_TYPES.UNKNOWN,
+      }),
+    };
+    const filesStorage = {
+      getBuffer: vi.fn().mockResolvedValue(Buffer.from('unknown')),
     };
 
     const router = new FileInspectorRouter({
-      audioFileInspector: { inspect: vi.fn() },
-      imageFileInspector: { inspect: vi.fn() },
-      videoFileInspector: { inspect: vi.fn() },
+      audioFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
+      imageFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
+      videoFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
       unknownFileInspector: unknownFileInspector,
+      filesStorage: filesStorage as never,
     });
 
-    const fileSource = {
-      getBuffer: vi.fn().mockResolvedValue(Buffer.from('unknown')),
-      getPath: vi.fn().mockResolvedValue('/tmp/a.bin'),
-    };
+    const result = await router.inspect({ key: '/tmp/a.bin' });
 
-    const result = await router.inspect({ fileSource });
-
-    expect(unknownFileInspector.inspect).toHaveBeenCalledWith({ fileSource });
-    expect(result).toEqual({ fileType: FILE_TYPES.UNKNOWN });
+    expect(unknownFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.UNKNOWN });
+    expect(unknownFileInspector.inspect).toHaveBeenCalledWith({
+      key: '/tmp/a.bin',
+      filesStorage: filesStorage,
+      fileSource: expect.objectContaining({
+        getBuffer: expect.any(Function),
+        getPath: expect.any(Function),
+      }),
+    });
+    expect(result).toEqual({
+      name: 'a.bin',
+      extension: 'bin',
+      itemType: 'FILE',
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/content/a.bin',
+      fileType: FILE_TYPES.UNKNOWN,
+    });
   });
 });

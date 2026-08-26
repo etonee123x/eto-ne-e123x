@@ -29,6 +29,7 @@ export class FolderDataModule extends Module {
       imageFileInspector,
       videoFileInspector,
       unknownFileInspector,
+      filesStorage,
     });
 
     const filesService = new FilesService({ filesStorage, fileInspectorRouter });

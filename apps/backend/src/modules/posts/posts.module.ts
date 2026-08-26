@@ -36,6 +36,7 @@ export class PostsModule extends Module {
       videoFileInspector,
       imageFileInspector,
       unknownFileInspector,
+      filesStorage,
     });
 
     const filesService = new FilesService({ filesStorage, fileInspectorRouter });

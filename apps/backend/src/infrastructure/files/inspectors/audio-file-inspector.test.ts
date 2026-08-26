@@ -7,7 +7,7 @@ vi.mock('music-metadata', () => {
 });
 
 import { parseBuffer } from 'music-metadata';
-import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio-file-inspector';
 
 describe('AudioFileInspector', () => {
@@ -24,8 +24,19 @@ describe('AudioFileInspector', () => {
     } as never);
 
     const inspector = new AudioFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'audio.mp3',
+        extension: 'mp3',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/audio.mp3',
+      }),
+    };
 
     const result = await inspector.inspect({
+      key: '/tmp/audio.mp3',
+      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
@@ -37,6 +48,11 @@ describe('AudioFileInspector', () => {
     });
 
     expect(result).toEqual({
+      name: 'audio.mp3',
+      extension: 'mp3',
+      itemType: ITEM_TYPES.FILE,
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/content/audio.mp3',
       fileType: FILE_TYPES.AUDIO,
       metadata: {
         duration: 2500,
@@ -57,8 +73,19 @@ describe('AudioFileInspector', () => {
     } as never);
 
     const inspector = new AudioFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'audio.mp3',
+        extension: 'mp3',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/audio.mp3',
+      }),
+    };
 
     const result = await inspector.inspect({
+      key: '/tmp/audio.mp3',
+      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
@@ -70,6 +97,11 @@ describe('AudioFileInspector', () => {
     });
 
     expect(result).toEqual({
+      name: 'audio.mp3',
+      extension: 'mp3',
+      itemType: ITEM_TYPES.FILE,
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/content/audio.mp3',
       fileType: FILE_TYPES.AUDIO,
       metadata: {
         duration: 0,

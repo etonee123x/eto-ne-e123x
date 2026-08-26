@@ -1,4 +1,4 @@
-import type { StoredFile } from '../entities/stored-file';
+import type { StoredFile } from '@/shared/domain/stored-file';
 import type { FileInspectorRouter } from '../inspectors/file-inspector-router';
 import type { FilesStorage } from '../storages/files-storage';
 
@@ -14,7 +14,7 @@ export class FilesService {
   async upload(parameters: { buffer: Buffer; key: string }): Promise<StoredFile> {
     await this.filesStorage.put(parameters);
 
-    const storedFile = await this.getStoredFile(parameters);
+    const storedFile = await this.getStoredFile({ key: parameters.key });
 
     return storedFile;
   }
@@ -26,29 +26,12 @@ export class FilesService {
 
     return storedFile;
   }
+
   async exists(parameters: { key: string }): Promise<boolean> {
     return this.filesStorage.exists(parameters);
   }
 
   async getStoredFile(parameters: { key: string }): Promise<StoredFile> {
-    const storedFileBase = await this.filesStorage.getStoredFileBase(parameters);
-
-    const buffer = await this.filesStorage.getBuffer(parameters);
-
-    const fileSource = {
-      getBuffer: async () => {
-        return buffer;
-      },
-      getPath: async () => {
-        return parameters.key;
-      },
-    };
-
-    const inspectedMetadata = await this.fileInspectorRouter.inspect({ fileSource });
-
-    return {
-      ...storedFileBase,
-      ...inspectedMetadata,
-    };
+    return this.fileInspectorRouter.inspect(parameters);
   }
 }

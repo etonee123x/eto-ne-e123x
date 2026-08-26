@@ -7,7 +7,7 @@ vi.mock('sharp', () => {
 });
 
 import sharp from 'sharp';
-import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { ImageFileInspector } from '@/infrastructure/files/inspectors/image-file-inspector';
 
 describe('ImageFileInspector', () => {
@@ -16,8 +16,19 @@ describe('ImageFileInspector', () => {
     vi.mocked(sharp).mockReturnValue({ metadata } as never);
 
     const inspector = new ImageFileInspector();
+    const filesStorage = {
+      getStoredFileBase: vi.fn().mockResolvedValue({
+        name: 'image.png',
+        extension: 'png',
+        itemType: ITEM_TYPES.FILE,
+        _meta: { createdAt: 1, updatedAt: 2 },
+        src: '/content/image.png',
+      }),
+    };
 
     const result = await inspector.inspect({
+      key: '/tmp/image.png',
+      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('image');
@@ -29,6 +40,11 @@ describe('ImageFileInspector', () => {
     });
 
     expect(result).toEqual({
+      name: 'image.png',
+      extension: 'png',
+      itemType: ITEM_TYPES.FILE,
+      _meta: { createdAt: 1, updatedAt: 2 },
+      src: '/content/image.png',
       fileType: FILE_TYPES.IMAGE,
       metadata: {
         width: 640,

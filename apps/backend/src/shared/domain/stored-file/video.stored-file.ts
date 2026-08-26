@@ -1,7 +1,7 @@
 import type { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import type { StoredFileBase } from '../types/stored-file-base';
+import type { StoredFile } from './stored-file';
 
-export interface StoredFileVideo extends StoredFileBase {
+export interface StoredFileVideo extends StoredFile {
   fileType: (typeof FILE_TYPES)['VIDEO'];
   metadata: {
     width: number;
