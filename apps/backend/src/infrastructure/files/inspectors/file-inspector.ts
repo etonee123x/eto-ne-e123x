@@ -3,11 +3,14 @@ import type { AudioFileInspector } from './audio.file-inspector';
 import type { ImageFileInspector } from './image.file-inspector';
 import type { VideoFileInspector } from './video.file-inspector';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import { extensionToFileType } from '../lib/extension-to-file-type.lib';
 import type { UnknownFileInspector } from './unknown.file-inspector';
 import type { FileSource } from '../types/file-source';
 import type { FilesStorage } from '../storages/files-storage';
 import type { StoredFile } from '@/shared/domain/stored-file';
+
+const EXTENSIONS_AUDIO = new Set(['mp3', 'ogg', 'wav']);
+const EXTENSIONS_IMAGE = new Set(['jpg', 'jpeg', 'png']);
+const EXTENSIONS_VIDEO = new Set(['mp4', 'webm']);
 
 interface FileInspectors {
   audioFileInspector: AudioFileInspector;
@@ -17,6 +20,28 @@ interface FileInspectors {
 }
 
 export class FileInspector {
+  private static extensionToFileType(extension: string | null) {
+    if (extension === null) {
+      return FILE_TYPES.UNKNOWN;
+    }
+
+    const extensionLowerCased = extension.toLowerCase();
+
+    if (EXTENSIONS_AUDIO.has(extensionLowerCased)) {
+      return FILE_TYPES.AUDIO;
+    }
+
+    if (EXTENSIONS_IMAGE.has(extensionLowerCased)) {
+      return FILE_TYPES.IMAGE;
+    }
+
+    if (EXTENSIONS_VIDEO.has(extensionLowerCased)) {
+      return FILE_TYPES.VIDEO;
+    }
+
+    return FILE_TYPES.UNKNOWN;
+  }
+
   private readonly filesStorage: FilesStorage;
 
   private readonly fileInspectors: Array<FileInspectors[keyof FileInspectors]>;
@@ -45,7 +70,7 @@ export class FileInspector {
     };
 
     const fileTypeResult = await fileTypeFromBuffer(buffer);
-    const fileType = fileTypeResult ? extensionToFileType(fileTypeResult.ext) : FILE_TYPES.UNKNOWN;
+    const fileType = fileTypeResult ? FileInspector.extensionToFileType(fileTypeResult.ext) : FILE_TYPES.UNKNOWN;
 
     const fileInspector = this.fileInspectors.find((fileInspector) => {
       return fileInspector.canInspect({ fileType });
@@ -57,8 +82,6 @@ export class FileInspector {
 
     return fileInspector.inspect({
       fileSource,
-      key: parameters.key,
-      filesStorage: this.filesStorage,
     });
   }
 }

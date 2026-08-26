@@ -42,7 +42,7 @@ describe('FileInspector', () => {
         imageFileInspector: imageFileInspector,
         videoFileInspector: videoFileInspector,
         unknownFileInspector: unknownFileInspector,
-      },
+      } as never,
       filesStorage: filesStorage as never,
     });
 
@@ -51,8 +51,6 @@ describe('FileInspector', () => {
     expect(filesStorage.getBuffer).toHaveBeenCalledWith({ key: '/tmp/a.mp3' });
     expect(audioFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.AUDIO });
     expect(audioFileInspector.inspect).toHaveBeenCalledWith({
-      key: '/tmp/a.mp3',
-      filesStorage: filesStorage,
       fileSource: expect.objectContaining({
         getBuffer: expect.any(Function),
         getPath: expect.any(Function),
@@ -86,7 +84,7 @@ describe('FileInspector', () => {
         imageFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
         videoFileInspector: { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() },
         unknownFileInspector: unknownFileInspector,
-      },
+      } as never,
 
       filesStorage: filesStorage as never,
     });
@@ -95,8 +93,6 @@ describe('FileInspector', () => {
 
     expect(unknownFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.UNKNOWN });
     expect(unknownFileInspector.inspect).toHaveBeenCalledWith({
-      key: '/tmp/a.bin',
-      filesStorage: filesStorage,
       fileSource: expect.objectContaining({
         getBuffer: expect.any(Function),
         getPath: expect.any(Function),

@@ -25,7 +25,6 @@ describe('VideoFileInspector', () => {
       return {} as never;
     });
 
-    const inspector = new VideoFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'video.mp4',
@@ -35,10 +34,9 @@ describe('VideoFileInspector', () => {
         src: '/content/video.mp4',
       }),
     };
+    const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      key: '/tmp/video.mp4',
-      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('video');
@@ -71,7 +69,6 @@ describe('VideoFileInspector', () => {
       return {} as never;
     });
 
-    const inspector = new VideoFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'video.mp4',
@@ -81,11 +78,10 @@ describe('VideoFileInspector', () => {
         src: '/content/video.mp4',
       }),
     };
+    const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
-        key: '/tmp/video.mp4',
-        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
@@ -106,7 +102,6 @@ describe('VideoFileInspector', () => {
       return {} as never;
     });
 
-    const inspector = new VideoFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'video.mp4',
@@ -116,11 +111,10 @@ describe('VideoFileInspector', () => {
         src: '/content/video.mp4',
       }),
     };
+    const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
-        key: '/tmp/video.mp4',
-        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
@@ -141,7 +135,6 @@ describe('VideoFileInspector', () => {
       return {} as never;
     });
 
-    const inspector = new VideoFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'video.mp4',
@@ -151,11 +144,10 @@ describe('VideoFileInspector', () => {
         src: '/content/video.mp4',
       }),
     };
+    const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
-        key: '/tmp/video.mp4',
-        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('video');

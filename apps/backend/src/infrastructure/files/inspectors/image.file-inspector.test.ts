@@ -15,7 +15,6 @@ describe('ImageFileInspector', () => {
     const metadata = vi.fn().mockResolvedValue({ width: 640, height: 480 });
     vi.mocked(sharp).mockReturnValue({ metadata } as never);
 
-    const inspector = new ImageFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'image.png',
@@ -25,10 +24,9 @@ describe('ImageFileInspector', () => {
         src: '/content/image.png',
       }),
     };
+    const inspector = new ImageFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      key: '/tmp/image.png',
-      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('image');

@@ -3,18 +3,13 @@ import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { StoredFileAudio } from '@/shared/domain/stored-file';
 import { FileInspectorBase } from './base.file-inspector';
 import type { FileSource } from '../types/file-source';
-import type { FilesStorage } from '../storages/files-storage';
 
 export class AudioFileInspector extends FileInspectorBase {
   canInspect(parameters: { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }) {
     return parameters.fileType === FILE_TYPES.AUDIO;
   }
 
-  async inspect(parameters: {
-    fileSource: FileSource;
-    key: string;
-    filesStorage: FilesStorage;
-  }): Promise<StoredFileAudio> {
+  async inspect(parameters: { fileSource: FileSource }): Promise<StoredFileAudio> {
     const base = await super.inspect(parameters);
     const buffer = await parameters.fileSource.getBuffer();
     const audioMetadata = await parseBuffer(buffer);

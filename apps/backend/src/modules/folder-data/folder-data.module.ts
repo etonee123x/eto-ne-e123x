@@ -1,7 +1,7 @@
 import { Module } from '@/shared/module';
 import { FolderDataController } from './controllers/folder-data.controller';
 import { FolderDataService } from './services/folder-data.service';
-import { FilesService } from '@/infrastructure/files/services/files-service';
+import { FilesService } from '@/infrastructure/files/services/files.service';
 import { FsFilesStorage } from '@/infrastructure/files/storages/fs-files-storage';
 import { FileInspector } from '@/infrastructure/files/inspectors/file-inspector';
 import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio.file-inspector';
@@ -19,10 +19,10 @@ export class FolderDataModule extends Module {
 
     const filesStorage = new FsFilesStorage({ filesLocation });
 
-    const audioFileInspector = new AudioFileInspector();
-    const imageFileInspector = new ImageFileInspector();
-    const videoFileInspector = new VideoFileInspector();
-    const unknownFileInspector = new UnknownFileInspector();
+    const audioFileInspector = new AudioFileInspector({ filesStorage });
+    const imageFileInspector = new ImageFileInspector({ filesStorage });
+    const videoFileInspector = new VideoFileInspector({ filesStorage });
+    const unknownFileInspector = new UnknownFileInspector({ filesStorage });
 
     const fileInspector = new FileInspector({
       fileInspectors: {

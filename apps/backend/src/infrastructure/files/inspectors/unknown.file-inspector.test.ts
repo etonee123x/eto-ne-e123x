@@ -5,7 +5,6 @@ import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown.
 
 describe('UnknownFileInspector', () => {
   it('returns unknown file type', async () => {
-    const inspector = new UnknownFileInspector();
     const filesStorage = {
       getStoredFileBase: async () => {
         return {
@@ -17,11 +16,10 @@ describe('UnknownFileInspector', () => {
         };
       },
     };
+    const inspector = new UnknownFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
-        key: '/tmp/unknown.bin',
-        filesStorage: filesStorage as never,
         fileSource: {
           getBuffer: async () => {
             return Buffer.from('unknown');

@@ -2,7 +2,7 @@ import nodePath from 'node:path';
 import nodeFsPromises from 'node:fs/promises';
 import { ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { AppError } from '@/shared/errors/app.error';
-import type { FilesService } from '@/infrastructure/files/services/files-service';
+import type { FilesService } from '@/infrastructure/files/services/files.service';
 import type { StoredFile } from '@/shared/domain/stored-file';
 import type { FilesLocation } from '@/infrastructure/files/locations/files-location';
 

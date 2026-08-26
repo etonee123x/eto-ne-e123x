@@ -23,7 +23,6 @@ describe('AudioFileInspector', () => {
       },
     } as never);
 
-    const inspector = new AudioFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'audio.mp3',
@@ -33,10 +32,9 @@ describe('AudioFileInspector', () => {
         src: '/content/audio.mp3',
       }),
     };
+    const inspector = new AudioFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      key: '/tmp/audio.mp3',
-      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
@@ -72,7 +70,6 @@ describe('AudioFileInspector', () => {
       common: {},
     } as never);
 
-    const inspector = new AudioFileInspector();
     const filesStorage = {
       getStoredFileBase: vi.fn().mockResolvedValue({
         name: 'audio.mp3',
@@ -82,10 +79,9 @@ describe('AudioFileInspector', () => {
         src: '/content/audio.mp3',
       }),
     };
+    const inspector = new AudioFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      key: '/tmp/audio.mp3',
-      filesStorage: filesStorage as never,
       fileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');

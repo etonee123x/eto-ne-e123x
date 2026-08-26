@@ -2,7 +2,7 @@ import { Module } from '@/shared/module';
 import { PostsController } from './controllers/posts.controller';
 import { PostsService } from './services/posts.service';
 import { PostsFsDatabaseRepo } from './repos/posts-fs-database.repo';
-import { FilesService } from '@/infrastructure/files/services/files-service';
+import { FilesService } from '@/infrastructure/files/services/files.service';
 import { FsFilesStorage } from '@/infrastructure/files/storages/fs-files-storage';
 import { FileInspector } from '@/infrastructure/files/inspectors/file-inspector';
 import { AudioFileInspector } from '@/infrastructure/files/inspectors/audio.file-inspector';
@@ -26,10 +26,10 @@ export class PostsModule extends Module {
 
     const filesStorage = new FsFilesStorage({ filesLocation });
 
-    const audioFileInspector = new AudioFileInspector();
-    const videoFileInspector = new VideoFileInspector();
-    const imageFileInspector = new ImageFileInspector();
-    const unknownFileInspector = new UnknownFileInspector();
+    const audioFileInspector = new AudioFileInspector({ filesStorage });
+    const videoFileInspector = new VideoFileInspector({ filesStorage });
+    const imageFileInspector = new ImageFileInspector({ filesStorage });
+    const unknownFileInspector = new UnknownFileInspector({ filesStorage });
 
     const fileInspector = new FileInspector({
       fileInspectors: {

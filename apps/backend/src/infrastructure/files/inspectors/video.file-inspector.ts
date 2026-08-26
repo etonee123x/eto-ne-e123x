@@ -4,18 +4,13 @@ import type { StoredFileVideo } from '@/shared/domain/stored-file';
 import ffprobe from 'ffprobe-static';
 import { FileInspectorBase } from './base.file-inspector';
 import type { FileSource } from '../types/file-source';
-import type { FilesStorage } from '../storages/files-storage';
 
 export class VideoFileInspector extends FileInspectorBase {
   canInspect(parameters: { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }) {
     return parameters.fileType === FILE_TYPES.VIDEO;
   }
 
-  async inspect(parameters: {
-    fileSource: FileSource;
-    key: string;
-    filesStorage: FilesStorage;
-  }): Promise<StoredFileVideo> {
+  async inspect(parameters: { fileSource: FileSource }): Promise<StoredFileVideo> {
     const base = await super.inspect(parameters);
     const path = await parameters.fileSource.getPath();
 
