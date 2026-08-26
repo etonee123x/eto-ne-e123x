@@ -97,8 +97,8 @@ export default defineConfig([
       '@typescript-eslint/no-floating-promises': 'off',
 
       // TODO: фиксить
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
+      // '@typescript-eslint/no-unsafe-assignment': 'off',
+      // '@typescript-eslint/no-unsafe-member-access': 'off',
 
       '@typescript-eslint/no-misused-promises': [
         'error',

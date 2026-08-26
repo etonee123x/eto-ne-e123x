@@ -21,14 +21,19 @@ export class VideoFileInspector extends FileInspectorBase {
           return;
         }
 
-        const parsedJson = JSON.parse(out);
+        const parsedJson = JSON.parse(out) as unknown;
 
-        if (!(parsedJson && typeof parsedJson === 'object' && Array.isArray(parsedJson.streams))) {
+        if (!(
+          parsedJson &&
+          typeof parsedJson === 'object' &&
+          'streams' in parsedJson &&
+          Array.isArray(parsedJson.streams)
+        )) {
           reject(new Error('Invalid ffprobe output'));
           return;
         }
 
-        const stream = (parsedJson.streams as Array<unknown>).find((stream) => {
+        const stream = parsedJson.streams.find((stream: unknown) => {
           return (
             stream &&
             typeof stream === 'object' &&

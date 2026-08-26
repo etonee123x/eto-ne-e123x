@@ -17,11 +17,12 @@ const buildApp = () => {
   });
 
   app.use((...parameters: Parameters<Express.ErrorRequestHandler>) => {
-    const [error, , response] = parameters;
+    const error: unknown = parameters[0];
+    const response = parameters[2];
 
     const errorCode =
       typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string'
-        ? error.code
+        ? (error as { code: string }).code
         : null;
 
     if (errorCode === 'LIMIT_FILE_SIZE') {

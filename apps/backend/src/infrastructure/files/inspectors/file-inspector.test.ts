@@ -52,9 +52,9 @@ describe('FileInspector', () => {
     expect(audioFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.AUDIO });
     expect(audioFileInspector.inspect).toHaveBeenCalledWith({
       storedFileSource: expect.objectContaining({
-        getBuffer: expect.any(Function),
-        getPath: expect.any(Function),
-      }),
+        getBuffer: expect.any(Function) as unknown,
+        getPath: expect.any(Function) as unknown,
+      }) as unknown,
     });
     expect(result).toEqual(storedFile);
   });
@@ -94,9 +94,9 @@ describe('FileInspector', () => {
     expect(unknownFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.UNKNOWN });
     expect(unknownFileInspector.inspect).toHaveBeenCalledWith({
       storedFileSource: expect.objectContaining({
-        getBuffer: expect.any(Function),
-        getPath: expect.any(Function),
-      }),
+        getBuffer: expect.any(Function) as unknown,
+        getPath: expect.any(Function) as unknown,
+      }) as unknown,
     });
     expect(result).toEqual({
       name: 'a.bin',

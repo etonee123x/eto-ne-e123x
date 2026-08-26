@@ -7,7 +7,8 @@ import { Controller } from '@/shared/controller';
 
 export class AuthController extends Controller {
   private login: RequestHandlerTyped<'/auth', 'post'> = (request, response) => {
-    const maybeJwt = request.cookies[KEY_COOKIE_JWT];
+    const cookies = request.cookies as Record<string, unknown>;
+    const maybeJwt = cookies[KEY_COOKIE_JWT];
 
     if (!maybeJwt) {
       throw new AppError(400, 'JWT is not found in request cookies');

@@ -167,11 +167,11 @@ describe('PostsService', () => {
     await service.createPost({ text: 'post', files });
 
     expect(filesService.upload).toHaveBeenNthCalledWith(1, {
-      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/),
+      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/) as never,
       buffer: fileA.buffer,
     });
     expect(filesService.upload).toHaveBeenNthCalledWith(2, {
-      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/),
+      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/) as never,
       buffer: fileB.buffer,
     });
     expect(postsRepo.createPost).toHaveBeenCalledWith({
@@ -203,7 +203,7 @@ describe('PostsService', () => {
     });
 
     expect(filesService.upload).toHaveBeenCalledWith({
-      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/),
+      key: expect.stringMatching(/^[a-f0-9-]+\.mp3$/) as never,
       buffer: Buffer.from('N'),
     });
     expect(filesService.delete).toHaveBeenCalledWith({ key: 'drop.mp3' });

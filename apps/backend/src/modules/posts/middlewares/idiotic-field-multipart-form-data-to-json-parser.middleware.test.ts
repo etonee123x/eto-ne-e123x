@@ -17,7 +17,8 @@ describe('idioticFieldMultipartFormDataToJsonParser', () => {
 
     middleware(request, {} as Express.Response, next);
 
-    expect(request.body.attachments).toEqual([{ name: 'a.mp3' }]);
+    const body = request.body as Record<string, unknown>;
+    expect(body.attachments).toEqual([{ name: 'a.mp3' }]);
     expect(next).toHaveBeenCalledOnce();
   });
 
@@ -51,7 +52,8 @@ describe('idioticFieldMultipartFormDataToJsonParser', () => {
 
     middleware(request, {} as Express.Response, next);
 
-    expect(request.body.attachments).toEqual([{ id: 1 }]);
+    const body = request.body as Record<string, unknown>;
+    expect(body.attachments).toEqual([{ id: 1 }]);
     expect(next).toHaveBeenCalledOnce();
   });
 });

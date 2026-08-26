@@ -17,7 +17,8 @@ export const cookieAuth: Express.RequestHandler = (request, response, next) => {
     throw new AppError(500, 'SECRET_KEY environment variable is not configured');
   }
 
-  const jwt = request.cookies[KEY_COOKIE_JWT];
+  const cookies = request.cookies as Record<string, unknown>;
+  const jwt = cookies[KEY_COOKIE_JWT];
 
   if (typeof jwt !== 'string' || !jwt) {
     response.clearCookie(KEY_COOKIE_JWT, COOKIE_OPTIONS);
@@ -33,7 +34,7 @@ export const cookieAuth: Express.RequestHandler = (request, response, next) => {
       ...COOKIE_OPTIONS,
       expires: typeof payload === 'object' && payload.exp ? new Date(payload.exp * 1000) : undefined,
     });
-    request.cookies[KEY_COOKIE_JWT] = jwt;
+    cookies[KEY_COOKIE_JWT] = jwt;
 
     next();
   } catch {
