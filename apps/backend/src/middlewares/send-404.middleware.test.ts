@@ -2,7 +2,7 @@ import Express from 'express';
 import request from 'supertest';
 import { describe, it } from 'vitest';
 
-import { send404 } from '@/middlewares/send404';
+import { send404 } from '@/middlewares/send-404.middleware';
 
 describe('send404', () => {
   it('sends 404 status for unknown route', async () => {

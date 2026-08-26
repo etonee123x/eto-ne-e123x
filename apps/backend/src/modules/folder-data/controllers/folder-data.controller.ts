@@ -2,7 +2,7 @@ import { requestToUrl } from '@/utils/request-to-url';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
 import { FolderDataService } from '../services/folder-data.service';
 import { Controller } from '@/shared/controller';
-import { AppError } from '@/shared/errors/app-error';
+import { AppError } from '@/shared/errors/app.error';
 
 export class FolderDataController extends Controller {
   private readonly folderDataService: FolderDataService;

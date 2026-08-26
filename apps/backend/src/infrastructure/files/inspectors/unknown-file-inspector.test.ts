@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown-file-inspector';
 
 describe('UnknownFileInspector', () => {

@@ -1,4 +1,4 @@
-import { ITEM_TYPES } from '@/helpers/folder-data';
+import { ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 
 export interface StoredFileBase {
   name: string;

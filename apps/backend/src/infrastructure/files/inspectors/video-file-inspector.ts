@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import type { FileInspector } from './file-inspector';
-import { FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import ffprobe from 'ffprobe-static';
 import type { FileSource } from '../types/file-source';
 import type { StoredFileVideo } from '../entities/stored-file-video';

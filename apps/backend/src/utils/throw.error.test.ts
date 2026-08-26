@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { throwError } from '@/utils/throw-error';
+import { throwError } from '@/utils/throw.error';
 
 describe('throwError', () => {
   it('throws Error with provided message', () => {

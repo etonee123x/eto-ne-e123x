@@ -3,8 +3,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { FILE_TYPES, ITEM_TYPES } from '@/helpers/folder-data';
-import { AppError } from '@/shared/errors/app-error';
+import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import { AppError } from '@/shared/errors/app.error';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
 import { FolderDataService } from '@/modules/folder-data/services/folder-data.service';
 

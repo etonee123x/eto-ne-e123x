@@ -9,7 +9,7 @@ import { ImageFileInspector } from '@/infrastructure/files/inspectors/image-file
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video-file-inspector';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown-file-inspector';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
-import { throwError } from '@/utils/throw-error';
+import { throwError } from '@/utils/throw.error';
 
 export class FolderDataModule extends Module {
   constructor() {

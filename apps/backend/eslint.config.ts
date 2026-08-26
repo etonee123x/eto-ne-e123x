@@ -104,7 +104,20 @@ export default defineConfig([
 
       'unicorn/name-replacements': [
         'error',
-        { allowList: { props: true, Props: true, ref: true, Ref: true, env: true, Env: true } },
+        {
+          allowList: {
+            props: true,
+            Props: true,
+            ref: true,
+            Ref: true,
+            env: true,
+            Env: true,
+            lib: true,
+            Lib: true,
+            src: true,
+            Src: true,
+          },
+        },
       ],
       'unicorn/no-null': 'off',
       'unicorn/no-array-for-each': 'off',

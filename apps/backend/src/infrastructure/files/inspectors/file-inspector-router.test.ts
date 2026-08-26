@@ -7,7 +7,7 @@ vi.mock('file-type', () => {
 });
 
 import { fileTypeFromBuffer } from 'file-type';
-import { FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { FileInspectorRouter } from '@/infrastructure/files/inspectors/file-inspector-router';
 
 describe('FileInspectorRouter', () => {

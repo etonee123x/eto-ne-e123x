@@ -1,17 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { extensionToFileType, FILE_TYPES, ITEM_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import { extensionToFileType } from './extension-to-file-type.lib';
 
-describe('folderData helper', () => {
-  it('exposes file and item type dictionaries', () => {
-    expect(FILE_TYPES.AUDIO).toBe('AUDIO');
-    expect(FILE_TYPES.IMAGE).toBe('IMAGE');
-    expect(FILE_TYPES.VIDEO).toBe('VIDEO');
-    expect(FILE_TYPES.UNKNOWN).toBe('UNKNOWN');
-    expect(ITEM_TYPES.FILE).toBe('FILE');
-    expect(ITEM_TYPES.FOLDER).toBe('FOLDER');
-  });
-
+describe('extension-to-file-type.lib', () => {
   it('returns UNKNOWN for null extension', () => {
     expect(extensionToFileType(null)).toBe(FILE_TYPES.UNKNOWN);
   });

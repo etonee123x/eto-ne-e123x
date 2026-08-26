@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import jsonwebtoken from 'jsonwebtoken';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { throwError } from '@/utils/throw-error';
+import { throwError } from '@/utils/throw.error';
 
 const url = new URL('/en/blog', 'http://localhost:3000');
 

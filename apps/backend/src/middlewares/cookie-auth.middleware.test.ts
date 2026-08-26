@@ -4,8 +4,8 @@ import jsonWebToken from 'jsonwebtoken';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { cookieAuth } from '@/middlewares/cookie-auth';
-import { errorHandler } from '@/middlewares/error-handler';
+import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
 
 const buildApp = () => {
   const app = Express();

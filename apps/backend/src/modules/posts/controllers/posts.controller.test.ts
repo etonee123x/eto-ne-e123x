@@ -5,8 +5,8 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { errorHandler } from '@/middlewares/error-handler';
-import { AppError } from '@/shared/errors/app-error';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
+import { AppError } from '@/shared/errors/app.error';
 import { PostsController } from '@/modules/posts/controllers/posts.controller';
 
 const buildApp = (postsService: unknown) => {

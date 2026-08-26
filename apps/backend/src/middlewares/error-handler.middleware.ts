@@ -1,4 +1,4 @@
-import { AppError } from '@/shared/errors/app-error';
+import { AppError } from '@/shared/errors/app.error';
 import { logger } from '@/shared/logger';
 import type { ErrorRequestHandler } from 'express';
 

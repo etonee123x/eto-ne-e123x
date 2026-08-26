@@ -16,8 +16,8 @@ vi.mock('@/shared/logger', () => {
   };
 });
 
-import { AppError } from '@/shared/errors/app-error';
-import { errorHandler } from '@/middlewares/error-handler';
+import { AppError } from '@/shared/errors/app.error';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
 
 describe('errorHandler', () => {
   it('returns app error status and body for AppError', async () => {

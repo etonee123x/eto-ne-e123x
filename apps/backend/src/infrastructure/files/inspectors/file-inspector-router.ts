@@ -2,7 +2,8 @@ import { fileTypeFromBuffer } from 'file-type';
 import type { AudioFileInspector } from './audio-file-inspector';
 import type { ImageFileInspector } from './image-file-inspector';
 import type { VideoFileInspector } from './video-file-inspector';
-import { extensionToFileType, FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
+import { extensionToFileType } from '../lib/extension-to-file-type.lib';
 import type { UnknownFileInspector } from './unknown-file-inspector';
 import type { FileSource } from '../types/file-source';
 

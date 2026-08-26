@@ -1,7 +1,7 @@
 import jsonWebToken from 'jsonwebtoken';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
 import Express from 'express';
-import { AppError } from '@/shared/errors/app-error';
+import { AppError } from '@/shared/errors/app.error';
 
 export const cookieAuth: Express.RequestHandler = (request, response, next) => {
   const jwt = request.cookies[KEY_COOKIE_JWT] || request.query.jwt;

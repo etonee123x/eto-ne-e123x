@@ -1,8 +1,8 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
 
-import { errorHandler } from '@/middlewares/error-handler';
-import { send404 } from '@/middlewares/send404';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
+import { send404 } from '@/middlewares/send-404.middleware';
 import { nonNullable } from '@/utils/non-nullable';
 import { isNodeEnvDevelopment } from '@/constants/node-env';
 

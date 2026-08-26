@@ -1,6 +1,6 @@
 import type { FileInspector } from './file-inspector';
 import sharp from 'sharp';
-import { FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { FileSource } from '../types/file-source';
 import type { StoredFileImage } from '../entities/stored-file-image';
 import type { StoredFileBase } from '../types/stored-file-base';

@@ -1,21 +1,5 @@
-import { fileTypeValues, itemTypeValues } from '@/types/openapi';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { isNil } from '@/utils/is-nil';
-
-export const FILE_TYPES = Object.fromEntries(
-  fileTypeValues.map((fileType) => {
-    return [fileType, fileType];
-  }),
-) as {
-  [Value in (typeof fileTypeValues)[number]]: Value;
-};
-
-export const ITEM_TYPES = Object.fromEntries(
-  itemTypeValues.map((itemType) => {
-    return [itemType, itemType];
-  }),
-) as {
-  [Value in (typeof itemTypeValues)[number]]: Value;
-};
 
 const EXTENSIONS_AUDIO = new Set(['mp3', 'ogg', 'wav']);
 const EXTENSIONS_IMAGE = new Set(['jpg', 'jpeg', 'png']);

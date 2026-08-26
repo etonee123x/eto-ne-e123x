@@ -1,7 +1,7 @@
-import { cookieAuth } from '@/middlewares/cookie-auth';
+import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { AppError } from '@/shared/errors/app-error';
+import { AppError } from '@/shared/errors/app.error';
 import { Controller } from '@/shared/controller';
 
 export class AuthController extends Controller {

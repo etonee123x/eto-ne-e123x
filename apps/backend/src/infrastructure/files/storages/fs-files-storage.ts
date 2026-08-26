@@ -2,7 +2,7 @@ import nodePath from 'node:path';
 import fsPromises from 'node:fs/promises';
 
 import type { FilesStorage } from './files-storage';
-import { ITEM_TYPES } from '@/helpers/folder-data';
+import { ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { FilesLocation } from '../locations/files-location';
 
 export class FsFilesStorage implements FilesStorage {

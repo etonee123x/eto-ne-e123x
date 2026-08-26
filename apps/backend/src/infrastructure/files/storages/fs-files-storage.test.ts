@@ -3,7 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ITEM_TYPES } from '@/helpers/folder-data';
+import { ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
 import { FsFilesStorage } from '@/infrastructure/files/storages/fs-files-storage';
 

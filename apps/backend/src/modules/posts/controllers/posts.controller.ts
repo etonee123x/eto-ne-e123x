@@ -2,7 +2,7 @@ import { nonNullable } from '@/utils/non-nullable';
 import { requestToUrl } from '@/utils/request-to-url';
 import type { components } from '@/types/openapi';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
-import { cookieAuth } from '@/middlewares/cookie-auth';
+import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
 import { PostsService } from '../services/posts.service';
 import { idioticFieldMultipartFormDataToJsonParser } from '../middlewares/idiotic-field-multipart-form-data-to-json-parser.middleware';
 import { parseFiles } from '../middlewares/parse-files.middleware';

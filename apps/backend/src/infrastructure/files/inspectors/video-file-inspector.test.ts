@@ -13,7 +13,7 @@ vi.mock('ffprobe-static', () => {
 });
 
 import { execFile } from 'node:child_process';
-import { FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video-file-inspector';
 
 describe('VideoFileInspector', () => {

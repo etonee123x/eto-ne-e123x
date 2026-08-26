@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { AppError } from '@/shared/errors/app-error';
+import { AppError } from '@/shared/errors/app.error';
 import { PostsService } from '@/modules/posts/services/posts.service';
 
 interface MockedPostsRepo {

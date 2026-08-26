@@ -12,7 +12,7 @@ import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown-
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
 import { FsDatabaseFile } from '@/infrastructure/fs-database-file';
 import type { Post } from './entities/post.entity';
-import { throwError } from '@/utils/throw-error';
+import { throwError } from '@/utils/throw.error';
 
 export class PostsModule extends Module {
   constructor() {

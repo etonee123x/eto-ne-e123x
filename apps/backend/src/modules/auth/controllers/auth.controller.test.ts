@@ -5,7 +5,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { errorHandler } from '@/middlewares/error-handler';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { AuthController } from '@/modules/auth/controllers/auth.controller';
 
 const buildApp = () => {

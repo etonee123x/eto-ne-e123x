@@ -1,4 +1,4 @@
-import type { FILE_TYPES } from '@/helpers/folder-data';
+import type { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { FileSource } from '../types/file-source';
 
 export interface FileInspector<T extends { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }> {

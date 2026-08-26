@@ -1,9 +1,9 @@
 import nodeFsPromises from 'node:fs/promises';
 import nodePath from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { AppError } from '@/shared/errors/app-error';
+import { AppError } from '@/shared/errors/app.error';
 import { isNil } from '@/utils/is-nil';
-import { throwError } from '@/utils/throw-error';
+import { throwError } from '@/utils/throw.error';
 
 export interface Meta {
   id: string;

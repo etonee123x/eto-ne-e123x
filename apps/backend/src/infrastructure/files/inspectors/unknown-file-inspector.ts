@@ -1,7 +1,7 @@
 import type { StoredFileUnknown } from '../entities/stored-file-unknown';
 import type { StoredFileBase } from '../types/stored-file-base';
 import type { FileInspector } from './file-inspector';
-import { FILE_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 
 export class UnknownFileInspector implements FileInspector<Omit<StoredFileUnknown, keyof StoredFileBase>> {
   async inspect() {

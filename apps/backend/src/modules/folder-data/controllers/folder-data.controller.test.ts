@@ -2,7 +2,7 @@ import Express from 'express';
 import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
-import { errorHandler } from '@/middlewares/error-handler';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { FolderDataController } from '@/modules/folder-data/controllers/folder-data.controller';
 
 const buildApp = (folderDataService: unknown) => {

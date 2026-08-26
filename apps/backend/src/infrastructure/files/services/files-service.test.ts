@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { FILE_TYPES, ITEM_TYPES } from '@/helpers/folder-data';
+import { FILE_TYPES, ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import { FilesService } from '@/infrastructure/files/services/files-service';
 
 describe('FilesService', () => {
