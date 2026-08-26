@@ -1,5 +1,6 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { send404 } from '@/middlewares/send-404.middleware';
@@ -20,6 +21,7 @@ export const createApp = () => {
   const jsonLimit = process.env.JSON_BODY_LIMIT ?? '1mb';
 
   const app = Express() //
+    .use(helmet())
     .use(cookieParser())
     .use(Express.json({ limit: jsonLimit }));
 

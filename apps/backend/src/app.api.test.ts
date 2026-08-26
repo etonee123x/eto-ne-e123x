@@ -18,6 +18,16 @@ describe('API smoke', () => {
     expect(response.body).toMatchObject({ statusCode: 400 });
   });
 
+  it('sets security headers via helmet', async () => {
+    const app = createApp();
+
+    const response = await request(app).get('/__unknown-route');
+
+    expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(response.headers['x-powered-by']).toBeUndefined();
+  });
+
   it('rejects JSON payloads exceeding size limit', async () => {
     const previousLimit = process.env.JSON_BODY_LIMIT;
     process.env.JSON_BODY_LIMIT = '100b';
