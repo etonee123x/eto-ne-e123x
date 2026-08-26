@@ -108,13 +108,13 @@ export class FsDatabaseFile<
     await this.ensureInit();
 
     const rows = await this.read();
-    const row = this.readRowById(parameters);
+    const row = await this.readRowById(parameters);
 
     const updatedRows = rows.filter((row) => {
       return row._meta.id !== parameters.id;
     });
 
-    nodeFsPromises.writeFile(this.pathToFile, JSON.stringify(updatedRows));
+    await nodeFsPromises.writeFile(this.pathToFile, JSON.stringify(updatedRows));
 
     return row;
   }

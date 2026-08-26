@@ -32,3 +32,28 @@ All repository skills live under `.agents/skills/` at the repository root. `skil
 Read `.agents/skills/caveman/SKILL.md` before the first response. Apply its communication rules throughout the session. Use level `ultra`.
 
 Exceptions defined by the skill still apply: code, comments, commits, documentation, and messages intended for third parties use normal prose unless the user explicitly asks to compress them.
+
+## Mandatory ESLint workflow
+
+The project contains two separate applications:
+
+- `apps/frontend`
+- `apps/backend`
+
+After every code modification, run ESLint from the directory of the application you modified.
+
+For frontend changes:
+- Run `cd apps/frontend && npm run lint:fix`
+
+For backend changes:
+- Run `cd apps/backend && npm run lint:fix`
+
+Do not run ESLint from the repository root.
+
+After `lint:fix`:
+- Review the changes made by ESLint.
+- If ESLint issues remain, fix only the remaining issues manually.
+- Run `npm run lint:fix` again after manual fixes.
+- The task is not complete until ESLint passes.
+
+If a task modifies both applications, run `npm run lint:fix` separately in both `apps/frontend` and `apps/backend`.
