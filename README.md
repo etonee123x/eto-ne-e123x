@@ -1,4 +1,4 @@
-# eto-ne-e123x
+# etonee123x
 
 Веб-приложение с публичным frontend на Next.js, API на Express и файловым контентом, который хранится в `infra`.
 
@@ -35,19 +35,10 @@ CLAUDE.md     совместимый entry point, ссылается на AGENTS
 ## Требования
 
 - Node.js с npm.
-- Доступ к GitHub для установки skills.
 
 В корне нет общего `package.json`: зависимости устанавливаются отдельно в каждом приложении.
 
 ## Установка
-
-После клонирования репозитория выполни:
-
-```sh
-cd apps/frontend && npm install
-cd ../backend && npm install
-cd ../openApi && npm install
-```
 
 Skills хранятся локально и исключены из Git. Установи их из корневого `skills-lock.json` командой из корня репозитория:
 
@@ -72,146 +63,21 @@ npx agent-browser --version
 
 После установки можно переходить к настройке окружения и запуску приложений.
 
-## Локальный запуск
-
-### 1. Настроить backend
-
-```sh
-cd apps/backend
-cp .env.example .env
-```
-
-Проверь значения `SECRET_KEY`, `DATABASE_PATH`, `CONTENT_PATH` и `UPLOADS_PATH` в `.env`. Пути из примера рассчитаны на запуск из `apps/backend`.
-
-Запустить API:
-
-```sh
-npm run dev
-```
-
-API будет доступен на `http://localhost:4000`, если в `.env` указан `PORT=4000`.
-
-### 2. Настроить frontend
-
-Для разработки с тестовым сервером:
-
-```sh
-cd apps/frontend
-cp .env.dev.example .env.local
-npm run dev
-```
-
-Для полностью локального API в `apps/frontend/.env.local` замени:
-
-```dotenv
-SERVER_ORIGIN=http://localhost:4000
-```
-
-Frontend будет доступен на `http://localhost:3000`.
-
-В development Next.js проксирует `/api`, `/content` и `/uploads` на `SERVER_ORIGIN` через `next.config.ts`.
-
-## Переменные окружения
-
-### Backend
-
-Файл-шаблон: `apps/backend/.env.example`.
-
-- `PORT` — порт Express-сервера.
-- `SECRET_KEY` — секрет для JWT; используй собственное длинное значение.
-- `DATABASE_PATH` — каталог с runtime-данными.
-- `CONTENT_PATH` — каталог с медиа-контентом.
-- `UPLOADS_PATH` — каталог пользовательских загрузок.
-
-### Frontend
-
-Файлы-шаблоны находятся в `apps/frontend`:
-
-- `.env.dev.example` — development;
-- `.env.test.example` — тестовый стенд;
-- `.env.prod.example` — production.
-
-Основные переменные:
-
-- `NEXT_PUBLIC_API_PREFIX` — публичный prefix API, обычно `/api`.
-- `NEXT_PUBLIC_SITE_URL` — URL текущего сайта.
-- `SERVER_ORIGIN` — origin backend для development proxy.
-- `INTERNAL_API_URL` — внутренний URL API для test/production-сценариев.
-- `APP_MODE` — режим приложения.
-- `BASIC_USER` и `BASIC_PASSWORD` — тестовая basic-аутентификация, если она нужна окружению.
-
-`.env`, `.env.local` и реальные секреты не коммитятся.
-
 ## Ответственность приложений
 
 ### `apps/frontend`
 
-Отвечает за UI, маршрутизацию, локализацию, клиентские запросы и отображение контента. Это Next.js App Router-приложение с локалями `en` и `ru`.
-
-Полезные команды:
-
-```sh
-npm run dev          # development server
-npm run build        # production build
-npm run start        # запуск production build
-npm run typecheck    # TypeScript без emit
-npm run lint         # ESLint
-npm run generate:openapi
-```
+Отвечает за UI, маршрутизацию, локализацию, клиентские запросы и отображение контента.
 
 ### `apps/backend`
 
-Отвечает за HTTP API, авторизацию, posts, browsing файлов и работу с хранилищами. Основные endpoint-группы находятся в `src/endpoints`:
-
-- `auth.ts` — authentication;
-- `posts.ts` — posts CRUD;
-- `folderData.ts` — browsing folders and files.
-
-Полезные команды:
-
-```sh
-npm run dev
-npm run start
-npm run typecheck
-npm run lint
-npm run generate:openapi
-```
+Отвечает за HTTP API, авторизацию, posts, browsing файлов и работу с хранилищами.
 
 В development API также отдаёт `/content` и `/uploads` как static directories.
 
 ### `apps/openApi`
 
-Содержит контракт API. Главный файл — `openapi/openapi.yaml`; отдельные paths и schemas подключаются через `$ref`.
-
-Полезные команды:
-
-```sh
-npm run lint
-npm run bundle
-npm run preview
-```
-
-## Архитектура frontend
-
-Frontend организован по Feature-Sliced Design. Направление зависимостей:
-
-```text
-shared < entities < features < widgets < app
-```
-
-- `shared` — переиспользуемые UI-компоненты, hooks, API utilities и общие функции;
-- `entities` — бизнес-сущности и их API/model/UI;
-- `features` — пользовательские действия и сценарии;
-- `widgets` — крупные составные блоки страниц;
-- `app` — маршруты Next.js, layouts и глобальные настройки.
-
-Правила:
-
-- не импортировать `entities` или `widgets` в `shared`;
-- не смешивать разные slices одного слоя без специального `@x` public API;
-- предпочитать public entry point `index.ts` вместо deep imports;
-- бизнес-логику держать в соответствующей entity, feature или widget;
-- при изменении текста обновлять оба файла в `src/i18n/messages`.
+Содержит контракт API.
 
 ## API и OpenAPI
 
@@ -227,7 +93,7 @@ OpenAPI — источник истины для публичного API.
 
 Генерируемые типы:
 
-- frontend: `apps/frontend/types/openapi.ts`;
+- frontend: `apps/frontend/src/shared/api/openapi.ts`;
 - backend: `apps/backend/src/types/openapi.ts`.
 
 ## Проверки

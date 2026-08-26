@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
-  title: eto-ne-e123x
+  title: etonee123x
   version: 1.0.0
-  description: eto-ne-e123x API
+  description: etonee123x API
   license:
     name: UNLICENSED
     url: UNLICENSED
 servers:
-  - url: https://eto-ne-e123x.dev/api
+  - url: https://etonee123x.dev/api
 security: []
 tags:
   - name: FolderData
