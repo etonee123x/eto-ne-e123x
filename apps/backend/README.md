@@ -100,6 +100,7 @@ multipart upload
 - `DATABASE_PATH` — путь к runtime-данным
 - `CONTENT_PATH` — каталог с медиа-контентом
 - `UPLOADS_PATH` — каталог загруженных пользователем файлов
+- `JSON_BODY_LIMIT` — лимит размера JSON тела запроса (по умолчанию `1mb`)
 
 Файл шаблона: `.env.example`.
 

@@ -17,9 +17,11 @@ export const createApp = () => {
     module.init(router);
   }
 
+  const jsonLimit = process.env.JSON_BODY_LIMIT ?? '1mb';
+
   const app = Express() //
     .use(cookieParser())
-    .use(Express.json());
+    .use(Express.json({ limit: jsonLimit }));
 
   if (isNodeEnvDevelopment) {
     app

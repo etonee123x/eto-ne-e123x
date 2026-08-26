@@ -17,4 +17,18 @@ describe('API smoke', () => {
 
     expect(response.body).toMatchObject({ statusCode: 400 });
   });
+
+  it('rejects JSON payloads exceeding size limit', async () => {
+    const previousLimit = process.env.JSON_BODY_LIMIT;
+    process.env.JSON_BODY_LIMIT = '100b';
+
+    const app = createApp();
+    const largeObject = { text: 'x'.repeat(200) };
+
+    const response = await request(app).post('/auth').send(largeObject).expect(413);
+
+    expect(response.body).toMatchObject({ statusCode: 413 });
+
+    process.env.JSON_BODY_LIMIT = previousLimit;
+  });
 });
