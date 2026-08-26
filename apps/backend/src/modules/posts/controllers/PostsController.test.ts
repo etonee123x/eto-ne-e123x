@@ -1,58 +1,42 @@
 import Express from 'express';
+import cookieParser from 'cookie-parser';
+import jsonWebToken from 'jsonwebtoken';
 import request from 'supertest';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { passThroughMiddleware } = vi.hoisted(() => {
-  return {
-    passThroughMiddleware: (...[, , next]: Parameters<Express.RequestHandler>) => {
-      next();
-    },
-  };
-});
-
-vi.mock('@/middlewares/cookieAuth', () => {
-  return {
-    cookieAuth: passThroughMiddleware,
-  };
-});
-
-vi.mock('@/modules/posts/middlewares/parseFiles', () => {
-  return {
-    parseFiles: (...[request_, , next]: Parameters<Express.RequestHandler>) => {
-      (request_ as unknown as { files: Array<globalThis.Express.Multer.File> }).files = [
-        {
-          originalname: 'upload.bin',
-          buffer: Buffer.from('content'),
-        } as globalThis.Express.Multer.File,
-      ];
-
-      next();
-    },
-  };
-});
-
-vi.mock('@/modules/posts/middlewares/idioticFieldMultipartFormDataToJsonParser', () => {
-  return {
-    idioticFieldMultipartFormDataToJsonParser: () => {
-      return passThroughMiddleware;
-    },
-  };
-});
-
+import { KEY_COOKIE_JWT } from '@/constants/keyCookieJwt';
+import { errorHandler } from '@/middlewares/errorHandler';
+import { AppError } from '@/shared/errors/AppError';
 import { PostsController } from '@/modules/posts/controllers/PostsController';
 
 const buildApp = (postsService: unknown) => {
   const app = Express();
 
+  app.use(cookieParser());
   app.use(Express.json());
 
   const controller = new PostsController(postsService as never);
   app.use(controller.router);
+  app.use(errorHandler);
 
   return app;
 };
 
+const signJwt = () => {
+  return jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), { expiresIn: '1h' });
+};
+
 describe('PostsController', () => {
+  const previousSecretKey = process.env.SECRET_KEY;
+
+  beforeEach(() => {
+    process.env.SECRET_KEY = 'test-secret';
+  });
+
+  afterEach(() => {
+    process.env.SECRET_KEY = previousSecretKey;
+  });
+
   it('maps query params and calls getPosts service', async () => {
     const getPosts = vi.fn(async () => {
       return {
@@ -109,6 +93,7 @@ describe('PostsController', () => {
     const createPost = vi.fn(async () => {
       return { ok: true };
     });
+    const jwt = signJwt();
 
     const app = buildApp({
       getPosts: vi.fn(),
@@ -117,7 +102,12 @@ describe('PostsController', () => {
       deletePostById: vi.fn(),
     });
 
-    await request(app).post('/posts').send({ text: 'hello' }).expect(200);
+    await request(app)
+      .post('/posts')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .field('text', 'hello')
+      .attach('files', Buffer.from('content'), { filename: 'upload.bin', contentType: 'application/octet-stream' })
+      .expect(200);
 
     expect(createPost).toHaveBeenCalledWith({
       text: 'hello',
@@ -133,6 +123,7 @@ describe('PostsController', () => {
     const updatePostById = vi.fn(async () => {
       return { ok: true };
     });
+    const jwt = signJwt();
 
     const app = buildApp({
       getPosts: vi.fn(),
@@ -143,7 +134,13 @@ describe('PostsController', () => {
 
     const attachments = [{ src: '/uploads/file.png', name: 'file.png' }];
 
-    await request(app).patch('/posts/post-7').send({ text: 'updated', attachments }).expect(200);
+    await request(app)
+      .patch('/posts/post-7')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .field('text', 'updated')
+      .field('attachments', JSON.stringify(attachments))
+      .attach('files', Buffer.from('content'), { filename: 'upload.bin', contentType: 'application/octet-stream' })
+      .expect(200);
 
     expect(updatePostById).toHaveBeenCalledWith({
       id: 'post-7',
@@ -161,6 +158,7 @@ describe('PostsController', () => {
     const deletePostById = vi.fn(async () => {
       return { ok: true };
     });
+    const jwt = signJwt();
 
     const app = buildApp({
       getPosts: vi.fn(),
@@ -169,8 +167,26 @@ describe('PostsController', () => {
       deletePostById,
     });
 
-    await request(app).delete('/posts/post-9').expect(200);
+    await request(app)
+      .delete('/posts/post-9')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .expect(200);
 
     expect(deletePostById).toHaveBeenCalledWith({ id: 'post-9' });
+  });
+
+  it('returns app error status when service throws AppError', async () => {
+    const app = buildApp({
+      getPosts: vi.fn(async () => {
+        throw new AppError(404, 'Posts was not found');
+      }),
+      createPost: vi.fn(),
+      updatePostById: vi.fn(),
+      deletePostById: vi.fn(),
+    });
+
+    const response = await request(app).get('/posts?filters[postId]=missing&pageSize=3').expect(404);
+
+    expect(response.body).toMatchObject({ statusCode: 404 });
   });
 });

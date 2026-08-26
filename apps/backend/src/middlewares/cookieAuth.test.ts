@@ -1,128 +1,81 @@
-import type Express from 'express';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('jsonwebtoken', () => {
-  return {
-    default: {
-      verify: vi.fn(),
-    },
-  };
-});
-
+import Express from 'express';
+import cookieParser from 'cookie-parser';
 import jsonWebToken from 'jsonwebtoken';
+import request from 'supertest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { KEY_COOKIE_JWT } from '@/constants/keyCookieJwt';
-import { AppError } from '@/shared/errors/AppError';
 import { cookieAuth } from '@/middlewares/cookieAuth';
+import { errorHandler } from '@/middlewares/errorHandler';
 
-const mockedVerify = vi.mocked(jsonWebToken.verify) as unknown as ReturnType<typeof vi.fn>;
+const buildApp = () => {
+  const app = Express();
+
+  app.use(cookieParser());
+
+  app.get('/protected', cookieAuth, (request_, response) => {
+    response.status(200).json({ jwt: request_.cookies[KEY_COOKIE_JWT] ?? null });
+  });
+
+  app.use(errorHandler);
+
+  return app;
+};
+
+const signJwt = () => {
+  return jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), { expiresIn: '1h' });
+};
 
 describe('cookieAuth', () => {
-  it('throws 401 and clears cookie when jwt is missing', () => {
-    const clearCookie = vi.fn();
-    const setCookie = vi.fn();
+  const previousSecretKey = process.env.SECRET_KEY;
 
-    const request = {
-      cookies: {},
-      query: {},
-    } as Express.Request;
-
-    const response = {
-      clearCookie,
-      cookie: setCookie,
-    } as unknown as Express.Response;
-
-    const next = vi.fn();
-
-    expect(() => {
-      cookieAuth(request, response, next);
-    }).toThrow(AppError);
-
-    expect(clearCookie).toHaveBeenCalledWith(KEY_COOKIE_JWT);
-    expect(next).not.toHaveBeenCalled();
+  beforeEach(() => {
+    process.env.SECRET_KEY = 'test-secret';
   });
 
-  it('verifies jwt from cookie and calls next', () => {
-    mockedVerify.mockReturnValue({ exp: 1_700_000_000 });
-
-    const clearCookie = vi.fn();
-    const setCookie = vi.fn();
-
-    const request = {
-      cookies: { [KEY_COOKIE_JWT]: 'token' },
-      query: {},
-    } as unknown as Express.Request;
-
-    const response = {
-      clearCookie,
-      cookie: setCookie,
-    } as unknown as Express.Response;
-
-    const next = vi.fn();
-
-    cookieAuth(request, response, next);
-
-    expect(mockedVerify).toHaveBeenCalledWith('token', String(process.env.SECRET_KEY));
-    expect(setCookie).toHaveBeenCalledWith(KEY_COOKIE_JWT, 'token', {
-      expires: new Date(1_700_000_000 * 1000),
-      sameSite: 'lax',
-    });
-    expect(request.cookies[KEY_COOKIE_JWT]).toBe('token');
-    expect(next).toHaveBeenCalledOnce();
+  afterEach(() => {
+    process.env.SECRET_KEY = previousSecretKey;
   });
 
-  it('uses jwt from query when cookie absent', () => {
-    mockedVerify.mockReturnValue({});
+  it('returns 401 when jwt is missing', async () => {
+    const app = buildApp();
 
-    const clearCookie = vi.fn();
-    const setCookie = vi.fn();
+    const response = await request(app).get('/protected').expect(401);
 
-    const request = {
-      cookies: {},
-      query: { jwt: 'query-token' },
-    } as unknown as Express.Request;
-
-    const response = {
-      clearCookie,
-      cookie: setCookie,
-    } as unknown as Express.Response;
-
-    const next = vi.fn();
-
-    cookieAuth(request, response, next);
-
-    expect(mockedVerify).toHaveBeenCalledWith('query-token', String(process.env.SECRET_KEY));
-    expect(setCookie).toHaveBeenCalledWith(KEY_COOKIE_JWT, 'query-token', {
-      expires: undefined,
-      sameSite: 'lax',
-    });
-    expect(next).toHaveBeenCalledOnce();
+    expect(response.body).toMatchObject({ statusCode: 401 });
+    expect(response.headers['set-cookie']).toBeDefined();
   });
 
-  it('throws 401 and clears cookie when verify fails', () => {
-    mockedVerify.mockImplementation(() => {
-      throw new Error('bad token');
-    });
+  it('passes request when jwt cookie is valid', async () => {
+    const app = buildApp();
+    const jwt = signJwt();
 
-    const clearCookie = vi.fn();
-    const setCookie = vi.fn();
+    const response = await request(app)
+      .get('/protected')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .expect(200);
 
-    const request = {
-      cookies: { [KEY_COOKIE_JWT]: 'broken' },
-      query: {},
-    } as unknown as Express.Request;
+    expect(response.body).toEqual({ jwt });
+    expect(response.headers['set-cookie']).toBeDefined();
+  });
 
-    const response = {
-      clearCookie,
-      cookie: setCookie,
-    } as unknown as Express.Response;
+  it('accepts jwt from query when cookie is absent', async () => {
+    const app = buildApp();
+    const jwt = signJwt();
 
-    const next = vi.fn();
+    const response = await request(app).get(`/protected?jwt=${jwt}`).expect(200);
 
-    expect(() => {
-      cookieAuth(request, response, next);
-    }).toThrow(AppError);
+    expect(response.body).toEqual({ jwt });
+  });
 
-    expect(clearCookie).toHaveBeenCalledWith(KEY_COOKIE_JWT);
-    expect(next).not.toHaveBeenCalled();
+  it('returns 401 when jwt is invalid', async () => {
+    const app = buildApp();
+
+    const response = await request(app)
+      .get('/protected')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=broken-token`])
+      .expect(401);
+
+    expect(response.body).toMatchObject({ statusCode: 401 });
+    expect(response.headers['set-cookie']).toBeDefined();
   });
 });

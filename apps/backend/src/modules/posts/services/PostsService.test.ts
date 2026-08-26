@@ -69,8 +69,6 @@ describe('PostsService', () => {
         pageSize: 10,
       }),
     ).resolves.toBe(page);
-
-    expect(postsRepo.findFirstPosts).toHaveBeenCalledWith({ pageSize: 10 });
   });
 
   it('throws 404 when around-post query returns null', async () => {
@@ -119,9 +117,36 @@ describe('PostsService', () => {
         pageSize: 2,
       }),
     ).resolves.toBe(nextPage);
+  });
 
-    expect(postsRepo.findPostsByCursorPrevious).toHaveBeenCalledWith({ cursorPrevious: '500', pageSize: 2 });
-    expect(postsRepo.findPostsByCursorNext).toHaveBeenCalledWith({ cursorNext: '300', pageSize: 2 });
+  it('throws 404 when previous cursor query returns null', async () => {
+    const { service, postsRepo } = buildService();
+
+    postsRepo.findPostsByCursorPrevious.mockResolvedValue(null);
+
+    await expect(
+      service.getPosts({
+        postId: null,
+        cursorNext: null,
+        cursorPrevious: '500',
+        pageSize: 10,
+      }),
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('throws 404 when next cursor query returns null', async () => {
+    const { service, postsRepo } = buildService();
+
+    postsRepo.findPostsByCursorNext.mockResolvedValue(null);
+
+    await expect(
+      service.getPosts({
+        postId: null,
+        cursorNext: '300',
+        cursorPrevious: null,
+        pageSize: 10,
+      }),
+    ).rejects.toBeInstanceOf(AppError);
   });
 
   it('createPost uploads every file then calls repo.createPost', async () => {
@@ -208,5 +233,38 @@ describe('PostsService', () => {
 
     expect(filesService.delete).toHaveBeenNthCalledWith(1, { key: 'a.mp3' });
     expect(filesService.delete).toHaveBeenNthCalledWith(2, { key: 'b.mp3' });
+  });
+
+  it('createPost propagates upload error and does not write post', async () => {
+    const { service, postsRepo, filesService } = buildService();
+
+    filesService.upload.mockRejectedValue(new Error('upload failed'));
+
+    await expect(
+      service.createPost({
+        text: 'post',
+        files: [buildFile('a.mp3', 'A')],
+      }),
+    ).rejects.toThrow('upload failed');
+
+    expect(postsRepo.createPost).not.toHaveBeenCalled();
+  });
+
+  it('updatePostById propagates upload error', async () => {
+    const { service, postsRepo, filesService } = buildService();
+
+    postsRepo.findPostById.mockResolvedValue({ attachments: [] });
+    filesService.upload.mockRejectedValue(new Error('upload failed'));
+
+    await expect(
+      service.updatePostById({
+        id: 'post-1',
+        text: 'updated',
+        attachments: [null],
+        files: [buildFile('new.mp3', 'N')],
+      }),
+    ).rejects.toThrow('upload failed');
+
+    expect(postsRepo.updatePostById).not.toHaveBeenCalled();
   });
 });

@@ -1,18 +1,15 @@
-import type Express from 'express';
-import { describe, expect, it, vi } from 'vitest';
+import Express from 'express';
+import request from 'supertest';
+import { describe, it } from 'vitest';
 
 import { send404 } from '@/middlewares/send404';
 
 describe('send404', () => {
-  it('sends 404 status', () => {
-    const sendStatus = vi.fn();
+  it('sends 404 status for unknown route', async () => {
+    const app = Express();
 
-    const response = {
-      sendStatus,
-    } as unknown as Express.Response;
+    app.use(send404);
 
-    send404({} as Express.Request, response, vi.fn());
-
-    expect(sendStatus).toHaveBeenCalledWith(404);
+    await request(app).get('/unknown-route').expect(404);
   });
 });

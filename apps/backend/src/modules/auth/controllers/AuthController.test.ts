@@ -1,32 +1,17 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
+import jsonWebToken from 'jsonwebtoken';
 import request from 'supertest';
-import { describe, expect, it, vi } from 'vitest';
-
-vi.mock('@/middlewares/cookieAuth', () => {
-  return {
-    cookieAuth: (...[, , next]: Parameters<Express.RequestHandler>) => {
-      next();
-    },
-  };
-});
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { KEY_COOKIE_JWT } from '@/constants/keyCookieJwt';
 import { errorHandler } from '@/middlewares/errorHandler';
 import { AuthController } from '@/modules/auth/controllers/AuthController';
 
-const buildApp = (parameters?: { forceNonStringCookie?: boolean }) => {
+const buildApp = () => {
   const app = Express();
 
   app.use(cookieParser());
-
-  if (parameters?.forceNonStringCookie) {
-    app.use((...parameters_) => {
-      const [request_, , next] = parameters_;
-      request_.cookies[KEY_COOKIE_JWT] = { bad: true };
-      next();
-    });
-  }
 
   const controller = new AuthController();
   app.use(controller.router);
@@ -35,38 +20,60 @@ const buildApp = (parameters?: { forceNonStringCookie?: boolean }) => {
   return app;
 };
 
+const signJwt = () => {
+  return jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), { expiresIn: '1h' });
+};
+
 describe('AuthController', () => {
-  it('returns 400 when jwt cookie is missing', async () => {
+  const previousSecretKey = process.env.SECRET_KEY;
+
+  beforeEach(() => {
+    process.env.SECRET_KEY = 'test-secret';
+  });
+
+  afterEach(() => {
+    process.env.SECRET_KEY = previousSecretKey;
+  });
+
+  it('returns 401 when jwt is missing', async () => {
     const app = buildApp();
 
-    const response = await request(app).post('/auth').expect(400);
+    const response = await request(app).post('/auth').expect(401);
 
-    expect(response.body).toMatchObject({ statusCode: 400 });
+    expect(response.body).toMatchObject({ statusCode: 401 });
   });
 
-  it('returns 400 when jwt is not a string', async () => {
-    const app = buildApp({ forceNonStringCookie: true });
-
-    const response = await request(app).post('/auth').expect(400);
-
-    expect(response.body).toMatchObject({ statusCode: 400 });
-  });
-
-  it('returns jwt on successful login', async () => {
+  it('returns 401 when jwt is invalid', async () => {
     const app = buildApp();
 
     const response = await request(app)
       .post('/auth')
-      .set('Cookie', [`${KEY_COOKIE_JWT}=token-value`])
+      .set('Cookie', [`${KEY_COOKIE_JWT}=broken-token`])
+      .expect(401);
+
+    expect(response.body).toMatchObject({ statusCode: 401 });
+  });
+
+  it('returns jwt on successful login', async () => {
+    const app = buildApp();
+    const jwt = signJwt();
+
+    const response = await request(app)
+      .post('/auth')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
       .expect(200);
 
-    expect(response.body).toEqual({ jwt: 'token-value' });
+    expect(response.body).toEqual({ jwt });
   });
 
   it('clears cookie and returns null jwt on logout', async () => {
     const app = buildApp();
+    const jwt = signJwt();
 
-    const response = await request(app).delete('/auth').expect(200);
+    const response = await request(app)
+      .delete('/auth')
+      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
+      .expect(200);
 
     expect(response.body).toEqual({ jwt: null });
     expect(response.headers['set-cookie']).toBeDefined();

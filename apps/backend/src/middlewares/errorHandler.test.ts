@@ -1,4 +1,5 @@
-import type Express from 'express';
+import Express from 'express';
+import request from 'supertest';
 import { describe, expect, it, vi } from 'vitest';
 
 const { loggerError } = vi.hoisted(() => {
@@ -19,46 +20,32 @@ import { AppError } from '@/shared/errors/AppError';
 import { errorHandler } from '@/middlewares/errorHandler';
 
 describe('errorHandler', () => {
-  it('returns app error status and body for AppError', () => {
-    const json = vi.fn();
-    const setStatus = vi.fn(() => {
-      return { json };
+  it('returns app error status and body for AppError', async () => {
+    const app = Express();
+
+    app.get('/posts', () => {
+      throw new AppError(404, 'Not found');
     });
 
-    const request = {
-      originalUrl: '/posts',
-    } as Express.Request;
+    app.use(errorHandler);
 
-    const response = {
-      status: setStatus,
-    } as unknown as Express.Response;
-
-    const appError = new AppError(404, 'Not found');
-
-    errorHandler(appError, request, response, vi.fn());
+    const response = await request(app).get('/posts').expect(404);
 
     expect(loggerError).toHaveBeenCalledWith('/posts Error: Not found');
-    expect(setStatus).toHaveBeenCalledWith(404);
-    expect(json).toHaveBeenCalledWith(appError);
+    expect(response.body).toMatchObject({ statusCode: 404 });
   });
 
-  it('returns 500 generic payload for unknown error', () => {
-    const json = vi.fn();
-    const setStatus = vi.fn(() => {
-      return { json };
+  it('returns 500 generic payload for unknown error', async () => {
+    const app = Express();
+
+    app.get('/posts', () => {
+      throw new Error('boom');
     });
 
-    const request = {
-      originalUrl: '/posts',
-    } as Express.Request;
+    app.use(errorHandler);
 
-    const response = {
-      status: setStatus,
-    } as unknown as Express.Response;
+    const response = await request(app).get('/posts').expect(500);
 
-    errorHandler(new Error('boom'), request, response, vi.fn());
-
-    expect(setStatus).toHaveBeenCalledWith(500);
-    expect(json).toHaveBeenCalledWith({ message: 'Something went wrong :(' });
+    expect(response.body).toEqual({ message: 'Something went wrong :(' });
   });
 });
