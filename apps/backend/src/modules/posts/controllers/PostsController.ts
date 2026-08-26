@@ -71,6 +71,6 @@ export class PostsController extends Controller {
       idioticFieldMultipartFormDataToJsonParser(['attachments']),
       this.updatePostById,
     );
-    this.router.delete('/posts', cookieAuth, this.deletePostById);
+    this.router.delete('/posts/:id', cookieAuth, this.deletePostById);
   }
 }

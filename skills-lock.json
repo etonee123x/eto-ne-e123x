@@ -7,6 +7,12 @@
       "skillPath": "skills/caveman/SKILL.md",
       "computedHash": "2bc96f7c5d3c82f76714d9ec5027ef72518ede527b009a4cab6afd6db339ada9"
     },
+    "expressjs-development": {
+      "source": "manutej/luxor-claude-marketplace",
+      "sourceType": "github",
+      "skillPath": "plugins/luxor-backend-toolkit/skills/expressjs-development/SKILL.md",
+      "computedHash": "79f9dce5dc9912b8a9ad9fd153885554106aef902822650601023c7f41b080af"
+    },
     "feature-sliced-design": {
       "source": "feature-sliced/skills",
       "sourceType": "github",
