@@ -65,19 +65,11 @@ npx agent-browser --version
 
 ## Ответственность приложений
 
-### `apps/frontend`
-
-Отвечает за UI, маршрутизацию, локализацию, клиентские запросы и отображение контента.
-
-### `apps/backend`
-
-Отвечает за HTTP API, авторизацию, posts, browsing файлов и работу с хранилищами.
-
-В development API также отдаёт `/content` и `/uploads` как static directories.
-
-### `apps/openApi`
-
-Содержит контракт API.
+| Приложение | Ответственность |
+| --- | --- |
+| `apps/frontend` | UI, маршрутизация, локализация, клиентские запросы и отображение контента. |
+| `apps/backend` | HTTP API, авторизация, posts, browsing файлов и работа с хранилищами. В development также отдаёт `/content` и `/uploads` как static directories. |
+| `apps/openApi` | Контракт API и формирование схем для frontend/backend. |
 
 ## API и OpenAPI
 
