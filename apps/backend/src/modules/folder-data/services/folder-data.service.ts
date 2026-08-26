@@ -5,6 +5,7 @@ import { AppError } from '@/shared/errors/app.error';
 import type { FilesService } from '@/infrastructure/files/services/files.service';
 import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 import type { FilesLocation } from '@/infrastructure/files/locations/files-location';
+import { resolveSafePath } from '@/utils/safe-path';
 
 const PROHIBITED_ELEMENTS_NAMES = new Set(['.git']);
 
@@ -17,6 +18,7 @@ const getStat = async (parameters: { path: string }) => {
 
   return nodeFsPromises.stat(parameters.path);
 };
+
 export class FolderDataService {
   private readonly filesLocation: FilesLocation;
   private readonly filesService: FilesService;
@@ -27,7 +29,7 @@ export class FolderDataService {
   }
 
   private pathAsRelativeUrlToSystemPath(pathAsRelativeUrl: string) {
-    return nodePath.join(this.filesLocation.fs, pathAsRelativeUrl);
+    return resolveSafePath(this.filesLocation.fs, pathAsRelativeUrl);
   }
 
   async getFolderData(parameters: { pathAsRelativeUrl: string }) {

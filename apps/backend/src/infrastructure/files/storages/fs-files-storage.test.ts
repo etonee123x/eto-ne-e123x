@@ -62,4 +62,16 @@ describe('FsFilesStorage', () => {
     expect(storedFileBase._meta.createdAt).toBeTypeOf('number');
     expect(storedFileBase._meta.updatedAt).toBeTypeOf('number');
   });
+
+  it('rejects keys escaping storage directory', async () => {
+    const baseDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'fs-storage-'));
+    temporaryDirectories.push(baseDirectory);
+
+    const filesLocation = new FilesLocation({ fs: baseDirectory, src: '/content' });
+    const storage = new FsFilesStorage({ filesLocation });
+
+    await expect(storage.getBuffer({ key: '../../etc/passwd' })).rejects.toMatchObject({
+      statusCode: 400,
+    });
+  });
 });

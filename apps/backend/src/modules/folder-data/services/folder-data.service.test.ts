@@ -115,4 +115,18 @@ describe('FolderDataService', () => {
     expect(result.pathDirectory).toBe('album');
     expect(filesService.getStoredFile).toHaveBeenNthCalledWith(1, { key: 'album/song.mp3' });
   });
+
+  it('rejects path traversal attempts with 400', async () => {
+    const rootDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'folder-data-'));
+    temporaryDirectories.push(rootDirectory);
+
+    const service = new FolderDataService({
+      filesLocation: new FilesLocation({ fs: rootDirectory, src: '/content' }),
+      filesService: {} as never,
+    });
+
+    await expect(service.getFolderData({ pathAsRelativeUrl: '../etc/passwd' })).rejects.toMatchObject({
+      statusCode: 400,
+    });
+  });
 });

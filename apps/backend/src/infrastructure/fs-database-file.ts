@@ -108,7 +108,13 @@ export class FsDatabaseFile<
     await this.ensureInit();
 
     const rows = await this.read();
-    const row = await this.readRowById(parameters);
+    const row = rows.find((row) => {
+      return row._meta.id === parameters.id;
+    });
+
+    if (!row) {
+      throw new AppError(404, 'Row not found');
+    }
 
     const updatedRows = rows.filter((row) => {
       return row._meta.id !== parameters.id;

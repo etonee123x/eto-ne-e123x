@@ -1,28 +1,45 @@
+import Express from 'express';
 import jsonWebToken from 'jsonwebtoken';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import Express from 'express';
+import { isNodeEnvProduction } from '@/constants/node-env';
 import { AppError } from '@/shared/errors/app.error';
 
-export const cookieAuth: Express.RequestHandler = (request, response, next) => {
-  const jwt = request.cookies[KEY_COOKIE_JWT] || request.query.jwt;
+const COOKIE_OPTIONS: Express.CookieOptions = {
+  httpOnly: true,
+  secure: isNodeEnvProduction,
+  sameSite: 'lax',
+  path: '/',
+};
 
-  if (typeof jwt !== 'string') {
-    response.clearCookie(KEY_COOKIE_JWT);
+export const cookieAuth: Express.RequestHandler = (request, response, next) => {
+  const secretKey = process.env.SECRET_KEY;
+  if (!secretKey || secretKey === 'undefined' || secretKey.trim() === '') {
+    throw new AppError(500, 'SECRET_KEY environment variable is not configured');
+  }
+
+  const authorizationHeader = request.headers.authorization;
+  const bearerToken = authorizationHeader?.startsWith('Bearer ') ? authorizationHeader.slice(7) : undefined;
+  const jwt = request.cookies[KEY_COOKIE_JWT] || bearerToken;
+
+  if (typeof jwt !== 'string' || !jwt) {
+    response.clearCookie(KEY_COOKIE_JWT, COOKIE_OPTIONS);
     throw new AppError(401);
   }
 
   try {
-    const payload = jsonWebToken.verify(jwt, String(process.env.SECRET_KEY));
+    const payload = jsonWebToken.verify(jwt, secretKey, {
+      algorithms: ['HS256', 'HS384', 'HS512'],
+    });
 
     response.cookie(KEY_COOKIE_JWT, jwt, {
+      ...COOKIE_OPTIONS,
       expires: typeof payload === 'object' && payload.exp ? new Date(payload.exp * 1000) : undefined,
-      sameSite: 'lax',
     });
     request.cookies[KEY_COOKIE_JWT] = jwt;
 
     next();
-  } catch (error) {
-    response.clearCookie(KEY_COOKIE_JWT);
-    throw new AppError(401, String(error));
+  } catch {
+    response.clearCookie(KEY_COOKIE_JWT, COOKIE_OPTIONS);
+    throw new AppError(401);
   }
 };

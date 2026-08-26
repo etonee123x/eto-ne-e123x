@@ -58,13 +58,31 @@ describe('cookieAuth', () => {
     expect(response.headers['set-cookie']).toBeDefined();
   });
 
-  it('accepts jwt from query when cookie is absent', async () => {
+  it('rejects jwt from query and returns 401', async () => {
     const app = buildApp();
     const jwt = signJwt();
 
-    const response = await request(app).get(`/protected?jwt=${jwt}`).expect(200);
+    const response = await request(app).get(`/protected?jwt=${jwt}`).expect(401);
+
+    expect(response.body).toMatchObject({ statusCode: 401 });
+  });
+
+  it('accepts jwt from Authorization Bearer header', async () => {
+    const app = buildApp();
+    const jwt = signJwt();
+
+    const response = await request(app).get('/protected').set('Authorization', `Bearer ${jwt}`).expect(200);
 
     expect(response.body).toEqual({ jwt });
+  });
+
+  it('returns 500 when SECRET_KEY is missing', async () => {
+    delete process.env.SECRET_KEY;
+    const app = buildApp();
+
+    const response = await request(app).get('/protected').expect(500);
+
+    expect(response.body).toMatchObject({ statusCode: 500 });
   });
 
   it('returns 401 when jwt is invalid', async () => {

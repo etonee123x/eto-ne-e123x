@@ -4,6 +4,7 @@ import fsPromises from 'node:fs/promises';
 import type { FilesStorage } from './files-storage';
 import { ITEM_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { FilesLocation } from '../locations/files-location';
+import { resolveSafePath } from '@/utils/safe-path';
 
 export class FsFilesStorage implements FilesStorage {
   private readonly filesLocation: FilesLocation;
@@ -13,29 +14,25 @@ export class FsFilesStorage implements FilesStorage {
   }
 
   private getPath(parameters: { key: string }) {
-    return nodePath.join(this.filesLocation.fs, parameters.key);
+    return resolveSafePath(this.filesLocation.fs, parameters.key);
   }
 
   async getStream(parameters: { key: string }) {
-    const fileHandle = await fsPromises.open(this.getPath(parameters), 'r');
+    const path = this.getPath(parameters);
+    const fileHandle = await fsPromises.open(path, 'r');
     return fileHandle.createReadStream();
   }
 
   async getBuffer(parameters: { key: string }) {
-    return fsPromises.readFile(this.getPath(parameters));
+    const path = this.getPath(parameters);
+    return fsPromises.readFile(path);
   }
 
   async getStoredFileBase(parameters: { key: string }) {
-    const statAwaited = await fsPromises.stat(this.getPath(parameters));
+    const path = this.getPath(parameters);
+    const statAwaited = await fsPromises.stat(path);
 
-    const parsedPath = nodePath.parse(this.getPath(parameters));
-
-    // console.log({
-    //   src: this.filesLocation.src,
-    //   fs: this.filesLocation.fs,
-    //   key: parameters.key,
-    //   res: parameters.key.replace(this.filesLocation.fs, ''),
-    // });
+    const parsedPath = nodePath.parse(path);
 
     const source = [this.filesLocation.src, parameters.key.replace(this.filesLocation.fs, '')].join('');
 
@@ -54,16 +51,19 @@ export class FsFilesStorage implements FilesStorage {
   }
 
   async put(...[parameters]: Parameters<FilesStorage['put']>) {
-    await fsPromises.writeFile(this.getPath(parameters), parameters.buffer);
+    const path = this.getPath(parameters);
+    await fsPromises.writeFile(path, parameters.buffer);
   }
 
   async delete(...[parameters]: Parameters<FilesStorage['delete']>) {
-    return fsPromises.unlink(this.getPath(parameters));
+    const path = this.getPath(parameters);
+    return fsPromises.unlink(path);
   }
 
   async exists(...[parameters]: Parameters<FilesStorage['exists']>) {
     try {
-      await fsPromises.access(this.getPath(parameters));
+      const path = this.getPath(parameters);
+      await fsPromises.access(path);
       return true;
     } catch {
       return false;

@@ -70,6 +70,9 @@ describe('FsDatabaseFile', () => {
 
     expect(deletedRow).toMatchObject({ text: 'updated' });
     await expect(databaseFile.readRowById({ id: createdRow._meta.id })).rejects.toMatchObject({ statusCode: 404 });
+
+    const rawFileContent = await fs.readFile(path.join(databaseDirectory, 'rows.json'), 'utf8');
+    expect(JSON.parse(rawFileContent)).toEqual([]);
   });
 
   it('returns not found errors for unknown rows', async () => {
@@ -81,6 +84,9 @@ describe('FsDatabaseFile', () => {
 
     await expect(databaseFile.readRowById({ id: 'missing' })).rejects.toMatchObject({ statusCode: 404 });
     await expect(databaseFile.writeEntityOrRow('missing', { text: 'value' })).rejects.toMatchObject({
+      statusCode: 404,
+    });
+    await expect(databaseFile.deleteRowById({ id: 'missing' })).rejects.toMatchObject({
       statusCode: 404,
     });
   });

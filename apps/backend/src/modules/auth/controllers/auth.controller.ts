@@ -1,6 +1,7 @@
 import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
+import { isNodeEnvProduction } from '@/constants/node-env';
 import { AppError } from '@/shared/errors/app.error';
 import { Controller } from '@/shared/controller';
 
@@ -20,7 +21,12 @@ export class AuthController extends Controller {
   };
 
   private logout: RequestHandlerTyped<'/auth', 'delete'> = (...[, response]) => {
-    response.clearCookie(KEY_COOKIE_JWT);
+    response.clearCookie(KEY_COOKIE_JWT, {
+      httpOnly: true,
+      secure: isNodeEnvProduction,
+      sameSite: 'lax',
+      path: '/',
+    });
 
     return response.send({ jwt: null });
   };
