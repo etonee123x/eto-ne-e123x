@@ -4,7 +4,7 @@ import type { ImageFileInspector } from './image.file-inspector';
 import type { VideoFileInspector } from './video.file-inspector';
 import { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
 import type { UnknownFileInspector } from './unknown.file-inspector';
-import type { FileSource } from '../types/file-source';
+import type { StoredFileSource } from '../types/stored-file-source';
 import type { FilesStorage } from '../storages/files-storage';
 import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 
@@ -60,7 +60,7 @@ export class FileInspector {
   async inspect(parameters: { key: string }): Promise<StoredFile> {
     const buffer = await this.filesStorage.getBuffer({ key: parameters.key });
 
-    const fileSource: FileSource = {
+    const storedFileSource: StoredFileSource = {
       getBuffer: async () => {
         return buffer;
       },
@@ -81,7 +81,7 @@ export class FileInspector {
     }
 
     return fileInspector.inspect({
-      fileSource,
+      storedFileSource,
     });
   }
 }

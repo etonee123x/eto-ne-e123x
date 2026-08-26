@@ -35,7 +35,7 @@ describe('AudioFileInspector', () => {
     const inspector = new AudioFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      fileSource: {
+      storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
         },
@@ -82,7 +82,7 @@ describe('AudioFileInspector', () => {
     const inspector = new AudioFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      fileSource: {
+      storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
         },

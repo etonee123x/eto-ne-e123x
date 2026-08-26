@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { CursorPage } from '@/shared/types/cursor-page';
 import type { Post } from '../entities/post.entity';
-import { PgRepo } from '@/shared/repos/pg.repo';
+import { PgRepo } from '@/infrastructure/database/pg.repo';
 import type { StoredFile } from '@/shared/domain/stored-file/stored-file';
 import type { PostsRepo } from './posts.repo';
 

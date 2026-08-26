@@ -37,7 +37,7 @@ describe('VideoFileInspector', () => {
     const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      fileSource: {
+      storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('video');
         },
@@ -82,7 +82,7 @@ describe('VideoFileInspector', () => {
 
     await expect(
       inspector.inspect({
-        fileSource: {
+        storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
           },
@@ -115,7 +115,7 @@ describe('VideoFileInspector', () => {
 
     await expect(
       inspector.inspect({
-        fileSource: {
+        storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
           },
@@ -148,7 +148,7 @@ describe('VideoFileInspector', () => {
 
     await expect(
       inspector.inspect({
-        fileSource: {
+        storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
           },

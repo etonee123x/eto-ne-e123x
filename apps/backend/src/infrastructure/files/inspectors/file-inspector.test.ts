@@ -51,7 +51,7 @@ describe('FileInspector', () => {
     expect(filesStorage.getBuffer).toHaveBeenCalledWith({ key: '/tmp/a.mp3' });
     expect(audioFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.AUDIO });
     expect(audioFileInspector.inspect).toHaveBeenCalledWith({
-      fileSource: expect.objectContaining({
+      storedFileSource: expect.objectContaining({
         getBuffer: expect.any(Function),
         getPath: expect.any(Function),
       }),
@@ -93,7 +93,7 @@ describe('FileInspector', () => {
 
     expect(unknownFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.UNKNOWN });
     expect(unknownFileInspector.inspect).toHaveBeenCalledWith({
-      fileSource: expect.objectContaining({
+      storedFileSource: expect.objectContaining({
         getBuffer: expect.any(Function),
         getPath: expect.any(Function),
       }),

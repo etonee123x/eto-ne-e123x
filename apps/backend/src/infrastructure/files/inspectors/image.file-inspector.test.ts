@@ -27,7 +27,7 @@ describe('ImageFileInspector', () => {
     const inspector = new ImageFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
-      fileSource: {
+      storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('image');
         },

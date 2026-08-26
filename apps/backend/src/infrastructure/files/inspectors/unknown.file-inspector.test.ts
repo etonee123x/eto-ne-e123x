@@ -20,7 +20,7 @@ describe('UnknownFileInspector', () => {
 
     await expect(
       inspector.inspect({
-        fileSource: {
+        storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('unknown');
           },

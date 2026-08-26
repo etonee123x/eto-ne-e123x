@@ -1,4 +1,4 @@
-import { FsDatabaseRepo } from '@/shared/repos/fs-database.repo';
+import { FsDatabaseRepo } from '@/infrastructure/database/fs-database.repo';
 import type { PostsRepo } from './posts.repo';
 import type { CursorPage } from '@/shared/types/cursor-page';
 import type { Post } from '../entities/post.entity';

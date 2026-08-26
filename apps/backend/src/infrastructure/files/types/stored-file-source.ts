@@ -1,4 +1,4 @@
-export interface FileSource {
+export interface StoredFileSource {
   getBuffer: () => Promise<Buffer>;
   getPath: () => Promise<string>;
 }
