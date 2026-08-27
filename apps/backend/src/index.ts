@@ -10,9 +10,9 @@ import { appConfig } from '@/config/app-config';
 const app = createApp();
 
 const server = http.createServer(app);
-server.requestTimeout = 30_000;
-server.headersTimeout = 10_000;
-server.keepAliveTimeout = 5000;
+server.requestTimeout = appConfig.requestTimeoutMs;
+server.headersTimeout = appConfig.headersTimeoutMs;
+server.keepAliveTimeout = appConfig.keepAliveTimeoutMs;
 
 server
   .once('listening', () => {

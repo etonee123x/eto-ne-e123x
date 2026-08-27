@@ -9,11 +9,11 @@ class AppConfig {
     return value;
   }
 
-  private static parsePositiveNumber(value: string): number {
-    const numberValue = Number(value);
+  private static getEnvironmentVariablePositiveNumber(name: string): number {
+    const numberValue = Number(this.getRequiredEnvironmentVariable(name));
 
     if (!Number.isFinite(numberValue) || numberValue <= 0) {
-      throw new Error('Value must be a positive number');
+      throw new Error(`${name} must be a positive number`);
     }
 
     return numberValue;
@@ -58,6 +58,18 @@ class AppConfig {
   */
   readonly jsonBodyLimit: string;
   /**
+  Maximum request processing time in milliseconds.
+  */
+  readonly requestTimeoutMs: number;
+  /**
+  Maximum time for receiving request headers in milliseconds.
+  */
+  readonly headersTimeoutMs: number;
+  /**
+  Keep-alive timeout in milliseconds.
+  */
+  readonly keepAliveTimeoutMs: number;
+  /**
   Allowed CORS origins.
   */
   readonly corsOrigins: Array<string>;
@@ -76,13 +88,16 @@ class AppConfig {
 
     this.port = AppConfig.getPortFromEnvironment();
     this.secretKey = AppConfig.getRequiredEnvironmentVariable('SECRET_KEY');
-    this.authTokenMaxLifetimeMinutes = AppConfig.parsePositiveNumber(
-      AppConfig.getRequiredEnvironmentVariable('AUTH_TOKEN_MAX_LIFETIME_MINUTES'),
+    this.authTokenMaxLifetimeMinutes = AppConfig.getEnvironmentVariablePositiveNumber(
+      'AUTH_TOKEN_MAX_LIFETIME_MINUTES',
     );
     this.databasePath = AppConfig.getRequiredEnvironmentVariable('DATABASE_PATH');
     this.contentPath = AppConfig.getRequiredEnvironmentVariable('CONTENT_PATH');
     this.uploadsPath = AppConfig.getRequiredEnvironmentVariable('UPLOADS_PATH');
     this.jsonBodyLimit = AppConfig.getRequiredEnvironmentVariable('JSON_BODY_LIMIT');
+    this.requestTimeoutMs = AppConfig.getEnvironmentVariablePositiveNumber('REQUEST_TIMEOUT_MS');
+    this.headersTimeoutMs = AppConfig.getEnvironmentVariablePositiveNumber('HEADERS_TIMEOUT_MS');
+    this.keepAliveTimeoutMs = AppConfig.getEnvironmentVariablePositiveNumber('KEEP_ALIVE_TIMEOUT_MS');
     this.corsOrigins = corsOrigin.split(',').map((origin) => {
       return origin.trim();
     });

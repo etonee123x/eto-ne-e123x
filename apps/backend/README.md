@@ -106,6 +106,9 @@ multipart upload
 | `UPLOADS_PATH` | Каталог загруженных пользователем файлов | `../../infra/uploads` |
 | `JSON_BODY_LIMIT` | Лимит размера JSON тела запроса | `1mb` |
 | `CORS_ORIGIN` | Разрешённые origin для CORS, список через запятую | `http://localhost:3000` |
+| `REQUEST_TIMEOUT_MS` | Максимальное время обработки запроса в миллисекундах | `30000` |
+| `HEADERS_TIMEOUT_MS` | Максимальное время получения headers в миллисекундах | `10000` |
+| `KEEP_ALIVE_TIMEOUT_MS` | Таймаут keep-alive в миллисекундах | `5000` |
 
 Файл шаблона: `.env.example`.
 

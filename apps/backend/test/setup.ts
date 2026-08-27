@@ -13,3 +13,6 @@ process.env.UPLOADS_PATH = path.resolve(infrastructureDirectory, 'uploads');
 process.env.JSON_BODY_LIMIT = '1mb';
 process.env.CORS_ORIGIN = 'http://localhost:3000';
 process.env.PORT = '0';
+process.env.REQUEST_TIMEOUT_MS = '30000';
+process.env.HEADERS_TIMEOUT_MS = '10000';
+process.env.KEEP_ALIVE_TIMEOUT_MS = '5000';
