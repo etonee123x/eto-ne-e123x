@@ -21,7 +21,7 @@ const buildApp = () => {
 };
 
 const signJwt = () => {
-  return jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), { expiresIn: '1h' });
+  return jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), { expiresIn: '5m' });
 };
 
 describe('AuthController', () => {
@@ -47,6 +47,41 @@ describe('AuthController', () => {
     const app = buildApp();
 
     const response = await request(app).post('/auth').query({ jwt: 'broken-token' }).expect(401);
+
+    expect(response.body).toMatchObject({ statusCode: 401 });
+  });
+
+  it('returns 401 when jwt expires after ten minutes', async () => {
+    const app = buildApp();
+    const jwt = jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), { expiresIn: '11m' });
+
+    const response = await request(app).post('/auth').query({ jwt }).expect(401);
+
+    expect(response.body).toMatchObject({ statusCode: 401 });
+  });
+
+  it('returns 401 when jwt is older than ten minutes', async () => {
+    const app = buildApp();
+    const now = Math.floor(Date.now() / 1000);
+    const jwt = jsonWebToken.sign(
+      { role: 'admin', iat: now - 11 * 60, exp: now + 60 },
+      String(process.env.SECRET_KEY),
+      { noTimestamp: true },
+    );
+
+    const response = await request(app).post('/auth').query({ jwt }).expect(401);
+
+    expect(response.body).toMatchObject({ statusCode: 401 });
+  });
+
+  it('returns 401 when jwt has no issued-at time', async () => {
+    const app = buildApp();
+    const jwt = jsonWebToken.sign({ role: 'admin' }, String(process.env.SECRET_KEY), {
+      expiresIn: '5m',
+      noTimestamp: true,
+    });
+
+    const response = await request(app).post('/auth').query({ jwt }).expect(401);
 
     expect(response.body).toMatchObject({ statusCode: 401 });
   });

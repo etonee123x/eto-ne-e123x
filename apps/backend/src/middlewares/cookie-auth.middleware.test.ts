@@ -2,7 +2,7 @@ import Express from 'express';
 import cookieParser from 'cookie-parser';
 import jsonWebToken from 'jsonwebtoken';
 import request from 'supertest';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
 import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
 import { errorHandler } from '@/middlewares/error-handler.middleware';
@@ -26,16 +26,6 @@ const signJwt = () => {
 };
 
 describe('cookieAuth', () => {
-  const previousSecretKey = process.env.SECRET_KEY;
-
-  beforeEach(() => {
-    process.env.SECRET_KEY = 'test-secret';
-  });
-
-  afterEach(() => {
-    process.env.SECRET_KEY = previousSecretKey;
-  });
-
   it('returns 401 when jwt is missing', async () => {
     const app = buildApp();
 
@@ -65,15 +55,6 @@ describe('cookieAuth', () => {
     const response = await request(app).get(`/protected?jwt=${jwt}`).expect(401);
 
     expect(response.body).toMatchObject({ statusCode: 401 });
-  });
-
-  it('returns 500 when SECRET_KEY is missing', async () => {
-    delete process.env.SECRET_KEY;
-    const app = buildApp();
-
-    const response = await request(app).get('/protected').expect(500);
-
-    expect(response.body).toMatchObject({ statusCode: 500 });
   });
 
   it('returns 401 when jwt is invalid', async () => {

@@ -2,6 +2,7 @@ import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
 import { createApp } from '@/app';
+import { appConfig } from '@/config/app-config';
 
 describe('API smoke', () => {
   it('returns 404 for unknown route', async () => {
@@ -38,8 +39,8 @@ describe('API smoke', () => {
   });
 
   it('rejects JSON payloads exceeding size limit', async () => {
-    const previousLimit = process.env.JSON_BODY_LIMIT;
-    process.env.JSON_BODY_LIMIT = '100b';
+    const previousLimit = appConfig.jsonBodyLimit;
+    (appConfig as unknown as { jsonBodyLimit: string }).jsonBodyLimit = '100b';
 
     const app = createApp();
     const largeObject = { text: 'x'.repeat(200) };
@@ -48,6 +49,6 @@ describe('API smoke', () => {
 
     expect(response.body).toMatchObject({ statusCode: 413 });
 
-    process.env.JSON_BODY_LIMIT = previousLimit;
+    (appConfig as unknown as { jsonBodyLimit: string }).jsonBodyLimit = previousLimit;
   });
 });

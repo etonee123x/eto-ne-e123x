@@ -4,6 +4,7 @@ import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { FsDatabaseFile } from '@/infrastructure/fs-database-file';
+import { appConfig } from '@/config/app-config';
 
 interface Entity {
   text: string;
@@ -21,22 +22,16 @@ describe('FsDatabaseFile', () => {
     temporaryDirectories.length = 0;
   });
 
-  it('throws when DATABASE_PATH is missing', () => {
-    const previousDatabasePath = process.env.DATABASE_PATH;
-
-    delete process.env.DATABASE_PATH;
-
+  it('uses initialized database configuration', () => {
     expect(() => {
       return new FsDatabaseFile<Entity>({ fileName: 'rows.json' });
-    }).toThrow('DATABASE_PATH is not defined');
-
-    process.env.DATABASE_PATH = previousDatabasePath;
+    }).not.toThrow();
   });
 
   it('initializes storage and reads empty array', async () => {
     const databaseDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'fs-db-'));
     temporaryDirectories.push(databaseDirectory);
-    process.env.DATABASE_PATH = databaseDirectory;
+    (appConfig as unknown as { databasePath: string }).databasePath = databaseDirectory;
 
     const databaseFile = new FsDatabaseFile<Entity>({ fileName: 'rows.json' });
 
@@ -47,7 +42,7 @@ describe('FsDatabaseFile', () => {
   it('creates, updates, reads and deletes rows', async () => {
     const databaseDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'fs-db-'));
     temporaryDirectories.push(databaseDirectory);
-    process.env.DATABASE_PATH = databaseDirectory;
+    (appConfig as unknown as { databasePath: string }).databasePath = databaseDirectory;
 
     const databaseFile = new FsDatabaseFile<Entity>({ fileName: 'rows.json' });
 
@@ -78,7 +73,7 @@ describe('FsDatabaseFile', () => {
   it('returns not found errors for unknown rows', async () => {
     const databaseDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'fs-db-'));
     temporaryDirectories.push(databaseDirectory);
-    process.env.DATABASE_PATH = databaseDirectory;
+    (appConfig as unknown as { databasePath: string }).databasePath = databaseDirectory;
 
     const databaseFile = new FsDatabaseFile<Entity>({ fileName: 'rows.json' });
 

@@ -12,11 +12,11 @@ import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown.
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
 import { FsDatabaseFile } from '@/infrastructure/fs-database-file';
 import type { Post } from './entities/post.entity';
-import { throwError } from '@/utils/throw.error';
+import { appConfig } from '@/config/app-config';
 
 export class PostsModule extends Module {
   constructor() {
-    const uploadsPath = process.env.UPLOADS_PATH ?? throwError('UPLOADS_PATH is not defined');
+    const uploadsPath = appConfig.uploadsPath;
 
     const filesLocation = new FilesLocation({ fs: uploadsPath, src: '/uploads' });
 

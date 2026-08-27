@@ -95,13 +95,17 @@ multipart upload
 
 Основные переменные:
 
-- `PORT` — порт сервера
-- `SECRET_KEY` — ключ для JWT
-- `DATABASE_PATH` — путь к runtime-данным
-- `CONTENT_PATH` — каталог с медиа-контентом
-- `UPLOADS_PATH` — каталог загруженных пользователем файлов
-- `JSON_BODY_LIMIT` — лимит размера JSON тела запроса (по умолчанию `1mb`)
-- `CORS_ORIGIN` — разрешенные origin для CORS (список через запятую, по умолчанию `http://localhost:3000`)
+| Переменная | Описание | Пример |
+| --- | --- | --- |
+| `NODE_ENV` | Окружение приложения | `development` |
+| `PORT` | Порт сервера | `4000` |
+| `SECRET_KEY` | Ключ для JWT | `a-string-secret-at-least-256-bits-long` |
+| `AUTH_TOKEN_MAX_LIFETIME_MINUTES` | Максимальный срок жизни JWT в минутах | `10` |
+| `DATABASE_PATH` | Путь к runtime-данным | `../../infra/database` |
+| `CONTENT_PATH` | Каталог с медиа-контентом | `../../infra/content` |
+| `UPLOADS_PATH` | Каталог загруженных пользователем файлов | `../../infra/uploads` |
+| `JSON_BODY_LIMIT` | Лимит размера JSON тела запроса | `1mb` |
+| `CORS_ORIGIN` | Разрешённые origin для CORS, список через запятую | `http://localhost:3000` |
 
 Файл шаблона: `.env.example`.
 

@@ -9,11 +9,11 @@ import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video.file-inspector';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown.file-inspector';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
-import { throwError } from '@/utils/throw.error';
+import { appConfig } from '@/config/app-config';
 
 export class FolderDataModule extends Module {
   constructor() {
-    const contentPath = process.env.CONTENT_PATH ?? throwError('CONTENT_PATH is not defined');
+    const contentPath = appConfig.contentPath;
 
     const filesLocation = new FilesLocation({ fs: contentPath, src: '/content' });
 

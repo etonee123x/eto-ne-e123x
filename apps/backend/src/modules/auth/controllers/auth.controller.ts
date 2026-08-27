@@ -3,7 +3,7 @@ import { rateLimit } from 'express-rate-limit';
 import jsonWebToken from 'jsonwebtoken';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { isNodeEnvProduction } from '@/constants/node-env';
+import { appConfig } from '@/config/app-config';
 import { AppError } from '@/shared/errors/app.error';
 import { Controller } from '@/shared/controller';
 
@@ -19,21 +19,32 @@ export class AuthController extends Controller {
       throw new AppError(400, 'JWT is not a string');
     }
 
-    const secretKey = process.env.SECRET_KEY;
-    if (!secretKey || secretKey === 'undefined' || secretKey.trim() === '') {
-      throw new AppError(500, 'SECRET_KEY environment variable is not configured');
-    }
+    const { secretKey, authTokenMaxLifetimeMinutes, isProduction } = appConfig;
+    const maxAuthTokenLifetimeSeconds = authTokenMaxLifetimeMinutes * 60;
 
     try {
       const payload = jsonWebToken.verify(maybeJwt, secretKey, {
         algorithms: ['HS256', 'HS384', 'HS512'],
       });
+      const issuedAt = typeof payload === 'object' ? payload.iat : undefined;
       const expiration = typeof payload === 'object' ? payload.exp : undefined;
-      const expires = typeof expiration === 'number' ? new Date(expiration * 1000) : undefined;
+      const now = Math.floor(Date.now() / 1000);
+
+      if (
+        typeof issuedAt !== 'number' ||
+        typeof expiration !== 'number' ||
+        issuedAt > now ||
+        now - issuedAt > maxAuthTokenLifetimeSeconds ||
+        expiration - issuedAt > maxAuthTokenLifetimeSeconds
+      ) {
+        throw new AppError(401);
+      }
+
+      const expires = new Date(expiration * 1000);
 
       response.cookie(KEY_COOKIE_JWT, maybeJwt, {
         httpOnly: true,
-        secure: isNodeEnvProduction,
+        secure: isProduction,
         sameSite: 'lax',
         path: '/',
         expires,
@@ -48,7 +59,7 @@ export class AuthController extends Controller {
   private logout: RequestHandlerTyped<'/auth', 'delete'> = (...[, response]) => {
     response.clearCookie(KEY_COOKIE_JWT, {
       httpOnly: true,
-      secure: isNodeEnvProduction,
+      secure: appConfig.isProduction,
       sameSite: 'lax',
       path: '/',
     });

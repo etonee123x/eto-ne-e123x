@@ -3,7 +3,7 @@ import nodePath from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { AppError } from '@/shared/errors/app.error';
 import { isNil } from '@/utils/is-nil';
-import { throwError } from '@/utils/throw.error';
+import { appConfig } from '@/config/app-config';
 
 export interface Meta {
   id: string;
@@ -34,7 +34,7 @@ export class FsDatabaseFile<
   private readonly pathToFile: string;
 
   constructor(parameters: { fileName: `${string}.json` }) {
-    const tableDatabasePath = process.env.DATABASE_PATH ?? throwError('DATABASE_PATH is not defined');
+    const tableDatabasePath = appConfig.databasePath;
 
     this.pathToFile = nodePath.join(tableDatabasePath, parameters.fileName);
   }

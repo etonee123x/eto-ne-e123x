@@ -5,8 +5,7 @@ import helmet from 'helmet';
 
 import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { send404 } from '@/middlewares/send-404.middleware';
-import { nonNullable } from '@/utils/non-nullable';
-import { isNodeEnvDevelopment } from '@/constants/node-env';
+import { appConfig } from '@/config/app-config';
 
 import { PostsModule } from '@/modules/posts/posts.module';
 import { AuthModule } from '@/modules/auth/auth.module';
@@ -20,28 +19,19 @@ export const createApp = () => {
     module.init(router);
   }
 
-  const jsonLimit = process.env.JSON_BODY_LIMIT ?? '1mb';
-  const corsOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((origin) => {
-        return origin.trim();
-      })
-    : ['http://localhost:3000'];
-
   const app = Express() //
     .use(helmet())
     .use(
       cors({
-        origin: corsOrigins,
+        origin: appConfig.corsOrigins,
         credentials: true,
       }),
     )
     .use(cookieParser())
-    .use(Express.json({ limit: jsonLimit }));
+    .use(Express.json({ limit: appConfig.jsonBodyLimit }));
 
-  if (isNodeEnvDevelopment) {
-    app
-      .use('/content', Express.static(nonNullable(process.env.CONTENT_PATH)))
-      .use('/uploads', Express.static(nonNullable(process.env.UPLOADS_PATH)));
+  if (appConfig.isDevelopment) {
+    app.use('/content', Express.static(appConfig.contentPath)).use('/uploads', Express.static(appConfig.uploadsPath));
   }
 
   return app //

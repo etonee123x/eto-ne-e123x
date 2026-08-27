@@ -5,6 +5,7 @@ import http from 'node:http';
 import { logger } from '@/shared/logger';
 import { createApp } from '@/app';
 import { pool } from '@/infrastructure/pool';
+import { appConfig } from '@/config/app-config';
 
 const app = createApp();
 
@@ -15,9 +16,9 @@ server.keepAliveTimeout = 5000;
 
 server
   .once('listening', () => {
-    logger.log(`HTTP server is listening on http://127.0.0.1:${process.env.PORT}`);
+    logger.log(`HTTP server is listening on http://127.0.0.1:${appConfig.port}`);
   })
-  .listen(process.env.PORT)
+  .listen(appConfig.port)
   .on('error', (error) => {
     logger.error(`Failed to start HTTP server due to: ${error.message}`);
     // eslint-disable-next-line unicorn/no-process-exit
