@@ -9,6 +9,9 @@ import { pool } from '@/infrastructure/pool';
 const app = createApp();
 
 const server = http.createServer(app);
+server.requestTimeout = 30_000;
+server.headersTimeout = 10_000;
+server.keepAliveTimeout = 5000;
 
 server
   .once('listening', () => {

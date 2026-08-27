@@ -35,21 +35,18 @@ describe('AuthController', () => {
     process.env.SECRET_KEY = previousSecretKey;
   });
 
-  it('returns 401 when jwt is missing', async () => {
+  it('returns 400 when jwt is missing', async () => {
     const app = buildApp();
 
-    const response = await request(app).post('/auth').expect(401);
+    const response = await request(app).post('/auth').expect(400);
 
-    expect(response.body).toMatchObject({ statusCode: 401 });
+    expect(response.body).toMatchObject({ statusCode: 400 });
   });
 
   it('returns 401 when jwt is invalid', async () => {
     const app = buildApp();
 
-    const response = await request(app)
-      .post('/auth')
-      .set('Cookie', [`${KEY_COOKIE_JWT}=broken-token`])
-      .expect(401);
+    const response = await request(app).post('/auth').query({ jwt: 'broken-token' }).expect(401);
 
     expect(response.body).toMatchObject({ statusCode: 401 });
   });
@@ -58,12 +55,10 @@ describe('AuthController', () => {
     const app = buildApp();
     const jwt = signJwt();
 
-    const response = await request(app)
-      .post('/auth')
-      .set('Cookie', [`${KEY_COOKIE_JWT}=${jwt}`])
-      .expect(200);
+    const response = await request(app).post('/auth').query({ jwt }).expect(200);
 
     expect(response.body).toEqual({ jwt });
+    expect(response.headers['set-cookie']).toBeDefined();
   });
 
   it('clears cookie and returns null jwt on logout', async () => {
