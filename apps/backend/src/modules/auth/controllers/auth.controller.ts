@@ -1,13 +1,14 @@
 import { cookieAuth } from '@/middlewares/cookie-auth.middleware';
 import { rateLimit } from 'express-rate-limit';
-import jsonWebToken from 'jsonwebtoken';
 import type { RequestHandlerTyped } from '@/types/request-handler-typed';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
-import { appConfig } from '@/config/app-config';
 import { AppError } from '@/shared/errors/app.error';
 import { Controller } from '@/shared/controller';
+import { AuthService } from '../services/auth.service';
 
 export class AuthController extends Controller {
+  private readonly authService: AuthService;
+
   private login: RequestHandlerTyped<'/auth', 'post'> = (request, response) => {
     const maybeJwt: unknown = request.query.jwt;
 
@@ -19,56 +20,23 @@ export class AuthController extends Controller {
       throw new AppError(400, 'JWT is not a string');
     }
 
-    const { secretKey, authTokenMaxLifetimeMinutes, isProduction } = appConfig;
-    const maxAuthTokenLifetimeSeconds = authTokenMaxLifetimeMinutes * 60;
+    const { expires } = this.authService.login({ jwt: maybeJwt });
 
-    try {
-      const payload = jsonWebToken.verify(maybeJwt, secretKey, {
-        algorithms: ['HS256', 'HS384', 'HS512'],
-      });
-      const issuedAt = typeof payload === 'object' ? payload.iat : undefined;
-      const expiration = typeof payload === 'object' ? payload.exp : undefined;
-      const now = Math.floor(Date.now() / 1000);
-
-      if (
-        typeof issuedAt !== 'number' ||
-        typeof expiration !== 'number' ||
-        issuedAt > now ||
-        now - issuedAt > maxAuthTokenLifetimeSeconds ||
-        expiration - issuedAt > maxAuthTokenLifetimeSeconds
-      ) {
-        throw new AppError(401);
-      }
-
-      const expires = new Date(expiration * 1000);
-
-      response.cookie(KEY_COOKIE_JWT, maybeJwt, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: 'lax',
-        path: '/',
-        expires,
-      });
-    } catch {
-      throw new AppError(401);
-    }
+    response.cookie(KEY_COOKIE_JWT, maybeJwt, { ...AuthService.cookieOptions, expires });
 
     return response.send({ jwt: maybeJwt });
   };
 
   private logout: RequestHandlerTyped<'/auth', 'delete'> = (...[, response]) => {
-    response.clearCookie(KEY_COOKIE_JWT, {
-      httpOnly: true,
-      secure: appConfig.isProduction,
-      sameSite: 'lax',
-      path: '/',
-    });
+    response.clearCookie(KEY_COOKIE_JWT, AuthService.cookieOptions);
 
     return response.send({ jwt: null });
   };
 
-  constructor() {
+  constructor(parameters: { authService: AuthService }) {
     super();
+
+    this.authService = parameters.authService;
 
     this.router.post(
       '/auth',

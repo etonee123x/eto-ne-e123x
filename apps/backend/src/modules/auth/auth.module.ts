@@ -1,11 +1,14 @@
 import Express from 'express';
 import { AuthController } from './controllers/auth.controller';
+import { AuthService } from './services/auth.service';
 
 export class AuthModule {
   private authController: AuthController;
 
   constructor() {
-    this.authController = new AuthController();
+    const authService = new AuthService();
+
+    this.authController = new AuthController({ authService });
   }
 
   init(router: Express.Router) {

@@ -7,13 +7,14 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { KEY_COOKIE_JWT } from '@/constants/key-cookie-jwt';
 import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { AuthController } from '@/modules/auth/controllers/auth.controller';
+import { AuthService } from '@/modules/auth/services/auth.service';
 
 const buildApp = () => {
   const app = Express();
 
   app.use(cookieParser());
 
-  const controller = new AuthController();
+  const controller = new AuthController({ authService: new AuthService() });
   app.use(controller.router);
   app.use(errorHandler);
 
