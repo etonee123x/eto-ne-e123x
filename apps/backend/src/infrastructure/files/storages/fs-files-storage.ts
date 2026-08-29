@@ -13,7 +13,7 @@ export class FsFilesStorage implements FilesStorage {
     this.filesLocation = parameters.filesLocation;
   }
 
-  private getPath(parameters: { key: string }) {
+  getPath(parameters: { key: string }) {
     return resolveSafePath(this.filesLocation.fs, parameters.key);
   }
 

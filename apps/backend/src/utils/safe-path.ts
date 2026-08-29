@@ -2,13 +2,16 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { AppError } from '@/shared/errors/app.error';
 
+const isOutsideRoot = (relativePath: string): boolean => {
+  return relativePath === '..' || relativePath.startsWith(`..${path.sep}`) || path.isAbsolute(relativePath);
+};
+
 export const resolveSafePath = (baseDirectory: string, userPath: string): string => {
   const root = path.resolve(baseDirectory);
-  const normalizedUserPath = userPath.replaceAll('\\', '/');
-  const target = path.resolve(root, normalizedUserPath);
+  const target = path.resolve(root, userPath.replace(/^\/+/, ''));
   const relative = path.relative(root, target);
 
-  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+  if (userPath.includes('\\') || isOutsideRoot(relative)) {
     throw new AppError(400, 'Invalid path');
   }
 
@@ -25,7 +28,7 @@ export const resolveSafePath = (baseDirectory: string, userPath: string): string
         const realCurrent = fs.realpathSync(current);
         const realRelative = path.relative(realRoot, realCurrent);
 
-        if (realRelative.startsWith('..') || path.isAbsolute(realRelative)) {
+        if (isOutsideRoot(realRelative)) {
           throw new AppError(400, 'Invalid path');
         }
       }

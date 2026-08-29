@@ -85,7 +85,7 @@ describe('FolderDataService', () => {
       }),
     ).toEqual(['song.mp3']);
     expect(filesService.getStoredFile).toHaveBeenCalledWith({
-      key: path.join(rootDirectory, 'album', 'song.mp3'),
+      key: 'album/song.mp3',
     });
   });
 

@@ -39,6 +39,9 @@ describe('AudioFileInspector', () => {
         getBuffer: async () => {
           return Buffer.from('audio');
         },
+        getKey: async () => {
+          return 'audio.mp3';
+        },
         getPath: async () => {
           return '/tmp/audio.mp3';
         },
@@ -85,6 +88,9 @@ describe('AudioFileInspector', () => {
       storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
+        },
+        getKey: async () => {
+          return 'audio.mp3';
         },
         getPath: async () => {
           return '/tmp/audio.mp3';

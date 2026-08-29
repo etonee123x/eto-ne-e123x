@@ -64,8 +64,11 @@ export class FileInspector {
       getBuffer: async () => {
         return buffer;
       },
-      getPath: async () => {
+      getKey: async () => {
         return parameters.key;
+      },
+      getPath: async () => {
+        return this.filesStorage.getPath({ key: parameters.key });
       },
     };
 

@@ -41,6 +41,9 @@ describe('VideoFileInspector', () => {
         getBuffer: async () => {
           return Buffer.from('video');
         },
+        getKey: async () => {
+          return 'video.mp4';
+        },
         getPath: async () => {
           return '/tmp/video.mp4';
         },
@@ -86,6 +89,9 @@ describe('VideoFileInspector', () => {
           getBuffer: async () => {
             return Buffer.from('video');
           },
+          getKey: async () => {
+            return 'video.mp4';
+          },
           getPath: async () => {
             return '/tmp/video.mp4';
           },
@@ -119,6 +125,9 @@ describe('VideoFileInspector', () => {
           getBuffer: async () => {
             return Buffer.from('video');
           },
+          getKey: async () => {
+            return 'video.mp4';
+          },
           getPath: async () => {
             return '/tmp/video.mp4';
           },
@@ -151,6 +160,9 @@ describe('VideoFileInspector', () => {
         storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
+          },
+          getKey: async () => {
+            return 'video.mp4';
           },
           getPath: async () => {
             return '/tmp/video.mp4';

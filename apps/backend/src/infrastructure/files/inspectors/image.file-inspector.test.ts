@@ -31,6 +31,9 @@ describe('ImageFileInspector', () => {
         getBuffer: async () => {
           return Buffer.from('image');
         },
+        getKey: async () => {
+          return 'image.png';
+        },
         getPath: async () => {
           return '/tmp/image.png';
         },
