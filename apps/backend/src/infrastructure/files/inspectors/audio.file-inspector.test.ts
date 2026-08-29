@@ -35,12 +35,10 @@ describe('AudioFileInspector', () => {
     const inspector = new AudioFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
+      key: 'audio.mp3',
       storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
-        },
-        getPath: async () => {
-          return '/tmp/audio.mp3';
         },
       },
     });
@@ -82,12 +80,10 @@ describe('AudioFileInspector', () => {
     const inspector = new AudioFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
+      key: 'audio.mp3',
       storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('audio');
-        },
-        getPath: async () => {
-          return '/tmp/audio.mp3';
         },
       },
     });

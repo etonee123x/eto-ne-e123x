@@ -10,9 +10,9 @@ export class VideoFileInspector extends FileInspectorBase {
     return parameters.fileType === FILE_TYPES.VIDEO;
   }
 
-  async inspect(parameters: { storedFileSource: StoredFileSource }): Promise<StoredFileVideo> {
-    const base = await super.inspect(parameters);
-    const path = await parameters.storedFileSource.getPath();
+  async inspect(parameters: { key: string; storedFileSource: StoredFileSource }): Promise<StoredFileVideo> {
+    const base = await super.inspect({ key: parameters.key });
+    const path = this.filesStorage.getPath({ key: parameters.key });
 
     const specific = await new Promise<Pick<StoredFileVideo, 'metadata'>>((resolve, reject) => {
       execFile(ffprobe.path, ['-v', 'quiet', '-print_format', 'json', '-show_streams', path], (error, out) => {

@@ -8,8 +8,8 @@ export class UnknownFileInspector extends FileInspectorBase {
     return parameters.fileType === FILE_TYPES.UNKNOWN;
   }
 
-  async inspect(parameters: { storedFileSource: StoredFileSource }): Promise<StoredFileUnknown> {
-    const base = await super.inspect(parameters);
+  async inspect(parameters: { key: string; storedFileSource: StoredFileSource }): Promise<StoredFileUnknown> {
+    const base = await super.inspect({ key: parameters.key });
 
     return {
       ...base,

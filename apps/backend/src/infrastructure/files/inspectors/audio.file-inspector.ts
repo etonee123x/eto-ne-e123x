@@ -9,8 +9,8 @@ export class AudioFileInspector extends FileInspectorBase {
     return parameters.fileType === FILE_TYPES.AUDIO;
   }
 
-  async inspect(parameters: { storedFileSource: StoredFileSource }): Promise<StoredFileAudio> {
-    const base = await super.inspect(parameters);
+  async inspect(parameters: { key: string; storedFileSource: StoredFileSource }): Promise<StoredFileAudio> {
+    const base = await super.inspect({ key: parameters.key });
     const buffer = await parameters.storedFileSource.getBuffer();
     const audioMetadata = await parseBuffer(buffer);
 

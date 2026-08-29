@@ -27,12 +27,10 @@ describe('ImageFileInspector', () => {
     const inspector = new ImageFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
+      key: 'image.png',
       storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('image');
-        },
-        getPath: async () => {
-          return '/tmp/image.png';
         },
       },
     });

@@ -51,7 +51,7 @@ export class FolderDataService {
             path: parameters.pathAsRelativeUrl,
             ...(await this.filesService.getStoredFile({ key: parameters.pathAsRelativeUrl })),
           },
-          currentDirectory: nodePath.dirname(parameters.pathAsRelativeUrl),
+          currentDirectory: nodePath.posix.dirname(parameters.pathAsRelativeUrl),
         }
       : {
           file: null,
@@ -87,7 +87,7 @@ export class FolderDataService {
 
         const items = await promiseItems;
 
-        const pathAsRelativeUrl = nodePath.join(currentDirectory, item.name);
+        const pathAsRelativeUrl = nodePath.posix.join(currentDirectory, item.name);
         const systemPath = this.pathAsRelativeUrlToSystemPath(pathAsRelativeUrl);
 
         const statAwaited = await getStat({
@@ -125,7 +125,7 @@ export class FolderDataService {
                 {
                   ...baseItem,
                   path: pathAsRelativeUrl,
-                  ...(await this.filesService.getStoredFile({ key: systemPath })),
+                  ...(await this.filesService.getStoredFile({ key: pathAsRelativeUrl })),
                 },
               ],
             };
