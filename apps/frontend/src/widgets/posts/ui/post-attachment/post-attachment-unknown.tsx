@@ -4,7 +4,7 @@ import { FileQuestionMark } from 'lucide-react';
 export const PostAttachmentUnknown = ({
   attachment,
 }: Readonly<{
-  attachment: components['schemas']['FolderDataItemUnknown'];
+  attachment: components['schemas']['StoredFileUnknown'];
 }>) => {
   return (
     <a href={attachment.src} target="_blank" rel="noopener noreferrer" className="inline-flex items-end gap-0.5">

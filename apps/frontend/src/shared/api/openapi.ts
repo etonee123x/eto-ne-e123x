@@ -4,493 +4,478 @@
  */
 
 export interface paths {
-  '/auth': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/auth": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create auth cookie */
+        post: operations["createAuth"];
+        /** Clear auth cookie */
+        delete: operations["deleteAuth"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /** Create auth cookie */
-    post: operations['createAuth'];
-    /** Clear auth cookie */
-    delete: operations['deleteAuth'];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/posts': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get posts */
+        get: operations["getPosts"];
+        put?: never;
+        /** Create post */
+        post: operations["createPost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get posts */
-    get: operations['getPosts'];
-    put?: never;
-    /** Create post */
-    post: operations['createPost'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/posts/{id}': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/posts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete post by ID */
+        delete: operations["deletePostById"];
+        options?: never;
+        head?: never;
+        /** Update post by ID */
+        patch: operations["updatePostById"];
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Delete post by ID */
-    delete: operations['deletePostById'];
-    options?: never;
-    head?: never;
-    /** Update post by ID */
-    patch: operations['updatePostById'];
-    trace?: never;
-  };
-  '/folder-data': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/folder-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get folder data by path */
+        get: operations["getFolderData"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Get folder data by path */
-    get: operations['getFolderData'];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    Error401: {
-      message: string;
+    schemas: {
+        Error401: {
+            message: string;
+        };
+        /** @enum {string} */
+        ItemType: "FOLDER" | "FILE";
+        StoredFileBase: {
+            name: string;
+            _meta: {
+                createdAt: number;
+                updatedAt: number;
+            };
+            itemType: components["schemas"]["ItemType"] & "FILE";
+            src: string;
+            extension: string | null;
+        };
+        /** @enum {string} */
+        FileType: "IMAGE" | "VIDEO" | "AUDIO" | "UNKNOWN";
+        StoredFileAudio: components["schemas"]["StoredFileBase"] & {
+            fileType: components["schemas"]["FileType"] & "AUDIO";
+            metadata: {
+                album: string | null;
+                bpm: number | null;
+                year: number | null;
+                artists: string[];
+                bitrate: number | null;
+                duration: number;
+            };
+        };
+        StoredFileImage: components["schemas"]["StoredFileBase"] & {
+            fileType: components["schemas"]["FileType"] & "IMAGE";
+            metadata: {
+                width: number;
+                height: number;
+            };
+        };
+        StoredFileVideo: components["schemas"]["StoredFileBase"] & {
+            fileType: components["schemas"]["FileType"] & "VIDEO";
+            metadata: {
+                width: number;
+                height: number;
+            };
+        };
+        StoredFileUnknown: components["schemas"]["StoredFileBase"] & {
+            fileType: components["schemas"]["FileType"] & "UNKNOWN";
+        };
+        StoredFile: components["schemas"]["StoredFileAudio"] | components["schemas"]["StoredFileImage"] | components["schemas"]["StoredFileVideo"] | components["schemas"]["StoredFileUnknown"];
+        PostResponse: {
+            _meta: {
+                id: string;
+                createdAt: number;
+                updatedAt: number;
+            };
+            text: string;
+            attachments: components["schemas"]["StoredFile"][];
+        };
+        PostsResponse: {
+            _meta: {
+                cursorPrevious: number | null;
+                cursorNext: number | null;
+            };
+            rows: components["schemas"]["PostResponse"][];
+        };
+        Error400: {
+            message: string;
+        };
+        PostCreateRequest: {
+            files: string[];
+            text: string;
+        };
+        Error404: {
+            message: string;
+        };
+        PostUpdateRequest: {
+            text: string;
+            attachments: (components["schemas"]["StoredFile"] | null)[];
+            files: string[];
+        };
+        FolderDataItemBase: {
+            name: string;
+            _meta: {
+                createdAt: number;
+                updatedAt: number;
+            };
+            path: string;
+        };
+        FolderDataItemFolder: components["schemas"]["FolderDataItemBase"] & {
+            itemType: components["schemas"]["ItemType"] & "FOLDER";
+        };
+        FolderDataItemAudio: components["schemas"]["StoredFileAudio"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemImage: components["schemas"]["StoredFileImage"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemVideo: components["schemas"]["StoredFileVideo"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemUnknown: components["schemas"]["StoredFileUnknown"] & components["schemas"]["FolderDataItemBase"];
+        FolderDataItemFile: components["schemas"]["FolderDataItemAudio"] | components["schemas"]["FolderDataItemImage"] | components["schemas"]["FolderDataItemVideo"] | components["schemas"]["FolderDataItemUnknown"];
+        FolderDataResponse: {
+            folders: components["schemas"]["FolderDataItemFolder"][];
+            files: components["schemas"]["FolderDataItemFile"][];
+            file: components["schemas"]["FolderDataItemFile"] | null;
+            pathDirectory: string;
+        };
     };
-    FolderDataItemMeta: {
-      createdAt: number;
-      updatedAt: number;
-    };
-    FolderDataItemBase: {
-      name: string;
-      path: string;
-      _meta: components['schemas']['FolderDataItemMeta'];
-    };
-    /** @enum {string} */
-    ItemType: 'FOLDER' | 'FILE';
-    FolderDataItemFileBase: components['schemas']['FolderDataItemBase'] & {
-      itemType: components['schemas']['ItemType'] & 'FILE';
-      src: string;
-    };
-    /** @enum {string} */
-    FileType: 'IMAGE' | 'VIDEO' | 'AUDIO' | 'UNKNOWN';
-    FolderDataItemAudio: components['schemas']['FolderDataItemFileBase'] & {
-      fileType: components['schemas']['FileType'] & 'AUDIO';
-      metadata: {
-        album: string | null;
-        bpm: number | null;
-        year: number | null;
-        artists: Array<string>;
-        bitrate: number | null;
-        duration: number | null;
-      };
-    };
-    FolderDataSize: {
-      width: number;
-      height: number;
-    };
-    FolderDataItemImage: components['schemas']['FolderDataItemFileBase'] & {
-      fileType: components['schemas']['FileType'] & 'IMAGE';
-      metadata: components['schemas']['FolderDataSize'];
-    };
-    FolderDataItemVideo: components['schemas']['FolderDataItemFileBase'] & {
-      fileType: components['schemas']['FileType'] & 'VIDEO';
-      metadata: components['schemas']['FolderDataSize'];
-    };
-    FolderDataItemUnknown: components['schemas']['FolderDataItemFileBase'] & {
-      fileType: components['schemas']['FileType'] & 'UNKNOWN';
-    };
-    FolderDataItemFile:
-      | components['schemas']['FolderDataItemAudio']
-      | components['schemas']['FolderDataItemImage']
-      | components['schemas']['FolderDataItemVideo']
-      | components['schemas']['FolderDataItemUnknown'];
-    PostResponse: {
-      _meta: {
-        id: string;
-        createdAt: number;
-        updatedAt: number;
-      };
-      text: string;
-      attachments: Array<components['schemas']['FolderDataItemFile']>;
-    };
-    PostsResponse: {
-      _meta: {
-        cursorPrevious: number | null;
-        cursorNext: number | null;
-      };
-      rows: Array<components['schemas']['PostResponse']>;
-    };
-    Error400: {
-      message: string;
-    };
-    PostCreateRequest: {
-      files: Array<string>;
-      text: string;
-    };
-    Error404: {
-      message: string;
-    };
-    PostUpdateRequest: {
-      text: string;
-      attachments: Array<components['schemas']['FolderDataItemFile'] | null>;
-      files: Array<string>;
-    };
-    FolderDataItemFolder: components['schemas']['FolderDataItemBase'] & {
-      itemType: components['schemas']['ItemType'] & 'FOLDER';
-    };
-    FolderDataResponse: {
-      folders: Array<components['schemas']['FolderDataItemFolder']>;
-      files: Array<components['schemas']['FolderDataItemFile']>;
-      file: components['schemas']['FolderDataItemFile'] | null;
-      pathDirectory: string;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  createAuth: {
-    parameters: {
-      query?: {
-        /** @description JWT token to set in auth cookie */
-        jwt?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            jwt: string;
-          };
-        };
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error401'];
-        };
-      };
-    };
-  };
-  deleteAuth: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': {
-            /** @enum {string|null} */
-            jwt: null;
-          };
-        };
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error401'];
-        };
-      };
-    };
-  };
-  getPosts: {
-    parameters: {
-      query?: {
-        filters?:
-          | {
-              /** @description Cursor for the next page */
-              cursorNext?: number;
-            }
-          | {
-              /** @description Cursor for the previous page */
-              cursorPrevious?: number;
-            }
-          | {
-              /** @description ID of the post */
-              postId?: string;
+    createAuth: {
+        parameters: {
+            query?: {
+                /** @description JWT token to set in auth cookie */
+                jwt?: string;
             };
-        /** @description Items per page */
-        pageSize?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        jwt: string;
+                    };
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error401"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    deleteAuth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          'application/json': components['schemas']['PostsResponse'];
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {string|null} */
+                        jwt: null;
+                    };
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error401"];
+                };
+            };
         };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error400'];
-        };
-      };
     };
-  };
-  createPost: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    getPosts: {
+        parameters: {
+            query?: {
+                filters?: {
+                    /** @description Cursor for the next page */
+                    cursorNext?: number;
+                } | {
+                    /** @description Cursor for the previous page */
+                    cursorPrevious?: number;
+                } | {
+                    /** @description ID of the post */
+                    postId?: string;
+                };
+                /** @description Items per page */
+                pageSize?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostsResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error400"];
+                };
+            };
+        };
     };
-    requestBody: {
-      content: {
-        'multipart/form-data': components['schemas']['PostCreateRequest'];
-      };
+    createPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PostCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error400"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error401"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Created */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    deletePostById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
         };
-        content: {
-          'application/json': components['schemas']['PostResponse'];
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostResponse"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error401"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error404"];
+                };
+            };
         };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error400'];
-        };
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error401'];
-        };
-      };
     };
-  };
-  deletePostById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
+    updatePostById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["PostUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostResponse"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error400"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error401"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error404"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    getFolderData: {
+        parameters: {
+            query: {
+                /** @description Path inside folder-data (e.g. /path/to/folder) */
+                path: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          'application/json': components['schemas']['PostResponse'];
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FolderDataResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error404"];
+                };
+            };
         };
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error401'];
-        };
-      };
-      /** @description Not Found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error404'];
-        };
-      };
     };
-  };
-  updatePostById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'multipart/form-data': components['schemas']['PostUpdateRequest'];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['PostResponse'];
-        };
-      };
-      /** @description Bad Request */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error400'];
-        };
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error401'];
-        };
-      };
-      /** @description Not Found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error404'];
-        };
-      };
-    };
-  };
-  getFolderData: {
-    parameters: {
-      query: {
-        /** @description Path inside folder-data (e.g. path/to/folder) */
-        path: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['FolderDataResponse'];
-        };
-      };
-      /** @description Not Found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['Error404'];
-        };
-      };
-    };
-  };
 }
 type FlattenedDeepRequired<T> = {
-  [K in keyof T]-?: FlattenedDeepRequired<
-    T[K] extends Array<unknown> | undefined | null ? Extract<T[K], Array<unknown>>[number] : T[K]
-  >;
+    [K in keyof T]-?: FlattenedDeepRequired<T[K] extends unknown[] | undefined | null ? Extract<T[K], unknown[]>[number] : T[K]>;
 };
-type ReadonlyArray<T> = [Exclude<T, undefined>] extends [Array<unknown>]
-  ? Readonly<Exclude<T, undefined>>
-  : Readonly<Array<Exclude<T, undefined>>>;
-export const itemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>['schemas']['ItemType']> = [
-  'FOLDER',
-  'FILE',
-];
-export const folderDataItemFileBaseItemTypeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>['schemas']['FolderDataItemFileBase']['itemType']
-> = ['FILE'];
-export const fileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>['schemas']['FileType']> = [
-  'IMAGE',
-  'VIDEO',
-  'AUDIO',
-  'UNKNOWN',
-];
-export const folderDataItemAudioFileTypeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>['schemas']['FolderDataItemAudio']['fileType']
-> = ['AUDIO'];
-export const folderDataItemImageFileTypeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>['schemas']['FolderDataItemImage']['fileType']
-> = ['IMAGE'];
-export const folderDataItemVideoFileTypeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>['schemas']['FolderDataItemVideo']['fileType']
-> = ['VIDEO'];
-export const folderDataItemUnknownFileTypeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>['schemas']['FolderDataItemUnknown']['fileType']
-> = ['UNKNOWN'];
-export const folderDataItemFolderItemTypeValues: ReadonlyArray<
-  FlattenedDeepRequired<components>['schemas']['FolderDataItemFolder']['itemType']
-> = ['FOLDER'];
+type ReadonlyArray<T> = [
+    Exclude<T, undefined>
+] extends [
+    unknown[]
+] ? Readonly<Exclude<T, undefined>> : Readonly<Exclude<T, undefined>[]>;
+export const itemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["ItemType"]> = ["FOLDER", "FILE"];
+export const storedFileBaseItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileBase"]["itemType"]> = ["FILE"];
+export const fileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FileType"]> = ["IMAGE", "VIDEO", "AUDIO", "UNKNOWN"];
+export const storedFileAudioFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileAudio"]["fileType"]> = ["AUDIO"];
+export const storedFileImageFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileImage"]["fileType"]> = ["IMAGE"];
+export const storedFileVideoFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileVideo"]["fileType"]> = ["VIDEO"];
+export const storedFileUnknownFileTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["StoredFileUnknown"]["fileType"]> = ["UNKNOWN"];
+export const folderDataItemFolderItemTypeValues: ReadonlyArray<FlattenedDeepRequired<components>["schemas"]["FolderDataItemFolder"]["itemType"]> = ["FOLDER"];

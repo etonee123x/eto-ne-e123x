@@ -1,0 +1,5 @@
+oneOf:
+  - $ref: ./StoredFileAudio.yaml
+  - $ref: ./StoredFileImage.yaml
+  - $ref: ./StoredFileVideo.yaml
+  - $ref: ./StoredFileUnknown.yaml

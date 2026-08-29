@@ -47,7 +47,7 @@ const ExplorerElementFile = dynamic(() => {
 const folderDataItemToHref = (
   folderDataItem: components['schemas']['FolderDataItemFolder'] | components['schemas']['FolderDataItemFile'],
 ) => {
-  return ['/explorer', folderDataItem.path].join('/');
+  return ['/explorer', folderDataItem.path].join('');
 };
 
 export const generateMetadata = async ({
@@ -59,7 +59,7 @@ export const generateMetadata = async ({
   const intlListFormat = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' });
 
   const queryClient = new QueryClient();
-  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/')));
+  const folderData = await queryClient.query(getFolderDataQueryOptions('/' + segments.join('/')));
 
   const navigationItems = pathDirectoryToNavigationItems(folderData.pathDirectory);
   const folderName = navigationItems.at(-1)?.text;
@@ -183,7 +183,7 @@ export default async function Explorer({ params }: Readonly<PageProps<'/[locale]
   const t = await getTranslations('Explorer');
 
   const queryClient = new QueryClient();
-  const folderData = await queryClient.fetchQuery(getFolderDataQueryOptions('/' + segments.join('/'))).catch(() => {
+  const folderData = await queryClient.query(getFolderDataQueryOptions('/' + segments.join('/'))).catch(() => {
     return null;
   });
   if (!folderData) {

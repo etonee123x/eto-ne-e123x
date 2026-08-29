@@ -27,7 +27,7 @@ const isAttachmentGalleryItem = (attachment: components['schemas']['PostResponse
 };
 
 const attachmentGalleryItemToGalleryItem = (
-  attachment: components['schemas']['FolderDataItemVideo'] | components['schemas']['FolderDataItemImage'],
+  attachment: components['schemas']['StoredFileVideo'] | components['schemas']['StoredFileImage'],
 ) => {
   return {
     src: attachment.src,
@@ -51,7 +51,7 @@ const Post = ({
 }: {
   post: components['schemas']['PostResponse'];
   selectedPostId: components['schemas']['PostResponse']['_meta']['id'] | null;
-  onClickAttachment: (attachment: components['schemas']['FolderDataItemFile']) => void;
+  onClickAttachment: (attachment: components['schemas']['StoredFile']) => void;
 }) => {
   const t = useTranslations('Post');
 

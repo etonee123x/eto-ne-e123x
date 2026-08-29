@@ -45,7 +45,7 @@ export const generateMetadata = async ({
   }
 
   const queryClient = new QueryClient();
-  const posts = await queryClient.fetchInfiniteQuery(infiniteQueryOptionsGetPosts(postId));
+  const posts = await queryClient.infiniteQuery(infiniteQueryOptionsGetPosts(postId));
 
   const post = posts.pages
     .flatMap((page) => {
@@ -135,7 +135,7 @@ export default async function Blog({ params }: Readonly<PageProps<'/[locale]/blo
   const postId = postIdAsSegmentsCrutchWFT?.[0] ?? null;
 
   const queryClient = new QueryClient();
-  const posts = await queryClient.fetchInfiniteQuery(infiniteQueryOptionsGetPosts(postId)).catch(() => {
+  const posts = await queryClient.infiniteQuery(infiniteQueryOptionsGetPosts(postId)).catch(() => {
     return undefined;
   });
   if (!posts) {

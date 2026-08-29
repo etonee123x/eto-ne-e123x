@@ -22,7 +22,7 @@ export const GalleryProvider = async ({
 
   const folderData = isNil(explorerPath)
     ? null
-    : await new QueryClient().fetchQuery(getFolderDataQueryOptions(explorerPath || '/')).catch(() => {
+    : await new QueryClient().query(getFolderDataQueryOptions(explorerPath || '/')).catch(() => {
         return null;
       });
 

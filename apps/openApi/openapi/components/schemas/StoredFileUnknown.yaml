@@ -1,0 +1,11 @@
+allOf:
+  - $ref: ./StoredFileBase.yaml
+  - type: object
+    properties:
+      fileType:
+        allOf:
+          - $ref: ./FileType.yaml
+          - enum:
+            - UNKNOWN
+    required:
+      - fileType

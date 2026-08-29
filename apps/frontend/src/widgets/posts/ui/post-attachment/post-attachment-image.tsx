@@ -7,7 +7,7 @@ export const PostAttachmentImage = ({
   index,
   onClick,
 }: Readonly<{
-  attachment: components['schemas']['FolderDataItemImage'];
+  attachment: components['schemas']['StoredFileImage'];
   index: number;
   onClick: () => void;
 }>) => {

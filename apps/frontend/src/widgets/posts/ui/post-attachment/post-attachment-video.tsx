@@ -5,7 +5,7 @@ export const PostAttachmentVideo = ({
   attachment,
   onClick,
 }: Readonly<{
-  attachment: components['schemas']['FolderDataItemVideo'];
+  attachment: components['schemas']['StoredFileVideo'];
   onClick: () => void;
 }>) => {
   return (

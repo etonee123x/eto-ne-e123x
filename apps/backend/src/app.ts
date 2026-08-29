@@ -1,23 +1,41 @@
 import Express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import helmet from 'helmet';
 
-import { errorHandler } from '@/middlewares/errorHandler';
-import { send404 } from '@/middlewares/send404';
-import { nonNullable } from '@/utils/nonNullable';
-import { isNodeEnvDevelopment } from '@/constants/nodeEnv';
-import { router } from '@/router';
+import { errorHandler } from '@/middlewares/error-handler.middleware';
+import { send404 } from '@/middlewares/send-404.middleware';
+import { appConfig } from '@/config/app-config';
 
-export const app = Express() //
-  .use(cookieParser())
-  .use(Express.json());
+import { PostsModule } from '@/modules/posts/posts.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { FolderDataModule } from '@/modules/folder-data/folder-data.module';
+import { HealthModule } from '@/modules/health/health.module';
 
-if (isNodeEnvDevelopment) {
-  app
-    .use('/content', Express.static(nonNullable(process.env.CONTENT_PATH)))
-    .use('/uploads', Express.static(nonNullable(process.env.UPLOADS_PATH)));
-}
+export const createApp = () => {
+  const router = Express.Router();
 
-app //
-  .use(router)
-  .use(errorHandler)
-  .use(send404);
+  for (const module of [new PostsModule(), new AuthModule(), new FolderDataModule(), new HealthModule()]) {
+    module.init(router);
+  }
+
+  const app = Express() //
+    .use(helmet())
+    .use(
+      cors({
+        origin: appConfig.corsOrigins,
+        credentials: true,
+      }),
+    )
+    .use(cookieParser())
+    .use(Express.json({ limit: appConfig.jsonBodyLimit }));
+
+  if (appConfig.isDevelopment) {
+    app.use('/content', Express.static(appConfig.contentPath)).use('/uploads', Express.static(appConfig.uploadsPath));
+  }
+
+  return app //
+    .use(router)
+    .use(errorHandler)
+    .use(send404);
+};

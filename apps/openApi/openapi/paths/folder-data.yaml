@@ -9,7 +9,7 @@ get:
       required: true
       schema:
         type: string
-      description: Path inside folder-data (e.g. path/to/folder)
+      description: Path inside folder-data (e.g. /path/to/folder)
   responses:
     "200":
       description: OK
