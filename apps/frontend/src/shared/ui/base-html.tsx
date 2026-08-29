@@ -20,5 +20,11 @@ export const BaseHtml = ({ html }: { html: string }) => {
     router.push(event.target.href.replace(globalThis.origin, ''));
   };
 
-  return <div className="custom-html" onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div
+      className="whitespace-break-spaces wrap-break-word [&_a]:underline"
+      onClick={onClick}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 };
