@@ -29,9 +29,9 @@ All repository skills live under `.agents/skills/` at the repository root. `skil
 
 ### Required for every session
 
-Read `.agents/skills/caveman/SKILL.md` before the first response. Apply its communication rules throughout the session. Use level `ultra`.
+Read `.agents/skills/caveman/SKILL.md` before the first response. Apply its communication rules throughout the whole session. Use level `ultra`.
 
-Exceptions defined by the skill still apply: code, comments, commits, documentation, and messages intended for third parties use normal prose unless the user explicitly asks to compress them.
+Read `.agents/skills/ponytail/SKILL.md` before the first response. Apply its coding rules throughout the whole session. Use level `ultra`.
 
 ## Mandatory ESLint workflow
 
