@@ -20,15 +20,10 @@ describe('UnknownFileInspector', () => {
 
     await expect(
       inspector.inspect({
+        key: 'unknown.bin',
         storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('unknown');
-          },
-          getKey: async () => {
-            return 'unknown.bin';
-          },
-          getPath: async () => {
-            return '/tmp/unknown.bin';
           },
         },
       }),

@@ -33,22 +33,25 @@ describe('VideoFileInspector', () => {
         _meta: { createdAt: 1, updatedAt: 2 },
         src: '/content/video.mp4',
       }),
+      getPath: vi.fn().mockReturnValue('/tmp/video.mp4'),
     };
     const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     const result = await inspector.inspect({
+      key: 'video.mp4',
       storedFileSource: {
         getBuffer: async () => {
           return Buffer.from('video');
         },
-        getKey: async () => {
-          return 'video.mp4';
-        },
-        getPath: async () => {
-          return '/tmp/video.mp4';
-        },
       },
     });
+
+    expect(filesStorage.getPath).toHaveBeenCalledWith({ key: 'video.mp4' });
+    expect(execFile).toHaveBeenCalledWith(
+      '/mock/ffprobe',
+      ['-v', 'quiet', '-print_format', 'json', '-show_streams', '/tmp/video.mp4'],
+      expect.any(Function),
+    );
 
     expect(result).toEqual({
       name: 'video.mp4',
@@ -80,20 +83,16 @@ describe('VideoFileInspector', () => {
         _meta: { createdAt: 1, updatedAt: 2 },
         src: '/content/video.mp4',
       }),
+      getPath: vi.fn().mockReturnValue('/tmp/video.mp4'),
     };
     const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
+        key: 'video.mp4',
         storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
-          },
-          getKey: async () => {
-            return 'video.mp4';
-          },
-          getPath: async () => {
-            return '/tmp/video.mp4';
           },
         },
       }),
@@ -116,20 +115,16 @@ describe('VideoFileInspector', () => {
         _meta: { createdAt: 1, updatedAt: 2 },
         src: '/content/video.mp4',
       }),
+      getPath: vi.fn().mockReturnValue('/tmp/video.mp4'),
     };
     const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
+        key: 'video.mp4',
         storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
-          },
-          getKey: async () => {
-            return 'video.mp4';
-          },
-          getPath: async () => {
-            return '/tmp/video.mp4';
           },
         },
       }),
@@ -152,20 +147,16 @@ describe('VideoFileInspector', () => {
         _meta: { createdAt: 1, updatedAt: 2 },
         src: '/content/video.mp4',
       }),
+      getPath: vi.fn().mockReturnValue('/tmp/video.mp4'),
     };
     const inspector = new VideoFileInspector({ filesStorage: filesStorage as never });
 
     await expect(
       inspector.inspect({
+        key: 'video.mp4',
         storedFileSource: {
           getBuffer: async () => {
             return Buffer.from('video');
-          },
-          getKey: async () => {
-            return 'video.mp4';
-          },
-          getPath: async () => {
-            return '/tmp/video.mp4';
           },
         },
       }),

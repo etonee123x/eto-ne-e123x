@@ -1,10 +1,9 @@
 import type { StoredFileBase } from '@/shared/domain/stored-file/base.stored-file';
 import type { FilesStorage } from '../storages/files-storage';
 import type { FILE_TYPES } from '@/shared/domain/file-types/file-types.domain';
-import type { StoredFileSource } from '../types/stored-file-source';
 
 export abstract class FileInspectorBase {
-  private filesStorage: FilesStorage;
+  protected readonly filesStorage: FilesStorage;
 
   constructor(parameters: { filesStorage: FilesStorage }) {
     this.filesStorage = parameters.filesStorage;
@@ -12,8 +11,7 @@ export abstract class FileInspectorBase {
 
   abstract canInspect(parameters: { fileType: (typeof FILE_TYPES)[keyof typeof FILE_TYPES] }): boolean;
 
-  protected async inspect(parameters: { storedFileSource: StoredFileSource }): Promise<StoredFileBase> {
-    const key = await parameters.storedFileSource.getKey();
-    return this.filesStorage.getStoredFileBase({ key });
+  protected async inspect(parameters: { key: string }): Promise<StoredFileBase> {
+    return this.filesStorage.getStoredFileBase({ key: parameters.key });
   }
 }

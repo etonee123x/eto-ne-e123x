@@ -27,8 +27,7 @@ describe('FileInspector', () => {
 
     const audioFileInspector = {
       canInspect: vi.fn().mockReturnValue(true),
-      inspect: vi.fn(async (parameters: { storedFileSource: { getPath: () => Promise<string> } }) => {
-        expect(await parameters.storedFileSource.getPath()).toBe('/tmp/storage/a.mp3');
+      inspect: vi.fn(() => {
         return storedFile;
       }),
     };
@@ -37,7 +36,6 @@ describe('FileInspector', () => {
     const unknownFileInspector = { canInspect: vi.fn().mockReturnValue(false), inspect: vi.fn() };
     const filesStorage = {
       getBuffer: vi.fn().mockResolvedValue(Buffer.from('audio')),
-      getPath: vi.fn().mockReturnValue('/tmp/storage/a.mp3'),
     };
 
     const router = new FileInspector({
@@ -55,10 +53,9 @@ describe('FileInspector', () => {
     expect(filesStorage.getBuffer).toHaveBeenCalledWith({ key: '/tmp/a.mp3' });
     expect(audioFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.AUDIO });
     expect(audioFileInspector.inspect).toHaveBeenCalledWith({
+      key: '/tmp/a.mp3',
       storedFileSource: expect.objectContaining({
         getBuffer: expect.any(Function) as unknown,
-        getKey: expect.any(Function) as unknown,
-        getPath: expect.any(Function) as unknown,
       }) as unknown,
     });
     expect(result).toEqual(storedFile);
@@ -98,10 +95,9 @@ describe('FileInspector', () => {
 
     expect(unknownFileInspector.canInspect).toHaveBeenCalledWith({ fileType: FILE_TYPES.UNKNOWN });
     expect(unknownFileInspector.inspect).toHaveBeenCalledWith({
+      key: '/tmp/a.bin',
       storedFileSource: expect.objectContaining({
         getBuffer: expect.any(Function) as unknown,
-        getKey: expect.any(Function) as unknown,
-        getPath: expect.any(Function) as unknown,
       }) as unknown,
     });
     expect(result).toEqual({

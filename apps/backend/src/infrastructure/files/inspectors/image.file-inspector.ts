@@ -9,8 +9,8 @@ export class ImageFileInspector extends FileInspectorBase {
     return parameters.fileType === FILE_TYPES.IMAGE;
   }
 
-  async inspect(parameters: { storedFileSource: StoredFileSource }): Promise<StoredFileImage> {
-    const base = await super.inspect(parameters);
+  async inspect(parameters: { key: string; storedFileSource: StoredFileSource }): Promise<StoredFileImage> {
+    const base = await super.inspect({ key: parameters.key });
     const buffer = await parameters.storedFileSource.getBuffer();
     const metadata = await sharp(buffer).metadata();
 

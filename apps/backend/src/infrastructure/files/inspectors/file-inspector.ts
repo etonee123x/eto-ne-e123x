@@ -64,12 +64,6 @@ export class FileInspector {
       getBuffer: async () => {
         return buffer;
       },
-      getKey: async () => {
-        return parameters.key;
-      },
-      getPath: async () => {
-        return this.filesStorage.getPath({ key: parameters.key });
-      },
     };
 
     const fileTypeResult = await fileTypeFromBuffer(buffer);
@@ -84,6 +78,7 @@ export class FileInspector {
     }
 
     return fileInspector.inspect({
+      key: parameters.key,
       storedFileSource,
     });
   }
