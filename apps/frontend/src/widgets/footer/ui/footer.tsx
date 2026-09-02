@@ -19,11 +19,11 @@ export const Footer = () => {
 
   return (
     <footer className="border-t border-primary">
-      <address className="layout-container py-4 flex gap-3 items-center italic">
+      <address className="layout-container py-4 flex gap-4 items-center italic">
         {links.map((link, index) => {
           return (
             <a key={index} rel="noopener noreferrer" target="_blank" href={link.href} aria-label={link.text}>
-              <link.icon className="text-primary size-8" />
+              <link.icon className="text-primary size-6" />
             </a>
           );
         })}

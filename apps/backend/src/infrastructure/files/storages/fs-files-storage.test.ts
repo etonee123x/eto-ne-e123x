@@ -58,7 +58,7 @@ describe('FsFilesStorage', () => {
     expect(storedFileBase.name).toBe('photo.jpg');
     expect(storedFileBase.extension).toBe('jpg');
     expect(storedFileBase.itemType).toBe(ITEM_TYPES.FILE);
-    expect(storedFileBase.src).toBe('/contentimages/photo.jpg');
+    expect(storedFileBase.src).toBe('/content/images/photo.jpg');
     expect(storedFileBase._meta.createdAt).toBeTypeOf('number');
     expect(storedFileBase._meta.updatedAt).toBeTypeOf('number');
   });
