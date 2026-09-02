@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
+vi.mock('file-type', () => {
+  return {
+    fileTypeFromBuffer: vi.fn(),
+  };
+});
+
+import { fileTypeFromBuffer } from 'file-type';
 import { AppError } from '@/shared/errors/app.error';
 import { PostsService } from '@/modules/posts/services/posts.service';
 
@@ -149,14 +156,15 @@ describe('PostsService', () => {
     ).rejects.toBeInstanceOf(AppError);
   });
 
-  it('createPost uploads every file then calls repo.createPost with generated uuid keys', async () => {
+  it('createPost uses server-detected extensions in generated attachment keys', async () => {
     const { service, postsRepo, filesService } = buildService();
 
-    const files = [buildFile('a.mp3', 'A'), buildFile('b.mp3', 'B')];
+    const files = [buildFile('untrusted.exe', 'A'), buildFile('also-untrusted.exe', 'B')];
     const [fileA, fileB] = files;
     if (!fileA || !fileB) {
       throw new Error('Expected test files to exist');
     }
+    vi.mocked(fileTypeFromBuffer).mockResolvedValue({ ext: 'mp3', mime: 'audio/mpeg' });
     const attachmentA = { src: '/uploads/a.mp3', name: 'uuid1.mp3' };
     const attachmentB = { src: '/uploads/b.mp3', name: 'uuid2.mp3' };
 
