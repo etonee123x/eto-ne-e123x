@@ -34,7 +34,7 @@ export class FsFilesStorage implements FilesStorage {
 
     const parsedPath = nodePath.parse(path);
 
-    const source = [this.filesLocation.src, parameters.key.replace(this.filesLocation.fs, '')].join('');
+    const source = nodePath.posix.join(this.filesLocation.src, parameters.key);
 
     const commonMetadata = {
       name: parsedPath.base,
