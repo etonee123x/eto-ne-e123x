@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import nodePath from 'node:path';
+import { fileTypeFromBuffer } from 'file-type';
 import { nonNullable } from '@/utils/non-nullable';
 import type { PostsRepo } from '../repos/posts.repo';
 import type { CursorPage } from '@/shared/types/cursor-page';
@@ -17,9 +17,9 @@ export class PostsService {
     this.filesService = parameters.filesService;
   }
 
-  private getKeyByFile(file: Express.Multer.File) {
-    const extension = nodePath.extname(file.originalname);
-    return `${randomUUID()}${extension}`;
+  private async getKeyByFile(file: Express.Multer.File) {
+    const fileType = await fileTypeFromBuffer(file.buffer);
+    return [randomUUID(), ...(fileType ? [fileType.ext] : [])].join('.');
   }
 
   async getPosts(parameters: {
@@ -74,7 +74,7 @@ export class PostsService {
       for (const file of parameters.files) {
         const uploaded = await this.filesService.upload({
           buffer: file.buffer,
-          key: this.getKeyByFile(file),
+          key: await this.getKeyByFile(file),
         });
         uploadedAttachments.push(uploaded);
       }
@@ -119,7 +119,7 @@ export class PostsService {
           const file = nonNullable(parameters.files[fileIndex++]);
           const uploaded = await this.filesService.upload({
             buffer: file.buffer,
-            key: this.getKeyByFile(file),
+            key: await this.getKeyByFile(file),
           });
           newlyUploaded.push(uploaded);
           attachments.push(uploaded);
@@ -130,7 +130,7 @@ export class PostsService {
         const file = nonNullable(parameters.files[fileIndex++]);
         const uploaded = await this.filesService.upload({
           buffer: file.buffer,
-          key: this.getKeyByFile(file),
+          key: await this.getKeyByFile(file),
         });
         newlyUploaded.push(uploaded);
         attachments.push(uploaded);
