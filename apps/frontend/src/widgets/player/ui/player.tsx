@@ -14,6 +14,7 @@ import { useTimeoutFn } from '@reactuses/core';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
+import { throwError } from '@/shared/utils/throw-error';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -22,12 +23,14 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
   };
 };
 
-const PlayerSlider = ({ duration }: { duration: number }) => {
+const PlayerSlider = () => {
   const t = useTranslations('ThePlayer');
+  const track = usePlayerContext().track ?? throwError();
 
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
 
   const { currentTime, setCurrentTime } = useAudioContext();
+  const duration = track.metadata.duration;
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
 
@@ -170,10 +173,10 @@ const PlayerControls = () => {
   );
 };
 
-export const Player = () => {
+const PlayerCopyLinkButton = () => {
   const t = useTranslations('ThePlayer');
+  const track = usePlayerContext().track ?? throwError();
 
-  const { track, close } = usePlayerContext();
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [, startCopiedLinkTimeout] = useTimeoutFn(
     () => {
@@ -183,20 +186,34 @@ export const Player = () => {
     { immediate: false },
   );
 
-  const onClickClose = () => {
-    close();
-  };
-
   const onClickCopyLink = async () => {
-    if (!track) {
-      return;
-    }
-
     const trackUrl = new URL('/explorer' + track.path, globalThis.location.origin);
 
     await globalThis.navigator.clipboard.writeText(trackUrl.toString());
     setHasCopiedLink(true);
     startCopiedLinkTimeout();
+  };
+
+  return (
+    <Button
+      className="col-start-3"
+      aria-label={hasCopiedLink ? t('copied') : t('copyLink')}
+      size="icon-sm"
+      variant="ghost"
+      onClick={onClickCopyLink}
+    >
+      {hasCopiedLink ? <Check /> : <Link />}
+    </Button>
+  );
+};
+
+export const Player = () => {
+  const t = useTranslations('ThePlayer');
+
+  const { track, close } = usePlayerContext();
+
+  const onClickClose = () => {
+    close();
   };
 
   if (!track) {
@@ -220,18 +237,10 @@ export const Player = () => {
           <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
             <h2>{track.name}</h2>
           </BaseAlwaysScrollable>
-          <Button
-            className="col-start-3"
-            aria-label={hasCopiedLink ? t('copied') : t('copyLink')}
-            size="icon-sm"
-            variant="ghost"
-            onClick={onClickCopyLink}
-          >
-            {hasCopiedLink ? <Check /> : <Link />}
-          </Button>
+          <PlayerCopyLinkButton />
         </header>
 
-        <PlayerSlider duration={track.metadata.duration} />
+        <PlayerSlider />
 
         <PlayerControls />
       </div>
