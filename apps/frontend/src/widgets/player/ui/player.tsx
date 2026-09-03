@@ -156,8 +156,6 @@ const PlayerControls = () => {
         <Shuffle />
       </Toggle>
       <ul className="flex justify-center gap-2">
-        {/* FP */}
-        {}
         {buttons.map((button, index) => {
           return (
             <li key={index}>
@@ -221,29 +219,27 @@ export const Player = () => {
   }
 
   return (
-    <section className="bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
-      <div className="layout-container flex flex-col gap-2 justify-center">
-        <Button
-          className="absolute inset-e-2 border-primary top-0 -translate-y-1/2!"
-          aria-label={t('closePlayer')}
-          size="icon"
-          variant="secondary"
-          onClick={onClickClose}
-        >
-          <X />
-        </Button>
+    <section className="layout-container flex flex-col gap-2 justify-center bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
+      <Button
+        className="absolute inset-e-2 border-primary top-0 -translate-y-1/2!"
+        aria-label={t('closePlayer')}
+        size="icon"
+        variant="secondary"
+        onClick={onClickClose}
+      >
+        <X />
+      </Button>
 
-        <header className="grid grid-cols-[1fr_auto_1fr] items-center">
-          <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
-            <h2>{track.name}</h2>
-          </BaseAlwaysScrollable>
-          <PlayerCopyLinkButton />
-        </header>
+      <header className="grid grid-cols-[1fr_auto_1fr] items-center">
+        <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
+          <h2>{track.name}</h2>
+        </BaseAlwaysScrollable>
+        <PlayerCopyLinkButton />
+      </header>
 
-        <PlayerSlider />
+      <PlayerSlider />
 
-        <PlayerControls />
-      </div>
+      <PlayerControls />
     </section>
   );
 };
