@@ -3,20 +3,17 @@
 import { useState, type ComponentProps } from 'react';
 import { usePlayerContext } from '../context/player-context';
 import { useAudioContext } from '../context/audio-context';
-import { Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
+import { Check, Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 import { Button } from '@/shared/ui/ds/button';
 import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
+import { useTimeoutFn } from '@reactuses/core';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
-
-const onClickCopyLink = () => {
-  globalThis.navigator.clipboard.writeText(globalThis.location.href);
-};
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -177,9 +174,29 @@ export const Player = () => {
   const t = useTranslations('ThePlayer');
 
   const { track, close } = usePlayerContext();
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
+  const [, startCopiedLinkTimeout] = useTimeoutFn(
+    () => {
+      setHasCopiedLink(false);
+    },
+    1500,
+    { immediate: false },
+  );
 
   const onClickClose = () => {
     close();
+  };
+
+  const onClickCopyLink = async () => {
+    if (!track) {
+      return;
+    }
+
+    const trackUrl = new URL('/explorer' + track.path, globalThis.location.origin);
+
+    await globalThis.navigator.clipboard.writeText(trackUrl.toString());
+    setHasCopiedLink(true);
+    startCopiedLinkTimeout();
   };
 
   if (!track) {
@@ -199,13 +216,19 @@ export const Player = () => {
           <X />
         </Button>
 
-        <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center">
           <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
             <h2>{track.name}</h2>
           </BaseAlwaysScrollable>
-          <button className="col-start-3 mt-0.5" aria-label={t('copyLink')} onClick={onClickCopyLink}>
-            <Link className="size-4" />
-          </button>
+          <Button
+            className="col-start-3"
+            aria-label={hasCopiedLink ? t('copied') : t('copyLink')}
+            size="icon-sm"
+            variant="ghost"
+            onClick={onClickCopyLink}
+          >
+            {hasCopiedLink ? <Check /> : <Link />}
+          </Button>
         </header>
 
         <PlayerSlider duration={track.metadata.duration} />
