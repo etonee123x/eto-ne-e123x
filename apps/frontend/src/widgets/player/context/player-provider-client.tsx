@@ -1,11 +1,11 @@
 'use client';
 
-import { type ContextType, type PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
+import { type ContextType, type PropsWithChildren, useCallback, useMemo, useRef, useState } from 'react';
 import { PlayerContext } from './player-context';
-import { isClient } from '@/shared/utils/target';
 import { throwError } from '@/shared/utils/throw-error';
 import { useRouter } from '@/i18n/navigation';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
+import { AudioProviderClient } from './audio-provider-client';
 
 type Track = NonNullable<NonNullable<ContextType<typeof PlayerContext>>['track']>;
 
@@ -27,17 +27,14 @@ export const PlayerProviderClient = ({
 
   const pathDirectory = useRef<string | null>(initialTrackPathDirectory);
 
-  const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
+  const open: NonNullable<ContextType<typeof PlayerContext>>['open'] = useCallback((track, playlist, pathDirectory) => {
+    setTrack(track);
+    setPlaylist(playlist);
+    setTrackPathDirectory(pathDirectory);
+  }, []);
 
   const close = useCallback(() => {
     setTrack(null);
-
-    if (!audioRef.current) {
-      return;
-    }
-
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
 
     if (trackPathDirectory !== pathDirectory.current) {
       return;
@@ -45,12 +42,6 @@ export const PlayerProviderClient = ({
 
     router.push('/explorer' + (pathDirectory.current ?? ''), { scroll: false });
   }, [trackPathDirectory, pathDirectory, router]);
-
-  const open: NonNullable<ContextType<typeof PlayerContext>>['open'] = useCallback((track, playlist, pathDirectory) => {
-    setTrack(track);
-    setPlaylist(playlist);
-    setTrackPathDirectory(pathDirectory);
-  }, []);
 
   const currentPlayingNumber = playlist.findIndex((playlistItem) => {
     return playlistItem.src === track?.src;
@@ -107,65 +98,38 @@ export const PlayerProviderClient = ({
     [],
   );
 
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
+  const playerContextValue = useMemo<NonNullable<ContextType<typeof PlayerContext>>>(() => {
+    return {
+      track,
 
-    if (!track?.src) {
-      return;
-    }
+      open,
+      next,
+      previous,
+      close,
 
-    audio.autoplay = true;
-    audio.src = track.src;
+      isShuffleModeEnabled,
+      setIsShuffleModeEnabled,
 
-    return () => {
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
+      setCurrentPlayingNumber,
+
+      setPathDirectory,
+      hasHistoryItems,
     };
-  }, [track?.src]);
-
-  useEffect(() => {
-    return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    audio?.addEventListener('ended', next);
-
-    return () => {
-      audio?.removeEventListener('ended', next);
-    };
-  }, [next]);
+  }, [
+    close,
+    hasHistoryItems,
+    isShuffleModeEnabled,
+    next,
+    open,
+    previous,
+    setCurrentPlayingNumber,
+    setPathDirectory,
+    track,
+  ]);
 
   return (
-    <PlayerContext
-      value={{
-        track,
-
-        open,
-        next,
-        previous,
-        close,
-
-        isShuffleModeEnabled,
-        setIsShuffleModeEnabled,
-
-        setCurrentPlayingNumber,
-
-        setPathDirectory,
-
-        audioRef,
-        hasHistoryItems,
-      }}
-    >
-      {children}
-    </PlayerContext>
+    <AudioProviderClient src={track?.src ?? null} onEnded={next}>
+      <PlayerContext value={playerContextValue}>{children}</PlayerContext>
+    </AudioProviderClient>
   );
 };

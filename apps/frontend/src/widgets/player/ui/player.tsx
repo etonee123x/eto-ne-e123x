@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, type ComponentProps } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { usePlayerContext } from '../context/player-context';
+import { useAudioContext } from '../context/audio-context';
 import { Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
@@ -12,7 +13,6 @@ import { Temporal } from 'temporal-polyfill';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
-import { isNil } from '@/shared/utils/is-nil';
 
 const onClickCopyLink = () => {
   globalThis.navigator.clipboard.writeText(globalThis.location.href);
@@ -28,40 +28,18 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
 const PlayerSlider = ({ duration }: { duration: number }) => {
   const t = useTranslations('ThePlayer');
 
-  const [currentTime, setCurrentTime] = useState(0);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
+
+  const { currentTime, setCurrentTime } = useAudioContext();
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
 
   const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
   const durationFormats = millisecondsToTimeFormats(duration);
 
-  const { audioRef } = usePlayerContext();
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    const onTimeUpdate = (event: Event) => {
-      if (!(event.currentTarget instanceof HTMLAudioElement)) {
-        return;
-      }
-
-      setCurrentTime(event.currentTarget.currentTime);
-    };
-
-    audio?.addEventListener('timeupdate', onTimeUpdate);
-
-    return () => {
-      audio?.removeEventListener('timeupdate', onTimeUpdate);
-    };
-  }, [audioRef]);
-
   const onValueCommitted: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
     const seconds = Number(value);
 
-    if (audioRef.current) {
-      audioRef.current.currentTime = seconds;
-    }
     setCurrentTime(seconds);
     setSeekPreview(null);
   };
@@ -88,59 +66,16 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   );
 };
 
-const DEFAULT_VOLUME = 1;
-
-const localStorageVolume = (() => {
-  const LOCAL_STORAGE_KEY = 'player:volume';
-
-  return {
-    get: () => {
-      if (!('localStorage' in globalThis)) {
-        return null;
-      }
-
-      const value = globalThis.localStorage.getItem(LOCAL_STORAGE_KEY);
-
-      if (isNil(value) || Number.isNaN(Number(value))) {
-        globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(DEFAULT_VOLUME));
-
-        return DEFAULT_VOLUME;
-      }
-
-      return Number(value);
-    },
-    set: (volume: number) => {
-      if (!('localStorage' in globalThis)) {
-        return;
-      }
-
-      globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(volume));
-    },
-  };
-})();
-
 const PlayerControlsVolume = () => {
-  const { audioRef } = usePlayerContext();
+  const { volume, setVolume } = useAudioContext();
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
 
   const isTouchOnly = useIsTouchOnly();
 
-  const [volume, setVolume] = useState(isTouchOnly ? DEFAULT_VOLUME : (localStorageVolume.get() ?? DEFAULT_VOLUME));
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      return;
-    }
-
-    audioRef.current.volume = volume;
-  }, [volume, audioRef]);
-
   const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
-    const volume = Number(value);
-    setVolume(volume);
-    localStorageVolume.set(volume);
+    setVolume(Number(value));
   };
 
   return (
@@ -162,39 +97,15 @@ const PlayerControlsVolume = () => {
 const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
-  const { next, previous, audioRef, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } =
-    usePlayerContext();
-
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const onPlay = () => {
-      setIsPlaying(true);
-    };
-    const onPause = () => {
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-
-    return () => {
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-    };
-  }, [audioRef]);
+  const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = usePlayerContext();
+  const { play, pause, isPlaying } = useAudioContext();
 
   const onClickPlay = () => {
-    audioRef.current?.play();
+    play();
   };
 
   const onClickPause = () => {
-    audioRef.current?.pause();
+    pause();
   };
 
   const onClickPrevious = () => {
@@ -246,7 +157,7 @@ const PlayerControls = () => {
       </Toggle>
       <ul className="flex justify-center gap-2">
         {/* FP */}
-        {/* eslint-disable-next-line react-hooks/refs */}
+        {}
         {buttons.map((button, index) => {
           return (
             <li key={index}>

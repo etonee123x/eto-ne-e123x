@@ -1,7 +1,7 @@
 'use client';
 
 import { throwError } from '@/shared/utils/throw-error';
-import { createContext, type RefObject, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import type { components } from '@/shared/api/openapi';
 
 type Track = components['schemas']['FolderDataItemAudio'];
@@ -22,8 +22,6 @@ export const PlayerContext = createContext<{
   setPathDirectory: (pathDirectory: string | null) => void;
 
   hasHistoryItems: boolean;
-
-  audioRef: RefObject<HTMLAudioElement | null>;
 } | null>(null);
 
 export const usePlayerContext = () => {
