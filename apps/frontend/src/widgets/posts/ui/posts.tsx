@@ -98,7 +98,7 @@ const Post = ({
         files,
       });
     } catch (error) {
-      toast.add({ title: t('couldNotSendPost') });
+      toast.add({ description: t('couldNotSendPost'), type: 'error' });
       throw error;
     }
 
