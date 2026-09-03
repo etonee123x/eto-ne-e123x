@@ -285,6 +285,9 @@ components:
       properties:
         name:
           type: string
+        size:
+          type: integer
+          minimum: 0
         _meta:
           type: object
           properties:
@@ -308,6 +311,7 @@ components:
             - 'null'
       required:
         - name
+        - size
         - _meta
         - itemType
         - src

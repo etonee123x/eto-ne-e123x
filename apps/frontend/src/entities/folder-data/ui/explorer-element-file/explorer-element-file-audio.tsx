@@ -69,7 +69,7 @@ export const ExplorerElementFileAudio = ({
 
   return (
     <article className="contents">
-      <Item className="border-primary" render={<Link {...props} />}>
+      <Item className="border-primary" render={<Link {...props} scroll={false} />}>
         <ExplorerElementHeader name={element.name} createdAt={element._meta.createdAt} />
         <Separator />
         <ItemContent className="w-full">

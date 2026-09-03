@@ -56,6 +56,7 @@ describe('FsFilesStorage', () => {
     const storedFileBase = await storage.getStoredFileBase({ key });
 
     expect(storedFileBase.name).toBe('photo.jpg');
+    expect(storedFileBase.size).toBe(1);
     expect(storedFileBase.extension).toBe('jpg');
     expect(storedFileBase.itemType).toBe(ITEM_TYPES.FILE);
     expect(storedFileBase.src).toBe('/content/images/photo.jpg');

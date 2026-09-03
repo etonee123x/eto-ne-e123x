@@ -7,6 +7,7 @@ import { IsAdminProvider } from '@/entities/session';
 
 import { Header } from '@/widgets/header';
 import { Footer } from '@/widgets/footer';
+import { Toaster } from '@/shared/ui/ds/toast';
 
 import { PlayerProvider, Player } from '@/widgets/player';
 
@@ -76,6 +77,7 @@ export default async function RootLayout({ children, params }: Readonly<LayoutPr
           <Header className="fixed top-0 w-full z-1 h-header-height" />
           <main className="pt-header-height relative flex flex-col flex-1">{children}</main>
           <Player />
+          <Toaster />
           <Footer />
           <Gallery />
         </Providers>

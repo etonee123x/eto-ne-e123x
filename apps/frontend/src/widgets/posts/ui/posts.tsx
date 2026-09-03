@@ -21,6 +21,7 @@ import { isNil } from '@/shared/utils/is-nil';
 import { useWindowScrollPosition } from '@/shared/hooks/use-window-scroll-position';
 import { cn } from '@/shared/utils/cn';
 import { PostAttachment } from './post-attachment/post-attachment';
+import { toast } from '@/shared/ui/ds/toast';
 
 const isAttachmentGalleryItem = (attachment: components['schemas']['PostResponse']['attachments'][number]) => {
   return attachment.fileType === FILE_TYPES.IMAGE || attachment.fileType === FILE_TYPES.VIDEO;
@@ -90,11 +91,16 @@ const Post = ({
   const mutationPatchPostById = useMutationPatchPostById();
 
   const onSubmit: ComponentProps<typeof FormPost>['onSubmit'] = async (...[, _post, files]) => {
-    await mutationPatchPostById.mutateAsync({
-      id: post._meta.id,
-      data: _post,
-      files,
-    });
+    try {
+      await mutationPatchPostById.mutateAsync({
+        id: post._meta.id,
+        data: _post,
+        files,
+      });
+    } catch (error) {
+      toast.add({ title: t('couldNotSendPost') });
+      throw error;
+    }
 
     exitEditPost();
 

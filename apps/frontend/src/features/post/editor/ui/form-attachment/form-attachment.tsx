@@ -35,6 +35,7 @@ export const FormAttachment = ({
   type: (typeof FILE_TYPES)[keyof typeof FILE_TYPES];
   src: string;
   name: ComponentProps<typeof AttachmentTitle>['children'];
+  fileSize: string;
   className: ComponentProps<typeof Attachment>['className'];
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
   ref: ComponentProps<typeof Attachment>['ref'];

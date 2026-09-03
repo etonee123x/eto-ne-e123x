@@ -3,6 +3,7 @@ import {
   AttachmentAction,
   AttachmentActions,
   AttachmentContent,
+  AttachmentDescription,
   AttachmentMedia,
   AttachmentTitle,
 } from '@/shared/ui/ds/attachment';
@@ -11,11 +12,13 @@ import { type ComponentProps } from 'react';
 
 export const FormAttachmentUnknown = ({
   name,
+  fileSize,
   onClickRemove,
   handleRef,
   ...props
 }: {
   name: ComponentProps<typeof AttachmentTitle>['children'];
+  fileSize: string;
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
   handleRef: ComponentProps<typeof AttachmentAction>['ref'];
 } & ComponentProps<typeof Attachment>) => {
@@ -26,6 +29,7 @@ export const FormAttachmentUnknown = ({
       </AttachmentMedia>
       <AttachmentContent>
         <AttachmentTitle>{name}</AttachmentTitle>
+        <AttachmentDescription>{fileSize}</AttachmentDescription>
       </AttachmentContent>
       <AttachmentActions>
         <AttachmentAction
