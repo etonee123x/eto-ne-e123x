@@ -1,8 +1,13 @@
 'use client';
 
 import { useState, type ComponentProps } from 'react';
-import { usePlayerContext } from '../context/player-context';
-import { useAudioContext } from '../context/audio-context';
+import {
+  useAudio,
+  useAudioCurrentTime,
+  useAudioIsPlaying,
+  useAudioPlayer,
+  useAudioVolume,
+} from '@/entities/audio-player';
 import { Check, Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
@@ -25,11 +30,12 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
 
 const PlayerSlider = () => {
   const t = useTranslations('ThePlayer');
-  const track = usePlayerContext().track ?? throwError();
+  const track = useAudioPlayer().track ?? throwError();
 
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
 
-  const { currentTime, setCurrentTime } = useAudioContext();
+  const currentTime = useAudioCurrentTime();
+  const { setCurrentTime } = useAudio();
   const duration = track.metadata.duration;
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
@@ -67,7 +73,8 @@ const PlayerSlider = () => {
 };
 
 const PlayerControlsVolume = () => {
-  const { volume, setVolume } = useAudioContext();
+  const volume = useAudioVolume();
+  const { setVolume } = useAudio();
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
@@ -97,8 +104,9 @@ const PlayerControlsVolume = () => {
 const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
-  const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = usePlayerContext();
-  const { play, pause, isPlaying } = useAudioContext();
+  const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
+  const { play, pause } = useAudio();
+  const isPlaying = useAudioIsPlaying();
 
   const onClickPlay = () => {
     play();
@@ -173,7 +181,7 @@ const PlayerControls = () => {
 
 const PlayerCopyLinkButton = () => {
   const t = useTranslations('ThePlayer');
-  const track = usePlayerContext().track ?? throwError();
+  const track = useAudioPlayer().track ?? throwError();
 
   const [hasCopiedLink, setHasCopiedLink] = useState(false);
   const [, startCopiedLinkTimeout] = useTimeoutFn(
@@ -208,7 +216,7 @@ const PlayerCopyLinkButton = () => {
 export const Player = () => {
   const t = useTranslations('ThePlayer');
 
-  const { track, close } = usePlayerContext();
+  const { track, close } = useAudioPlayer();
 
   const onClickClose = () => {
     close();
