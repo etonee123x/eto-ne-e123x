@@ -8,6 +8,7 @@ type Track = components['schemas']['FolderDataItemAudio'];
 
 export const PlayerContext = createContext<{
   track: Track | null;
+  playlistPathDirectory: string | null;
   open: (track: Track, playlist: Array<Track>, pathDirectory: string) => void;
   next: () => void;
   previous: () => void;
