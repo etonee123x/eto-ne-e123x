@@ -3,6 +3,7 @@ import {
   AttachmentAction,
   AttachmentActions,
   AttachmentContent,
+  AttachmentDescription,
   AttachmentMedia,
   AttachmentTitle,
 } from '@/shared/ui/ds/attachment';
@@ -12,11 +13,13 @@ import { type ComponentProps } from 'react';
 export const FormAttachmentAudio = ({
   src,
   name,
+  fileSize,
   onClickRemove,
   handleRef,
   ...props
 }: Pick<ComponentProps<'audio'>, 'src'> & {
   name: ComponentProps<typeof AttachmentTitle>['children'];
+  fileSize: string;
   onClickRemove: ComponentProps<typeof AttachmentAction>['onClick'];
   handleRef: ComponentProps<typeof AttachmentAction>['ref'];
 } & ComponentProps<typeof Attachment>) => {
@@ -27,6 +30,7 @@ export const FormAttachmentAudio = ({
       </AttachmentMedia>
       <AttachmentContent>
         <AttachmentTitle>{name}</AttachmentTitle>
+        <AttachmentDescription>{fileSize}</AttachmentDescription>
       </AttachmentContent>
       <AttachmentActions>
         <AttachmentAction

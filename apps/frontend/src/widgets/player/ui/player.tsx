@@ -1,22 +1,25 @@
 'use client';
 
-import { useEffect, useState, type ComponentProps } from 'react';
-import { usePlayerContext } from '../context/player-context';
-import { Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
+import { useState, type ComponentProps } from 'react';
+import {
+  useAudio,
+  useAudioCurrentTime,
+  useAudioIsPlaying,
+  useAudioPlayer,
+  useAudioVolume,
+} from '@/entities/audio-player';
+import { Check, Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
 import { Button } from '@/shared/ui/ds/button';
 import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
+import { useTimeoutFn } from '@reactuses/core';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
-import { isNil } from '@/shared/utils/is-nil';
-
-const onClickCopyLink = () => {
-  globalThis.navigator.clipboard.writeText(globalThis.location.href);
-};
+import { throwError } from '@/shared/utils/throw-error';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -25,43 +28,24 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
   };
 };
 
-const PlayerSlider = ({ duration }: { duration: number }) => {
+const PlayerSlider = () => {
   const t = useTranslations('ThePlayer');
+  const track = useAudioPlayer().track ?? throwError();
 
-  const [currentTime, setCurrentTime] = useState(0);
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
+
+  const currentTime = useAudioCurrentTime();
+  const { setCurrentTime } = useAudio();
+  const duration = track.metadata.duration;
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
 
   const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
   const durationFormats = millisecondsToTimeFormats(duration);
 
-  const { audioRef } = usePlayerContext();
-
-  useEffect(() => {
-    const audio = audioRef.current;
-
-    const onTimeUpdate = (event: Event) => {
-      if (!(event.currentTarget instanceof HTMLAudioElement)) {
-        return;
-      }
-
-      setCurrentTime(event.currentTarget.currentTime);
-    };
-
-    audio?.addEventListener('timeupdate', onTimeUpdate);
-
-    return () => {
-      audio?.removeEventListener('timeupdate', onTimeUpdate);
-    };
-  }, [audioRef]);
-
   const onValueCommitted: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
     const seconds = Number(value);
 
-    if (audioRef.current) {
-      audioRef.current.currentTime = seconds;
-    }
     setCurrentTime(seconds);
     setSeekPreview(null);
   };
@@ -88,59 +72,17 @@ const PlayerSlider = ({ duration }: { duration: number }) => {
   );
 };
 
-const DEFAULT_VOLUME = 1;
-
-const localStorageVolume = (() => {
-  const LOCAL_STORAGE_KEY = 'player:volume';
-
-  return {
-    get: () => {
-      if (!('localStorage' in globalThis)) {
-        return null;
-      }
-
-      const value = globalThis.localStorage.getItem(LOCAL_STORAGE_KEY);
-
-      if (isNil(value) || Number.isNaN(Number(value))) {
-        globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(DEFAULT_VOLUME));
-
-        return DEFAULT_VOLUME;
-      }
-
-      return Number(value);
-    },
-    set: (volume: number) => {
-      if (!('localStorage' in globalThis)) {
-        return;
-      }
-
-      globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(volume));
-    },
-  };
-})();
-
 const PlayerControlsVolume = () => {
-  const { audioRef } = usePlayerContext();
+  const volume = useAudioVolume();
+  const { setVolume } = useAudio();
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
 
   const isTouchOnly = useIsTouchOnly();
 
-  const [volume, setVolume] = useState(isTouchOnly ? DEFAULT_VOLUME : (localStorageVolume.get() ?? DEFAULT_VOLUME));
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      return;
-    }
-
-    audioRef.current.volume = volume;
-  }, [volume, audioRef]);
-
   const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
-    const volume = Number(value);
-    setVolume(volume);
-    localStorageVolume.set(volume);
+    setVolume(Number(value));
   };
 
   return (
@@ -162,39 +104,16 @@ const PlayerControlsVolume = () => {
 const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
-  const { next, previous, audioRef, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } =
-    usePlayerContext();
-
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const onPlay = () => {
-      setIsPlaying(true);
-    };
-    const onPause = () => {
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('play', onPlay);
-    audio.addEventListener('pause', onPause);
-
-    return () => {
-      audio.removeEventListener('play', onPlay);
-      audio.removeEventListener('pause', onPause);
-    };
-  }, [audioRef]);
+  const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
+  const { play, pause } = useAudio();
+  const isPlaying = useAudioIsPlaying();
 
   const onClickPlay = () => {
-    audioRef.current?.play();
+    play();
   };
 
   const onClickPause = () => {
-    audioRef.current?.pause();
+    pause();
   };
 
   const onClickPrevious = () => {
@@ -245,8 +164,6 @@ const PlayerControls = () => {
         <Shuffle />
       </Toggle>
       <ul className="flex justify-center gap-2">
-        {/* FP */}
-        {/* eslint-disable-next-line react-hooks/refs */}
         {buttons.map((button, index) => {
           return (
             <li key={index}>
@@ -262,10 +179,44 @@ const PlayerControls = () => {
   );
 };
 
+const PlayerCopyLinkButton = () => {
+  const t = useTranslations('ThePlayer');
+  const track = useAudioPlayer().track ?? throwError();
+
+  const [hasCopiedLink, setHasCopiedLink] = useState(false);
+  const [, startCopiedLinkTimeout] = useTimeoutFn(
+    () => {
+      setHasCopiedLink(false);
+    },
+    1500,
+    { immediate: false },
+  );
+
+  const onClickCopyLink = async () => {
+    const trackUrl = new URL('/explorer' + track.path, globalThis.location.origin);
+
+    await globalThis.navigator.clipboard.writeText(trackUrl.toString());
+    setHasCopiedLink(true);
+    startCopiedLinkTimeout();
+  };
+
+  return (
+    <Button
+      className="col-start-3"
+      aria-label={hasCopiedLink ? t('copied') : t('copyLink')}
+      size="icon-sm"
+      variant="ghost"
+      onClick={onClickCopyLink}
+    >
+      {hasCopiedLink ? <Check /> : <Link />}
+    </Button>
+  );
+};
+
 export const Player = () => {
   const t = useTranslations('ThePlayer');
 
-  const { track, close } = usePlayerContext();
+  const { track, close } = useAudioPlayer();
 
   const onClickClose = () => {
     close();
@@ -276,31 +227,27 @@ export const Player = () => {
   }
 
   return (
-    <section className="bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
-      <div className="layout-container flex flex-col gap-2 justify-center">
-        <Button
-          className="absolute inset-e-2 border-primary top-0 -translate-y-1/2!"
-          aria-label={t('closePlayer')}
-          size="icon"
-          variant="secondary"
-          onClick={onClickClose}
-        >
-          <X />
-        </Button>
+    <section className="layout-container flex flex-col gap-2 justify-center bg-background z-player border-t border-primary pt-2 pb-4 w-full sticky bottom-0">
+      <Button
+        className="absolute inset-e-2 border-primary top-0 -translate-y-1/2!"
+        aria-label={t('closePlayer')}
+        size="icon"
+        variant="secondary"
+        onClick={onClickClose}
+      >
+        <X />
+      </Button>
 
-        <header className="grid grid-cols-[1fr_auto_1fr] gap-1 items-center">
-          <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
-            <h2>{track.name}</h2>
-          </BaseAlwaysScrollable>
-          <button className="col-start-3 mt-0.5" aria-label={t('copyLink')} onClick={onClickCopyLink}>
-            <Link className="size-4" />
-          </button>
-        </header>
+      <header className="grid grid-cols-[1fr_auto_1fr] items-center">
+        <BaseAlwaysScrollable className="col-start-2 [--base-always-scrollable--content--margin:0_auto]">
+          <h2>{track.name}</h2>
+        </BaseAlwaysScrollable>
+        <PlayerCopyLinkButton />
+      </header>
 
-        <PlayerSlider duration={track.metadata.duration} />
+      <PlayerSlider />
 
-        <PlayerControls />
-      </div>
+      <PlayerControls />
     </section>
   );
 };

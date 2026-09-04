@@ -86,6 +86,7 @@ export interface components {
         ItemType: "FOLDER" | "FILE";
         StoredFileBase: {
             name: string;
+            size: number;
             _meta: {
                 createdAt: number;
                 updatedAt: number;

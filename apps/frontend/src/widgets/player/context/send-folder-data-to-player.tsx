@@ -1,12 +1,12 @@
 'use client';
 
-import { usePlayerContext } from './player-context';
+import { useAudioPlayer } from '@/entities/audio-player';
 import { FILE_TYPES } from '@/entities/file';
 import { type components } from '@/shared/api/openapi';
 import { useEffect } from 'react';
 
 export const SendFolderDataToPlayer = ({ folderData }: { folderData: components['schemas']['FolderDataResponse'] }) => {
-  const { open, setPathDirectory } = usePlayerContext();
+  const { open, setPathDirectory } = useAudioPlayer();
 
   useEffect(() => {
     const fileAudio = folderData.file?.fileType === FILE_TYPES.AUDIO ? folderData.file : null;

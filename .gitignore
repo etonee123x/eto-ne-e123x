@@ -1,3 +1,5 @@
 infra
 .agents
 .claude
+.vscode/*
+!.vscode/mcp.json

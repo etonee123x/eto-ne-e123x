@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { type ComponentProps, useState } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useMutationCreatePost } from '../mutations/use-mutation-create-post';
+import { toast } from '@/shared/ui/ds/toast';
 
 export const FormPostCreate = () => {
   const t = useTranslations('FormPostCreate');
@@ -15,10 +16,16 @@ export const FormPostCreate = () => {
   const mutationCreatePost = useMutationCreatePost();
 
   const onSubmit: ComponentProps<typeof FormPost>['onSubmit'] = async (...[, post, files]) => {
-    await mutationCreatePost.mutateAsync({
-      data: { text: post.text },
-      files,
-    });
+    try {
+      await mutationCreatePost.mutateAsync({
+        data: { text: post.text },
+        files,
+      });
+      throw new Error('Failed to create post');
+    } catch (error) {
+      toast.add({ description: t('couldNotSendPost'), type: 'error' });
+      throw error;
+    }
 
     router.push('/blog', { scroll: false });
   };

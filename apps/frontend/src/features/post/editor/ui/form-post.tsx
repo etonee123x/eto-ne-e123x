@@ -3,7 +3,6 @@
 import { Button } from '@/shared/ui/ds/button';
 import { Textarea } from '@/shared/ui/ds/textarea';
 import { type components } from '@/shared/api/openapi';
-import { fileToFileWithHashName } from '@/shared/utils/file-to-file-with-hash-name';
 import { FilePlus2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import {
@@ -17,7 +16,6 @@ import {
   useState,
 } from 'react';
 import { extensionToFileType, FILE_TYPES } from '@/entities/file';
-import { nonNullable } from '@/shared/utils/non-nullable';
 import { DragDropProvider } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 import { FormAttachment } from './form-attachment';
@@ -39,6 +37,14 @@ const onKeyDownTextarea: ComponentProps<typeof Textarea>['onKeyDown'] = (event) 
   event.preventDefault();
   event.currentTarget.form?.requestSubmit();
 };
+const formatFileSize = (bytes: number) => {
+  const units = ['B', 'KB', 'MB', 'GB'];
+  const unitIndex = Math.min(Math.floor(Math.log(Math.max(bytes, 1)) / Math.log(1024)), units.length - 1);
+  const size = bytes / 1024 ** unitIndex;
+  const maximumFractionDigits = unitIndex === 0 || size >= 10 ? 0 : 1;
+
+  return `${new Intl.NumberFormat(undefined, { maximumFractionDigits }).format(size)} ${units[unitIndex]}`;
+};
 
 const fileOrAttachmentToKey = (fileOrAttachment: FileOrAttachment) => {
   return fileOrAttachment instanceof File
@@ -46,18 +52,30 @@ const fileOrAttachmentToKey = (fileOrAttachment: FileOrAttachment) => {
     : [fileOrAttachment.name, fileOrAttachment.src].join('-');
 };
 
-const fileOrAttachmentToType = (fileOrAttachment: FileOrAttachment) => {
-  return fileOrAttachment instanceof File
-    ? (extensionToFileType(
-        `.${nonNullable(/^[^/]+\/(?<extension>.*)$/.exec(fileOrAttachment.type)?.groups?.extension)}`,
-      ) ?? FILE_TYPES.UNKNOWN)
-    : fileOrAttachment.fileType;
+const fileWithUniqueName = (file: File, usedNames: Set<string>) => {
+  const extensionStart = file.name.lastIndexOf('.');
+  const baseName = extensionStart > 0 ? file.name.slice(0, extensionStart) : file.name;
+  const extension = extensionStart > 0 ? file.name.slice(extensionStart) : '';
+  let index = 0;
+  let name = file.name;
+
+  while (usedNames.has(name)) {
+    name = `${baseName} (${++index})${extension}`;
+  }
+
+  usedNames.add(name);
+
+  return name === file.name ? file : new File([file], name, { type: file.type, lastModified: file.lastModified });
 };
 
-// новояз
-// eslint-disable-next-line unicorn/prevent-abbreviations
-const fileOrAttachmentToSrc = (fileOrAttachment: FileOrAttachment) => {
-  return fileOrAttachment instanceof File ? URL.createObjectURL(fileOrAttachment) : fileOrAttachment.src;
+const fileOrAttachmentToType = (fileOrAttachment: FileOrAttachment) => {
+  if (!(fileOrAttachment instanceof File)) {
+    return fileOrAttachment.fileType;
+  }
+
+  const extension = /^[^/]+\/(?<extension>.+)$/.exec(fileOrAttachment.type)?.groups?.extension;
+
+  return extension ? (extensionToFileType(`.${extension}`) ?? FILE_TYPES.UNKNOWN) : FILE_TYPES.UNKNOWN;
 };
 
 const SortableFormAttachment = ({
@@ -72,14 +90,32 @@ const SortableFormAttachment = ({
   onClickRemoveByIndex: (index: number) => void;
 }) => {
   const { handleRef, ref } = useSortable({ id, index });
+  const [fileObjectUrl] = useState(() => {
+    return fileOrAttachment instanceof File ? URL.createObjectURL(fileOrAttachment) : undefined;
+  });
+
+  useEffect(() => {
+    return () => {
+      if (fileObjectUrl) {
+        URL.revokeObjectURL(fileObjectUrl);
+      }
+    };
+  }, [fileObjectUrl]);
+
+  const source = fileOrAttachment instanceof File ? fileObjectUrl : fileOrAttachment.src;
+
+  if (!source) {
+    return null;
+  }
 
   return (
     <FormAttachment
       ref={ref}
       handleRef={handleRef}
-      src={fileOrAttachmentToSrc(fileOrAttachment)}
+      src={source}
       type={fileOrAttachmentToType(fileOrAttachment)}
       name={fileOrAttachment.name}
+      fileSize={formatFileSize(fileOrAttachment.size)}
       onClickRemove={() => {
         onClickRemoveByIndex(index);
       }}
@@ -168,10 +204,16 @@ export const FormPost = ({
     }
 
     setModelFilesAndAttachments((modelFilesAndAttachments) => {
+      const usedNames = new Set(
+        modelFilesAndAttachments.map((fileOrAttachment) => {
+          return fileOrAttachment.name;
+        }),
+      );
+
       return [
         ...modelFilesAndAttachments,
         ...files.map((file) => {
-          return fileToFileWithHashName(file);
+          return fileWithUniqueName(file, usedNames);
         }),
       ];
     });
@@ -194,10 +236,16 @@ export const FormPost = ({
 
     event.preventDefault();
     setModelFilesAndAttachments((modelFilesAndAttachments) => {
+      const usedNames = new Set(
+        modelFilesAndAttachments.map((fileOrAttachment) => {
+          return fileOrAttachment.name;
+        }),
+      );
+
       return [
         ...modelFilesAndAttachments,
         ...files.map((file) => {
-          return fileToFileWithHashName(file);
+          return fileWithUniqueName(file, usedNames);
         }),
       ];
     });
@@ -215,18 +263,22 @@ export const FormPost = ({
       return;
     }
 
-    await onSubmit(
-      event.nativeEvent,
-      {
-        text: modelText,
-        attachments: modelFilesAndAttachments.map((fileOrAttachment) => {
-          return fileOrAttachment instanceof File ? null : fileOrAttachment;
+    try {
+      await onSubmit(
+        event.nativeEvent,
+        {
+          text: modelText,
+          attachments: modelFilesAndAttachments.map((fileOrAttachment) => {
+            return fileOrAttachment instanceof File ? null : fileOrAttachment;
+          }),
+        },
+        modelFilesAndAttachments.filter((fileOrAttachment): fileOrAttachment is File => {
+          return fileOrAttachment instanceof File;
         }),
-      },
-      modelFilesAndAttachments.filter((fileOrAttachment): fileOrAttachment is File => {
-        return fileOrAttachment instanceof File;
-      }),
-    );
+      );
+    } catch {
+      return;
+    }
 
     setModelText(defaultValues.text);
     setModelFilesAndAttachments(defaultValues.attachments);

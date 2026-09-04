@@ -38,6 +38,7 @@ export class FsFilesStorage implements FilesStorage {
 
     const commonMetadata = {
       name: parsedPath.base,
+      size: statAwaited.size,
       extension: parsedPath.ext.slice(1) || null,
       itemType: ITEM_TYPES.FILE,
       _meta: {

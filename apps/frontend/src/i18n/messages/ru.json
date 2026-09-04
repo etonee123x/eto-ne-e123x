@@ -76,6 +76,7 @@
     "delete": "Удалить",
     "confirm": "Подтвердить",
     "cancel": "Отменить",
+    "couldNotSavePost": "Не удалось сохранить пост",
     "thereAreNoMorePosts": "Больше постов нет"
   },
   "FormPost": {
@@ -84,7 +85,8 @@
     "clearAll": "Очистить все"
   },
   "FormPostCreate": {
-    "send": "Отправить"
+    "send": "Отправить",
+    "couldNotSendPost": "Не удалось отправить пост"
   },
   "ExplorerElementAudio": {
     "duration": "Длительность",

@@ -76,6 +76,7 @@
     "delete": "Delete",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    "couldNotSavePost": "Failed to save post",
     "thereAreNoMorePosts": "There are no more posts"
   },
   "FormPost": {
@@ -84,7 +85,8 @@
     "clearAll": "Clear all"
   },
   "FormPostCreate": {
-    "send": "Send"
+    "send": "Send",
+    "couldNotSendPost": "Failed to send post"
   },
   "ExplorerElementAudio": {
     "duration": "Duration",

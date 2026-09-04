@@ -7,6 +7,7 @@ import { Calendar, Clock, Disc3, Metronome, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ComponentProps } from 'react';
 import { ExplorerElementHeader } from '../explorer-element-header';
+import { AudioTrackProgress } from '@/entities/audio-player/@x/folder-data';
 
 export const ExplorerElementFileAudio = ({
   element,
@@ -69,7 +70,8 @@ export const ExplorerElementFileAudio = ({
 
   return (
     <article className="contents">
-      <Item className="border-primary" render={<Link {...props} />}>
+      <Item className="border-primary relative overflow-hidden" render={<Link {...props} scroll={false} />}>
+        <AudioTrackProgress trackSrc={element.src} duration={element.metadata.duration} />
         <ExplorerElementHeader name={element.name} createdAt={element._meta.createdAt} />
         <Separator />
         <ItemContent className="w-full">
