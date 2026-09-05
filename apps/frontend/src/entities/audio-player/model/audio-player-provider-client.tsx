@@ -336,18 +336,22 @@ export const AudioPlayerProviderClient = ({
     };
 
     const onTimeUpdate = (event: Event) => {
-      if (event.currentTarget instanceof HTMLAudioElement) {
-        store.currentTime = event.currentTarget.currentTime;
-        store.notify();
+      if (!(event.currentTarget instanceof HTMLAudioElement)) {
+        return;
       }
+
+      store.currentTime = event.currentTarget.currentTime;
+      store.notify();
     };
 
     const onVolumeChange = (event: Event) => {
-      if (event.currentTarget instanceof HTMLAudioElement && !isTouchOnly) {
-        store.volume = event.currentTarget.volume;
-        localStorageVolume.set(store.volume);
-        store.notify();
+      if (!(event.currentTarget instanceof HTMLAudioElement) || isTouchOnly) {
+        return;
       }
+
+      store.volume = event.currentTarget.volume;
+      localStorageVolume.set(store.volume);
+      store.notify();
     };
 
     audio?.addEventListener('play', onPlay);
