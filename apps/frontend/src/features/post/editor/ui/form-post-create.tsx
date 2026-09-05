@@ -21,7 +21,6 @@ export const FormPostCreate = () => {
         data: { text: post.text },
         files,
       });
-      throw new Error('Failed to create post');
     } catch (error) {
       toast.add({ description: t('couldNotSendPost'), type: 'error' });
       throw error;
