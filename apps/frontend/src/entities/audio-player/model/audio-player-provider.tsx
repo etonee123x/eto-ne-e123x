@@ -2,7 +2,6 @@
 
 import { type ContextType, type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isClient } from '@/shared/utils/target';
-import { useBroadcastChannel, useEventListener } from '@reactuses/core';
 import { isNil } from '@/shared/utils/is-nil';
 import { AudioStoreContext, type AudioStore } from './audio-store-context';
 import { PlayerContext } from './player-context';
@@ -10,6 +9,7 @@ import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
 import { throwError } from '@/shared/utils/throw-error';
+import { useSinglePlayback } from '@/shared/hooks/use-single-playback';
 
 const DEFAULT_VOLUME = 1;
 
@@ -39,11 +39,6 @@ const localStorageVolume = (() => {
   };
 })();
 
-interface PlayerMessage {
-  type: 'play';
-}
-
-type PlayerEvent = MessageEvent<PlayerMessage>;
 type Track = NonNullable<NonNullable<ContextType<typeof PlayerContext>>['track']>;
 interface InternalAudioStore extends AudioStore {
   notify: () => void;
@@ -113,8 +108,6 @@ export const AudioPlayerProvider = ({
 
   const pathname = usePathname();
 
-  const { post, channel } = useBroadcastChannel<PlayerMessage, PlayerMessage>({ name: 'audio' });
-
   const isTouchOnly = useIsTouchOnly();
 
   const [track, setTrack] = useState<Track | null>(initialTrack);
@@ -130,6 +123,12 @@ export const AudioPlayerProvider = ({
   const pathDirectory = useRef<string | null>(initialPlaylistPathDirectory);
 
   const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
+
+  const { playback } = useSinglePlayback({
+    onOtherPlayback: () => {
+      audioRef.current?.pause();
+    },
+  });
 
   const [store] = useState(() => {
     return createAudioStore();
@@ -177,7 +176,7 @@ export const AudioPlayerProvider = ({
         return;
       }
 
-      router.push('/explorer' + _track.path, { scroll: false });
+      router.replace('/explorer' + _track.path, { scroll: false });
     },
     [pathname, router, track],
   );
@@ -316,25 +315,30 @@ export const AudioPlayerProvider = ({
 
   useEffect(() => {
     const audio = audioRef.current;
+
     const onPlay = () => {
-      post({ type: 'play' });
+      playback();
       store.isPlaying = true;
       store.notify();
     };
+
     const onPause = () => {
       store.isPlaying = false;
       store.notify();
     };
+
     const onResetCurrentTime = () => {
       store.currentTime = 0;
       store.notify();
     };
+
     const onTimeUpdate = (event: Event) => {
       if (event.currentTarget instanceof HTMLAudioElement) {
         store.currentTime = event.currentTarget.currentTime;
         store.notify();
       }
     };
+
     const onVolumeChange = (event: Event) => {
       if (event.currentTarget instanceof HTMLAudioElement && !isTouchOnly) {
         store.volume = event.currentTarget.volume;
@@ -342,12 +346,14 @@ export const AudioPlayerProvider = ({
         store.notify();
       }
     };
+
     audio?.addEventListener('play', onPlay);
     audio?.addEventListener('pause', onPause);
     audio?.addEventListener('loadstart', onResetCurrentTime);
     audio?.addEventListener('emptied', onResetCurrentTime);
     audio?.addEventListener('timeupdate', onTimeUpdate);
     audio?.addEventListener('volumechange', onVolumeChange);
+
     return () => {
       audio?.removeEventListener('play', onPlay);
       audio?.removeEventListener('pause', onPause);
@@ -356,15 +362,7 @@ export const AudioPlayerProvider = ({
       audio?.removeEventListener('timeupdate', onTimeUpdate);
       audio?.removeEventListener('volumechange', onVolumeChange);
     };
-  }, [isTouchOnly, post, store]);
-
-  useEventListener<PlayerEvent>(
-    'message',
-    () => {
-      return audioRef.current?.pause();
-    },
-    channel,
-  );
+  }, [isTouchOnly, store, playback]);
 
   const playerValue = useMemo<NonNullable<ContextType<typeof PlayerContext>>>(() => {
     return {
