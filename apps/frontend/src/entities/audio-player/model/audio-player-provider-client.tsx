@@ -4,7 +4,7 @@ import { type ContextType, type PropsWithChildren, useCallback, useEffect, useMe
 import { isClient } from '@/shared/utils/target';
 import { isNil } from '@/shared/utils/is-nil';
 import { AudioStoreContext, type AudioStore } from './audio-store-context';
-import { PlayerContext } from './player-context';
+import { AudioPlayerContext } from './audio-player-context';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
@@ -39,7 +39,7 @@ const localStorageVolume = (() => {
   };
 })();
 
-type Track = NonNullable<NonNullable<ContextType<typeof PlayerContext>>['track']>;
+type Track = NonNullable<NonNullable<ContextType<typeof AudioPlayerContext>>['track']>;
 interface InternalAudioStore extends AudioStore {
   notify: () => void;
 }
@@ -94,7 +94,7 @@ const createAudioStore = (): InternalAudioStore => {
   return store;
 };
 
-export const AudioPlayerProvider = ({
+export const AudioPlayerProviderClient = ({
   children,
   initialTrack,
   initialPlaylist,
@@ -134,11 +134,14 @@ export const AudioPlayerProvider = ({
     return createAudioStore();
   });
 
-  const open: NonNullable<ContextType<typeof PlayerContext>>['open'] = useCallback((track, playlist, pathDirectory) => {
-    setTrack(track);
-    setPlaylist(playlist);
-    setPlaylistPathDirectory(pathDirectory);
-  }, []);
+  const open: NonNullable<ContextType<typeof AudioPlayerContext>>['open'] = useCallback(
+    (track, playlist, pathDirectory) => {
+      setTrack(track);
+      setPlaylist(playlist);
+      setPlaylistPathDirectory(pathDirectory);
+    },
+    [],
+  );
 
   const close = useCallback(() => {
     setTrack(null);
@@ -152,7 +155,7 @@ export const AudioPlayerProvider = ({
     return playlistItem.src === track?.src;
   });
 
-  const setCurrentPlayingNumber: NonNullable<ContextType<typeof PlayerContext>>['setCurrentPlayingNumber'] =
+  const setCurrentPlayingNumber: NonNullable<ContextType<typeof AudioPlayerContext>>['setCurrentPlayingNumber'] =
     useCallback(
       (playingNumber) => {
         setTrack(playlist[playingNumber] ?? throwError());
@@ -224,7 +227,7 @@ export const AudioPlayerProvider = ({
     setCurrentPlayingNumber(previousPlayingNumber ?? 0);
   }, [currentPlayingNumber, historyItems, maybeNavigateToTrack, playlist, setCurrentPlayingNumber]);
 
-  const setPathDirectory: NonNullable<ContextType<typeof PlayerContext>>['setPathDirectory'] = useCallback(
+  const setPathDirectory: NonNullable<ContextType<typeof AudioPlayerContext>>['setPathDirectory'] = useCallback(
     (nextPathDirectory) => {
       pathDirectory.current = nextPathDirectory;
     },
@@ -364,7 +367,7 @@ export const AudioPlayerProvider = ({
     };
   }, [isTouchOnly, store, playback]);
 
-  const playerValue = useMemo<NonNullable<ContextType<typeof PlayerContext>>>(() => {
+  const playerValue = useMemo<NonNullable<ContextType<typeof AudioPlayerContext>>>(() => {
     return {
       track,
       playlistPathDirectory,
@@ -393,7 +396,7 @@ export const AudioPlayerProvider = ({
 
   return (
     <AudioStoreContext value={store}>
-      <PlayerContext value={playerValue}>{children}</PlayerContext>
+      <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>
     </AudioStoreContext>
   );
 };

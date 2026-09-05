@@ -6,7 +6,7 @@ import { createContext, useContext } from 'react';
 
 type Track = components['schemas']['FolderDataItemAudio'];
 
-export const PlayerContext = createContext<{
+export const AudioPlayerContext = createContext<{
   track: Track | null;
   playlistPathDirectory: string | null;
   open: (track: Track, playlist: Array<Track>, pathDirectory: string) => void;
@@ -21,5 +21,5 @@ export const PlayerContext = createContext<{
 } | null>(null);
 
 export const useAudioPlayer = () => {
-  return useContext(PlayerContext) ?? throwError();
+  return useContext(AudioPlayerContext) ?? throwError();
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAudioCurrentTime } from '../model/audio-store-context';
-import { useAudioPlayer } from '../model/player-context';
+import { useAudioPlayer } from '../model/audio-player-context';
 
 const ActiveTrackProgress = ({ duration }: { duration: number }) => {
   const currentTime = useAudioCurrentTime();

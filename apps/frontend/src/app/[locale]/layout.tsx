@@ -9,7 +9,7 @@ import { Header } from '@/widgets/header';
 import { Footer } from '@/widgets/footer';
 import { Toaster } from '@/shared/ui/ds/toast';
 
-import { PlayerProvider, Player } from '@/widgets/player';
+import { AudioPlayerProvider, Player } from '@/widgets/player';
 
 import { Gallery } from '@/shared/lib/gallery';
 import { GalleryProvider } from '@/widgets/gallery';
@@ -51,9 +51,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
       <IsAdminProvider>
         <QueryClientProvider>
           <ThemeProvider>
-            <PlayerProvider>
+            <AudioPlayerProvider>
               <GalleryProvider>{children}</GalleryProvider>
-            </PlayerProvider>
+            </AudioPlayerProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </IsAdminProvider>
