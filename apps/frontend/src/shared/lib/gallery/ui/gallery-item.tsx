@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import type { GalleryItem as TGalleryItem } from '../types/gallery-item';
+import { Video } from './video';
 
 export const GalleryItem = ({ galleryItem }: { galleryItem: TGalleryItem }) => {
   const propsBase = {
@@ -13,5 +14,5 @@ export const GalleryItem = ({ galleryItem }: { galleryItem: TGalleryItem }) => {
     return <Image {...propsBase} alt={galleryItem.name} />;
   }
 
-  return <video {...propsBase} controls />;
+  return <Video {...propsBase} />;
 };

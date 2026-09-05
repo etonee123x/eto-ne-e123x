@@ -9,7 +9,7 @@ export const PlayerProvider = async ({
   children,
 }: Omit<
   ComponentProps<typeof AudioPlayerProvider>,
-  'initialTrack' | 'initialPlaylist' | 'initialTrackPathDirectory'
+  'initialTrack' | 'initialPlaylist' | 'initialPlaylistPathDirectory'
 >) => {
   const headers = await _headers();
   // middleware may skip some paths (e.g. containing a dot), so x-pathname can be absent
@@ -32,7 +32,7 @@ export const PlayerProvider = async ({
   const pathDirectory = initialFolderData?.pathDirectory ?? null;
 
   return (
-    <AudioPlayerProvider initialTrack={track} initialPlaylist={playlist} initialTrackPathDirectory={pathDirectory}>
+    <AudioPlayerProvider initialTrack={track} initialPlaylist={playlist} initialPlaylistPathDirectory={pathDirectory}>
       {children}
     </AudioPlayerProvider>
   );

@@ -1,10 +1,10 @@
-import { BaseVideo } from '@/shared/ui/base-video';
 import { Item, ItemContent, ItemMedia } from '@/shared/ui/ds/item';
 import { Separator } from '@/shared/ui/ds/separator';
 import { Link } from '@/i18n/navigation';
 import { type components } from '@/shared/api/openapi';
 import { type ComponentProps } from 'react';
-import { ExplorerElementHeader } from '../explorer-element-header';
+import { ExplorerElementHeader } from '../../explorer-element-header';
+import { Video } from './video';
 
 export const ExplorerElementFileVideo = ({
   element,
@@ -17,7 +17,7 @@ export const ExplorerElementFileVideo = ({
         <Separator />
         <ItemContent>
           <ItemMedia>
-            <BaseVideo src={element.src} width={element.metadata.width} height={element.metadata.height} />
+            <Video src={element.src} width={element.metadata.width} height={element.metadata.height} />
           </ItemMedia>
         </ItemContent>
       </Item>

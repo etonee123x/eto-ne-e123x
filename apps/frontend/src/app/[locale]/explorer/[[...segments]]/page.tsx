@@ -62,7 +62,7 @@ export const generateMetadata = async ({
   const folderData = await queryClient.query(getFolderDataQueryOptions('/' + segments.join('/')));
 
   const navigationItems = pathDirectoryToNavigationItems(folderData.pathDirectory);
-  const folderName = navigationItems.at(-1)?.text;
+  const folderName = (navigationItems.at(-1) ?? throwError()).text;
 
   const image = isFolderDataItemFileImage(folderData.file)
     ? folderData.file
@@ -121,12 +121,9 @@ export const generateMetadata = async ({
           folderData.file.metadata.artists.length > 0
             ? intlListFormat.format(folderData.file.metadata.artists)
             : t('description.audio.idkWho'),
-        album:
-          folderData.file.metadata.album || folderName
-            ? t('description.audio.album', {
-                album: folderData.file.metadata.album ?? folderName ?? '',
-              })
-            : '',
+        album: t('description.audio.album', {
+          album: folderData.file.metadata.album ?? folderName,
+        }),
         year: folderData.file.metadata.year ? t('description.audio.year', { year: folderData.file.metadata.year }) : '',
         duration: folderData.file.metadata.duration
           ? t('description.audio.duration', {
@@ -140,7 +137,7 @@ export const generateMetadata = async ({
   return {
     ...defaults,
     description: t('description.common.soWhatWeHaveHere', {
-      folderName: folderName ?? '',
+      folderName,
       fileDescription: folderData.file
         ? t('description.common.watch', {
             type: isFolderDataItemFileImage(folderData.file)
