@@ -2,97 +2,17 @@
 
 import { type ContextType, type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isClient } from '@/shared/utils/target';
-import { isNil } from '@/shared/utils/is-nil';
-import { AudioStoreContext, type AudioStore } from './audio-store-context';
+import { AudioStoreContext } from './audio-store-context';
+import { AudioControllerContext, type AudioController } from './audio-controller-context';
 import { AudioPlayerContext } from './audio-player-context';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
 import { throwError } from '@/shared/utils/throw-error';
 import { useSinglePlayback } from '@/shared/hooks/use-single-playback';
-
-const DEFAULT_VOLUME = 1;
-
-const localStorageVolume = (() => {
-  const LOCAL_STORAGE_KEY = 'player:volume';
-
-  return {
-    get: () => {
-      if (!('localStorage' in globalThis)) {
-        return null;
-      }
-
-      const value = globalThis.localStorage.getItem(LOCAL_STORAGE_KEY);
-
-      if (isNil(value) || Number.isNaN(Number(value))) {
-        globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(DEFAULT_VOLUME));
-        return DEFAULT_VOLUME;
-      }
-
-      return Number(value);
-    },
-    set: (volume: number) => {
-      if ('localStorage' in globalThis) {
-        globalThis.localStorage.setItem(LOCAL_STORAGE_KEY, String(volume));
-      }
-    },
-  };
-})();
+import { createAudioStore, DEFAULT_VOLUME } from './audio-store';
 
 type Track = NonNullable<NonNullable<ContextType<typeof AudioPlayerContext>>['track']>;
-interface InternalAudioStore extends AudioStore {
-  notify: () => void;
-}
-
-const createAudioStore = (): InternalAudioStore => {
-  const listeners = new Set<() => void>();
-  let audioElement: HTMLAudioElement | null = null;
-  const notify = () => {
-    listeners.forEach((listener) => {
-      listener();
-    });
-  };
-  const store: InternalAudioStore = {
-    currentTime: 0,
-    volume: localStorageVolume.get() ?? DEFAULT_VOLUME,
-    isPlaying: false,
-    play: () => {
-      return audioElement?.play();
-    },
-    pause: () => {
-      return audioElement?.pause();
-    },
-    setCurrentTime: (currentTime) => {
-      if (!audioElement) {
-        return;
-      }
-
-      audioElement.currentTime = currentTime;
-      store.currentTime = currentTime;
-      notify();
-    },
-    setVolume: (volume) => {
-      localStorageVolume.set(volume);
-      store.volume = volume;
-      if (audioElement) {
-        audioElement.volume = volume;
-      }
-      notify();
-    },
-    setAudioElement: (nextAudioElement) => {
-      audioElement = nextAudioElement;
-    },
-    subscribe: (listener) => {
-      listeners.add(listener);
-      return () => {
-        return listeners.delete(listener);
-      };
-    },
-    notify,
-  };
-
-  return store;
-};
 
 export const AudioPlayerProviderClient = ({
   children,
@@ -133,6 +53,33 @@ export const AudioPlayerProviderClient = ({
   const [store] = useState(() => {
     return createAudioStore();
   });
+
+  const audioController = useMemo<AudioController>(() => {
+    return {
+      play: () => {
+        return audioRef.current?.play();
+      },
+      pause: () => {
+        audioRef.current?.pause();
+      },
+      setCurrentTime: (currentTime) => {
+        const audio = audioRef.current;
+        if (!audio) {
+          return;
+        }
+
+        audio.currentTime = currentTime;
+        store.setCurrentTime(currentTime);
+      },
+      setVolume: (volume) => {
+        store.setVolume(volume);
+        const audio = audioRef.current;
+        if (audio) {
+          audio.volume = volume;
+        }
+      },
+    };
+  }, [store]);
 
   const open: NonNullable<ContextType<typeof AudioPlayerContext>>['open'] = useCallback(
     (track, playlist, pathDirectory) => {
@@ -249,15 +196,15 @@ export const AudioPlayerProviderClient = ({
       artist: track.metadata.artists.join(', '),
       album: track.metadata.album ?? undefined,
     });
-    navigator.mediaSession.setActionHandler('play', store.play);
-    navigator.mediaSession.setActionHandler('pause', store.pause);
+    navigator.mediaSession.setActionHandler('play', audioController.play);
+    navigator.mediaSession.setActionHandler('pause', audioController.pause);
     navigator.mediaSession.setActionHandler('nexttrack', next);
     navigator.mediaSession.setActionHandler('previoustrack', previous);
     navigator.mediaSession.setActionHandler('seekbackward', () => {
-      store.setCurrentTime(Math.max(0, store.currentTime - 10));
+      audioController.setCurrentTime(Math.max(0, store.currentTime - 10));
     });
     navigator.mediaSession.setActionHandler('seekforward', () => {
-      store.setCurrentTime(Math.min(track.metadata.duration / 1000, store.currentTime + 10));
+      audioController.setCurrentTime(Math.min(track.metadata.duration / 1000, store.currentTime + 10));
     });
 
     return () => {
@@ -268,14 +215,13 @@ export const AudioPlayerProviderClient = ({
       navigator.mediaSession.setActionHandler('seekbackward', null);
       navigator.mediaSession.setActionHandler('seekforward', null);
     };
-  }, [next, previous, store, track]);
+  }, [audioController, next, previous, store, track]);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) {
       return;
     }
-    store.setAudioElement(audio);
     if (!track) {
       audio.pause();
       audio.currentTime = 0;
@@ -312,7 +258,6 @@ export const AudioPlayerProviderClient = ({
     return () => {
       audioRef.current?.pause();
       audioRef.current = null;
-      store.setAudioElement(null);
     };
   }, [store]);
 
@@ -321,18 +266,15 @@ export const AudioPlayerProviderClient = ({
 
     const onPlay = () => {
       playback();
-      store.isPlaying = true;
-      store.notify();
+      store.setIsPlaying(true);
     };
 
     const onPause = () => {
-      store.isPlaying = false;
-      store.notify();
+      store.setIsPlaying(false);
     };
 
     const onResetCurrentTime = () => {
-      store.currentTime = 0;
-      store.notify();
+      store.setCurrentTime(0);
     };
 
     const onTimeUpdate = (event: Event) => {
@@ -340,8 +282,7 @@ export const AudioPlayerProviderClient = ({
         return;
       }
 
-      store.currentTime = event.currentTarget.currentTime;
-      store.notify();
+      store.setCurrentTime(event.currentTarget.currentTime);
     };
 
     const onVolumeChange = (event: Event) => {
@@ -349,9 +290,7 @@ export const AudioPlayerProviderClient = ({
         return;
       }
 
-      store.volume = event.currentTarget.volume;
-      localStorageVolume.set(store.volume);
-      store.notify();
+      store.setVolume(event.currentTarget.volume);
     };
 
     audio?.addEventListener('play', onPlay);
@@ -399,8 +338,10 @@ export const AudioPlayerProviderClient = ({
   ]);
 
   return (
-    <AudioStoreContext value={store}>
-      <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>
-    </AudioStoreContext>
+    <AudioControllerContext value={audioController}>
+      <AudioStoreContext value={store}>
+        <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>
+      </AudioStoreContext>
+    </AudioControllerContext>
   );
 };

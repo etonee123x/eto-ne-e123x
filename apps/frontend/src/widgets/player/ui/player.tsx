@@ -2,7 +2,7 @@
 
 import { useState, type ComponentProps } from 'react';
 import {
-  useAudio,
+  useAudioController,
   useAudioCurrentTime,
   useAudioIsPlaying,
   useAudioPlayer,
@@ -35,7 +35,7 @@ const PlayerSlider = () => {
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
 
   const currentTime = useAudioCurrentTime();
-  const { setCurrentTime } = useAudio();
+  const { setCurrentTime } = useAudioController();
   const duration = track.metadata.duration;
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
@@ -74,7 +74,7 @@ const PlayerSlider = () => {
 
 const PlayerControlsVolume = () => {
   const volume = useAudioVolume();
-  const { setVolume } = useAudio();
+  const { setVolume } = useAudioController();
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
@@ -105,7 +105,7 @@ const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
   const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
-  const { play, pause } = useAudio();
+  const { play, pause } = useAudioController();
   const isPlaying = useAudioIsPlaying();
 
   const onClickPlay = () => {

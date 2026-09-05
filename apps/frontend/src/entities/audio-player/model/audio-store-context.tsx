@@ -7,11 +7,6 @@ export interface AudioStore {
   currentTime: number;
   volume: number;
   isPlaying: boolean;
-  play: () => void;
-  pause: () => void;
-  setCurrentTime: (currentTime: number) => void;
-  setVolume: (volume: number) => void;
-  setAudioElement: (audioElement: HTMLAudioElement | null) => void;
   subscribe: (listener: () => void) => () => void;
 }
 
@@ -19,12 +14,6 @@ export const AudioStoreContext = createContext<AudioStore | null>(null);
 
 const useAudioStore = () => {
   return useContext(AudioStoreContext) ?? throwError();
-};
-
-export const useAudio = () => {
-  const { play, pause, setCurrentTime, setVolume } = useAudioStore();
-
-  return { play, pause, setCurrentTime, setVolume };
 };
 
 export const useAudioCurrentTime = () => {
