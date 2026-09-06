@@ -264,24 +264,12 @@ export const AudioPlayerProviderClient = ({
     });
     navigator.mediaSession.setActionHandler('nexttrack', next);
     navigator.mediaSession.setActionHandler('previoustrack', previous);
-    navigator.mediaSession.setActionHandler('seekbackward', () => {
-      if (audioCurrent) {
-        audioCurrent.currentTime = Math.max(0, audioCurrent.currentTime - 10);
-      }
-    });
-    navigator.mediaSession.setActionHandler('seekforward', () => {
-      if (audioCurrent) {
-        audioCurrent.currentTime = Math.min(track.metadata.duration / 1000, audioCurrent.currentTime + 10);
-      }
-    });
 
     return () => {
       navigator.mediaSession.setActionHandler('play', null);
       navigator.mediaSession.setActionHandler('pause', null);
       navigator.mediaSession.setActionHandler('nexttrack', null);
       navigator.mediaSession.setActionHandler('previoustrack', null);
-      navigator.mediaSession.setActionHandler('seekbackward', null);
-      navigator.mediaSession.setActionHandler('seekforward', null);
     };
   }, [next, previous, track]);
 
