@@ -1,29 +1,21 @@
 'use client';
 
+import { useEventListener } from '@reactuses/core';
 import { useAudioPlayer } from '../model/audio-player-context';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 const ActiveTrackProgress = ({ duration }: { duration: number }) => {
   const { audio } = useAudioPlayer();
-  const [currentTime, setCurrentTime] = useState(0);
 
-  useEffect(() => {
-    const audioCurrent = audio.current;
+  const getCurrentTime = () => {
+    return audio.current?.currentTime ?? 0;
+  };
 
-    if (!audioCurrent) {
-      return;
-    }
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
-    const onTimeUpdate = () => {
-      setCurrentTime(audioCurrent.currentTime);
-    };
-
-    audioCurrent.addEventListener('timeupdate', onTimeUpdate);
-
-    return () => {
-      audioCurrent.removeEventListener('timeupdate', onTimeUpdate);
-    };
-  }, [audio]);
+  useEventListener('timeupdate', () => {
+    setCurrentTime(getCurrentTime());
+  });
 
   const percent = duration > 0 ? Math.min(100, ((currentTime * 1000) / duration) * 100) : 0;
 

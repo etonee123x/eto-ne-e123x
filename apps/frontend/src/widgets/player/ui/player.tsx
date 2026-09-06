@@ -14,6 +14,7 @@ import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
 import { throwError } from '@/shared/utils/throw-error';
+import { DEFAULT_VOLUME } from '@/entities/audio-player/model/local-storage-volume';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -24,9 +25,16 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
 
 const PlayerSlider = () => {
   const t = useTranslations('ThePlayer');
-  const { audio, track: maybeTrack } = useAudioPlayer();
-  const track = maybeTrack ?? throwError();
-  const [currentTime, setCurrentTime] = useState(0);
+  const { audio, track } = useAudioPlayer();
+  if (!track) {
+    throw new Error('No track available');
+  }
+
+  const getCurrentTime = () => {
+    return audio.current?.currentTime ?? 0;
+  };
+
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
   const duration = track.metadata.duration;
@@ -34,13 +42,7 @@ const PlayerSlider = () => {
   useEventListener(
     'timeupdate',
     () => {
-      const audioCurrent = audio.current;
-
-      if (!audioCurrent) {
-        return;
-      }
-
-      setCurrentTime(audioCurrent.currentTime);
+      setCurrentTime(getCurrentTime());
     },
     audio,
   );
@@ -85,7 +87,11 @@ const PlayerSlider = () => {
 
 const PlayerControlsVolume = () => {
   const { audio } = useAudioPlayer();
-  const [volume, setVolume] = useState(1);
+  const getVolume = () => {
+    return audio.current?.volume ?? DEFAULT_VOLUME;
+  };
+
+  const [volume, setVolume] = useState(getVolume());
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
@@ -95,7 +101,7 @@ const PlayerControlsVolume = () => {
   useEventListener(
     'volumechange',
     () => {
-      setVolume(audio.current?.volume ?? 0);
+      setVolume(getVolume());
     },
     audio,
   );
@@ -130,10 +136,19 @@ const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
   const { audio, next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  const getIsPlaying = () => {
+    if (!audio.current) {
+      return false;
+    }
+
+    return !audio.current.paused;
+  };
+
+  const [isPlaying, setIsPlaying] = useState(getIsPlaying());
 
   const onPlaybackChange = () => {
-    setIsPlaying(!audio.current?.paused);
+    setIsPlaying(getIsPlaying());
   };
 
   useEventListener('play', onPlaybackChange, audio);

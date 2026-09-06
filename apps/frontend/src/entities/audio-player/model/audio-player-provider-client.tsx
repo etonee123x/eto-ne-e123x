@@ -170,6 +170,38 @@ export const AudioPlayerProviderClient = ({
     audio,
   );
 
+  useEventListener(
+    'loadstart',
+    () => {
+      if (!audio.current) {
+        return;
+      }
+
+      audio.current.currentTime = 0;
+    },
+    audio,
+  );
+
+  useEventListener(
+    'emptied',
+    () => {
+      if (!audio.current) {
+        return;
+      }
+
+      audio.current.currentTime = 0;
+    },
+    audio,
+  );
+
+  useEventListener(
+    'ended',
+    () => {
+      next();
+    },
+    audio,
+  );
+
   useEffect(() => {
     const audioCurrent = audio.current;
 
