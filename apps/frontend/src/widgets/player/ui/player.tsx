@@ -47,6 +47,14 @@ const PlayerSlider = () => {
     audio,
   );
 
+  useEventListener(
+    'loadstart',
+    () => {
+      setCurrentTime(getCurrentTime());
+    },
+    audio,
+  );
+
   const sliderTimeSeconds = seekPreview ?? currentTime;
 
   const currentTimeFormats = millisecondsToTimeFormats(sliderTimeSeconds * 1000);
