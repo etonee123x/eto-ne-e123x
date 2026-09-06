@@ -96,15 +96,15 @@ export const AudioPlayerProviderClient = ({
       : (currentPlayingNumber + 1) % playlist.length;
   }, [currentPlayingNumber, isShuffleModeEnabled, playlist.length]);
 
-  const maybeNavigateToTrack = useCallback(
-    (_track: Track) => {
-      if (!(track && decodeURIComponent(pathname) === '/explorer' + track.path)) {
-        return;
-      }
+  const doesRoutePathEqualToTrackPath = useCallback(() => {
+    return track && decodeURIComponent(pathname) === '/explorer' + track.path;
+  }, [pathname, track]);
 
+  const navigateToTrack = useCallback(
+    (_track: Track) => {
       router.replace('/explorer' + _track.path, { scroll: false });
     },
-    [pathname, router, track],
+    [router],
   );
 
   const next = useCallback(() => {
@@ -114,14 +114,23 @@ export const AudioPlayerProviderClient = ({
     }
 
     const nextTrack = playlist[nextPlayingNumber] ?? throwError();
-    maybeNavigateToTrack(nextTrack);
-
     setHistoryItems((historyItems) => {
       return [...historyItems, currentPlayingNumber];
     });
 
-    setCurrentPlayingNumber(nextPlayingNumber);
-  }, [currentPlayingNumber, getNextPlayingNumber, maybeNavigateToTrack, playlist, setCurrentPlayingNumber]);
+    if (doesRoutePathEqualToTrackPath()) {
+      navigateToTrack(nextTrack);
+    } else {
+      setCurrentPlayingNumber(nextPlayingNumber);
+    }
+  }, [
+    currentPlayingNumber,
+    doesRoutePathEqualToTrackPath,
+    getNextPlayingNumber,
+    navigateToTrack,
+    playlist,
+    setCurrentPlayingNumber,
+  ]);
 
   const previous = useCallback(() => {
     if (currentPlayingNumber === -1 || playlist.length === 0) {
@@ -131,9 +140,12 @@ export const AudioPlayerProviderClient = ({
     if (historyItems.length === 0) {
       const previousPlayingNumber = (currentPlayingNumber - 1 + playlist.length) % playlist.length;
       const previousTrack = playlist[previousPlayingNumber] ?? throwError();
-      maybeNavigateToTrack(previousTrack);
 
-      setCurrentPlayingNumber(previousPlayingNumber);
+      if (doesRoutePathEqualToTrackPath()) {
+        navigateToTrack(previousTrack);
+      } else {
+        setCurrentPlayingNumber(previousPlayingNumber);
+      }
 
       return;
     }
@@ -145,10 +157,19 @@ export const AudioPlayerProviderClient = ({
       return historyItems.slice(0, -1);
     });
 
-    maybeNavigateToTrack(previousTrack);
-
-    setCurrentPlayingNumber(previousPlayingNumber ?? 0);
-  }, [currentPlayingNumber, historyItems, maybeNavigateToTrack, playlist, setCurrentPlayingNumber]);
+    if (doesRoutePathEqualToTrackPath()) {
+      navigateToTrack(previousTrack);
+    } else {
+      setCurrentPlayingNumber(previousPlayingNumber ?? 0);
+    }
+  }, [
+    currentPlayingNumber,
+    historyItems,
+    doesRoutePathEqualToTrackPath,
+    navigateToTrack,
+    playlist,
+    setCurrentPlayingNumber,
+  ]);
 
   const setPathDirectory: NonNullable<ContextType<typeof AudioPlayerContext>>['setPathDirectory'] = useCallback(
     (nextPathDirectory) => {
