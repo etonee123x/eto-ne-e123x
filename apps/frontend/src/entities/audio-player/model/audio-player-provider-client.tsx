@@ -11,6 +11,7 @@ import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-cu
 import { throwError } from '@/shared/utils/throw-error';
 import { useSinglePlayback } from '@/shared/hooks/use-single-playback';
 import { createAudioStore, DEFAULT_VOLUME } from './audio-store';
+import { useEventListener } from '@reactuses/core';
 
 type Track = NonNullable<NonNullable<ContextType<typeof AudioPlayerContext>>['track']>;
 
@@ -240,15 +241,6 @@ export const AudioPlayerProviderClient = ({
 
   useEffect(() => {
     const audio = audioRef.current;
-    audio?.addEventListener('ended', next);
-
-    return () => {
-      audio?.removeEventListener('ended', next);
-    };
-  }, [next]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
     if (audio) {
       audio.volume = isTouchOnly ? DEFAULT_VOLUME : store.volume;
     }
@@ -261,54 +253,42 @@ export const AudioPlayerProviderClient = ({
     };
   }, [store]);
 
-  useEffect(() => {
-    const audio = audioRef.current;
+  const onPlay = () => {
+    playback();
+    store.setIsPlaying(true);
+  };
 
-    const onPlay = () => {
-      playback();
-      store.setIsPlaying(true);
-    };
+  const onPause = () => {
+    store.setIsPlaying(false);
+  };
 
-    const onPause = () => {
-      store.setIsPlaying(false);
-    };
+  const onResetCurrentTime = () => {
+    store.setCurrentTime(0);
+  };
 
-    const onResetCurrentTime = () => {
-      store.setCurrentTime(0);
-    };
+  const onTimeUpdate = (event: Event) => {
+    if (!(event.currentTarget instanceof HTMLAudioElement)) {
+      return;
+    }
 
-    const onTimeUpdate = (event: Event) => {
-      if (!(event.currentTarget instanceof HTMLAudioElement)) {
-        return;
-      }
+    store.setCurrentTime(event.currentTarget.currentTime);
+  };
 
-      store.setCurrentTime(event.currentTarget.currentTime);
-    };
+  const onVolumeChange = (event: Event) => {
+    if (!(event.currentTarget instanceof HTMLAudioElement) || isTouchOnly) {
+      return;
+    }
 
-    const onVolumeChange = (event: Event) => {
-      if (!(event.currentTarget instanceof HTMLAudioElement) || isTouchOnly) {
-        return;
-      }
+    store.setVolume(event.currentTarget.volume);
+  };
 
-      store.setVolume(event.currentTarget.volume);
-    };
-
-    audio?.addEventListener('play', onPlay);
-    audio?.addEventListener('pause', onPause);
-    audio?.addEventListener('loadstart', onResetCurrentTime);
-    audio?.addEventListener('emptied', onResetCurrentTime);
-    audio?.addEventListener('timeupdate', onTimeUpdate);
-    audio?.addEventListener('volumechange', onVolumeChange);
-
-    return () => {
-      audio?.removeEventListener('play', onPlay);
-      audio?.removeEventListener('pause', onPause);
-      audio?.removeEventListener('loadstart', onResetCurrentTime);
-      audio?.removeEventListener('emptied', onResetCurrentTime);
-      audio?.removeEventListener('timeupdate', onTimeUpdate);
-      audio?.removeEventListener('volumechange', onVolumeChange);
-    };
-  }, [isTouchOnly, store, playback]);
+  useEventListener('ended', next, audioRef);
+  useEventListener('play', onPlay, audioRef);
+  useEventListener('pause', onPause, audioRef);
+  useEventListener('loadstart', onResetCurrentTime, audioRef);
+  useEventListener('emptied', onResetCurrentTime, audioRef);
+  useEventListener('timeupdate', onTimeUpdate, audioRef);
+  useEventListener('volumechange', onVolumeChange, audioRef);
 
   const playerValue = useMemo<NonNullable<ContextType<typeof AudioPlayerContext>>>(() => {
     return {
