@@ -264,6 +264,8 @@ export const AudioPlayerProviderClient = ({
     });
     navigator.mediaSession.setActionHandler('nexttrack', next);
     navigator.mediaSession.setActionHandler('previoustrack', previous);
+    navigator.mediaSession.setActionHandler('seekforward', null);
+    navigator.mediaSession.setActionHandler('seekbackward', null);
 
     return () => {
       navigator.mediaSession.setActionHandler('play', null);
