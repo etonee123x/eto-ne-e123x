@@ -1,14 +1,14 @@
 import { type ComponentProps } from 'react';
-import { AudioPlayerProvider } from '@/entities/audio-player';
+import { AudioPlayerProviderClient } from '@/entities/audio-player';
 import { headers as _headers } from 'next/headers';
 import { isNil } from '@/shared/utils/is-nil';
 import { getFolderDataQueryOptions } from '@/entities/folder-data';
 import { QueryClient } from '@tanstack/react-query';
 
-export const PlayerProvider = async ({
+export const AudioPlayerProvider = async ({
   children,
 }: Omit<
-  ComponentProps<typeof AudioPlayerProvider>,
+  ComponentProps<typeof AudioPlayerProviderClient>,
   'initialTrack' | 'initialPlaylist' | 'initialPlaylistPathDirectory'
 >) => {
   const headers = await _headers();
@@ -32,8 +32,12 @@ export const PlayerProvider = async ({
   const pathDirectory = initialFolderData?.pathDirectory ?? null;
 
   return (
-    <AudioPlayerProvider initialTrack={track} initialPlaylist={playlist} initialPlaylistPathDirectory={pathDirectory}>
+    <AudioPlayerProviderClient
+      initialTrack={track}
+      initialPlaylist={playlist}
+      initialPlaylistPathDirectory={pathDirectory}
+    >
       {children}
-    </AudioPlayerProvider>
+    </AudioPlayerProviderClient>
   );
 };

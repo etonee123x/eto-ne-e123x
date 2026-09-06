@@ -1,10 +1,22 @@
 'use client';
 
-import { useAudioCurrentTime } from '../model/audio-store-context';
-import { useAudioPlayer } from '../model/player-context';
+import { useEventListener } from '@reactuses/core';
+import { useAudioPlayer } from '../model/audio-player-context';
+import { useState } from 'react';
 
 const ActiveTrackProgress = ({ duration }: { duration: number }) => {
-  const currentTime = useAudioCurrentTime();
+  const { audio } = useAudioPlayer();
+
+  const getCurrentTime = () => {
+    return audio.current?.currentTime ?? 0;
+  };
+
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
+
+  useEventListener('timeupdate', () => {
+    setCurrentTime(getCurrentTime());
+  });
+
   const percent = duration > 0 ? Math.min(100, ((currentTime * 1000) / duration) * 100) : 0;
 
   return (

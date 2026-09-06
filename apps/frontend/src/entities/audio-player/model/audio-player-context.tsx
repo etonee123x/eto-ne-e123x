@@ -2,11 +2,12 @@
 
 import { throwError } from '@/shared/utils/throw-error';
 import type { components } from '@/shared/api/openapi';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, type RefObject } from 'react';
 
 type Track = components['schemas']['FolderDataItemAudio'];
 
-export const PlayerContext = createContext<{
+export const AudioPlayerContext = createContext<{
+  audio: RefObject<HTMLAudioElement | null>;
   track: Track | null;
   playlistPathDirectory: string | null;
   open: (track: Track, playlist: Array<Track>, pathDirectory: string) => void;
@@ -21,5 +22,5 @@ export const PlayerContext = createContext<{
 } | null>(null);
 
 export const useAudioPlayer = () => {
-  return useContext(PlayerContext) ?? throwError();
+  return useContext(AudioPlayerContext) ?? throwError();
 };

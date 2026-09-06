@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, type ComponentProps } from 'react';
-import {
-  useAudio,
-  useAudioCurrentTime,
-  useAudioIsPlaying,
-  useAudioPlayer,
-  useAudioVolume,
-} from '@/entities/audio-player';
+import { useAudioPlayer } from '@/entities/audio-player';
 import { Check, Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
@@ -15,11 +9,12 @@ import { Button } from '@/shared/ui/ds/button';
 import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
-import { useTimeoutFn } from '@reactuses/core';
+import { useEventListener, useTimeoutFn } from '@reactuses/core';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
 import { throwError } from '@/shared/utils/throw-error';
+import { DEFAULT_VOLUME } from '@/entities/audio-player/model/local-storage-volume';
 
 const millisecondsToTimeFormats = (milliseconds: number) => {
   return {
@@ -30,13 +25,35 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
 
 const PlayerSlider = () => {
   const t = useTranslations('ThePlayer');
-  const track = useAudioPlayer().track ?? throwError();
+  const { audio, track } = useAudioPlayer();
+  if (!track) {
+    throw new Error('No track available');
+  }
+
+  const getCurrentTime = () => {
+    return audio.current?.currentTime ?? 0;
+  };
+
+  const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
-
-  const currentTime = useAudioCurrentTime();
-  const { setCurrentTime } = useAudio();
   const duration = track.metadata.duration;
+
+  useEventListener(
+    'timeupdate',
+    () => {
+      setCurrentTime(getCurrentTime());
+    },
+    audio,
+  );
+
+  useEventListener(
+    'loadstart',
+    () => {
+      setCurrentTime(getCurrentTime());
+    },
+    audio,
+  );
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
 
@@ -46,6 +63,10 @@ const PlayerSlider = () => {
   const onValueCommitted: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
     const seconds = Number(value);
 
+    if (audio.current) {
+      // eslint-disable-next-line react-hooks/immutability -- HTMLAudioElement is an imperative browser API.
+      audio.current.currentTime = seconds;
+    }
     setCurrentTime(seconds);
     setSeekPreview(null);
   };
@@ -73,16 +94,34 @@ const PlayerSlider = () => {
 };
 
 const PlayerControlsVolume = () => {
-  const volume = useAudioVolume();
-  const { setVolume } = useAudio();
+  const { audio } = useAudioPlayer();
+  const getVolume = () => {
+    return audio.current?.volume ?? DEFAULT_VOLUME;
+  };
+
+  const [volume, setVolume] = useState(getVolume());
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
 
   const isTouchOnly = useIsTouchOnly();
 
+  useEventListener(
+    'volumechange',
+    () => {
+      setVolume(getVolume());
+    },
+    audio,
+  );
+
   const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
-    setVolume(Number(value));
+    const volume = Number(value);
+
+    if (audio.current) {
+      // eslint-disable-next-line react-hooks/immutability -- HTMLAudioElement is an imperative browser API.
+      audio.current.volume = volume;
+    }
+    setVolume(volume);
   };
 
   return (
@@ -104,16 +143,31 @@ const PlayerControlsVolume = () => {
 const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
-  const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
-  const { play, pause } = useAudio();
-  const isPlaying = useAudioIsPlaying();
+  const { audio, next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
 
-  const onClickPlay = () => {
-    play();
+  const getIsPlaying = () => {
+    if (!audio.current) {
+      return false;
+    }
+
+    return !audio.current.paused;
+  };
+
+  const [isPlaying, setIsPlaying] = useState(getIsPlaying());
+
+  const onPlaybackChange = () => {
+    setIsPlaying(getIsPlaying());
+  };
+
+  useEventListener('play', onPlaybackChange, audio);
+  useEventListener('pause', onPlaybackChange, audio);
+
+  const onClickPlay = async () => {
+    await audio.current?.play();
   };
 
   const onClickPause = () => {
-    pause();
+    audio.current?.pause();
   };
 
   const onClickPrevious = () => {

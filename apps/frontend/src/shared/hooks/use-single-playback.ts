@@ -1,5 +1,5 @@
 import { useBroadcastChannel, useEventListener } from '@reactuses/core';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 type Id = string & { _type?: 'PlayerId' };
 
@@ -12,12 +12,12 @@ export const useSinglePlayback = ({ onOtherPlayback }: { onOtherPlayback: () => 
 
   const { channel, post } = useBroadcastChannel<Id, Id>({ name: 'single-playback' });
 
-  const playback = () => {
+  const playback = useCallback(() => {
     const event: SinglePlaybackEvent = new CustomEvent(EVENT_NAME, { detail: id.current });
 
     globalThis.dispatchEvent(event);
     post(id.current);
-  };
+  }, [post]);
 
   const onPlaybackEvent = (event: SinglePlaybackEvent) => {
     if (event.detail === id.current) {
