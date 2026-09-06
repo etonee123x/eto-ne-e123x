@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ComponentProps } from 'react';
-import { useAudioCurrentTime, useAudioIsPlaying, useAudioPlayer, useAudioVolume } from '@/entities/audio-player';
+import { useAudioPlayer } from '@/entities/audio-player';
 import { Check, Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
@@ -9,7 +9,7 @@ import { Button } from '@/shared/ui/ds/button';
 import { Slider } from '@/shared/ui/ds/slider';
 import { millisecondsToHumanReadable } from '@/shared/utils/milliseconds-to-human-readable';
 import { Temporal } from 'temporal-polyfill';
-import { useTimeoutFn } from '@reactuses/core';
+import { useEventListener, useTimeoutFn } from '@reactuses/core';
 import { Toggle } from '@/shared/ui/ds/toggle';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { useHasMounted } from '@/shared/hooks/use-has-mounted';
@@ -24,11 +24,26 @@ const millisecondsToTimeFormats = (milliseconds: number) => {
 
 const PlayerSlider = () => {
   const t = useTranslations('ThePlayer');
-  const track = useAudioPlayer().track ?? throwError();
+  const { audio, track: maybeTrack } = useAudioPlayer();
+  const track = maybeTrack ?? throwError();
+  const [currentTime, setCurrentTime] = useState(0);
 
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
-  const [currentTime, setCurrentTime] = useAudioCurrentTime();
   const duration = track.metadata.duration;
+
+  useEventListener(
+    'timeupdate',
+    () => {
+      const audioCurrent = audio.current;
+
+      if (!audioCurrent) {
+        return;
+      }
+
+      setCurrentTime(audioCurrent.currentTime);
+    },
+    audio,
+  );
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
 
@@ -38,6 +53,10 @@ const PlayerSlider = () => {
   const onValueCommitted: ComponentProps<typeof Slider>['onValueCommitted'] = (value) => {
     const seconds = Number(value);
 
+    if (audio.current) {
+      // eslint-disable-next-line react-hooks/immutability -- HTMLAudioElement is an imperative browser API.
+      audio.current.currentTime = seconds;
+    }
     setCurrentTime(seconds);
     setSeekPreview(null);
   };
@@ -65,15 +84,30 @@ const PlayerSlider = () => {
 };
 
 const PlayerControlsVolume = () => {
-  const [volume, setVolume] = useAudioVolume();
+  const { audio } = useAudioPlayer();
+  const [volume, setVolume] = useState(1);
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
 
   const isTouchOnly = useIsTouchOnly();
 
+  useEventListener(
+    'volumechange',
+    () => {
+      setVolume(audio.current?.volume ?? 0);
+    },
+    audio,
+  );
+
   const onValueChangeVolume: ComponentProps<typeof Slider>['onValueChange'] = (value) => {
-    setVolume(Number(value));
+    const volume = Number(value);
+
+    if (audio.current) {
+      // eslint-disable-next-line react-hooks/immutability -- HTMLAudioElement is an imperative browser API.
+      audio.current.volume = volume;
+    }
+    setVolume(volume);
   };
 
   return (
@@ -95,15 +129,22 @@ const PlayerControlsVolume = () => {
 const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
-  const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
-  const [isPlaying, { play, pause }] = useAudioIsPlaying();
+  const { audio, next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const onClickPlay = () => {
-    play();
+  const onPlaybackChange = () => {
+    setIsPlaying(!audio.current?.paused);
+  };
+
+  useEventListener('play', onPlaybackChange, audio);
+  useEventListener('pause', onPlaybackChange, audio);
+
+  const onClickPlay = async () => {
+    await audio.current?.play();
   };
 
   const onClickPause = () => {
-    pause();
+    audio.current?.pause();
   };
 
   const onClickPrevious = () => {

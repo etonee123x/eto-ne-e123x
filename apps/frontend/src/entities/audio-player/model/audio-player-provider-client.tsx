@@ -1,15 +1,15 @@
 'use client';
 
 import { type ContextType, type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AudioStoreContext } from './audio-store-context';
 import { AudioPlayerContext } from './audio-player-context';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
 import { throwError } from '@/shared/utils/throw-error';
 import { useSinglePlayback } from '@/shared/hooks/use-single-playback';
-import { AudioStore } from './audio-store';
 import { localStorageVolume, DEFAULT_VOLUME } from './local-storage-volume';
+import { isClient } from '@/shared/utils/target';
+import { useEventListener } from '@reactuses/core';
 
 type Track = NonNullable<NonNullable<ContextType<typeof AudioPlayerContext>>['track']>;
 
@@ -41,15 +41,21 @@ export const AudioPlayerProviderClient = ({
 
   const pathDirectory = useRef<string | null>(initialPlaylistPathDirectory);
 
+  const audio = useRef<HTMLAudioElement | null>(null);
+
+  // eslint-disable-next-line react-hooks/refs -- create one stable browser Audio resource.
+  if (audio.current === null && isClient) {
+    const audioCurrent = new Audio();
+
+    audioCurrent.volume = isTouchOnly ? DEFAULT_VOLUME : localStorageVolume.get();
+    audio.current = audioCurrent;
+  }
+
   const { playback } = useSinglePlayback({
     onOtherPlayback: () => {
-      audioStore.current.pause();
+      audio.current?.pause();
     },
   });
-
-  const audioStore = useRef(
-    new AudioStore({ volume: isTouchOnly ? DEFAULT_VOLUME : localStorageVolume.get(), playback }),
-  );
 
   const open: NonNullable<ContextType<typeof AudioPlayerContext>>['open'] = useCallback(
     (track, playlist, pathDirectory) => {
@@ -151,7 +157,38 @@ export const AudioPlayerProviderClient = ({
     [],
   );
 
+  useEventListener('play', playback, audio);
+  useEventListener(
+    'volumechange',
+    () => {
+      if (!audio.current) {
+        return;
+      }
+
+      localStorageVolume.set(audio.current.volume);
+    },
+    audio,
+  );
+
   useEffect(() => {
+    const audioCurrent = audio.current;
+
+    if (!audioCurrent) {
+      return;
+    }
+
+    audioCurrent.autoplay = true;
+
+    return () => {
+      audioCurrent.pause();
+      audioCurrent.removeAttribute('src');
+      audioCurrent.load();
+    };
+  }, []);
+
+  useEffect(() => {
+    const audioCurrent = audio.current;
+
     if (!('mediaSession' in navigator)) {
       return;
     }
@@ -167,18 +204,22 @@ export const AudioPlayerProviderClient = ({
       album: track.metadata.album ?? undefined,
     });
     navigator.mediaSession.setActionHandler('play', () => {
-      audioStore.current.play();
+      audioCurrent?.play();
     });
     navigator.mediaSession.setActionHandler('pause', () => {
-      audioStore.current.pause();
+      audioCurrent?.pause();
     });
     navigator.mediaSession.setActionHandler('nexttrack', next);
     navigator.mediaSession.setActionHandler('previoustrack', previous);
     navigator.mediaSession.setActionHandler('seekbackward', () => {
-      audioStore.current.currentTime = Math.max(0, audioStore.current.currentTime - 10);
+      if (audioCurrent) {
+        audioCurrent.currentTime = Math.max(0, audioCurrent.currentTime - 10);
+      }
     });
     navigator.mediaSession.setActionHandler('seekforward', () => {
-      audioStore.current.currentTime = Math.min(track.metadata.duration / 1000, audioStore.current.currentTime + 10);
+      if (audioCurrent) {
+        audioCurrent.currentTime = Math.min(track.metadata.duration / 1000, audioCurrent.currentTime + 10);
+      }
     });
 
     return () => {
@@ -196,33 +237,38 @@ export const AudioPlayerProviderClient = ({
       return;
     }
 
-    const audioStoreCurrent = audioStore.current;
+    const audioCurrent = audio.current;
 
-    audioStoreCurrent.setSrc(track.src);
+    if (!audioCurrent) {
+      return;
+    }
+
+    audioCurrent.src = track.src;
 
     return () => {
-      audioStoreCurrent.unload();
+      audioCurrent.pause();
+      audioCurrent.currentTime = 0;
+      audioCurrent.removeAttribute('src');
+      audioCurrent.load();
     };
   }, [track]);
 
   useEffect(() => {
     if (!isTouchOnly) {
+      if (audio.current) {
+        audio.current.volume = localStorageVolume.get();
+      }
       return;
     }
 
-    audioStore.current.setVolume(DEFAULT_VOLUME);
+    if (audio.current) {
+      audio.current.volume = DEFAULT_VOLUME;
+    }
   }, [isTouchOnly]);
-
-  useEffect(() => {
-    const audioStoreCurrent = audioStore.current;
-
-    return () => {
-      audioStoreCurrent.destroy();
-    };
-  }, []);
 
   const playerValue = useMemo<NonNullable<ContextType<typeof AudioPlayerContext>>>(() => {
     return {
+      audio,
       track,
       playlistPathDirectory,
       open,
@@ -248,9 +294,5 @@ export const AudioPlayerProviderClient = ({
     track,
   ]);
 
-  return (
-    <AudioStoreContext value={audioStore}>
-      <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>
-    </AudioStoreContext>
-  );
+  return <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>;
 };
