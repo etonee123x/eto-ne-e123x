@@ -4,7 +4,7 @@ import { useAudioCurrentTime } from '../model/audio-store-context';
 import { useAudioPlayer } from '../model/audio-player-context';
 
 const ActiveTrackProgress = ({ duration }: { duration: number }) => {
-  const currentTime = useAudioCurrentTime();
+  const [currentTime] = useAudioCurrentTime();
   const percent = duration > 0 ? Math.min(100, ((currentTime * 1000) / duration) * 100) : 0;
 
   return (

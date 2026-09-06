@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, type ComponentProps } from 'react';
-import {
-  useAudioController,
-  useAudioCurrentTime,
-  useAudioIsPlaying,
-  useAudioPlayer,
-  useAudioVolume,
-} from '@/entities/audio-player';
+import { useAudioCurrentTime, useAudioIsPlaying, useAudioPlayer, useAudioVolume } from '@/entities/audio-player';
 import { Check, Link, Pause, Play, Shuffle, SkipBack, SkipForward, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { BaseAlwaysScrollable } from '@/shared/ui/base-always-scrollable';
@@ -33,9 +27,7 @@ const PlayerSlider = () => {
   const track = useAudioPlayer().track ?? throwError();
 
   const [seekPreview, setSeekPreview] = useState<number | null>(null);
-
-  const currentTime = useAudioCurrentTime();
-  const { setCurrentTime } = useAudioController();
+  const [currentTime, setCurrentTime] = useAudioCurrentTime();
   const duration = track.metadata.duration;
 
   const sliderTimeSeconds = seekPreview ?? currentTime;
@@ -73,8 +65,7 @@ const PlayerSlider = () => {
 };
 
 const PlayerControlsVolume = () => {
-  const volume = useAudioVolume();
-  const { setVolume } = useAudioController();
+  const [volume, setVolume] = useAudioVolume();
   const t = useTranslations('ThePlayer');
 
   const hasMounted = useHasMounted();
@@ -105,8 +96,7 @@ const PlayerControls = () => {
   const t = useTranslations('ThePlayer');
 
   const { next, previous, isShuffleModeEnabled, setIsShuffleModeEnabled, hasHistoryItems } = useAudioPlayer();
-  const { play, pause } = useAudioController();
-  const isPlaying = useAudioIsPlaying();
+  const [isPlaying, { play, pause }] = useAudioIsPlaying();
 
   const onClickPlay = () => {
     play();

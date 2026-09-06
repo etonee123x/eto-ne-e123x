@@ -1,17 +1,15 @@
 'use client';
 
 import { type ContextType, type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isClient } from '@/shared/utils/target';
 import { AudioStoreContext } from './audio-store-context';
-import { AudioControllerContext, type AudioController } from './audio-controller-context';
 import { AudioPlayerContext } from './audio-player-context';
 import { useIsTouchOnly } from '@/shared/hooks/use-is-touch-only';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { getRandomExceptCurrentIndex } from '@/shared/utils/get-random-except-current-index';
 import { throwError } from '@/shared/utils/throw-error';
 import { useSinglePlayback } from '@/shared/hooks/use-single-playback';
-import { createAudioStore, DEFAULT_VOLUME } from './audio-store';
-import { useEventListener } from '@reactuses/core';
+import { AudioStore } from './audio-store';
+import { localStorageVolume, DEFAULT_VOLUME } from './local-storage-volume';
 
 type Track = NonNullable<NonNullable<ContextType<typeof AudioPlayerContext>>['track']>;
 
@@ -43,44 +41,15 @@ export const AudioPlayerProviderClient = ({
 
   const pathDirectory = useRef<string | null>(initialPlaylistPathDirectory);
 
-  const audioRef = useRef<HTMLAudioElement | null>(isClient ? new Audio() : null);
-
   const { playback } = useSinglePlayback({
     onOtherPlayback: () => {
-      audioRef.current?.pause();
+      audioStore.current.pause();
     },
   });
 
-  const [store] = useState(() => {
-    return createAudioStore();
-  });
-
-  const audioController = useMemo<AudioController>(() => {
-    return {
-      play: () => {
-        return audioRef.current?.play();
-      },
-      pause: () => {
-        audioRef.current?.pause();
-      },
-      setCurrentTime: (currentTime) => {
-        const audio = audioRef.current;
-        if (!audio) {
-          return;
-        }
-
-        audio.currentTime = currentTime;
-        store.setCurrentTime(currentTime);
-      },
-      setVolume: (volume) => {
-        store.setVolume(volume);
-        const audio = audioRef.current;
-        if (audio) {
-          audio.volume = volume;
-        }
-      },
-    };
-  }, [store]);
+  const audioStore = useRef(
+    new AudioStore({ volume: isTouchOnly ? DEFAULT_VOLUME : localStorageVolume.get(), playback }),
+  );
 
   const open: NonNullable<ContextType<typeof AudioPlayerContext>>['open'] = useCallback(
     (track, playlist, pathDirectory) => {
@@ -197,15 +166,19 @@ export const AudioPlayerProviderClient = ({
       artist: track.metadata.artists.join(', '),
       album: track.metadata.album ?? undefined,
     });
-    navigator.mediaSession.setActionHandler('play', audioController.play);
-    navigator.mediaSession.setActionHandler('pause', audioController.pause);
+    navigator.mediaSession.setActionHandler('play', () => {
+      audioStore.current.play();
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      audioStore.current.pause();
+    });
     navigator.mediaSession.setActionHandler('nexttrack', next);
     navigator.mediaSession.setActionHandler('previoustrack', previous);
     navigator.mediaSession.setActionHandler('seekbackward', () => {
-      audioController.setCurrentTime(Math.max(0, store.currentTime - 10));
+      audioStore.current.currentTime = Math.max(0, audioStore.current.currentTime - 10);
     });
     navigator.mediaSession.setActionHandler('seekforward', () => {
-      audioController.setCurrentTime(Math.min(track.metadata.duration / 1000, store.currentTime + 10));
+      audioStore.current.currentTime = Math.min(track.metadata.duration / 1000, audioStore.current.currentTime + 10);
     });
 
     return () => {
@@ -216,79 +189,37 @@ export const AudioPlayerProviderClient = ({
       navigator.mediaSession.setActionHandler('seekbackward', null);
       navigator.mediaSession.setActionHandler('seekforward', null);
     };
-  }, [audioController, next, previous, store, track]);
+  }, [next, previous, track]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
     if (!track) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.removeAttribute('src');
-      audio.load();
       return;
     }
-    audio.autoplay = true;
-    audio.src = track.src;
+
+    const audioStoreCurrent = audioStore.current;
+
+    audioStoreCurrent.setSrc(track.src);
+
     return () => {
-      audio.pause();
-      audio.removeAttribute('src');
-      audio.load();
+      audioStoreCurrent.unload();
     };
-  }, [store, track]);
+  }, [track]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = isTouchOnly ? DEFAULT_VOLUME : store.volume;
+    if (!isTouchOnly) {
+      return;
     }
-  }, [isTouchOnly, store]);
+
+    audioStore.current.setVolume(DEFAULT_VOLUME);
+  }, [isTouchOnly]);
 
   useEffect(() => {
+    const audioStoreCurrent = audioStore.current;
+
     return () => {
-      audioRef.current?.pause();
-      audioRef.current = null;
+      audioStoreCurrent.destroy();
     };
-  }, [store]);
-
-  const onPlay = () => {
-    playback();
-    store.setIsPlaying(true);
-  };
-
-  const onPause = () => {
-    store.setIsPlaying(false);
-  };
-
-  const onResetCurrentTime = () => {
-    store.setCurrentTime(0);
-  };
-
-  const onTimeUpdate = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLAudioElement)) {
-      return;
-    }
-
-    store.setCurrentTime(event.currentTarget.currentTime);
-  };
-
-  const onVolumeChange = (event: Event) => {
-    if (!(event.currentTarget instanceof HTMLAudioElement) || isTouchOnly) {
-      return;
-    }
-
-    store.setVolume(event.currentTarget.volume);
-  };
-
-  useEventListener('ended', next, audioRef);
-  useEventListener('play', onPlay, audioRef);
-  useEventListener('pause', onPause, audioRef);
-  useEventListener('loadstart', onResetCurrentTime, audioRef);
-  useEventListener('emptied', onResetCurrentTime, audioRef);
-  useEventListener('timeupdate', onTimeUpdate, audioRef);
-  useEventListener('volumechange', onVolumeChange, audioRef);
+  }, []);
 
   const playerValue = useMemo<NonNullable<ContextType<typeof AudioPlayerContext>>>(() => {
     return {
@@ -318,10 +249,8 @@ export const AudioPlayerProviderClient = ({
   ]);
 
   return (
-    <AudioControllerContext value={audioController}>
-      <AudioStoreContext value={store}>
-        <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>
-      </AudioStoreContext>
-    </AudioControllerContext>
+    <AudioStoreContext value={audioStore}>
+      <AudioPlayerContext value={playerValue}>{children}</AudioPlayerContext>
+    </AudioStoreContext>
   );
 };

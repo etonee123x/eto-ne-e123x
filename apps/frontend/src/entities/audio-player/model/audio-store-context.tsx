@@ -1,59 +1,63 @@
 'use client';
 
 import { throwError } from '@/shared/utils/throw-error';
-import { createContext, useContext, useSyncExternalStore } from 'react';
+import { createContext, useContext, useSyncExternalStore, type RefObject } from 'react';
+import type { AudioStore } from './audio-store';
 
-export interface AudioStore {
-  currentTime: number;
-  volume: number;
-  isPlaying: boolean;
-  subscribe: (listener: () => void) => () => void;
-}
-
-export const AudioStoreContext = createContext<AudioStore | null>(null);
+export const AudioStoreContext = createContext<RefObject<AudioStore> | null>(null);
 
 const useAudioStore = () => {
   return useContext(AudioStoreContext) ?? throwError();
 };
 
 export const useAudioCurrentTime = () => {
-  const store = useAudioStore();
+  const audioStore = useAudioStore();
 
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      return store.currentTime;
-    },
-    () => {
-      return 0;
-    },
+  const currentTime = useSyncExternalStore(
+    audioStore.current.subscribeCurrentTime,
+    audioStore.current.getSnapshotCurrentTime,
+    audioStore.current.getServerSnapshotCurrentTime,
   );
+
+  const setCurrentTime = (currentTime: number) => {
+    audioStore.current.setCurrentTime(currentTime);
+  };
+
+  return [currentTime, setCurrentTime] as const;
 };
 
 export const useAudioVolume = () => {
-  const store = useAudioStore();
+  const audioStore = useAudioStore();
 
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      return store.volume;
-    },
-    () => {
-      return 1;
-    },
+  const volume = useSyncExternalStore(
+    audioStore.current.subscribeVolume,
+    audioStore.current.getSnapshotVolume,
+    audioStore.current.getServerSnapshotVolume,
   );
+
+  const setVolume = (volume: number) => {
+    audioStore.current.setVolume(volume);
+  };
+
+  return [volume, setVolume] as const;
 };
 
 export const useAudioIsPlaying = () => {
-  const store = useAudioStore();
+  const audioStore = useAudioStore();
 
-  return useSyncExternalStore(
-    store.subscribe,
-    () => {
-      return store.isPlaying;
-    },
-    () => {
-      return false;
-    },
+  const isPlaying = useSyncExternalStore(
+    audioStore.current.subscribeIsPlaying,
+    audioStore.current.getSnapshotIsPlaying,
+    audioStore.current.getServerSnapshotIsPlaying,
   );
+
+  const play = () => {
+    audioStore.current.play();
+  };
+
+  const pause = () => {
+    audioStore.current.pause();
+  };
+
+  return [isPlaying, { play, pause }] as const;
 };
