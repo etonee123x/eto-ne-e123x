@@ -48,6 +48,8 @@ export const AudioPlayerProviderClient = ({
     const audioCurrent = new Audio();
 
     audioCurrent.volume = isTouchOnly ? DEFAULT_VOLUME : localStorageVolume.get();
+    audioCurrent.autoplay = true;
+
     audio.current = audioCurrent;
   }
 
@@ -171,6 +173,16 @@ export const AudioPlayerProviderClient = ({
     setCurrentPlayingNumber,
   ]);
 
+  const nextRef = useRef(next);
+  useEffect(() => {
+    nextRef.current = next;
+  }, [next]);
+
+  const previousRef = useRef(previous);
+  useEffect(() => {
+    previousRef.current = previous;
+  }, [previous]);
+
   const setPathDirectory: NonNullable<ContextType<typeof AudioPlayerContext>>['setPathDirectory'] = useCallback(
     (nextPathDirectory) => {
       pathDirectory.current = nextPathDirectory;
@@ -224,76 +236,27 @@ export const AudioPlayerProviderClient = ({
   );
 
   useEffect(() => {
-    const audioCurrent = audio.current;
-
-    if (!audioCurrent) {
-      return;
-    }
-
-    audioCurrent.autoplay = true;
-
-    return () => {
-      audioCurrent.pause();
-      audioCurrent.removeAttribute('src');
-      audioCurrent.load();
-    };
-  }, []);
-
-  useEffect(() => {
-    const audioCurrent = audio.current;
-
-    if (!('mediaSession' in navigator)) {
-      return;
-    }
-
     if (!track) {
-      navigator.mediaSession.metadata = null;
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
+
       return;
     }
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: track.name,
-      artist: track.metadata.artists.join(', '),
-      album: track.metadata.album ?? undefined,
-    });
-    navigator.mediaSession.setActionHandler('play', () => {
-      audioCurrent?.play();
-    });
-    navigator.mediaSession.setActionHandler('pause', () => {
-      audioCurrent?.pause();
-    });
-    navigator.mediaSession.setActionHandler('nexttrack', next);
-    navigator.mediaSession.setActionHandler('previoustrack', previous);
-    navigator.mediaSession.setActionHandler('seekforward', null);
-    navigator.mediaSession.setActionHandler('seekbackward', null);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: track.name,
+        artist: track.metadata.artists.join(', '),
+        album: track.metadata.album ?? undefined,
+      });
+    }
 
-    return () => {
-      navigator.mediaSession.setActionHandler('play', null);
-      navigator.mediaSession.setActionHandler('pause', null);
-      navigator.mediaSession.setActionHandler('nexttrack', null);
-      navigator.mediaSession.setActionHandler('previoustrack', null);
-    };
-  }, [next, previous, track]);
-
-  useEffect(() => {
-    if (!track) {
+    if (!audio.current) {
       return;
     }
 
-    const audioCurrent = audio.current;
-
-    if (!audioCurrent) {
-      return;
-    }
-
-    audioCurrent.src = track.src;
-
-    return () => {
-      audioCurrent.pause();
-      audioCurrent.currentTime = 0;
-      audioCurrent.removeAttribute('src');
-      audioCurrent.load();
-    };
+    audio.current.src = track.src;
   }, [track]);
 
   useEffect(() => {
@@ -308,6 +271,47 @@ export const AudioPlayerProviderClient = ({
       audio.current.volume = DEFAULT_VOLUME;
     }
   }, [isTouchOnly]);
+
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        nextRef.current();
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        previousRef.current();
+      });
+
+      navigator.mediaSession.setActionHandler('play', () => {
+        audio.current?.play();
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        audio.current?.pause();
+      });
+      navigator.mediaSession.setActionHandler('seekto', ({ seekTime }) => {
+        if (!(audio.current && typeof seekTime === 'number')) {
+          return;
+        }
+
+        audio.current.currentTime = seekTime;
+      });
+    }
+
+    return () => {
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('nexttrack', null);
+        navigator.mediaSession.setActionHandler('previoustrack', null);
+
+        navigator.mediaSession.setActionHandler('play', null);
+        navigator.mediaSession.setActionHandler('pause', null);
+        navigator.mediaSession.setActionHandler('seekto', null);
+        navigator.mediaSession.metadata = null;
+      }
+
+      audio.current?.pause();
+      audio.current?.removeAttribute('src');
+      audio.current?.load();
+    };
+  }, []);
 
   const playerValue = useMemo<NonNullable<ContextType<typeof AudioPlayerContext>>>(() => {
     return {
