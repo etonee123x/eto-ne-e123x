@@ -13,9 +13,21 @@ const ActiveTrackProgress = ({ duration }: { duration: number }) => {
 
   const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
-  useEventListener('timeupdate', () => {
-    setCurrentTime(getCurrentTime());
-  });
+  useEventListener(
+    'timeupdate',
+    () => {
+      setCurrentTime(getCurrentTime());
+    },
+    audio,
+  );
+
+  useEventListener(
+    'loadstart',
+    () => {
+      setCurrentTime(getCurrentTime());
+    },
+    audio,
+  );
 
   const percent = duration > 0 ? Math.min(100, ((currentTime * 1000) / duration) * 100) : 0;
 

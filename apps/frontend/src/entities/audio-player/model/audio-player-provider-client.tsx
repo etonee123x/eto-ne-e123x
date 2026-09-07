@@ -59,6 +59,22 @@ export const AudioPlayerProviderClient = ({
     },
   });
 
+  const unloadMedia = useCallback(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('seekto', null);
+      navigator.mediaSession.metadata = null;
+    }
+
+    audio.current?.pause();
+    audio.current?.removeAttribute('src');
+    audio.current?.load();
+  }, []);
+
   const open: NonNullable<ContextType<typeof AudioPlayerContext>>['open'] = useCallback(
     (track, playlist, pathDirectory) => {
       setTrack(track);
@@ -237,10 +253,7 @@ export const AudioPlayerProviderClient = ({
 
   useEffect(() => {
     if (!track) {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = null;
-      }
-
+      unloadMedia();
       return;
     }
 
@@ -250,30 +263,7 @@ export const AudioPlayerProviderClient = ({
         artist: track.metadata.artists.join(', '),
         album: track.metadata.album ?? undefined,
       });
-    }
 
-    if (!audio.current) {
-      return;
-    }
-
-    audio.current.src = track.src;
-  }, [track]);
-
-  useEffect(() => {
-    if (!isTouchOnly) {
-      if (audio.current) {
-        audio.current.volume = localStorageVolume.get();
-      }
-      return;
-    }
-
-    if (audio.current) {
-      audio.current.volume = DEFAULT_VOLUME;
-    }
-  }, [isTouchOnly]);
-
-  useEffect(() => {
-    if ('mediaSession' in navigator) {
       navigator.mediaSession.setActionHandler('nexttrack', () => {
         nextRef.current();
       });
@@ -296,22 +286,31 @@ export const AudioPlayerProviderClient = ({
       });
     }
 
-    return () => {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('nexttrack', null);
-        navigator.mediaSession.setActionHandler('previoustrack', null);
+    if (!audio.current) {
+      return;
+    }
 
-        navigator.mediaSession.setActionHandler('play', null);
-        navigator.mediaSession.setActionHandler('pause', null);
-        navigator.mediaSession.setActionHandler('seekto', null);
-        navigator.mediaSession.metadata = null;
+    audio.current.src = track.src;
+  }, [track, unloadMedia]);
+
+  useEffect(() => {
+    if (!isTouchOnly) {
+      if (audio.current) {
+        audio.current.volume = localStorageVolume.get();
       }
+      return;
+    }
 
-      audio.current?.pause();
-      audio.current?.removeAttribute('src');
-      audio.current?.load();
+    if (audio.current) {
+      audio.current.volume = DEFAULT_VOLUME;
+    }
+  }, [isTouchOnly]);
+
+  useEffect(() => {
+    return () => {
+      unloadMedia();
     };
-  }, []);
+  }, [unloadMedia]);
 
   const playerValue = useMemo<NonNullable<ContextType<typeof AudioPlayerContext>>>(() => {
     return {
