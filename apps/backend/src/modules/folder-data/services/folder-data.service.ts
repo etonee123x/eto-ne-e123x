@@ -49,7 +49,7 @@ export class FolderDataService {
       ? {
           file: {
             path: parameters.pathAsRelativeUrl,
-            ...(await this.filesService.getStoredFile({ key: parameters.pathAsRelativeUrl })),
+            ...(await this.filesService.getFileInspection({ key: parameters.pathAsRelativeUrl })),
           },
           currentDirectory: nodePath.posix.dirname(parameters.pathAsRelativeUrl),
         }
@@ -125,7 +125,7 @@ export class FolderDataService {
                 {
                   ...baseItem,
                   path: pathAsRelativeUrl,
-                  ...(await this.filesService.getStoredFile({ key: pathAsRelativeUrl })),
+                  ...(await this.filesService.getFileInspection({ key: pathAsRelativeUrl })),
                 },
               ],
             };

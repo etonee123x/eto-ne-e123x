@@ -9,6 +9,7 @@ import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file
 import { VideoFileInspector } from '@/infrastructure/files/inspectors/video.file-inspector';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown.file-inspector';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
+import { FileInspectorCacheService } from '@/infrastructure/files/services/file-inspector-cache.service';
 import { appConfig } from '@/config/app-config';
 
 export class FolderDataModule extends Module {
@@ -19,6 +20,7 @@ export class FolderDataModule extends Module {
 
     const filesStorage = new FsFilesStorage({ filesLocation });
 
+    // Keep each dependency named so folder-data composition remains inspectable and replaceable.
     const audioFileInspector = new AudioFileInspector({ filesStorage });
     const imageFileInspector = new ImageFileInspector({ filesStorage });
     const videoFileInspector = new VideoFileInspector({ filesStorage });
@@ -34,7 +36,14 @@ export class FolderDataModule extends Module {
       filesStorage,
     });
 
-    const filesService = new FilesService({ filesStorage, fileInspector });
+    // Folder responses obtain all file metadata through this cache-aware FilesService.
+    const fileInspectorCache = new FileInspectorCacheService();
+
+    const filesService = new FilesService({
+      filesStorage,
+      fileInspector,
+      fileInspectorCache,
+    });
 
     const folderDataService = new FolderDataService({ filesService, filesLocation });
 

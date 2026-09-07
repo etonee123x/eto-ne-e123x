@@ -54,6 +54,10 @@ class AppConfig {
   */
   readonly uploadsPath: string;
   /**
+  Path to folder data cache files.
+  */
+  readonly fileInspectorCachePath: string;
+  /**
   Maximum JSON request body size.
   */
   readonly jsonBodyLimit: string;
@@ -83,7 +87,7 @@ class AppConfig {
   readonly isDevelopment: boolean;
 
   constructor() {
-    const nodeEnvironment = AppConfig.getRequiredEnvironmentVariable('NODE_ENV');
+    const nodeEnvironment = process.env.NODE_ENV || 'production';
     const corsOrigin = AppConfig.getRequiredEnvironmentVariable('CORS_ORIGIN');
 
     this.port = AppConfig.getPortFromEnvironment();
@@ -94,6 +98,7 @@ class AppConfig {
     this.databasePath = AppConfig.getRequiredEnvironmentVariable('DATABASE_PATH');
     this.contentPath = AppConfig.getRequiredEnvironmentVariable('CONTENT_PATH');
     this.uploadsPath = AppConfig.getRequiredEnvironmentVariable('UPLOADS_PATH');
+    this.fileInspectorCachePath = AppConfig.getRequiredEnvironmentVariable('FILE_INSPECTOR_CACHE_PATH');
     this.jsonBodyLimit = AppConfig.getRequiredEnvironmentVariable('JSON_BODY_LIMIT');
     this.requestTimeoutMs = AppConfig.getEnvironmentVariablePositiveNumber('REQUEST_TIMEOUT_MS');
     this.headersTimeoutMs = AppConfig.getEnvironmentVariablePositiveNumber('HEADERS_TIMEOUT_MS');

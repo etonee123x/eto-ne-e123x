@@ -10,6 +10,7 @@ import { VideoFileInspector } from '@/infrastructure/files/inspectors/video.file
 import { ImageFileInspector } from '@/infrastructure/files/inspectors/image.file-inspector';
 import { UnknownFileInspector } from '@/infrastructure/files/inspectors/unknown.file-inspector';
 import { FilesLocation } from '@/infrastructure/files/locations/files-location';
+import { FileInspectorCacheService } from '@/infrastructure/files/services/file-inspector-cache.service';
 import { FsDatabaseFile } from '@/infrastructure/fs-database-file';
 import type { Post } from './entities/post.entity';
 import { appConfig } from '@/config/app-config';
@@ -41,7 +42,14 @@ export class PostsModule extends Module {
       filesStorage,
     });
 
-    const filesService = new FilesService({ filesStorage, fileInspector });
+    // FilesService requires every dependency at construction, even though posts currently use only non-cached operations.
+    const fileInspectorCache = new FileInspectorCacheService();
+
+    const filesService = new FilesService({
+      filesStorage,
+      fileInspector,
+      fileInspectorCache,
+    });
 
     const postsService = new PostsService({ postsRepo, filesService });
 
